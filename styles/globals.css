@@ -253,6 +253,11 @@
   --shadow-widget: 0 1px 2px rgba(11, 11, 12, 0.06), 0 8px 24px rgba(11, 11, 12, 0.08);
   /* The front card of Home's deck. */
   --shadow-deck: 0 8px 24px rgba(11, 11, 12, 0.08);
+  /* Home's AI box (the designers' Home fixes H16, H1): closed, a soft drop only; open, the focus halo and a deeper drop. */
+  --shadow-ai-box: 0 10px 32px rgba(11, 11, 12, 0.1);
+  --shadow-ai-box-open: 0 0 0 3px var(--accent-muted), 0 10px 32px rgba(11, 11, 12, 0.14);
+  /* The selection bar (documents-tab, owner 2026-11-17): its shadow tinted with the company colour, a product-wide rule. */
+  --shadow-selection: 0 4px 16px color-mix(in srgb, var(--accent) 16%, transparent);
 
   /* Type (SPEC § 5). The sizes repeat tokens.json's `typography`; the families are set in the base layer. */
   --font-sans: var(--font-text);
@@ -309,11 +314,11 @@
   --text-hero-m--letter-spacing: -0.02em;
   --text-hero-m--font-weight: 400;
   --text-hero-s: 44px;
-  --text-hero-s--line-height: 48px;
+  --text-hero-s--line-height: 44px;
   --text-hero-s--letter-spacing: -0.02em;
   --text-hero-s--font-weight: 400;
   --text-hero-l: 52px;
-  --text-hero-l--line-height: 56px;
+  --text-hero-l--line-height: 52px;
   --text-hero-l--letter-spacing: -0.02em;
   --text-hero-l--font-weight: 400;
   --text-hero-xl: 72px;
@@ -341,6 +346,21 @@
   --text-home-sentence-m--line-height: 24px;
   --text-home-sentence-l: 24px;
   --text-home-sentence-l--line-height: 28px;
+  /* Home only (the designers' Home fixes, 2026-11-18). */
+  --text-home-input: 18px;
+  --text-home-input--line-height: 26px;
+  --text-home-input--font-weight: 400;
+  --text-home-badge-day: 18px;
+  --text-home-badge-day--line-height: 26px;
+  --text-home-badge-day--font-weight: 500;
+  --text-home-day: 16px;
+  --text-home-day--line-height: 16px;
+  --text-home-micro: 11px;
+  --text-home-micro--line-height: 18px;
+  --text-home-micro--font-weight: 600;
+  --text-home-pill: 16px;
+  --text-home-pill--line-height: normal;
+  --text-home-pill--font-weight: 500;
 
   /* The company hub only (company-hub specs, Changes to SPEC; CH7): its page titles, a document's title, the two
      column headings, reading text, and its big numbers. */
@@ -412,6 +432,8 @@
   .text-home-sentence,
   .text-home-sentence-m,
   .text-home-sentence-l,
+  .text-home-badge-day,
+  .text-home-day,
   .text-auth-title,
   .text-auth-display {
     font-family: var(--font-heading);
@@ -530,8 +552,33 @@
 @utility on-band {
   color: var(--on-accent);
 }
+/*
+ * The quiet text on the band — the date, Edit home's line (the designers' Home fixes H2, E4): Rose on Wine, and for
+ * any other colour the accent mixed into what sits on it, so it reads on a dark band and a light one alike.
+ */
+@utility on-band-tint {
+  color: var(--band-tint);
+}
+:root {
+  --band-tint: color-mix(in oklch, var(--accent) 32%, var(--on-accent));
+}
+[data-accent="wine"] {
+  --band-tint: var(--rose);
+}
 @utility on-band-quiet {
   color: color-mix(in srgb, var(--on-accent) 72%, transparent);
+}
+/* The small switch's track on the band (the designers' Home fixes E7): white 16 % over the accent. */
+@utility band-track {
+  background-color: color-mix(in srgb, var(--on-accent) 16%, transparent);
+}
+/* Edit home's Cancel on the band (E5): a hairline of white 40 %. */
+@utility band-outline {
+  border-color: color-mix(in srgb, var(--on-accent) 40%, transparent);
+}
+/* Edit home's divider under the title on the band (E21): white 18 %. */
+@utility band-divider {
+  border-color: color-mix(in srgb, var(--on-accent) 18%, transparent);
 }
 @utility band-glass {
   background-color: color-mix(in srgb, var(--on-accent) 14%, transparent);

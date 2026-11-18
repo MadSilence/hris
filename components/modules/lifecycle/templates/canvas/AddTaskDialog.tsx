@@ -11,6 +11,8 @@ import { cn } from "@/lib/cn";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { EDITABLE_TASK_KINDS, type TaskKind } from "@/models/lifecycle";
 import { TASK_KIND_ICON } from "./TaskKindIcon";
+import { SignTemplateField } from "./TaskKindConfigFields";
+import { useDocumentTemplates } from "@/components/modules/signing/hooks/useDocumentsSection";
 import { Icon } from "@/components/desact/icon";
 import { FormError } from "@/components/feedback/FormError";
 
@@ -18,7 +20,7 @@ type Props = {
   open: boolean;
   /** "Onboarding Manager · Day 3" — where the task will be. */
   where: string;
-  onAddAction: (task: { title: string; kind: TaskKind }) => void;
+  onAddAction: (task: { title: string; kind: TaskKind; templateId?: string | null }) => void;
   onCancelAction: () => void;
 };
 
@@ -36,16 +38,31 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState<TaskKind>("TODO");
   const [error, setError] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [templateError, setTemplateError] = useState<string | null>(null);
+  const { data: templates } = useDocumentTemplates(open);
 
   useEffect(() => {
     if (!open) return;
     setTitle("");
     setKind("TODO");
     setError(null);
+    setTemplateId(null);
+    setTemplateError(null);
   }, [open]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (kind === "SIGN") {
+      // A Sign task is named after its document — "Sign: Employment contract" — unless a title was typed (P01a).
+      const template = (templates ?? []).find((x) => x.id === templateId);
+      if (!template) {
+        setTemplateError(t("addTask.pickDocument"));
+        return;
+      }
+      onAddAction({ title: title.trim() || t("addTask.signTitle", { document: template.name }), kind, templateId });
+      return;
+    }
     if (!title.trim()) {
       setError(t("addTask.enterTitle"));
       return;
@@ -63,7 +80,7 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
           </DialogHeader>
 
           <div className="space-y-1.5">
-            <RequiredLabel htmlFor="add-task-title" required>{t("shared.title")}</RequiredLabel>
+            <RequiredLabel htmlFor="add-task-title" required={kind !== "SIGN"}>{t("shared.title")}</RequiredLabel>
             <Input
               id="add-task-title"
               autoFocus
@@ -111,6 +128,11 @@ export function AddTaskDialog({ open, where, onAddAction, onCancelAction }: Prop
               })}
             </div>
           </fieldset>
+
+          {kind === "SIGN" && (
+            <SignTemplateField idPrefix="add-task" templateId={templateId} error={templateError}
+              onChange={(id) => { setTemplateId(id); setTemplateError(null); }} />
+          )}
 
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={onCancelAction}>{tCommon("actions.cancel")}</Button>

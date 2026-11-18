@@ -34,8 +34,9 @@ export const PersonalDocumentsBreadcrumbs: React.FC<PersonalDocumentsBreadcrumbs
                   : "text-tertiary transition-colors hover:text-primary"
               }
             >
-              {/* The root is the tab itself, named in the reader's language; every other hop is a folder's name. */}
-              {item.id === null ? t("documents.root") : item.name}
+              {/* The first hop is the tab itself, named in the reader's language; every other is its own name — a folder,
+                  or the trash, which has no id either (documents-tab T10). */}
+              {index === 0 ? t("documents.root") : item.name}
             </button>
             {!isLast && <Icon icon={ArrowRight01Icon} size="sm" className="text-tertiary" />}
           </React.Fragment>

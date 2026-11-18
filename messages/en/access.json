@@ -48,6 +48,10 @@
       "label": "Document categories",
       "description": "Document category configuration."
     },
+    "peopleDocumentTemplates": {
+      "label": "Document templates",
+      "description": "Templates for generated documents and who signs them."
+    },
     "peopleTimeOff": {
       "label": "Time off",
       "description": "Time off requests and balances."

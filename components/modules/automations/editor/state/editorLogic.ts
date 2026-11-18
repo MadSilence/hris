@@ -273,4 +273,4 @@ export const countsRequests = (definition: AutomationDefinition): boolean =>
 
 /** Steps a run skips because they are not connected yet (K9). */
 export const notConnectedSteps = (definition: AutomationDefinition): StepSpec[] =>
-  flatten(definition).map((n) => n.step).filter((s) => s.type === "SIGN_DOCUMENT" || s.type === "SEND_SURVEY");
+  flatten(definition).map((n) => n.step).filter((s) => s.type === "SEND_SURVEY");

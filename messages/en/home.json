@@ -8,12 +8,11 @@
   },
   "profileMenu": {
     "label": "My profile menu",
-    "jobLine": "{hasJob, select, yes {{job}} other {}}{both, select, yes { · } other {}}{hasTeam, select, yes {{team}} other {}}",
     "myProfile": "My profile",
     "myTimeOff": "My time off",
     "myDocuments": "My documents",
+    "toSign": "{count, plural, one {# to sign} other {# to sign}}",
     "myAttendance": "My attendance",
-    "editHome": "Edit home",
     "personalSettings": "Personal settings",
     "logOut": "Log out"
   },
@@ -25,7 +24,6 @@
       "whosOutFriday": "Who’s out Friday?",
       "myBalance": "My balance"
     },
-    "hint": "Shift + Enter for a new line",
     "send": "Send",
     "groups": {
       "people": "People",
@@ -57,6 +55,10 @@
       "title": "Next time off",
       "description": "A quiet countdown to your next day off"
     },
+    "toSign": {
+      "title": "To sign",
+      "description": "Documents waiting for your signature, with the due date"
+    },
     "whosOut": {
       "title": "Who’s out",
       "description": "Who is away today or this week"
@@ -76,6 +78,10 @@
     "automations": {
       "title": "Automations",
       "description": "What noddo did this week, and what needs a fix"
+    },
+    "expiringDocuments": {
+      "title": "Expiring documents",
+      "description": "Documents that run out soon, and those that already have"
     }
   },
   "sizes": {
@@ -101,7 +107,7 @@
     "save": "Save",
     "saving": "Saving…",
     "header": "Header",
-    "colour": "Colour",
+    "colour": "Color",
     "light": "Light",
     "reset": "Reset to default",
     "panelTitle": "Widgets",
@@ -174,7 +180,8 @@
       "task": "Task",
       "review": "Review",
       "failedRun": "Failed automation",
-      "agree": "A page to agree to"
+      "agree": "A page to agree to",
+      "sign": "A document to sign"
     },
     "toasts": {
       "approved": "Time off approved",
@@ -187,7 +194,10 @@
     "agreeWaits": "A page needs your yes",
     "agreeBy": "Agree by {date}",
     "agreeOverdue": "It was due {date}",
-    "read": "Read"
+    "read": "Read",
+    "signWaits": "A document waits for your signature",
+    "signBy": "Sign by {date}",
+    "sign": "Sign"
   },
   "timeOff": {
     "link": "My time off",
@@ -204,7 +214,7 @@
     "approved": "Approved",
     "requestTimeOff": "Request time off",
     "emptyTitle": "No time-off policy yet",
-    "emptyLine": "Ask HR to add you to one."
+    "emptyLine": "You're not added to one yet."
   },
   "nextTimeOff": {
     "approved": "Approved",
@@ -309,8 +319,29 @@
     "failedLabel": "Failed",
     "skipped": "Skipped",
     "emptyTitle": "No automations yet",
-    "emptyLine": "Let noddo do the routine work.",
+    "emptyLine": "Let noddo handle the routine.",
     "create": "Create automation",
     "failureLine": "{name}: {reason}"
+  },
+  "expiringDocuments": {
+    "couldNotLoad": "Couldn’t load the expiring documents",
+    "emptyTitle": "Nothing is expiring",
+    "emptyLine": "Every document with a date is valid for a while yet.",
+    "all": "All",
+    "toRenew": "to renew",
+    "expired": "{count, plural, one {# expired} other {# expired}}",
+    "expiresOn": "{date}",
+    "expiredOn": "Expired {date}"
+  },
+  "toSign": {
+    "all": "All documents",
+    "couldNotLoad": "Couldn’t load documents",
+    "emptyTitle": "Nothing to sign",
+    "emptyLine": "All your documents are signed.",
+    "pending": "pending",
+    "nextDue": "Next due {date}",
+    "due": "Due {date}",
+    "overdue": "Overdue",
+    "sign": "Sign"
   }
 }

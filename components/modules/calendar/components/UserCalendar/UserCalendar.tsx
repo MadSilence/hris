@@ -1,6 +1,6 @@
 "use client";
 
-import { partsToISO as toISO } from "@/lib/date";
+import { partsToISO as toISO, useWeekStartsOn } from "@/lib/date";
 import { MONTH_KEYS, expandSpanToDays, nonWorkingDayTest } from "@/components/modules/calendar/lib/dateRange";
 import { useTranslations } from "next-intl";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
@@ -80,14 +80,15 @@ type Props = {
   footer?: (visibleDays: CalendarDayInfo[]) => ReactNode;
 };
 
-/** Monday first; the labels are the catalogue's `weekdays.short.*`. */
-const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+/** In `Date.getDay()` order; the header starts on the company's first day. Labels: the catalogue's `weekdays.short.*`. */
+const WEEKDAYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
-const weekdayOffset = (jsDay: number) => (jsDay + 6) % 7;
+/** How far a weekday sits from the company's first day of the week (`useWeekStartsOn`). */
+const weekdayOffset = (jsDay: number, weekStartsOn: number) => (jsDay - weekStartsOn + 7) % 7;
 
 /** How many week-rows a month spans, leading and trailing days of its neighbours included. */
-const weeksInMonth = (year: number, month: number) =>
-  Math.ceil((weekdayOffset(new Date(year, month, 1).getDay()) + new Date(year, month + 1, 0).getDate()) / 7);
+const weeksInMonth = (year: number, month: number, weekStartsOn: number) =>
+  Math.ceil((weekdayOffset(new Date(year, month, 1).getDay(), weekStartsOn) + new Date(year, month + 1, 0).getDate()) / 7);
 
 type DayCell = {
   iso: string;
@@ -205,6 +206,12 @@ export const UserCalendar: FC<Props> = ({
   // two calendars cannot drift apart, and matching what the backend counts.
   const { company } = useCompanyData();
   const isNonWorkingDay = useMemo(() => nonWorkingDayTest(company?.workingDays), [company?.workingDays]);
+  // The grid starts on the company's first day of the week, as every calendar does.
+  const weekStartsOn = useWeekStartsOn();
+  const weekdays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => WEEKDAYS[(weekStartsOn + i) % 7]),
+    [weekStartsOn],
+  );
   // Memoised so the month grid's useMemo does not see a new Date identity on every render.
   const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState({ year: today.getFullYear(), month: today.getMonth() });
@@ -256,13 +263,13 @@ export const UserCalendar: FC<Props> = ({
 
   // As many week-rows as the visible month touches — four to six. The grid used to be a fixed six,
   // so a month that fits in five drew a whole extra week of the next one.
-  const weekCount = weeksInMonth(cursor.year, cursor.month);
+  const weekCount = weeksInMonth(cursor.year, cursor.month, weekStartsOn);
 
   const weeks = useMemo<DayCell[][]>(() => {
     const { year, month } = cursor;
-    const firstOffset = weekdayOffset(new Date(year, month, 1).getDay());
+    const firstOffset = weekdayOffset(new Date(year, month, 1).getDay(), weekStartsOn);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const rows = weeksInMonth(year, month);
+    const rows = weeksInMonth(year, month, weekStartsOn);
 
     const cells: DayCell[] = Array.from({ length: rows * 7 }).map((_, i) => {
       const dayNum = i - firstOffset + 1;
@@ -275,7 +282,7 @@ export const UserCalendar: FC<Props> = ({
     });
 
     return Array.from({ length: rows }).map((_, w) => cells.slice(w * 7, w * 7 + 7));
-  }, [cursor, holidaysByDay, today, isNonWorkingDay]);
+  }, [cursor, holidaysByDay, today, isNonWorkingDay, weekStartsOn]);
 
   const dayInfo = useMemo<CalendarDayInfo[][]>(
     () =>
@@ -366,7 +373,7 @@ export const UserCalendar: FC<Props> = ({
       <div className="min-h-0 flex-1 overflow-y-auto">
         {/* Weekday header */}
         <div className={`${gridClass} border-b border-divider`}>
-          {WEEKDAYS.map((d) => (
+          {weekdays.map((d) => (
             <div
               key={d}
               className="border-r border-divider px-2 py-2 text-center text-hint font-medium text-tertiary last:border-r-0"

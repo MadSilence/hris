@@ -152,7 +152,10 @@
       "ROLE": "a role",
       "USER": "a person",
       "APPROVER": "the approver"
-    }
+    },
+    "signRequested": "Signature requested",
+    "signAsks": "{company} asks you to sign {document}.",
+    "signThen": "Then each signer after them gets the same when it’s their turn. Guests get it by email."
   },
   "banners": {
     "live": "This automation is on. Changes apply to runs that start after you save.",

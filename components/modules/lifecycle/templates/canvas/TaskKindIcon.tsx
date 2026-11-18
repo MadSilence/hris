@@ -1,4 +1,4 @@
-import { BookOpen01Icon, CheckListIcon, FileUploadIcon, ShieldCheckIcon, Task01Icon, TaskDone01Icon, TextIcon, UserAdd01Icon, UserCheck01Icon } from "@hugeicons/core-free-icons";
+import { BookOpen01Icon, CheckListIcon, FileUploadIcon, ShieldCheckIcon, Task01Icon, TaskDone01Icon, TextIcon, UserAdd01Icon, UserCheck01Icon, SignatureIcon } from "@hugeicons/core-free-icons";
 import type { TaskKind } from "@/models/lifecycle";
 import type { IconSvgElement } from "@/components/desact/icon";
 
@@ -14,4 +14,5 @@ export const TASK_KIND_ICON: Record<TaskKind, IconSvgElement> = {
   APPROVE_PEERS: UserCheck01Icon,
   APPROVE_REVIEW: ShieldCheckIcon,
   APPROVE_AUTOMATION: ShieldCheckIcon,
+  SIGN: SignatureIcon,
 };

@@ -20,6 +20,16 @@ type Props<T extends string> = {
   disabled?: boolean;
   /** Stretch to the parent's width, each segment an equal share (the default), or hug the labels. */
   fill?: boolean;
+  /**
+   * `sm` — Home's small switch (the designers' Home fixes H10, E7, E11b): a pill 28 high, segments 24 high, 12/20,
+   * the picked one 500 and the others 400. The default stays the 32-high control every other screen uses.
+   */
+  size?: "md" | "sm";
+  /**
+   * The small switch's track: Mist with a soft shadow under the picked segment (the default); `divider` on a white
+   * page, no shadow; `band` on the accent band — white 16 %, the unpicked words white, no shadow (E7).
+   */
+  tone?: "mist" | "divider" | "band";
   className?: string;
 };
 
@@ -39,8 +49,11 @@ export function SegmentedControl<T extends string>({
   "aria-labelledby": ariaLabelledBy,
   disabled = false,
   fill = true,
+  size = "md",
+  tone = "mist",
   className,
 }: Props<T>) {
+  const small = size === "sm";
   const refs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const enabled = options.map((o, i) => (!disabled && !o.disabled ? i : -1)).filter((i) => i >= 0);
   const pickedIndex = options.findIndex((o) => o.value === value);
@@ -85,7 +98,13 @@ export function SegmentedControl<T extends string>({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
       aria-disabled={disabled || undefined}
-      className={cn("inline-flex h-8 items-stretch gap-0.5 rounded-control bg-mist p-0.5", fill && "flex w-full", className)}
+      className={cn(
+        "inline-flex items-stretch gap-0.5 p-0.5",
+        small ? "h-7 rounded-pill" : "h-8 rounded-control",
+        !small || tone === "mist" ? "bg-mist" : tone === "divider" ? "bg-divider" : "band-track",
+        fill && "flex w-full",
+        className,
+      )}
     >
       {options.map((option, index) => {
         const picked = option.value === value;
@@ -104,11 +123,16 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              "inline-flex min-w-0 items-center justify-center truncate rounded-control px-3 text-label",
+              "inline-flex min-w-0 items-center justify-center truncate",
+              small ? "rounded-pill px-2.5 text-hint leading-5" : "rounded-control px-3 text-label",
               "transition-[background-color,color,box-shadow] duration-(--duration-hover)",
               "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent",
               fill && "flex-1",
-              picked ? "bg-card text-primary shadow-raised" : "text-secondary hover:text-primary",
+              !small && (picked ? "bg-card text-primary shadow-raised" : "text-secondary hover:text-primary"),
+              small &&
+                (picked
+                  ? cn("bg-card font-medium text-primary", tone === "mist" && "shadow-card")
+                  : cn("font-normal", tone === "band" ? "on-band hover:opacity-90" : "text-secondary hover:text-primary")),
               off && "cursor-not-allowed text-disabled hover:text-disabled",
             )}
           >

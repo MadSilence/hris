@@ -40,6 +40,8 @@ export type DraftItem = {
   materials: Material[];
   /** QUESTIONNAIRE: its questions (A5). */
   questions: Question[];
+  /** SIGN: the document template made and sent when the task opens (process-sign-task P01a). */
+  templateId?: string | null;
   /** Keys of the tasks this one waits for. */
   waitsFor: string[];
   /** A named person who cannot do it for anybody — read from the saved template, not worked out here (C4). */
@@ -74,6 +76,7 @@ export const draftFromTemplate = (template: Template): TemplateDraft => ({
     categoryId: i.config?.categoryId ?? null,
     materials: i.config?.materials ?? [],
     questions: i.config?.questions ?? [],
+    templateId: i.config?.templateId ?? null,
     accessProblem: i.accessProblem ?? null,
     waitsFor: (i.waitsFor ?? []).filter((id) => template.items.some((other) => other.id === id)),
   })),
@@ -113,6 +116,7 @@ const configOf = (i: DraftItem): TemplateItemWrite["config"] => {
     case "DOCUMENT": return { materials };
     case "TODO": return { categoryId: i.categoryId, materials };
     case "QUESTIONNAIRE": return { questions: i.questions, materials };
+    case "SIGN": return { templateId: i.templateId ?? null, materials };
     default: return { materials };
   }
 };
@@ -269,6 +273,8 @@ export const draftProblems = (draft: TemplateDraft, t: LifecycleT): string[] => 
     else if (i.kind === "ACKNOWLEDGE" && i.materials.length === 0) problems.push(t("draftProblems.attachMaterial", { title }));
     else if (i.kind === "QUESTIONNAIRE" && i.questions.length === 0) problems.push(t("draftProblems.addQuestion", { title }));
     else if (i.kind === "QUESTIONNAIRE" && i.questions.some((q) => !q.label.trim())) problems.push(t("draftProblems.emptyQuestion", { title }));
+    else if (i.kind === "SIGN" && !i.templateId) problems.push(t("draftProblems.chooseTemplate", { title }));
+    else if (i.kind === "SIGN" && i.assigneeKind !== "TARGET") problems.push(t("draftProblems.signByPerson", { title }));
     else if (i.kind === "QUESTIONNAIRE" && i.questions.some(tooFewOptions)) problems.push(t("draftProblems.addOptions", { title }));
   });
   return problems;

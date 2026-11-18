@@ -10,6 +10,8 @@ import type { Material, ProcessType, Question, TaskKind } from "@/models/lifecyc
 import { MaterialsEditor } from "@/components/modules/lifecycle/shared/MaterialsEditor";
 import { QuestionsEditor } from "@/components/modules/lifecycle/shared/QuestionsEditor";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { useDocumentTemplates } from "@/components/modules/signing/hooks/useDocumentsSection";
+import type { DocumentTemplateDTO } from "@/api/modules/signing/dto";
 
 /** Field types the preboarding page cannot show — the backend refuses them there too. */
 const NOT_ON_PREBOARDING_PAGE = new Set(["PERSON", "REFERENCE", "OBJECT", "ADDRESS", "MONEY"]);
@@ -22,8 +24,16 @@ type Props = {
   categoryId: string | null;
   materials: Material[];
   questions: Question[];
+  /** SIGN: the document template. */
+  templateId?: string | null;
   disabled?: boolean;
-  onChange: (patch: { attributeIds?: string[]; categoryId?: string | null; materials?: Material[]; questions?: Question[] }) => void;
+  onChange: (patch: {
+    attributeIds?: string[];
+    categoryId?: string | null;
+    materials?: Material[];
+    questions?: Question[];
+    templateId?: string | null;
+  }) => void;
 };
 
 /**
@@ -45,7 +55,7 @@ export function TaskKindConfigFields(props: Props) {
   );
 }
 
-function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, onChange }: Props) {
+function KindFields({ idPrefix, kind, type, attributeIds, categoryId, templateId, disabled, onChange }: Props) {
   const t = useTranslations("lifecycle");
   // The attribute list is read through its sections: there is no flat `/attributes` list on either side of
   // the stack, and the hook that asked for one got a 404 (found by the live run).
@@ -119,6 +129,9 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
     );
   }
 
+  if (kind === "SIGN") return <SignTemplateField idPrefix={idPrefix} templateId={templateId ?? null} disabled={disabled}
+    onChange={(id) => onChange({ templateId: id })} />;
+
   if (kind === "ACKNOWLEDGE") {
     return (
       <p className="text-hint text-tertiary">{t("kindConfig.acknowledgeHint")}</p>
@@ -126,4 +139,52 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, disabled, 
   }
 
   return null;
+}
+
+/** "The person → Their manager": a template's signers in their order, for the hint under the Document field. */
+export function useSignersText() {
+  const t = useTranslations("lifecycle");
+  return (template: Pick<DocumentTemplateDTO, "signers">) =>
+    t("kindConfig.signers", {
+      list: [...template.signers]
+        .sort((a, b) => (a.order ?? 1) - (b.order ?? 1))
+        .map((s) => (s.label?.trim() ? s.label : t(`kindConfig.signerKind.${s.kind}`)))
+        .join(" → "),
+    });
+}
+
+/**
+ * The Sign task's document (process-sign-task P01a, P01d): one template, the field its own search, each option with
+ * who signs in grey; who signs is the template's, so nothing else is asked.
+ */
+export function SignTemplateField({ idPrefix, templateId, disabled, onChange, error }: {
+  idPrefix: string;
+  templateId: string | null;
+  disabled?: boolean;
+  onChange: (templateId: string | null) => void;
+  error?: string | null;
+}) {
+  const t = useTranslations("lifecycle");
+  const { data: templates, isLoading } = useDocumentTemplates();
+  const signersText = useSignersText();
+  const chosen = (templates ?? []).find((x) => x.id === templateId) ?? null;
+  return (
+    <div className="space-y-1.5">
+      <RequiredLabel htmlFor={`${idPrefix}-template`} required>{t("kindConfig.document")}</RequiredLabel>
+      <SearchableSelect
+        id={`${idPrefix}-template`}
+        options={(templates ?? [])
+          .filter((x) => x.isActive || x.id === templateId)
+          .map((x) => ({ value: x.id, label: x.name, hint: signersText(x) }))}
+        value={templateId}
+        onChange={onChange}
+        placeholder={isLoading ? t("kindConfig.loadingTemplates") : t("kindConfig.pickDocument")}
+        emptyLabel={templates && templates.length === 0 ? t("kindConfig.noTemplates") : t("kindConfig.noDocumentMatch")}
+        clearable={false}
+        disabled={disabled}
+      />
+      {error && <p className="text-hint text-status-declined-text">{error}</p>}
+      {chosen && <p className="text-hint text-tertiary">{signersText(chosen)}</p>}
+    </div>
+  );
 }

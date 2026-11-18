@@ -30,6 +30,7 @@ import { boardGridTemplate } from "@/components/modules/calendar/components/Comp
 import { CompanyCalendarToolbar } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarToolbar";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
+import { useWeekStartsOn } from "@/lib/date";
 import type { CalendarView } from "@/models/calendarView";
 import type { CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/calendar";
 import { availableGroupings, parseCalendarGrouping } from "@/components/modules/calendar/lib/grouping";
@@ -66,10 +67,12 @@ export const CompanyCalendarBoardContainer: FC = () => {
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
 
+  // A week view starts on the company's first day of the week, not on a hardcoded Monday.
+  const weekStartsOn = useWeekStartsOn();
   const { from, to } = useMemo(() => {
-    if (density === "week") return { from: startOfWeek(anchor), to: endOfWeek(anchor) };
+    if (density === "week") return { from: startOfWeek(anchor, weekStartsOn), to: endOfWeek(anchor, weekStartsOn) };
     return { from: startOfMonth(anchor), to: endOfMonth(anchor) };
-  }, [density, anchor]);
+  }, [density, anchor, weekStartsOn]);
 
   const days = useMemo(() => eachDay(from, to), [from, to]);
   const dayISOs = useMemo(() => days.map(toISO), [days]);

@@ -21,7 +21,8 @@
     "NOMINATE_PEERS": "Nominate peers",
     "APPROVE_PEERS": "Approve peers",
     "APPROVE_REVIEW": "Approve review",
-    "APPROVE_AUTOMATION": "Approve"
+    "APPROVE_AUTOMATION": "Approve",
+    "SIGN": "Sign"
   },
   "taskKindDescription": {
     "TODO": "Something to do and tick off. Can ask for a file to be attached.",
@@ -33,7 +34,8 @@
     "NOMINATE_PEERS": "Colleagues to nominate for a performance review. Closes when the nomination is sent.",
     "APPROVE_PEERS": "Peers somebody nominated, to approve. Closes when they are approved.",
     "APPROVE_REVIEW": "A manager review to approve before it is shared. Closes when approved or sent back.",
-    "APPROVE_AUTOMATION": "An automation waits for this approval. Closes when approved or declined."
+    "APPROVE_AUTOMATION": "An automation waits for this approval. Closes when approved or declined.",
+    "SIGN": "The person signs a document made from a template; it closes when everyone has signed."
   },
   "questionType": {
     "SHORT_TEXT": "Short text",
@@ -229,7 +231,9 @@
     "waitingRead": "Waiting for {name} to confirm they have read it.",
     "fillOnProfile": "Fill in on the profile",
     "waitingAnswer": "Waiting for {name} to answer.",
-    "answer": "Answer"
+    "answer": "Answer",
+    "signingDeclined": "{name} declined to sign: “{comment}”",
+    "signingDeclinedNoComment": "{name} declined to sign"
   },
   "myTasks": {
     "showDone": "Show done",
@@ -334,7 +338,9 @@
   "addTask": {
     "enterTitle": "Enter a title.",
     "titlePlaceholder": "Order a laptop",
-    "kindLegend": "Kind of task"
+    "kindLegend": "Kind of task",
+    "pickDocument": "Pick a document",
+    "signTitle": "Sign: {document}"
   },
   "canvas": {
     "blockLabel": "{title}, {day}, {lane}",
@@ -364,7 +370,9 @@
     "attachMaterial": "{title}: attach a file or a link to acknowledge.",
     "addQuestion": "{title}: add a question.",
     "emptyQuestion": "{title}: a question has no text.",
-    "addOptions": "{title}: a choice needs at least two options."
+    "addOptions": "{title}: a choice needs at least two options.",
+    "chooseTemplate": "“{title}”: pick a document to sign.",
+    "signByPerson": "“{title}”: a Sign task is the person’s own — move it to their lane."
   },
   "kindConfig": {
     "fields": "Fields",
@@ -376,7 +384,19 @@
     "categoryPlaceholder": "Select a category…",
     "noCategories": "No document categories yet — add them in Settings → People → Documents.",
     "fileHint": "Ticked with the file attached — a signed form, a receipt. It goes into the person's Documents.",
-    "acknowledgeHint": "The person reads what is attached and presses I Have Read It; the moment is recorded. Only they can do it."
+    "acknowledgeHint": "The person reads what is attached and presses I Have Read It; the moment is recorded. Only they can do it.",
+    "document": "Document",
+    "pickDocument": "Pick a document",
+    "loadingTemplates": "Loading…",
+    "noTemplates": "No document templates yet — add one in Settings › Document templates.",
+    "noDocumentMatch": "No document by that name",
+    "signers": "Signs: {list}",
+    "signerKind": {
+      "PERSON": "The person",
+      "MANAGER": "Their manager",
+      "USER": "A named person",
+      "GUEST": "A guest"
+    }
   },
   "sidePanel": {
     "label": "Task details",

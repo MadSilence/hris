@@ -1,9 +1,21 @@
 import { hrisApiNotificationsClient } from "@/api/modules/notifications/clients";
-import type { Notification, NotificationChannel, NotificationPreference } from "@/models/notifications";
+import type {
+  InboxSummary,
+  Notification,
+  NotificationChannel,
+  NotificationPage,
+  NotificationPageQuery,
+  NotificationPreference,
+  WaitingOnMe,
+} from "@/models/notifications";
 
 export class HrisNotificationsService {
-  public async list(): Promise<Notification[]> {
-    return hrisApiNotificationsClient.list();
+  public async list(query: NotificationPageQuery = {}): Promise<NotificationPage> {
+    return hrisApiNotificationsClient.list(query);
+  }
+
+  public async summary(): Promise<InboxSummary> {
+    return hrisApiNotificationsClient.summary();
   }
 
   public async unreadCount(): Promise<number> {
@@ -28,6 +40,10 @@ export class HrisNotificationsService {
 
   public async remove(id: string): Promise<void> {
     return hrisApiNotificationsClient.remove(id);
+  }
+
+  public async waitingOnMe(): Promise<WaitingOnMe> {
+    return hrisApiNotificationsClient.waitingOnMe();
   }
 
   public async listPreferences(): Promise<NotificationPreference[]> {

@@ -196,7 +196,7 @@ export const hueDistance = (a: number, b: number): number => {
 export const STATUS_HUE_MARGIN = 25;
 
 /**
- * …at about the same lightness (HSL, 0–1). Hue alone would call Wine — a deep burgundy, 23° from Declined — a red
+ * …at about the same lightness (HSL, 0–1). Used for Approved only (Appearance's quiet line); red is {@link isRedAccent}, in OKLCH. Hue alone would call Wine — a deep burgundy, 23° from Declined — a red
  * workspace; the designers name only Cherry and Tangerine (L8-Rules), which sit within this of Declined's lightness.
  */
 export const STATUS_LIGHTNESS_MARGIN = 0.15;
@@ -206,8 +206,7 @@ const lightnessOf = (hex: string): number => {
   return (Math.max(...rgb) + Math.min(...rgb)) / 510;
 };
 
-/** Declined (`--status-declined-fill`) and Approved (`--status-approved-fill`), as tokens.css writes them. */
-const DECLINED = "#C42B1C";
+/** Approved (`--status-approved-fill`), as tokens.css writes it. */
 const APPROVED = "#1E7A4F";
 
 const within = (stored: string | null | undefined, status: string): boolean => {
@@ -221,12 +220,39 @@ const within = (stored: string | null | undefined, status: string): boolean => {
   );
 };
 
+/** OKLCH of a HEX colour: lightness 0–1, chroma, hue in degrees 0–360. */
+export const oklchOf = (hex: string): { l: number; c: number; h: number } => {
+  const [r, g, b] = toRgb(hex).map((v) => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
+  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+  return { l: L, c: Math.hypot(A, B), h: (Math.atan2(B, A) * 180) / Math.PI + (B < 0 ? 360 : 0) };
+};
+
+/** A red workspace, in OKLCH (the designers' Q-30, 2026-11-18): hue 10°–42°, lightness 0.46–0.68, chroma ≥ 0.12. */
+export const RED_ACCENT = { hueMin: 10, hueMax: 42, lightnessMin: 0.46, lightnessMax: 0.68, chromaMin: 0.12 } as const;
+
 /**
- * A red workspace (Cherry, Tangerine, or a custom colour within 25° of Declined at about its lightness): the confirm dialog's destructive
+ * A red workspace (Cherry, Tangerine, or any colour inside {@link RED_ACCENT}): the confirm dialog's destructive
  * button turns from a red fill into a red outline, so the two reds do not blur (rule 3). Product-wide, through
- * `data-accent-tone="red"` beside the accent (`styles/globals.css`).
+ * `data-accent-tone="red"` beside the accent (`styles/globals.css`). Wine, Mulberry and the burgundies are not red.
  */
-export const isRedAccent = (stored: string | null | undefined): boolean => within(stored, DECLINED);
+export const isRedAccent = (stored: string | null | undefined): boolean => {
+  const { l, c, h } = oklchOf(accentHex(stored));
+  return (
+    h >= RED_ACCENT.hueMin &&
+    h <= RED_ACCENT.hueMax &&
+    l >= RED_ACCENT.lightnessMin &&
+    l <= RED_ACCENT.lightnessMax &&
+    c >= RED_ACCENT.chromaMin
+  );
+};
 
 /** Appearance's quiet line: the picked colour sits within 25° of the colour noddo uses for approvals. */
 export const isCloseToApproved = (stored: string | null | undefined): boolean => within(stored, APPROVED);

@@ -60,12 +60,12 @@ const RequestPill: React.FC<{ request: TimeOffRequest; href: string; tabIndex?: 
       href={href}
       tabIndex={tabIndex}
       className={cn(
-        "inline-flex h-8 min-w-0 items-center gap-2 rounded-pill px-3 text-label text-primary",
+        "inline-flex h-9 min-w-0 items-center gap-2 rounded-pill px-3 text-label leading-5 text-primary",
         pending ? "border-[1.5px] border-dashed border-accent bg-card" : "bg-subtle",
       )}
     >
       <span className="truncate">{dates.range(request.startDate, request.endDate)}</span>
-      <span className={cn("flex shrink-0 items-center gap-1 text-hint font-semibold", pending ? "text-status-pending-text" : "text-status-approved-text")}>
+      <span className={cn("flex shrink-0 items-center gap-1 text-hint leading-5 font-medium", pending ? "text-status-pending-text" : "text-status-approved-text")}>
         <Icon icon={pending ? HourglassIcon : CheckmarkCircle02Icon} size="sm" className="size-3.5" />
         {pending ? t("timeOff.pending") : t("timeOff.approved")}
       </span>
@@ -117,7 +117,7 @@ export const TimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   );
   if (current.length === 0) {
     return (
-      <WidgetCard title={title} size={size}>
+      <WidgetCard title={title} size={size} aside={<WidgetLink href={myTimeOff}>{t("timeOff.link")}</WidgetLink>}>
         <WidgetEmpty size={size} scene="time-off-s" title={t("timeOff.emptyTitle")} line={t("timeOff.emptyLine")} />
       </WidgetCard>
     );
@@ -142,7 +142,7 @@ export const TimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const heroValue = mainPolicy?.unlimitedQuota ? t("timeOff.noLimit") : formatDayAmount(main.currentBalance);
   const heroWord = mainPolicy?.unlimitedQuota ? mainPolicy.name : mainWord;
   const requestButton = requestTimeOff && (
-    <Button type="button" size="md" className="w-full" disabled={preview} onClick={requestTimeOff}>
+    <Button type="button" size="md" className="w-full" tabIndex={preview ? -1 : undefined} onClick={requestTimeOff}>
       {t("timeOff.requestTimeOff")}
     </Button>
   );

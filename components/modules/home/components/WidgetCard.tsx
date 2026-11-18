@@ -63,9 +63,9 @@ export const WidgetCard: React.FC<{
   );
 };
 
-/** The link at the right of a title: "Inbox", "My time off", "See all". */
+/** The link at the right of a title: "Inbox", "My time off", "See all" — 13/20 500, the row 20 high (H15). */
 export const WidgetLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
-  <Link href={href} className="shrink-0 text-label text-accent-text underline-offset-4 hover:underline">
+  <Link href={href} className="shrink-0 text-label leading-5 text-accent-text underline-offset-4 hover:underline">
     {children}
   </Link>
 );
@@ -75,9 +75,9 @@ export const WidgetInfo: React.FC<{ children: React.ReactNode }> = ({ children }
   <span className="shrink-0 text-hint text-tertiary">{children}</span>
 );
 
-/** The counter next to a title (PRODUCT-RULES 13): 22 high, the soft accent. */
+/** The counter next to a title (PRODUCT-RULES 13): 22 high, padding 0 7, Inter 12/16 600 on the soft accent (H19). */
 export const CounterPill: React.FC<{ count: number }> = ({ count }) => (
-  <span className="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-pill bg-accent-subtle px-1.5 text-hint font-semibold text-accent-text">
+  <span className="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-pill bg-accent-subtle px-[7px] font-sans text-hint font-semibold text-accent-text">
     {count}
   </span>
 );
@@ -91,12 +91,14 @@ export const FactChip: React.FC<{ icon?: React.ReactNode; children: React.ReactN
 );
 
 /** A big number and its word on one baseline (PRODUCT-RULES 1: they never break apart). */
-export const BigNumber: React.FC<{ value: React.ReactNode; word?: React.ReactNode; size: "s" | "m" | "l" | "xl" | "xxl"; className?: string }> = ({
-  value,
-  word,
-  size,
-  className,
-}) => (
+export const BigNumber: React.FC<{
+  value: React.ReactNode;
+  word?: React.ReactNode;
+  size: "s" | "m" | "l" | "xl" | "xxl";
+  className?: string;
+  /** The word's type where a widget draws it smaller than 14/20 (Next time off Small, H7). */
+  wordClassName?: string;
+}> = ({ value, word, size, className, wordClassName }) => (
   <p className={cn("flex min-w-0 items-baseline gap-2 whitespace-nowrap", className)}>
     <span
       className={cn(
@@ -110,7 +112,7 @@ export const BigNumber: React.FC<{ value: React.ReactNode; word?: React.ReactNod
     >
       {value}
     </span>
-    {word && <span className="truncate text-body text-secondary">{word}</span>}
+    {word && <span className={cn("truncate text-body text-secondary", wordClassName)}>{word}</span>}
   </p>
 );
 
@@ -152,7 +154,10 @@ export const WidgetSkeleton: React.FC<{ rows?: number; number?: boolean }> = ({ 
   );
 };
 
-/** Empty: the S illustration, a title, one line, at most one action. */
+/**
+ * Empty: the S illustration, a title (15/22 600), one line (13/18 400), at most one action — a secondary button 36
+ * high (H20; `md`).
+ */
 export const WidgetEmpty: React.FC<{
   scene: Scene;
   title: string;
@@ -163,7 +168,7 @@ export const WidgetEmpty: React.FC<{
   <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
     {size !== "S" && <Illustration scene={scene} size="s" />}
     <p className="text-card-title text-primary">{title}</p>
-    {size !== "S" && <p className="text-body text-secondary">{line}</p>}
+    {size !== "S" && <p className="text-label font-normal text-secondary">{line}</p>}
     {action}
   </div>
 );
@@ -200,7 +205,7 @@ export const PersonFace: React.FC<{
   name: string;
   avatarUrl?: string | null;
   detail?: string | null;
-  size?: 20 | 22 | 28 | 32 | 36 | 64;
+  size?: 20 | 22 | 24 | 26 | 28 | 32 | 36 | 64;
   className?: string;
 }> = ({ name, avatarUrl, detail, size = 28, className }) => (
   <Tooltip>
@@ -210,6 +215,8 @@ export const PersonFace: React.FC<{
           "shrink-0 ring-2 ring-card",
           size === 20 && "size-5",
           size === 22 && "size-[22px]",
+          size === 24 && "size-6",
+          size === 26 && "size-[26px]",
           size === 28 && "size-7",
           size === 32 && "size-8",
           size === 36 && "size-9",
@@ -218,7 +225,7 @@ export const PersonFace: React.FC<{
         )}
       >
         {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-        <AvatarFallback name={name} className={size >= 36 ? "text-label" : "text-hint"}>
+        <AvatarFallback name={name} className={size >= 36 ? "text-label" : size === 28 ? "text-home-micro leading-5" : "text-hint"}>
           {initialsOf(name)}
         </AvatarFallback>
       </Avatar>

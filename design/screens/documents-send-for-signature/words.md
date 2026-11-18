@@ -1,0 +1,1238 @@
+# Words — documents-send-for-signature
+
+Every string in each frame, in reading order, exactly as drawn (English, sentence case). The app sidebar and the profile header are left out (they are the existing chrome). Names, dates, file names and counts are sample data, not copy. The spec quotes the copy that matters; where they differ, the spec wins.
+
+
+## S01-Menu
+_S01 · ⋯ on a PDF: Send for signature_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Rename
+- Edit expiry date
+- Send for signature
+- Move to…
+- Move to trash
+
+## S02-SendOpen
+_S02 · Send for signature opens with the person already in step 1_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Send for signature
+- Employment contract 2026.pdf · Meryem Alaoui
+- Title
+- Employment contract 2026
+- Signers see it in the email and on the signing page.
+- Who signs
+- MA
+- Meryem Alaoui
+- The person
+- Add co-signer
+- Add next signer
+- People in one box sign at the same time. Each gets an email when it’s their turn.
+- Cancel
+- Send
+
+## S03-AddSigner
+_S03 · Add next signer → pick who: their manager, anyone in the company, or someone outside it_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Send for signature
+- Employment contract 2026.pdf · Meryem Alaoui
+- Title
+- Employment contract 2026
+- Signers see it in the email and on the signing page.
+- Who signs
+- MA
+- Meryem Alaoui
+- The person
+- Add co-signer
+- Find a person
+- People in one box sign at the same time. Each gets an email when it’s their turn.
+- Cancel
+- Send
+- Their manager
+- Tomas Petrauskas
+- People
+- LN
+- Lena Novak
+- People partner · Vilnius
+- IK
+- Inga Kazlauskė
+- Payroll · Vilnius
+- Someone outside the company
+- They sign by a link in their email
+
+## S04-TwoSteps
+_S04 · Meryem signs first; then Tomas and Lena, at the same time — no word “order”, steps say it_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Send for signature
+- Employment contract 2026.pdf · Meryem Alaoui
+- Title
+- Employment contract 2026
+- Signers see it in the email and on the signing page.
+- Who signs
+- MA
+- Meryem Alaoui
+- The person
+- Add co-signer
+- TP
+- Tomas Petrauskas
+- Their manager
+- LN
+- Lena Novak
+- People partner · Vilnius
+- Add next signer
+- People in one box sign at the same time. Each gets an email when it’s their turn.
+- Cancel
+- Send
+
+## S05-Guest
+_S05 · A guest: a name and an email typed here; Send with an empty email shows the error under it_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Send for signature
+- Employment contract 2026.pdf · Meryem Alaoui
+- Title
+- Employment contract 2026
+- Signers see it in the email and on the signing page.
+- Who signs
+- MA
+- Meryem Alaoui
+- The person
+- Add co-signer
+- TP
+- Tomas Petrauskas
+- Their manager
+- Daniel Kim
+- name@company.com
+- Enter their email.
+- Add next signer
+- People in one box sign at the same time. Each gets an email when it’s their turn.
+- Cancel
+- Send
+
+## S06-Sent
+_S06 · Sent: a toast; the row shows how far it got — “Signing · 0 of 3”. A signed file: “(signed)” in its name and the signature mark, which stays visible when a long name is cut; hover it for when and by whom_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Signing · 0 of 3
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Signed on 2 Feb 2024
+- By Meryem Alaoui and Lena Novak
+- Sent for signature. Meryem signs first.
+
+## S07-Status
+_S07 · The preview of a document out for signature: steps, then the due date with time left, automatic reminders, Send a reminder now; Cancel signing under the column_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Signing · 1 of 3
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing
+- 1 of 3 signed
+- Sent by Lena Novak on 17 Nov
+- MA
+- Meryem Alaoui
+- · The person
+- Signed 17 Nov, 14:02
+- TP
+- Tomas Petrauskas
+- · Their manager
+- To sign
+- LN
+- Lena Novak
+- · People partner
+- Due 17 Dec
+- 30 days left
+- Reminders go out on day 3 and the day before it’s due
+- Send a reminder now
+- Move to trash
+- Cancel signing
+- Download
+
+## S08a-Signed
+_S08 · A · Signed by everyone: the signed copy is right there_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing
+- Signed by everyone
+- Sent by Lena Novak on 17 Nov
+- MA
+- Meryem Alaoui
+- · The person
+- Signed 17 Nov, 14:02
+- TP
+- Tomas Petrauskas
+- · Their manager
+- Signed 18 Nov, 09:15
+- LN
+- Lena Novak
+- · People partner
+- Signed 18 Nov, 11:40
+- Completed 18 Nov
+- Employment contract 2026 (signed).pdf
+- In Contracts
+- Move to trash
+- Download
+
+## S08b-Declined
+_S08 · B · Declined: who declined and why; Send again_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Declined
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing
+- Sent by Lena Novak on 17 Nov
+- MA
+- Meryem Alaoui
+- · The person
+- Signed 17 Nov, 14:02
+- TP
+- Tomas Petrauskas
+- · Their manager
+- Declined 18 Nov
+- “The start date is wrong — it should be 1 Dec.”
+- LN
+- Lena Novak
+- · People partner
+- Not asked any more
+- Declined 18 Nov
+- Nobody can sign it now.
+- Send again
+- Move to trash
+- Download
+
+## S08c-Expired
+_S08 · C · Expired: the due date passed before everyone signed; Send again_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing
+- Expired
+- Sent by Lena Novak on 17 Nov
+- MA
+- Meryem Alaoui
+- · The person
+- Signed 17 Nov, 14:02
+- TP
+- Tomas Petrauskas
+- · Their manager
+- Didn’t sign
+- LN
+- Lena Novak
+- · People partner
+- Signed 18 Nov, 11:40
+- Closed 17 Dec
+- The due date passed
+- Tomas didn’t sign in time, so nobody can sign it now.
+- Send again
+- Move to trash
+- Download
+
+## S08d-Cancelled
+_S08 · D · Cancelled: by whom and why; Send again_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing
+- Cancelled
+- Sent by Lena Novak on 17 Nov
+- MA
+- Meryem Alaoui
+- · The person
+- Signed 17 Nov, 14:02
+- TP
+- Tomas Petrauskas
+- · Their manager
+- Not asked any more
+- LN
+- Lena Novak
+- · People partner
+- Cancelled 18 Nov
+- Sent the wrong version.
+- Send again
+- Move to trash
+- Download
+
+## S08e-SendAgain
+_S08 · E · Send again opens the usual Send for signature window (S04), filled in as last time; the preview closes behind it_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Declined
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Send for signature
+- Employment contract 2026.pdf · Meryem Alaoui
+- Title
+- Employment contract 2026
+- Signers see it in the email and on the signing page.
+- Who signs
+- MA
+- Meryem Alaoui
+- The person
+- Add co-signer
+- TP
+- Tomas Petrauskas
+- Their manager
+- LN
+- Lena Novak
+- People partner · Vilnius
+- Add next signer
+- People in one box sign at the same time. Each gets an email when it’s their turn.
+- Cancel
+- Send
+
+## S09-CancelConfirm
+_S09 · Cancel signing asks once; the optional reason stays in the document’s Signing panel_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Signing · 1 of 3
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Cancel this signing?
+- Nobody can sign it any more. Meryem’s signature is dropped; the document stays as it was.
+- Comment
+- (optional)
+- For example: sent the wrong version
+- Keep it
+- Cancel signing
+
+## S10-SignedMenu
+_S10 · ⋯ on a signed document: no Rename, no expiry edit — it’s final_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Signing · 1 of 3
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- A signed document can’t be changed.
+- Signing history
+- Move to…
+- Move to trash
+
+## S11-OutMenu
+_S11 · ⋯ on a document out for signature: no Send, no Rename — it can’t change while it’s being signed. The signing is seen by clicking the document or its “Signing” pill — the preview opens with the Signing panel_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Signing · 1 of 3
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Move to…
+- Move to trash
+
+## S12-NotPdf
+_S12 · Not a PDF: Send for signature isn’t in the menu at all_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Signing · 1 of 3
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Rename
+- Edit expiry date
+- Move to…
+- Move to trash
+
+## S13-HistoryLink
+_S13 · A signed document: “Signing history” at the foot of the panel (also in ⋯ on the file, see S10)_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing
+- Signed by everyone
+- Sent by Lena Novak on 17 Nov
+- MA
+- Meryem Alaoui
+- · The person
+- Signed 17 Nov, 14:02
+- TP
+- Tomas Petrauskas
+- · Their manager
+- Signed 18 Nov, 09:15
+- LN
+- Lena Novak
+- · People partner
+- Signed 18 Nov, 11:40
+- Completed 18 Nov
+- Employment contract 2026 (signed).pdf
+- In Contracts
+- Signing history
+- Move to trash
+- Download
+
+## S13b-History
+_S13 · Signing history: every send, signature, decline and cancel with its comment, oldest first_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Employment contract 2026.pdf
+- Hidden
+- 17 Nov 2026
+- NDA (signed).pdf
+- Visible
+- 2 Feb 2024
+- Confidentiality and intellectual property assignment agreement 2026 (signed).pdf
+- 14 Nov 2026
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Hidden from Meryem
+- Signing history
+- 14 Nov, 09:40
+- Lena Novak
+- sent it for signature
+- 14 Nov, 11:05
+- Meryem Alaoui
+- signed
+- 14 Nov, 15:10
+- Tomas Petrauskas
+- declined
+- “The start date is wrong — it should be 1 Dec.”
+- 17 Nov, 09:40
+- sent it again
+- 17 Nov, 14:02
+- 18 Nov, 09:15
+- 18 Nov, 11:40
+- signed — signed by everyone
+- Move to trash
+- Download

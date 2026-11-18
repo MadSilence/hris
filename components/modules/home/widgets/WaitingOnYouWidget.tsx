@@ -27,16 +27,16 @@ import { useDisplayLocale, useShortDates } from "@/lib/date";
 import { showActionError, showError } from "@/lib/errors/errorToast";
 import { dayAmountArgs, type TimeOffDecisionContext, type TimeOffRequest } from "@/models/timeOff";
 import { getTimeOffRequestsAwaitingMeQueryKey } from "@/components/modules/settings/modules/time/timeOff/utils";
-import { timeOffRequestsService } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/services/timeOffRequestsService";
 import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
 import { useDecideCancellation } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useDecideCancellation";
 import { timeOffDecisionQueryKey } from "@/components/modules/timeOffDecision";
 import { NEEDS_ACTION_INBOX_HREF } from "@/components/modules/notifications/utils/inboxFilters";
-import { lifecycleQueryKeys, useMyTasks } from "@/components/modules/lifecycle/hooks";
+import { getWaitingOnMeQueryKey } from "@/components/modules/notifications/utils/notificationsQueryKeys";
+import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
+import { lifecycleQueryKeys } from "@/components/modules/lifecycle/hooks";
 import { decideAutomationApprovalAction } from "@/components/modules/automations/actions/automationActions";
 import { automationsHref } from "@/components/modules/automations/list";
 import { useRunWords } from "@/components/modules/automations/runs";
-import { useMyAgreements } from "@/components/modules/hub/hooks";
 import { ago } from "@/components/modules/home/utils/ago";
 import { useAutomationsWeek, useSaveHomeSettings } from "@/components/modules/home/hooks";
 import { scheduleWrite, showUndoToast, usePendingWrites } from "@/components/modules/home/deferred";
@@ -66,18 +66,10 @@ const KIND_ICON: Record<DeckCard["kind"], IconSvgElement> = {
   TASK: TaskDone01Icon,
   REVIEW: StarIcon,
   AGREE: FileTextIcon,
+  SIGN: FileTextIcon,
   FAILED_RUN: CancelCircleIcon,
 };
 
-
-/** The leave this reader may decide; read only with the right to see leave at all. */
-const useAwaitingMe = (enabled: boolean) =>
-  useQuery<TimeOffRequest[]>({
-    queryKey: getTimeOffRequestsAwaitingMeQueryKey(),
-    queryFn: () => timeOffRequestsService.listAwaitingMe(),
-    staleTime: 30_000,
-    enabled,
-  });
 
 /** One request's decision context — who asked, who else is out, what is left after. Shared with the request page. */
 const useDecisionContext = (requestId: string | null) => {
@@ -90,16 +82,16 @@ const useDecisionContext = (requestId: string | null) => {
   });
 };
 
-/** Every source of the deck, read once for whichever size is drawn. */
+/**
+ * Every source of the deck, read once for whichever size is drawn. What waits on the reader is the one list
+ * (`/me/actions`, A1) the inbox and a profile read too — leave, tasks and review steps, pages to agree to; only HR's
+ * failed runs, which are to read and not to do, come from the automations week.
+ */
 const useDeck = () => {
   const settings = useUserSettings();
-  const canSeeLeave = useCanAccess("PEOPLE.TIME_OFF", "VIEW");
   const canSeeAutomations = useCanAccess("SETTINGS.AUTOMATIONS", "VIEW");
-  const requests = useAwaitingMe(canSeeLeave);
-  const tasks = useMyTasks(false);
+  const waiting = useWaitingOnMe();
   const week = useAutomationsWeek(canSeeAutomations);
-  // Pages waiting for this person's yes (U3) — everybody's: reading the hub needs no right.
-  const agreements = useMyAgreements();
   const held = usePendingWrites();
   const save = useSaveHomeSettings();
   const [skipped, setSkipped] = useState<string[]>([]);
@@ -111,15 +103,16 @@ const useDeck = () => {
   const deck = useMemo(
     () =>
       buildDeck({
-        requests: requests.data ?? [],
-        tasks: tasks.data ?? [],
+        requests: waiting.data?.requests ?? [],
+        tasks: waiting.data?.tasks ?? [],
         failedRuns: week.data?.failedToday ?? [],
-        agreements: agreements.data?.waiting ?? [],
+        agreements: waiting.data?.agreements ?? [],
+        envelopes: waiting.data?.envelopes ?? [],
         skipped,
         held,
         heldTask: (id) => held.has(taskDoneKey(id)),
       }),
-    [requests.data, tasks.data, week.data, agreements.data, skipped, held],
+    [waiting.data, week.data, skipped, held],
   );
 
   const skip = (key: string) => {
@@ -132,11 +125,10 @@ const useDeck = () => {
   return {
     deck,
     skip,
-    loading: (canSeeLeave && requests.isLoading) || tasks.isLoading,
-    error: (canSeeLeave ? requests.error : null) ?? tasks.error,
+    loading: waiting.isLoading,
+    error: waiting.error,
     refetch: () => {
-      void requests.refetch();
-      void tasks.refetch();
+      void waiting.refetch();
     },
   };
 };
@@ -157,6 +149,9 @@ const useAnswers = () => {
         showError(error);
       }
       await queryClient.invalidateQueries({ queryKey: getTimeOffRequestsAwaitingMeQueryKey() });
+      // The deck reads the one list (A1); an automation's approval goes through a server action, not a mutation, so the
+      // app-wide refresh after a mutation does not see it.
+      await queryClient.invalidateQueries({ queryKey: getWaitingOnMeQueryKey() });
     });
     showUndoToast(message, t("card.undo"), () => {
       undo();
@@ -199,6 +194,14 @@ const hrefOf = (card: DeckCard) => {
       return automationsHref.seeWhy(card.run.ruleId, card.run.id);
     case "AGREE":
       return `/hub/handbook/${card.agreement.pageId}`;
+    case "SIGN":
+      return `/documents/sign/${card.envelope.id}`;
+    case "TASK":
+      // A signature waiting (documents-signing G01): Sign opens the signing screen, not the task list.
+      if (card.task.kind === "SIGN" && card.task.envelopeId) return `/documents/sign/${card.task.envelopeId}`;
+      // A request for a document (documents-requests R09): its box and Upload are on the person's own tab.
+      if (card.task.kind === "DOCUMENT" && card.task.processId === null) return `/organization/people/${card.task.subject.id}/documents`;
+      return "/tasks";
     default:
       return "/tasks";
   }
@@ -349,6 +352,20 @@ const DecisionCard: React.FC<{
     actions = (
       <Button asChild size="sm" tabIndex={tab}>
         <Link href={hrefOf(card)}>{t("waitingOnYou.read")}</Link>
+      </Button>
+    );
+  } else if (card.kind === "SIGN") {
+    // Signing is never done on Home: the document has to be read first, on its own screen.
+    const envelope = card.envelope;
+    const lastDay = envelope.expiresAt ? envelope.expiresAt.slice(0, 10) : null;
+    who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.signWaits")}</span>;
+    main = envelope.title;
+    under = lastDay ? (
+      <p className="truncate text-label text-secondary">{t("waitingOnYou.signBy", { date: dates.date(lastDay, { weekday: true }) })}</p>
+    ) : null;
+    actions = (
+      <Button asChild size="sm" tabIndex={tab}>
+        <Link href={hrefOf(card)}>{t("waitingOnYou.sign")}</Link>
       </Button>
     );
   } else {
@@ -564,7 +581,9 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
       ? card.run.ruleName ?? ""
       : card.kind === "AGREE"
         ? card.agreement.title
-        : card.task.title;
+        : card.kind === "SIGN"
+          ? card.envelope.title
+          : card.task.title;
   const line = leave
     ? t("waitingOnYou.rowLine", {
         days: tTimeOff("amount.days", dayAmountArgs(card.request.requestedAmount)),
@@ -573,7 +592,9 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
       })
     : card.kind === "AGREE"
       ? t("waitingOnYou.kinds.agree")
-      : t(`waitingOnYou.kinds.${card.kind === "FAILED_RUN" ? "failedRun" : card.kind === "AUTOMATION" ? "automation" : card.kind === "REVIEW" ? "review" : "task"}`);
+      : card.kind === "SIGN"
+        ? t("waitingOnYou.kinds.sign")
+        : t(`waitingOnYou.kinds.${card.kind === "FAILED_RUN" ? "failedRun" : card.kind === "AUTOMATION" ? "automation" : card.kind === "REVIEW" ? "review" : "task"}`);
   return (
     <li>
       <Link

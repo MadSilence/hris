@@ -18,6 +18,12 @@ export type Company = {
    */
   workingDays?: string[];
   weekStartDay?: string;
+  /**
+   * How the company writes a date, from its country: `US` (month first) or `EUROPEAN` (day first). Read through
+   * `lib/date` (`useCompanyDateStyle`), never by a component; nobody chooses it (DECISIONS.md § "The designers' Home
+   * fixes, round 1").
+   */
+  dateStyle?: "US" | "EUROPEAN";
 
   /** The company row's version, sent back by the profile form. Versions the profile fields only. */
   version?: number;

@@ -5,6 +5,7 @@ import { DayPicker, type DateRange } from "react-day-picker";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { cn } from "@/lib/cn";
+import { useWeekStartsOn } from "@/lib/date";
 import { buttonVariants } from "./button";
 import { Icon } from "./icon";
 
@@ -20,6 +21,8 @@ import { Icon } from "./icon";
  * Figures are tabular.
  */
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: React.ComponentProps<typeof DayPicker>) {
+  // The week starts on the company's first day (react-day-picker's own default is Sunday); a caller may still say.
+  const companyWeekStartsOn = useWeekStartsOn();
   const isRange = props.mode === "range";
   const selectedRange = isRange ? (props.selected as DateRange | undefined) : undefined;
   // A one-day range reads as "the second date still to come" too: forms that keep the end equal to the start after
@@ -39,6 +42,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: R
 
   return (
     <DayPicker
+      weekStartsOn={companyWeekStartsOn}
       {...props}
       showOutsideDays={showOutsideDays}
       className={cn("p-3 tabular-nums", className)}

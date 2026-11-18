@@ -151,13 +151,6 @@
       "thisDevice": "this device",
       "hint": "When something happened is shown in this zone. Dates in the calendar sense — a hire date, a day of leave — are the same day for everybody and do not move."
     },
-    "dateFormat": {
-      "label": "Date format",
-      "system": "Same as this device",
-      "dayFirst": "{sample} — day first",
-      "monthFirst": "{sample} — month first",
-      "yearFirst": "{sample} — year first"
-    },
     "language": {
       "label": "Language",
       "followCompany": "Same as the company ({language})",

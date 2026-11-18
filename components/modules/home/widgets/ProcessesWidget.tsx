@@ -107,17 +107,18 @@ export const ProcessesWidget: React.FC<HomeWidgetProps> = ({ size, preview }) =>
             >
               <PersonFace name={name} size={28} />
               <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <span className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-body font-medium text-primary">{name}</span>
+                <span className="truncate text-body leading-[18px] font-medium text-primary">{name}</span>
+                <span className={cn("truncate text-hint leading-[18px]", p.overdueTaskCount > 0 ? "text-status-pending-text" : "text-tertiary")}>
+                  {typeLine(p)}
+                </span>
+                {/* The count sits right of the bar, on its line (H5). */}
+                <span className="flex items-center gap-2">
+                  <span className="relative h-1 min-w-0 flex-1 overflow-hidden rounded-pill bg-mist" aria-hidden>
+                    <span className={cn("absolute inset-y-0 left-0 rounded-pill", BAR[p.type])} style={{ width: `${share}%` }} />
+                  </span>
                   <span className="shrink-0 text-hint tabular-nums text-tertiary">
                     {t("processes.progress", { done, total: p.taskCount })}
                   </span>
-                </span>
-                <span className={cn("truncate text-hint", p.overdueTaskCount > 0 ? "text-status-pending-text" : "text-tertiary")}>
-                  {typeLine(p)}
-                </span>
-                <span className="relative h-1 w-full overflow-hidden rounded-pill bg-mist" aria-hidden>
-                  <span className={cn("absolute inset-y-0 left-0 rounded-pill", BAR[p.type])} style={{ width: `${share}%` }} />
                 </span>
               </span>
             </Link>

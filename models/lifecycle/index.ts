@@ -19,7 +19,9 @@ export type TaskKind =
   | "APPROVE_PEERS"
   | "APPROVE_REVIEW"
   /** An automation asks for approval before its run goes on; decided with Approve / Decline on the task. */
-  | "APPROVE_AUTOMATION";
+  | "APPROVE_AUTOMATION"
+  /** Sign a document made from a template (DOCUMENTS_DESIGN.md § 5.5): closed when everybody signed. */
+  | "SIGN";
 
 /** A review and its steps — nominating and approving peers, approving a manager review — come only from a review cycle. */
 export type ReviewTaskKind = "REVIEW" | "NOMINATE_PEERS" | "APPROVE_PEERS" | "APPROVE_REVIEW";
@@ -72,6 +74,11 @@ export type TaskConfig = {
   categoryId?: string | null;
   materials?: Material[] | null;
   questions?: Question[] | null;
+  /** SIGN: the template sent, and the signing it was sent in — the signing screen opens it. */
+  templateId?: string | null;
+  envelopeId?: string | null;
+  /** DOCUMENT, a request: the file uploaded into it. */
+  documentId?: string | null;
 };
 
 /** Why an assignee cannot do a task as things stand — a warning, not a refusal. */
@@ -176,6 +183,10 @@ export type Task = {
   /** QUESTIONNAIRE: what it asks; null for the other kinds. */
   questions: Question[] | null;
   commentCount: number;
+  /** SIGN: the signing it was sent in — the signing screen opens it. */
+  envelopeId?: string | null;
+  /** A document request (no process): who asked — the box says "Asked by …" (R07). */
+  requestedBy?: Ref | null;
 };
 
 export type TaskComment = {
@@ -352,6 +363,7 @@ export const TASK_KINDS: TaskKind[] = [
   "DOCUMENT",
   "ACKNOWLEDGE",
   "QUESTIONNAIRE",
+  "SIGN",
   "REVIEW",
   "NOMINATE_PEERS",
   "APPROVE_PEERS",

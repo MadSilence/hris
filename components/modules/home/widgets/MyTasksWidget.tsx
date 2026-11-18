@@ -26,6 +26,7 @@ import {
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
 import type { HomeWidgetProps } from "./catalogue";
+import { NOTIFICATIONS_QUERY_KEY } from "@/components/modules/notifications/utils/notificationsQueryKeys";
 
 /** A task Home can close in one tick: nothing to fill, attach or answer. Everything else opens on /tasks. */
 export const TICKABLE_KINDS = new Set<Task["kind"]>(["TODO", "ACKNOWLEDGE"]);
@@ -57,6 +58,8 @@ export const useTickTask = () => {
       const result = await completeMyTaskAction({ id: task.id });
       if (result.status !== ActionStatus.SUCCESS) showActionError(result);
       await queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.myTasksRoot });
+      // Sent through a server action, not a mutation: the one list (A1) and the inbox are refreshed by hand.
+      await queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_QUERY_KEY] });
     });
     showUndoToast(t("myTasks.done"), t("card.undo"), () => {
       undo();
@@ -65,9 +68,16 @@ export const useTickTask = () => {
 };
 
 /** The round checkbox of a task (SPEC § 13.11); ticked, it fills with the accent. */
-const TaskCheck: React.FC<{ done: boolean; disabled: boolean; label: string; onTick: () => void }> = ({ done, disabled, label, onTick }) => (
+const TaskCheck: React.FC<{ done: boolean; disabled: boolean; label: string; onTick: () => void; tabIndex?: number }> = ({
+  done,
+  disabled,
+  label,
+  onTick,
+  tabIndex,
+}) => (
   <button
     type="button"
+    tabIndex={tabIndex}
     role="checkbox"
     aria-checked={done}
     aria-label={label}
@@ -155,7 +165,8 @@ export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
         <span className="pt-0.5">
           <TaskCheck
             done={done}
-            disabled={Boolean(preview) || !TICKABLE_KINDS.has(task.kind) || task.status === "WAITING"}
+            disabled={!TICKABLE_KINDS.has(task.kind) || task.status === "WAITING"}
+            tabIndex={preview ? -1 : undefined}
             label={t("myTasks.markDone", { title: task.title })}
             onTick={() => tick(task)}
           />

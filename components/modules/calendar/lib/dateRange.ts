@@ -17,12 +17,16 @@ export const addMonths = (d: Date, n: number) => {
 export const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
 export const endOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0);
 
-export const startOfWeek = (d: Date) => {
+/**
+ * The first day of the week `d` is in. `weekStartsOn` is the company's (`useWeekStartsOn` from `lib/date`, as
+ * `Date.getDay()` counts); Monday when not given.
+ */
+export const startOfWeek = (d: Date, weekStartsOn: number = 1) => {
   const x = new Date(d);
-  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  x.setDate(x.getDate() - ((x.getDay() - weekStartsOn + 7) % 7));
   return x;
 };
-export const endOfWeek = (d: Date) => addDays(startOfWeek(d), 6);
+export const endOfWeek = (d: Date, weekStartsOn: number = 1) => addDays(startOfWeek(d, weekStartsOn), 6);
 
 export const eachDay = (from: Date, to: Date): Date[] => {
   const out: Date[] = [];

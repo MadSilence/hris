@@ -183,7 +183,7 @@ export const AutomationsWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
           line={t("automations.emptyLine")}
           action={
             size === "S" ? undefined : (
-              <Button asChild variant="secondary" size="sm" tabIndex={preview ? -1 : undefined}>
+              <Button asChild variant="secondary" size="md" tabIndex={preview ? -1 : undefined}>
                 <Link href={automationsHref.list}>{t("automations.create")}</Link>
               </Button>
             )

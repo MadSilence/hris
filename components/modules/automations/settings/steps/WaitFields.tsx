@@ -54,10 +54,14 @@ export const useTaskStepsAbove = (definition: StepPartProps["definition"], step:
   const label = usePlaceholderLabel();
   const n = numbers(definition);
   return stepsAbove(definition, step.id)
-    .filter((s) => s.type === "CREATE_TASK")
+    .filter((s) => s.type === "CREATE_TASK" || s.type === "SIGN_DOCUMENT")
     .map((s) => ({
       value: s.id,
-      label: t("wait.taskOption", { number: n[s.id] ?? "", title: tokensAsWords(s.title, label) || t("wait.untitledTask") }),
+      label:
+        s.type === "SIGN_DOCUMENT"
+          ? t("wait.signedOption", { number: n[s.id] ?? "", title: s.title?.trim() || t("wait.untitledDocument") })
+          : t("wait.taskOption", { number: n[s.id] ?? "", title: tokensAsWords(s.title, label) || t("wait.untitledTask") }),
+      signing: s.type === "SIGN_DOCUMENT",
     }));
 };
 
@@ -101,6 +105,7 @@ export const WaitFields: React.FC<StepPartProps> = ({ definition, step, catalog,
                 placeholder={t("wait.pickTask")} emptyLabel={t("common.noResults")} ariaLabel={t("wait.task")}
                 invalid={Boolean(errorFor(t, problems, "taskStepId"))} />
             </Field>
+            {tasks.find((x) => x.value === step.taskStepId)?.signing && <Hint>{t("wait.signedHint")}</Hint>}
           </Indented>
         )}
         <label className="flex cursor-pointer items-center gap-2.5">

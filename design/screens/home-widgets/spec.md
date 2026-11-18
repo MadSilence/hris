@@ -66,7 +66,7 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 - **States:** loading (LW01), empty "All caught up" / "Nothing waits for your answer." (**all-caught-up**), error "Couldn’t load requests". A long name is one line with … and the full name in a tooltip.
 
 ## 2. Time off (LW02)
-**Who sees it:** everyone with a time-off policy. Without a policy it shows the empty state "No time-off policy yet" / "Ask HR to add you to one." (**time-off-s**). **Data:** balances by type and the person's requests. **Sizes:** S, M, L.
+**Who sees it:** everyone with a time-off policy. Without a policy it shows the empty state "No time-off policy yet" / "You're not added to one yet." (**time-off-s**). **Data:** balances by type and the person's requests. **Sizes:** S, M, L.
 
 - **Small:** a "Time off" label + the "My time off" link; "14.5 vacation days"; "Request time off" (primary, full width).
 - **Medium:** the big number (52) + "vacation days"; a hairline, then the other types as a quiet list ("Personal 2 days left", "Sick leave No limit"); the nearest request as a one-line pill (dates + status; pending = dashed `accent` edge + Pending status with no fill); "+N" counter if there are more; "Request time off".
@@ -152,7 +152,7 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 - **Large:** "See all"; "This week · 128 runs" under the title; a dot chart, one column per day (W…Today, today in accent, a failed run as a red dot); the failure block and "Next" on the right.
 - Hover a day: tooltip "Today · 36 runs" / Ran fine 35 / Failed 1 / Skipped 0, with dots in the chart's colours.
 - **All good:** a Pine soft block "All ran fine" / "No failures this week." and no red dot. The card itself is always white (SPEC § 4.6).
-- Empty: "No automations yet" / "Let noddo do the routine work." + "Create automation" (**automations**). "Fix it" → the failed run; the chart → Automations.
+- Empty: "No automations yet" / "Let noddo handle the routine." + "Create automation" (**automations**). "Fix it" → the failed run; the chart → Automations.
 
 ---
 
@@ -254,3 +254,24 @@ Q-5 (where the Skip order is kept), Q-6 (the per-day automation read) — in `ha
   - **My team / Everyone** is remembered in the browser, not on the server.
   - **Next time off Small** shows the countdown at 44; the calendar leaf sits where the title's link would.
 - **Images of the real screen:** owed by the first walk.
+
+### The designers' fixes, round 1 (2026-11-18)
+
+Built from `design-fixes-round-1` (FIXES.md Part 4.1, H1–H24; the owner's calls `(claude)/DECISIONS.md` § "The designers'
+Home fixes, round 1"). Where this spec's text above disagrees, these win:
+
+- **Grid:** always 4 fluid columns (`repeat(4, minmax(0, 1fr))`, gap 24, rows 160) in a container up to 1200; under 1000 px
+  of content 3 columns. Each widget keeps its cell (`col`, `row`); empty cells are allowed.
+- **To sign is built** (§ 7, LW07): it reads `/me/actions` — a signature a task stands for and one sent from a profile.
+  Sign opens the signing screen. In every role's default after Next time off (S). "From HR" in Large is not shown: the
+  list has no sender for a task's signature.
+- **My time stays out** — the owner kept clock-in out of the product on 2026-11-18 (it was answered "build it" in the
+  package's Q-7).
+- **This week** lists the rest of the company's week only (`weekStartDay`); rows 13/22, avatar 24, the day "21 Nov".
+- **Who's out:** the small switch (28 high, `SegmentedControl size="sm"`), day numbers Inter Tight 16/16, bars with a
+  26 avatar and padding 0 3, and **Upcoming** under the lanes — leave starting in the two weeks after this one
+  (`WhosOutDTO.upcoming`, WEEK only). The five day columns start on the company's first day of the week.
+- **Big numbers** 52/52 and 44/44 (`--text-hero-l`, `--text-hero-s`); empty-state buttons secondary 36; links in title rows
+  13/20; the counter Inter 12/16 600.
+- **In Edit home** widgets keep their colours and buttons: nothing is greyed, the content takes no pointer.
+- Not done: H6 for **Small** (a 160-high card has no room for the illustration, line and button) — asked back.

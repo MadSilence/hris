@@ -40,7 +40,14 @@ const SESSION_MAX_AGE_SECONDS = REFRESH_MAX_AGE_SECONDS;
  * refresh token is `SameSite=Strict`: only the app itself ever sends it. The access cookie stays `Lax`,
  * because a link from a mail is a cross-site navigation and must land signed in.
  */
-export const setSessionCookies = (res: NextResponse, tokens: SessionTokens): void => {
+/**
+ * Where a session's cookies can be written: a route handler's response, or — in a server action or a route handler —
+ * the request's own cookie store (`{ cookies: await cookies() }`), which is how an action renews an expired token
+ * (`hrisApiClient`, B1).
+ */
+type CookieTarget = { cookies: Pick<NextResponse["cookies"], "set"> };
+
+export const setSessionCookies = (res: CookieTarget, tokens: SessionTokens): void => {
   res.cookies.set({
     name: ACCESS_COOKIE,
     value: tokens.accessToken,

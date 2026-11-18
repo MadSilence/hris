@@ -64,7 +64,6 @@ jest.mock("@/components/desact/select", () => ({
 }));
 
 const folderSelect = () => screen.getByLabelText("Folder");
-const visibilitySelect = () => screen.getAllByRole("combobox")[1];
 const categorySelect = () => screen.getByLabelText("Category");
 
 const folders = [
@@ -137,8 +136,8 @@ describe("UploadDocumentForm", () => {
   it("hides the category picker when the company has none", () => {
     renderForm();
 
-    // Folder and visibility remain; the category picker is the only conditional one.
-    expect(screen.queryAllByRole("combobox")).toHaveLength(2);
+    // The folder remains (visibility is a segmented choice since M3); the category picker is the only conditional one.
+    expect(screen.queryAllByRole("combobox")).toHaveLength(1);
   });
 
   it("submits the chosen visibility", async () => {
@@ -147,7 +146,7 @@ describe("UploadDocumentForm", () => {
     renderForm({ onSubmitAction });
 
     fireEvent.change(screen.getByLabelText(/^files$/i), { target: { files: [file] } });
-    fireEvent.change(visibilitySelect(), { target: { value: "VISIBLE_TO_EMPLOYEE" } });
+    fireEvent.click(screen.getByRole("radio", { name: "Visible" }));
     fireEvent.click(screen.getByRole("button", { name: /^upload$/i }));
 
     await waitFor(() => expect(onSubmitAction).toHaveBeenCalledTimes(1));
@@ -313,5 +312,19 @@ describe("UploadDocumentForm", () => {
     expect(getInnerButton(/^choose files$/i)).toBeDisabled();
     expect(screen.getByRole("button", { name: /^cancel$/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
+  });
+
+  it("opens with the files dropped on it, and a refused file says why (M3)", () => {
+    const refused = new File(["x"], "virus.exe", { type: "application/octet-stream", lastModified: 1 });
+    renderForm({
+      initialFiles: [file, refused],
+      statuses: {
+        [`${file.name}:${file.size}:${file.lastModified}`]: { state: "done" },
+        [`${refused.name}:${refused.size}:${refused.lastModified}`]: { state: "failed", message: "Uploaded file type is not allowed" },
+      },
+    });
+    expect(screen.getByText("contract.pdf")).toBeInTheDocument();
+    expect(screen.getByText("Uploaded file type is not allowed")).toBeInTheDocument();
+    expect(screen.getByLabelText("Uploaded")).toBeInTheDocument();
   });
 });

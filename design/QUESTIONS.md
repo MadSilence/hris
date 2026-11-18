@@ -3,24 +3,6 @@
 Only open questions. When one is answered, delete it and write the answer where it lives (the
 screen's spec, the package, or the owner's rules). The format is in `HANDOFF.md` § "Questions".
 
-## Q-1 — A segmented control is used on almost every automations window, and the package has none · automations-triggers, automations-steps, automations-test-and-turn-on · from code · 2026-11-06
-Before / After, Requested · Approved · Declined · Cancelled, Day · Week · Month · Quarter · Year, Assign / Unassign, And / Or, Approves / Declines / No answer — every one is drawn as a segmented control. `styles/noddo/SPEC.md` has no such component and it is not under "New components" in any spec. The code builds it from the frames (height 32, radius 8, the picked segment white on Mist, level 1) and lists it in `CHANGELOG.md`.
-Recommended: the designers add it to the package as drawn; the code's values are replaced by theirs when it lands.
-**Blocks:** nothing (built from the frames)
-
-## Q-2 — The word for an approval's time-out "Go on" · automations-steps · from code · 2026-11-06
-With branches there is nothing after an approval but its two paths. The owner settled that "Go on" follows the **Declined** path (nothing is granted without a yes). "Go on" now reads like approval.
-Recommended: "Treat it as declined". The code uses that until the designers answer.
-**Blocks:** nothing
-
-## Q-7 — What the owner cut from the home handoff · home, home-edit, home-widgets · from code · 2026-11-11
-The owner answered the places where the design asked owner rules to give way (`(claude)/DECISIONS.md` § "The home redesign"). Three change what is drawn:
-- **My time is not built** — a running clock is clock-in, which the product does not do. It leaves the panel (For me counts one fewer), the employee default and HF01–HF04.
-- **To sign waits for e-signing**, which is not planned; the same for the deck's *Do · document* card and "My documents · {n} to sign" in the profile menu.
-- **The birthday choice moves to the person**: a switch in their own preferences, on by default, instead of Settings → General → Home. It is not drawn.
-Recommended: the designers fill the space My time leaves in the defaults and the finished frames, and draw the preferences switch; the code builds the rest meanwhile from the specs as they are, leaving those two widgets out.
-**Blocks:** nothing
-
 ## Q-9 — Who can manage the hub · company-hub, company-hub-manage · from designers · 2026-11-12
 **Answered by the owner (CH2, CH4):** HR only in v1 — no team-lead mode yet (scoped authors come later); the right is granted in Manage hub → Settings, "Who can post and edit pages".
 
@@ -87,12 +69,72 @@ The band's rings are a static image; with "Your own" and with the Light backgrou
 Recommended: generate the PNG when the colour or the background is saved.
 **Blocks:** nothing
 
-## Q-29 — The package still carries the old ten presets · sign-in-appearance · from code · 2026-11-13
-`styles/noddo/tokens.css` has `[data-accent]` blocks for Wine, Brick, Terracotta, Sun, Forest, Teal, Denim, Iris, Raspberry and Graphite. The code took the nine (Q-24) without waiting: Wine and Graphite read the package's blocks; Cherry, Tangerine, Sunflower, Basil, Indigo, Ocean, Mulberry and Black are derived in `lib/theme/accent.ts` exactly as a "Your own" colour is, and `accent.test.ts` fails the day the package's list changes, so the two cannot drift silently.
-Recommended: the next package version carries the nine (light and dark values, Sunflower with Graphite on its fill) and drops the eight; the code then reads them as it reads Wine.
-**Blocks:** nothing
+## Documents round (2026-11-17) — Q-31 … Q-43, answered by the owner on 2026-11-18
 
-## Q-30 — "Close to a status" measured by hue alone calls Wine red · sign-in-appearance · from code · 2026-11-13
-L8-Rules makes a workspace "red" within 25° of Declined (#C42B1C, 5°). Wine (#6E1630) sits at 342°, 23° away, so by hue alone Wine — the default — would turn every confirm dialog's Delete into an outline, which the frames do not show. The code adds lightness: within 25° of hue **and** within 0.15 of the status colour's HSL lightness. Cherry and Tangerine are red; Wine is not. The quiet line in Appearance is drawn only for approvals ("Close to the color noddo uses for approvals"), so the code shows it only near Approved; by hue alone Indigo (20° from In progress) and Tangerine and Sunflower (near Pending) would also be "close", against the spec's "none of the nine".
-Recommended: keep both as built; if the line should cover other statuses, give it the words for each.
-**Blocks:** nothing
+The owner took the round as drawn: **everything the design asks of the code is built as designed**. The entries keep
+the designers' question in one line and the answer; the work is `(claude)/development_plan/DOCUMENTS_PLAN.md` § 7.
+
+## Q-31 — A signer without a label · documents-send-for-signature · from designers · 2026-11-17
+**Answered:** yes, the label is optional. The API already takes a signer with none; the certificate then prints the
+name and email only.
+
+## Q-32 — Telling signers that a signing was cancelled · documents-send-for-signature · from designers · 2026-11-17
+**Answered:** as recommended. Whoever was already asked to sign, in the company or a guest, gets "Lena Novak cancelled
+the signing of …", with the comment if there is one. Signers still waiting for their turn are not told.
+
+## Q-33 — Automatic reminders: day 3 and the day before the due date · documents-send-for-signature · from designers · 2026-11-17
+**Answered:** as drawn. It replaces the day-3-and-day-7 rule built on 2026-11-16 (`DECISIONS.md` D6). No setting.
+
+## Q-34 — Signing history needs an event list · documents-send-for-signature · from designers · 2026-11-17
+**Answered:** the events exist in the journal, one per sent, signed, declined, cancelled, expired and completed,
+for every signing. A per-document list across all its signings is added for S13.
+
+## Q-35 — Reading before your turn · documents-signing · from designers · 2026-11-17
+**Answered:** as recommended, and already so: a signer in the company may read the document from the moment it is
+sent. A guest's link is only issued at their turn.
+
+## Q-36 — A drawn signature and the phone hand-off · documents-signing · from designers · 2026-11-17
+**Answered:** yes, both the pad on the computer and the phone through the QR code, for people in the company, guests
+and new joiners. The certificate records "typed" or "drawn".
+
+## Q-37 — The typed signature's font in the PDF · documents-signing · from designers · 2026-11-17
+**Answered:** yes, Marck Script is embedded in the PDF engine for the typed name. The certificate page stays in the
+engine's text font.
+
+## Q-38 — Who sends a document an automation sends · automations-send-for-signature · from designers · 2026-11-17
+**Answered:** as recommended, and as built: the automation's owner is the sender ("Sent by …", "… asks you to sign");
+the email's sender line is the company.
+
+## Q-39 — "Wait until signed" ends on declined or cancelled · automations-send-for-signature · from designers · 2026-11-17
+**Answered:** yes, as drawn. The engine did not do it yet: a declined, cancelled or expired signing left its task open
+and the wait sat out its days. It is fixed in this round.
+
+## Q-40 — Test run: "Send the document to me" · automations-send-for-signature · from designers · 2026-11-17
+**Answered:** yes. The test run makes the PDF, marked [Test], and emails it to the tester only. Nothing is filed in
+anyone's Documents.
+
+## Q-41 — Company-wide documents lists and the Documents item · documents-section · from designers · 2026-11-17
+**Answered:** yes. The API gains the three lists it lacks (all documents, open signings, requests; expiring exists).
+The item shows for whoever may see documents beyond their own profile: a scope on *People documents — view* wider
+than oneself.
+
+## Q-42 — Languages: no Russian · system · from designers · 2026-11-17
+**Answered: Russian stays.** The product keeps English and Russian, as built and walked
+(`(claude)/DECISIONS.md` § "Internationalisation"); Ukrainian or Bulgarian may join later. Every new string of this
+round gets its Russian. The spec line "there is no Russian in the product" (`documents-signing`, Changes to SPEC) is
+superseded by this answer.
+
+## Q-43 — A "document" field in notifications · automations-send-for-signature · from designers · 2026-11-17
+**Answered:** yes. `TokenTextField` offers **document** after a Send for signature step: the signed document, as a
+link.
+
+## Q-44 — The Templates round: templates are written in noddo, not uploaded · documents templates · from code · 2026-11-18
+The owner decided on 2026-11-18 that a document template is **a document written in noddo's own editor** (the
+company hub's TipTap editor), not an uploaded Word file. Its text carries **field chips** from the attribute
+vocabulary and **signature blocks** where each signer signs. It has versions, and every generated document remembers
+the version it was made from. The PDF is made from it in the company's style. A DOCX is only imported (converted
+into the editor) or exported. The AI drafts a template, proposes edits as changes to blocks and finds what is missing,
+and a person publishes.
+The brief for the Templates round follows this; the drawn screens already fit it ("who signs" and "time to sign" come
+from the template).
+**Blocks:** the Templates round's drawing only

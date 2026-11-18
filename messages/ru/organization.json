@@ -367,42 +367,46 @@
       "blankDescriptionEditable": "Здесь хранятся договоры, удостоверения и сертификаты.\nПеретащите файлы сюда или загрузите их кнопкой ниже.",
       "uploadFile": "Загрузить файл",
       "newFolder": "Новая папка",
-      "noMatchTitle": "Подходящих документов нет",
-      "noMatchHint": "Измените поиск или фильтр.",
       "emptyFolderTitle": "Эта папка пуста",
-      "emptyFolderDescription": "Перетащите файлы сюда или нажмите «Добавить»."
+      "emptyFolderDescription": "Перетащите файлы сюда или нажмите «Добавить».",
+      "add": "Добавить",
+      "uploadFiles": "Загрузить файлы",
+      "selectAll": "Выбрать все {count}",
+      "noResultsTitle": "Ничего не нашлось по «{query}»",
+      "noResultsHint": "Попробуйте другое слово. Поиск идёт по всем папкам.",
+      "loadFailed": "Не удалось загрузить документы"
     },
     "emptyState": {
       "title": "Нет ни папок, ни файлов",
       "description": "Здесь пусто. Создайте папку или загрузите файл, чтобы начать."
     },
     "folderCard": {
-      "actions": "Действия с папкой"
-    },
-    "toolbar": {
-      "starredOnly": "Только отмеченные звёздочкой",
-      "hrOnly": "Только документы для HR",
-      "addFolder": "Добавить папку",
-      "uploadDocuments": "Загрузить документы"
+      "actions": "Действия с папкой",
+      "files": "{count, plural, one {# файл} few {# файла} many {# файлов} other {# файла}}",
+      "uploadHere": "Загрузить сюда",
+      "rename": "Переименовать",
+      "look": "Значок и цвет",
+      "delete": "Удалить папку"
     },
     "table": {
       "category": "Категория",
       "visibility": "Видимость",
       "size": "Размер",
       "uploaded": "Загружен",
-      "hrOnly": "Только HR",
-      "employee": "Сотрудник",
       "star": "Отметить звёздочкой",
       "unstar": "Снять звёздочку",
       "actions": "Действия с документом",
       "move": "Переместить",
-      "changeVisibility": "Изменить доступ",
       "movedToTrash": "{name} — в корзине",
       "visibilityFailed": "Не удалось изменить доступ.",
       "selectAll": "Выбрать все",
       "select": "Выбрать {name}",
       "batchFailed": "Не удалось выполнить для выбранных.",
-      "movedManyToTrash": "{count, plural, one {# документ} few {# документа} many {# документов} other {# документа}} в корзине"
+      "movedManyToTrash": "{count, plural, one {# документ} few {# документа} many {# документов} other {# документа}} в корзине",
+      "whoCanSee": "Кто видит",
+      "visible": "Видно",
+      "hidden": "Скрыто",
+      "moveToTrash": "Переместить в корзину"
     },
     "trash": {
       "restoreFailed": "Не удалось восстановить",
@@ -460,8 +464,9 @@
     },
     "preview": {
       "readOnly": "Только просмотр.",
-      "readOnlyWithCategory": "{category} · Только просмотр.",
-      "downloadInstead": "Скачать файл"
+      "downloadInstead": "Скачать файл",
+      "renamed": "Переименовано",
+      "validUntil": "Действует до {date}"
     },
     "purge": {
       "title": "Удалить навсегда",
@@ -486,11 +491,37 @@
       "removeFile": "Убрать {name}",
       "folder": "Папка",
       "visibility": "Кто видит документ",
-      "visibilityHrOnly": "Только HR — скрыт от сотрудника",
-      "visibilityEmployee": "Виден сотруднику — только для чтения",
       "category": "Категория",
       "selectCategory": "Выберите категорию",
-      "submit": "{count, plural, =0 {Загрузить} =1 {Загрузить} one {Загрузить # файл} few {Загрузить # файла} many {Загрузить # файлов} other {Загрузить # файла}}"
+      "submit": "{count, plural, =0 {Загрузить} =1 {Загрузить} one {Загрузить # файл} few {Загрузить # файла} many {Загрузить # файлов} other {Загрузить # файла}}",
+      "uploading": "Загружается…",
+      "waiting": "В очереди",
+      "done": "Загружено"
+    },
+    "folders": "Папки",
+    "views": {
+      "label": "Показать",
+      "LOOSE": "Вне папок",
+      "ALL": "Все документы",
+      "STARRED": "Избранное",
+      "EXPIRING": "Истекают"
+    },
+    "folderLook": {
+      "title": "Значок и цвет",
+      "icon": "Значок",
+      "color": "Цвет",
+      "icons": {
+        "folder": "Папка",
+        "briefcase": "Портфель",
+        "shield": "Щит",
+        "heart": "Здоровье",
+        "file": "Страница",
+        "book": "Книга",
+        "building": "Здание",
+        "calendar": "Календарь",
+        "people": "Люди",
+        "laptop": "Ноутбук"
+      }
     }
   },
   "views": {

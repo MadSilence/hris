@@ -111,6 +111,6 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
 - **Where to see it:** a step's settings in the editor. Code: `components/modules/automations/settings/steps`.
 - **Differs from the design:** people rows show "office" without the job (the people search returns no job); a picked
   person reads "a person" in card titles; a policy shows "{n} days" or "No limit" ("Everyone" has nothing behind it);
-  the approval's no-answer option reads "Treat it as declined" (QA1, `QUESTIONS.md` Q-2); sign and survey steps carry
+  the approval's no-answer option reads "Count as declined" (QA1; the designers' word, Q-2, 2026-11-18); sign and survey steps carry
   "Not connected yet".
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").

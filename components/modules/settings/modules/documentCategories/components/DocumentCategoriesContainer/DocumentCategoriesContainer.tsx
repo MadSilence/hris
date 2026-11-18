@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, FormEvent, useEffect, useState } from "react";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/feedback/FormError";
 import { FieldError } from "@/components/desact/field-error";
@@ -223,7 +224,14 @@ export const DocumentCategoriesContainer: FC = () => {
   );
 };
 
-type FormValues = { name: string; description: string | null; isActive: boolean };
+type FormValues = {
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  requiresExpiry: boolean;
+  remindDaysBefore: number;
+  defaultVisibility: "HR_ONLY" | "VISIBLE_TO_EMPLOYEE" | "";
+};
 
 const CategoryFormModal: FC<{
   isOpen: boolean;
@@ -238,7 +246,12 @@ const CategoryFormModal: FC<{
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [requiresExpiry, setRequiresExpiry] = useState(false);
+  const [remind, setRemind] = useState(true);
+  const [remindDays, setRemindDays] = useState("30");
+  const [defaultVisibility, setDefaultVisibility] = useState<"HR_ONLY" | "VISIBLE_TO_EMPLOYEE" | "">("");
   const [tried, setTried] = useState(false);
+  const tExpiry = useTranslations("signing");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -246,6 +259,10 @@ const CategoryFormModal: FC<{
     setName(category?.name ?? "");
     setDescription(category?.description ?? "");
     setIsActive(category?.isActive ?? true);
+    setRequiresExpiry(category?.requiresExpiry ?? false);
+    setRemind(category ? category.remindDaysBefore != null : true);
+    setRemindDays(String(category?.remindDaysBefore ?? 30));
+    setDefaultVisibility(category?.defaultVisibility ?? "");
   }, [isOpen, category]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -253,10 +270,15 @@ const CategoryFormModal: FC<{
     if (isLoading) return;
     setTried(true);
     if (!name.trim()) return;
+    const days = Number(remindDays);
+    if (remind && (!Number.isInteger(days) || days < 1 || days > 365)) return;
     onSubmitAction({
       name: name.trim(),
       description: description.trim() || null,
       isActive,
+      requiresExpiry,
+      remindDaysBefore: remind ? days : 0,
+      defaultVisibility,
     });
   };
 
@@ -307,6 +329,41 @@ const CategoryFormModal: FC<{
               checked={isActive}
               disabled={isLoading}
               onCheckedChange={setIsActive}
+            />
+          </div>
+
+          {/* documents-expiry X07: the expiry rule and who sees an upload by default. */}
+          <div className="flex items-center justify-between rounded-control border border-divider px-3 py-2.5">
+            <Label htmlFor="category-requires-expiry" className="text-body">{tExpiry("category.requiresExpiry")}</Label>
+            <Switch id="category-requires-expiry" checked={requiresExpiry} disabled={isLoading} onCheckedChange={setRequiresExpiry} />
+          </div>
+          <div className="flex items-center gap-2 rounded-control border border-divider px-3 py-2.5">
+            <Switch id="category-remind" checked={remind} disabled={isLoading} onCheckedChange={setRemind} />
+            <Label htmlFor="category-remind" className="text-body">{tExpiry("category.remind")}</Label>
+            <Input
+              aria-label={tExpiry("category.days")}
+              className="w-20"
+              inputMode="numeric"
+              value={remindDays}
+              disabled={isLoading || !remind}
+              aria-invalid={tried && remind && !(Number(remindDays) >= 1 && Number(remindDays) <= 365) ? true : undefined}
+              onChange={(e) => setRemindDays(e.currentTarget.value.replace(/\D/g, ""))}
+            />
+            <span className="text-body text-secondary">{tExpiry("category.daysBefore")}</span>
+          </div>
+          <FieldError>
+            {tried && remind && !(Number(remindDays) >= 1 && Number(remindDays) <= 365) ? tExpiry("category.daysRange") : null}
+          </FieldError>
+          <div className="space-y-2">
+            <Label>{tExpiry("category.visibleByDefault")}</Label>
+            <SegmentedControl
+              options={[
+                { value: "HR_ONLY", label: tExpiry("section.hidden") },
+                { value: "VISIBLE_TO_EMPLOYEE", label: tExpiry("section.visible") },
+                { value: "", label: tExpiry("category.uploaderDecides") },
+              ]}
+              value={defaultVisibility}
+              onChange={(v) => setDefaultVisibility(v as "HR_ONLY" | "VISIBLE_TO_EMPLOYEE" | "")}
             />
           </div>
 

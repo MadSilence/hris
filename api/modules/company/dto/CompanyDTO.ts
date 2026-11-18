@@ -8,6 +8,8 @@ export type CompanyDTO = {
   /** See `models/company/Company.ts` for why the working week rides on the app-shell read. */
   workingDays?: string[];
   weekStartDay?: string;
+  /** `US` or `EUROPEAN`, from the company's country — see `models/company/Company.ts`. */
+  dateStyle?: "US" | "EUROPEAN";
   /** The company row's version — the profile fields only; the working week has its own, on settings. */
   version?: number;
 };

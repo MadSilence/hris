@@ -18,7 +18,8 @@
     "finishProfile": "Заполнить профиль",
     "myPreferences": "Мои настройки",
     "changePassword": "Сменить пароль",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "documents": "Документы"
   },
   "public": {
     "nav": {

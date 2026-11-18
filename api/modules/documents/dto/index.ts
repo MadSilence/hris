@@ -5,6 +5,10 @@ export type DocumentFolderDTO = {
   parentId: string | null;
   userId: string;
   createdAt: string;
+  /** A Hugeicons key from the folder set; null draws the plain folder (documents-tab T03). */
+  icon?: string | null;
+  /** A tag-palette colour; null is gray. */
+  color?: string | null;
 };
 
 export type DocumentDTO = {
@@ -21,7 +25,20 @@ export type DocumentDTO = {
   categoryName: string | null;
   /** HR_ONLY — the employee does not see it; VISIBLE_TO_EMPLOYEE — they can read it. */
   visibility: DocumentVisibility;
+  description?: string | null;
+  /** The last day it is valid (ISO date); null when it does not expire. */
+  expiresOn?: string | null;
+  /** Null without a date. EXPIRING inside the category's reminder window (30 days without one). */
+  expiryState?: DocumentExpiryState | null;
+  /** NOT_SCANNED until a malware scanner is connected (DOCUMENTS_DESIGN.md D7). */
+  scanStatus?: "NOT_SCANNED" | "CLEAN" | "INFECTED" | "FAILED";
+  sourceTemplateId?: string | null;
+  envelopeId?: string | null;
+  /** Set on the sealed result of a signing; such a document is final. */
+  signedAt?: string | null;
 };
+
+export type DocumentExpiryState = "VALID" | "EXPIRING" | "EXPIRED";
 
 export type DocumentVisibility = "HR_ONLY" | "VISIBLE_TO_EMPLOYEE";
 
@@ -33,12 +50,23 @@ export type DocumentCategoryDTO = {
   isSystem: boolean;
   /** Sent back by the edit dialog; the backend refuses a save over a newer row (E00409). */
   version?: number;
+  /** A document of this category cannot be filed without an expiry date. */
+  requiresExpiry?: boolean;
+  /** Days before expiry the person and their HR are reminded; null is no reminder. */
+  remindDaysBefore?: number | null;
+  /** What an upload takes when it does not choose; null keeps the uploader's rule. */
+  defaultVisibility?: DocumentVisibility | null;
 };
 
 export type SaveDocumentCategoryRequest = {
   name: string;
   description?: string | null;
   isActive?: boolean;
+  requiresExpiry?: boolean;
+  /** 0 clears the reminder. */
+  remindDaysBefore?: number | null;
+  /** An empty string clears the default. */
+  defaultVisibility?: DocumentVisibility | "" | null;
 };
 
 /** Create has no version to send — the backend body is strict, so it is only on the update type. */
@@ -69,6 +97,16 @@ export type UploadDocumentArgs = {
   categoryId?: string | null;
   /** Omitted → the backend picks by who uploads (own space → visible, HR → HR-only). */
   visibility?: DocumentVisibility | null;
+  description?: string | null;
+  /** ISO date. Required when the category requires expiry (D00029). */
+  expiresOn?: string | null;
+};
+
+/** `PATCH /documents/{id}` — partial; `clearExpiresOn` removes the date. */
+export type UpdateDocumentDetailsRequest = {
+  description?: string | null;
+  expiresOn?: string | null;
+  clearExpiresOn?: boolean;
 };
 
 export type RenameDocumentRequest = {

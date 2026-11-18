@@ -29,6 +29,7 @@ import peopleImport from "./peopleImport.json";
 import structure from "./structure.json";
 import hub from "./hub.json";
 import demo from "./demo.json";
+import signing from "./signing.json";
 
 const ru: DeepPartial<typeof import("@/messages/en").default> = {
   common,
@@ -56,6 +57,7 @@ const ru: DeepPartial<typeof import("@/messages/en").default> = {
   structure,
   hub,
   demo,
+  signing,
 };
 
 export default ru;

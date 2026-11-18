@@ -1,8 +1,9 @@
 import { hrisDocumentsService } from "@/api/modules/documents/services/hrisDocumentsService";
 
 export class DocumentsRoutes {
-  public async getRootDocuments(_req: Request, userId: string) {
-    const data = await hrisDocumentsService.getRootDocuments(userId);
+  public async getRootDocuments(req: Request, userId: string) {
+    const all = new URL(req.url).searchParams.get("all") === "true";
+    const data = await hrisDocumentsService.getRootDocuments(userId, all);
     return Response.json(data);
   }
 

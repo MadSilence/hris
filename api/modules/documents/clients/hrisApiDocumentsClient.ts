@@ -8,6 +8,7 @@ import {
   DocumentFolderDeleteImpactDTO,
   DocumentFolderDeleteStrategy,
   DocumentFolderContentDTO,
+  DocumentFolderDTO,
   DocumentCategoryDTO,
   MoveDocumentRequest,
   RenameDocumentFolderRequest,
@@ -22,11 +23,17 @@ import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 export class HrisApiDocumentsClient {
   private readonly BASE_PATH = "/documents";
 
-  public async getRootDocuments(userId: string): Promise<DocumentFolderContentDTO> {
+  /** `all`: every document of the person, in any folder — the tab's "All documents" view and its folder counts. */
+  public async getRootDocuments(userId: string, all = false): Promise<DocumentFolderContentDTO> {
     const dto = await hrisApiClient.get<DocumentFolderContentDTO>(
-      `${this.BASE_PATH}/users/${userId}`
+      `${this.BASE_PATH}/users/${userId}${all ? "?all=true" : ""}`
     );
     return documentMapper.mapFolderContentDTO(dto);
+  }
+
+  /** A folder's icon and colour (documents-tab T03). */
+  public async updateFolderLook(userId: string, folderId: string, body: { icon: string | null; color: string | null }) {
+    return hrisApiClient.patch<DocumentFolderDTO, typeof body>(`${this.BASE_PATH}/users/${userId}/folders/${folderId}/look`, body);
   }
 
   public async getFolderContent(
@@ -182,6 +189,14 @@ export class HrisApiDocumentsClient {
 
     if (payload.visibility) {
       formData.append("visibility", payload.visibility);
+    }
+
+    if (payload.description) {
+      formData.append("description", payload.description);
+    }
+
+    if (payload.expiresOn) {
+      formData.append("expiresOn", payload.expiresOn);
     }
 
     return hrisApiClient.postForm<DocumentDTO>(

@@ -4,54 +4,60 @@ import {
   dateToISO,
   displayLocale,
   formatDisplayDate,
+  formatLongDate,
   formatShortDate,
   formatShortRange,
   isoToDate,
   resetDisplayPreferences,
   setDisplayPreferences,
   useDateFormatter,
+  weekStartsOnOf,
 } from "@/lib/date";
 import { withTestLocale } from "@/test/nextIntl";
 
 /**
  * The one place a date becomes text.
  *
- * Two rules are worth pinning above all: a calendar date is never moved by a zone, and an explicit
- * preference beats the browser's. The first is the reason `2026-03-12` does not read as the
- * eleventh to anybody west of Greenwich; the second is the whole point of the setting.
+ * Two rules are worth pinning above all: a calendar date is never moved by a zone, and the order is the
+ * company's, by its country — nobody chooses it and the browser has no say (DECISIONS.md § "The designers' Home
+ * fixes, round 1").
  */
 describe("formatDisplayDate", () => {
   afterEach(() => resetDisplayPreferences());
 
-  it("follows the browser until somebody chooses", () => {
-    // Whatever the runner's locale is, this is the behaviour every date had before the setting.
-    const browser = new Intl.DateTimeFormat(undefined, {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(isoToDate("2026-03-12"));
-
-    expect(formatDisplayDate("2026-03-12")).toBe(browser);
+  it("writes the European order by default, whatever the browser does", () => {
+    expect(formatDisplayDate("2026-03-12", { language: "en" })).toBe("12.03.2026");
+    expect(formatDisplayDate("2026-03-12", { language: "en", style: "medium" })).toBe("12 Mar 2026");
+    expect(formatDisplayDate("2026-03-12", { language: "en", style: "long" })).toBe("12 March 2026");
   });
 
-  it.each([
-    ["DMY", "12.03.2026"],
-    ["MDY", "03/12/2026"],
-    ["YMD", "2026-03-12"],
-  ] as const)("writes a calendar date as %s", (format, expected) => {
-    setDisplayPreferences({ dateFormat: format });
+  it("writes month first for a company in the US", () => {
+    setDisplayPreferences({ dateStyle: "US" });
 
-    expect(formatDisplayDate("2026-03-12")).toBe(expected);
+    expect(formatDisplayDate("2026-03-12", { language: "en" })).toBe("03/12/2026");
+    expect(formatDisplayDate("2026-11-18", { language: "en", style: "medium" })).toBe("Nov 18, 2026");
+    expect(formatDisplayDate("2026-11-18", { language: "en", style: "long" })).toBe("November 18, 2026");
+  });
+
+  it("takes the order the caller passes over the module's", () => {
+    expect(formatDisplayDate("2026-11-18", { language: "en", style: "medium", dateStyle: "US" })).toBe("Nov 18, 2026");
+  });
+
+  it("is never month first in Russian, even for a US company", () => {
+    setDisplayPreferences({ dateStyle: "US" });
+
+    expect(formatDisplayDate("2026-03-12", { language: "ru" })).toBe("12.03.2026");
+    expect(formatDisplayDate("2026-11-18", { language: "ru", style: "medium" })).toMatch(/^18 нояб/);
   });
 
   it("never moves a calendar date by a zone", () => {
     // Midnight UTC read in Auckland is already the next day, and in Honolulu the previous one. A
     // hire date is the same day for everybody, so neither may happen here.
-    setDisplayPreferences({ dateFormat: "YMD", timeZone: "Pacific/Auckland" });
-    expect(formatDisplayDate("2026-03-12")).toBe("2026-03-12");
+    setDisplayPreferences({ timeZone: "Pacific/Auckland" });
+    expect(formatDisplayDate("2026-03-12", { language: "en" })).toBe("12.03.2026");
 
-    setDisplayPreferences({ dateFormat: "YMD", timeZone: "Pacific/Honolulu" });
-    expect(formatDisplayDate("2026-03-12")).toBe("2026-03-12");
+    setDisplayPreferences({ timeZone: "Pacific/Honolulu" });
+    expect(formatDisplayDate("2026-03-12", { language: "en" })).toBe("12.03.2026");
   });
 
   it("reads an instant in the chosen zone", () => {
@@ -59,22 +65,21 @@ describe("formatDisplayDate", () => {
     // question `analysis/DATES_NUMBERS_TZ_ANALYSIS.md` § 4 asked, answered.
     const instant = "2026-03-12T23:30:00Z";
 
-    setDisplayPreferences({ dateFormat: "YMD", timeZone: "Europe/Warsaw" });
-    expect(formatDisplayDate(instant)).toBe("2026-03-13");
+    setDisplayPreferences({ timeZone: "Europe/Warsaw" });
+    expect(formatDisplayDate(instant, { language: "en" })).toBe("13.03.2026");
 
-    setDisplayPreferences({ dateFormat: "YMD", timeZone: "America/New_York" });
-    expect(formatDisplayDate(instant)).toBe("2026-03-12");
+    setDisplayPreferences({ timeZone: "America/New_York" });
+    expect(formatDisplayDate(instant, { language: "en" })).toBe("12.03.2026");
   });
 
   it("drops the year where the caller asks it to", () => {
-    setDisplayPreferences({ dateFormat: "DMY" });
-
     // Birthdays and anniversaries, where the attribute hides the year.
-    expect(formatDisplayDate("2026-03-12", { hideYear: true })).toBe("12.03");
+    expect(formatDisplayDate("2026-03-12", { hideYear: true, language: "en" })).toBe("12.03");
+    expect(formatDisplayDate("2026-03-12", { hideYear: true, language: "en", dateStyle: "US" })).toBe("03/12");
   });
 
   it("leaves an explicit locale alone", () => {
-    setDisplayPreferences({ dateFormat: "MDY" });
+    setDisplayPreferences({ dateStyle: "US" });
 
     // The escape hatch for a screen that has a reason. It must win, or it is not one.
     expect(formatDisplayDate("2026-03-12", { locale: "en-GB" })).toBe("12/03/2026");
@@ -108,8 +113,8 @@ describe("formatDisplayDate with an explicit language", () => {
     expect(formatDisplayDate("2026-11-12", { language: "ru", style: "medium" })).toMatch(/нояб/);
   });
 
-  it("writes a Russian month in a chosen format too — the order is the reader's, the words the page's", () => {
-    setDisplayPreferences({ dateFormat: "DMY" });
+  it("writes a Russian month for any company — the order is the company's, the words the page's", () => {
+    setDisplayPreferences({ dateStyle: "US" });
 
     expect(formatDisplayDate("2026-11-12", { language: "ru", style: "medium" })).toMatch(/нояб/);
   });
@@ -163,30 +168,66 @@ describe("useDateFormatter", () => {
 
 describe("the short style (C1)", () => {
   const today = new Date(2026, 10, 5);
+  const en = { today, language: "en" } as const;
+  const us = { today, language: "en", dateStyle: "US" } as const;
   afterEach(() => resetDisplayPreferences());
 
   it("drops the year of the current year and keeps it otherwise", () => {
-    setDisplayPreferences({ dateFormat: "DMY" });
-    expect(formatShortDate("2026-11-11", { today, language: "en" })).toBe("11 Nov");
-    expect(formatShortDate("2025-11-11", { today, language: "en" })).toBe("11 Nov 2025");
-    expect(formatShortDate("2026-11-11", { today, language: "en", weekday: true })).toBe("Wed, 11 Nov");
+    expect(formatShortDate("2026-11-11", en)).toBe("11 Nov");
+    expect(formatShortDate("2025-11-11", en)).toBe("11 Nov 2025");
+    expect(formatShortDate("2026-11-11", us)).toBe("Nov 11");
+    expect(formatShortDate("2025-11-11", us)).toBe("Nov 11, 2025");
   });
 
-  it("writes a span inside a month once, in the reader's order", () => {
-    setDisplayPreferences({ dateFormat: "DMY" });
-    expect(formatShortRange("2026-11-11", "2026-11-13", { today, language: "en", weekday: true })).toBe("Wed–Fri, 11–13 Nov");
-    setDisplayPreferences({ dateFormat: "MDY" });
-    expect(formatShortRange("2026-11-11", "2026-11-13", { today, language: "en", weekday: true })).toBe("Wed–Fri, Nov 11–13");
+  it("puts no comma after a European short weekday, and one after a US one", () => {
+    expect(formatShortDate("2026-11-18", { ...en, weekday: true })).toBe("Wed 18 Nov");
+    expect(formatShortDate("2026-11-18", { ...us, weekday: true })).toBe("Wed, Nov 18");
+  });
+
+  it("writes a span inside a month once, in the company's order", () => {
+    expect(formatShortRange("2026-11-25", "2026-11-27", en)).toBe("25–27 Nov");
+    expect(formatShortRange("2026-11-25", "2026-11-27", us)).toBe("Nov 25–27");
+    expect(formatShortRange("2026-11-25", "2026-11-27", { ...en, weekday: true })).toBe("Wed 25 – Fri 27 Nov");
+    expect(formatShortRange("2026-11-25", "2026-11-27", { ...us, weekday: true })).toBe("Wed, Nov 25 – Fri, Nov 27");
+  });
+
+  it("follows the module's order when the caller passes none", () => {
+    setDisplayPreferences({ dateStyle: "US" });
+    expect(formatShortRange("2026-11-25", "2026-11-27", en)).toBe("Nov 25–27");
   });
 
   it("writes both ends across months, and the year on both across years", () => {
-    setDisplayPreferences({ dateFormat: "DMY" });
-    expect(formatShortRange("2026-11-30", "2026-12-02", { today, language: "en" })).toBe("30 Nov – 2 Dec");
-    expect(formatShortRange("2026-12-28", "2027-01-03", { today, language: "en" })).toBe("28 Dec 2026 – 3 Jan 2027");
+    expect(formatShortRange("2026-11-30", "2026-12-02", en)).toBe("30 Nov – 2 Dec");
+    expect(formatShortRange("2026-11-30", "2026-12-02", us)).toBe("Nov 30 – Dec 2");
+    expect(formatShortRange("2026-12-28", "2027-01-03", en)).toBe("28 Dec 2026 – 3 Jan 2027");
+    expect(formatShortRange("2026-12-28", "2027-01-03", us)).toBe("Dec 28, 2026 – Jan 3, 2027");
   });
 
   it("reads a single day as one date", () => {
-    setDisplayPreferences({ dateFormat: "DMY" });
-    expect(formatShortRange("2026-11-11", "2026-11-11", { today, language: "en" })).toBe("11 Nov");
+    expect(formatShortRange("2026-11-11", "2026-11-11", en)).toBe("11 Nov");
+  });
+
+  it("is day first in Russian for a US company", () => {
+    expect(formatShortDate("2026-11-18", { today, language: "ru", dateStyle: "US" })).toMatch(/^18 нояб/);
+  });
+});
+
+describe("the long style", () => {
+  it("writes the full month, with the weekday where asked", () => {
+    expect(formatLongDate("2026-11-18", { language: "en" })).toBe("18 November 2026");
+    expect(formatLongDate("2026-11-18", { language: "en", dateStyle: "US" })).toBe("November 18, 2026");
+    expect(formatLongDate("2026-11-18", { language: "en", weekday: true, hideYear: true })).toBe("Wednesday, 18 November");
+    expect(formatLongDate("2026-11-18", { language: "en", weekday: true, hideYear: true, dateStyle: "US" }))
+      .toBe("Wednesday, November 18");
+  });
+});
+
+describe("the week start", () => {
+  it("counts the company's first day as Date.getDay() does, Monday when unknown", () => {
+    expect(weekStartsOnOf("SUNDAY")).toBe(0);
+    expect(weekStartsOnOf("MONDAY")).toBe(1);
+    expect(weekStartsOnOf("saturday")).toBe(6);
+    expect(weekStartsOnOf(undefined)).toBe(1);
+    expect(weekStartsOnOf("SOMEDAY")).toBe(1);
   });
 });

@@ -16,9 +16,9 @@ const request = (id: string, createdAt: string) => ({
   createdAt,
 });
 
-jest.mock("@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsAwaitingMe", () => ({
-  useTimeOffRequestsAwaitingMe: () => ({
-    data: [request("r1", "2026-11-01"), request("r2", "2026-11-02"), request("r3", "2026-11-03")],
+jest.mock("@/components/modules/notifications/hooks/useWaitingOnMe", () => ({
+  useWaitingOnMe: () => ({
+    data: { requests: [request("r1", "2026-11-01"), request("r2", "2026-11-02"), request("r3", "2026-11-03")] },
   }),
 }));
 jest.mock("@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest", () => ({

@@ -35,8 +35,8 @@ describe("contentSecurityPolicy", () => {
     expect(directive(policy, "base-uri")).toEqual(["'self'"]);
   });
 
-  it("talks only to its own host in production", () => {
-    expect(directive(contentSecurityPolicy("n", "production"), "connect-src")).toEqual(["'self'"]);
+  it("talks only to its own host in production, and may read back its own blobs (PdfViewer)", () => {
+    expect(directive(contentSecurityPolicy("n", "production"), "connect-src")).toEqual(["'self'", "blob:"]);
   });
 
   it("does not restrict form targets, so a provider's sign-in redirect still works", () => {

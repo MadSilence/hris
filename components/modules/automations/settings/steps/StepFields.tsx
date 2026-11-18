@@ -11,6 +11,7 @@ import { AssignFields, PolicyFields } from "./RecordSteps";
 import { SplitFields } from "./SplitFields";
 import { WaitFields } from "./WaitFields";
 import type { StepPartProps } from "./stepPartProps";
+import { allSteps } from "../../model/tree";
 
 /** The trigger's event, when it is one — it adds placeholders and "The approver". */
 export const eventOf = (definition: AutomationDefinition, catalog: AutomationCatalog): AutomationEventOption | null => {
@@ -19,9 +20,16 @@ export const eventOf = (definition: AutomationDefinition, catalog: AutomationCat
   return catalog.events.find((e) => e.value === trigger.event) ?? null;
 };
 
-/** The fields a text may insert: the catalogue's and the trigger event's, once each. */
+/**
+ * The fields a text may insert: the catalogue's and the trigger event's, once each — and "document", the signed
+ * document, when the automation sends one for signature (A05, Q-43).
+ */
 export const placeholdersOf = (definition: AutomationDefinition, catalog: AutomationCatalog): string[] => [
-  ...new Set([...(catalog.placeholders ?? []), ...(eventOf(definition, catalog)?.placeholders ?? [])]),
+  ...new Set([
+    ...(catalog.placeholders ?? []),
+    ...(eventOf(definition, catalog)?.placeholders ?? []),
+    ...(allSteps(definition).some((s) => s.type === "SIGN_DOCUMENT") ? ["document"] : []),
+  ]),
 ];
 
 const OwnFields: React.FC<StepPartProps> = (props) => {

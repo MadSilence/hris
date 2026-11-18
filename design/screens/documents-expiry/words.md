@@ -1,0 +1,588 @@
+# Words — documents-expiry
+
+Every string in each frame, in reading order, exactly as drawn (English, sentence case). The app sidebar and the profile header are left out (they are the existing chrome). Names, dates, file names and counts are sample data, not copy. The spec quotes the copy that matters; where they differ, the spec wins.
+
+
+## X01-List
+_X01 · Expires column: just the date — amber with an hourglass when it’s soon, red with a cross when it’s past, grey otherwise, — when none_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+
+## X02-ExpiringView
+_X02 · Expiring view: same five columns; expired first, then soonest_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Residence permit.pdf
+- 2 Nov 2026
+- Visible
+- 11 Nov 2024
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Work permit.pdf
+- 9 Dec 2026
+- 2 Jan 2025
+
+## F4-GroupedByFolder
+_F4 · Same five columns; All documents is grouped under folder headings_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Remote work agreement.pdf
+- 12 Mar 2024
+- Salary change 2025.pdf
+- Hidden
+- 1 Apr 2025
+- ID card — both sides.jpg
+- 1 Aug 2030
+- Payslip October 2026.pdf
+- 31 Oct 2026
+
+## X03-Menu
+_X03 · ⋯ — new item: Edit expiry date (the rest is the approved menu)_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Rename
+- Edit expiry date
+- Move to…
+- Move to trash
+
+## X04-EditDetails
+_X04 · Edit expiry date: one optional field_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Expiry date
+- Valid until
+- (optional)
+- Meryem and whoever manages her documents get a reminder 30 days before.
+- Remove date
+- Cancel
+- Save
+- March
+- Mo
+- Tu
+- We
+- Th
+- Fr
+- Sa
+- Su
+- Today
+- Clear
+
+## X04b-YearPicker
+_X04b · Click the year: the calendar shows a scrolling grid of years; picking one goes straight back to the days_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Expiry date
+- Valid until
+- (optional)
+- Meryem and whoever manages her documents get a reminder 30 days before.
+- Remove date
+- Cancel
+- Save
+- March
+- Today
+- Clear
+
+## X05-UploadExpiry
+_X05 · The approved upload (M3), one new optional field: Valid until_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Upload documents
+- To Meryem Alaoui’s documents
+- Drop files here
+- or
+- choose them
+- Visa 2026.pdf
+- 1.1 MB
+- Residence card — both sides.jpg
+- 2.3 MB
+- Folder
+- (optional)
+- No category
+- Valid until
+- No expiry date
+- Hidden from Meryem
+- Visible to Meryem
+- Only people with access to Meryem’s documents see them.
+- Cancel
+- Upload 2 files
+
+## X05b-UploadRequired
+_X05b · Only when the company made the date required for a category (Settings › Document categories)_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Upload documents
+- To Meryem Alaoui’s documents
+- Drop files here
+- or
+- choose them
+- Passport 2026.pdf
+- 2.1 MB
+- Folder
+- (optional)
+- Passport
+- Valid until
+- Pick a date
+- Your company asks for an expiry date on passports.
+- Hidden from Meryem
+- Visible to Meryem
+- Only people with access to Meryem’s documents see them.
+- Cancel
+- Upload
+
+## X06-Preview
+_X06 · The approved preview; the expiry shows in the line under the name_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- In the Identity folder
+- Visible to Meryem
+- Expires 26 Nov 2026
+- Move to trash
+- Download
+
+## X07-Category
+_X07 · Settings › Document categories: expiry required, reminder, default visibility_
+
+- Settings · People
+- Document categories
+- Add category
+- Passport
+- Expiry date required · remind 60 days before · visible to the person
+- Identity
+- Expiry date optional · remind 30 days before · uploader decides
+- Contracts
+- No expiry · hidden from the person
+- Certificates
+- Expiry date optional · remind 30 days before · visible to the person
+- Payslips
+- No expiry · visible to the person
+- Edit category
+- Name
+- Needs an expiry date
+- A file of this category can’t be uploaded without one.
+- Remind before it expires
+- days before
+- Don’t remind
+- The person and everyone who edits their documents get a notice and an email.
+- Who can see new files
+- Hidden from the person
+- Visible to the person
+- The uploader decides
+- Cancel
+- Save
+
+## X10-HomeWidget
+_X10 · Home widget “Expiring documents”: S · M · L for HR, M for the person, empty_
+
+- For people who manage documents · Small · Medium · Large
+- Expiring documents
+- All
+- expired
+- 4 more expire within 30 days
+- Expiring
+- documents
+- RA
+- Rūta Adomaitė
+- Residence permit.pdf
+- 2 Nov
+- MA
+- Meryem Alaoui
+- Passport.pdf
+- 26 Nov
+- JS
+- Jonas Stankus
+- Driving licence.jpg
+- 4 Dec
+- 2 Nov 2026
+- 26 Nov 2026
+- 4 Dec 2026
+- AS
+- Ana Silva
+- First aid certificate.pdf
+- 12 Dec 2026
+- TP
+- Tomas Petrauskas
+- Work permit.pdf
+- 15 Dec 2026
+- For the person · Medium · Empty
+- My documents
+- expires soon
+- Valid until 26 Nov
+- Upload the new one
+- Nothing expires soon
+- Documents show up here 30 days before.
+
+## X11-OwnView
+_X11 · Meryem sees the expiry of her own visible files_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025

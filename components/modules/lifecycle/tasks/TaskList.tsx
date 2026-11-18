@@ -27,6 +27,8 @@ import {
   type Task,
   type TaskComment,
 } from "@/models/lifecycle";
+import type { EnvelopeDTO } from "@/api/modules/signing/dto";
+import { SigningPill } from "@/components/modules/signing/components/SigningPanel";
 import { TaskMaterials, saveBlob } from "./TaskMaterials";
 import { TaskComments } from "./TaskComments";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -36,6 +38,8 @@ import { FilePickButton } from "@/components/modules/lifecycle/shared/FilePickBu
 
 type Props = {
   tasks: Task[];
+  /** A Sign task's signing, by its envelope — on a process page, to say how it stands or how it ended (A1). */
+  signingOf?: (envelopeId: string) => EnvelopeDTO | undefined;
   /** Show whose task it is — on a process page, where tasks belong to several people. */
   showAssignee?: boolean;
   /** Show whom it is about — in the Tasks tab, where tasks are about several people. */
@@ -71,7 +75,7 @@ type Props = {
  */
 export function TaskList({
   tasks, showAssignee, showSubject, viewerId, onCompleteAction, canComplete, isMine, onChangedAction, onEditAction,
-  onCancelAction, busyTaskId, preview,
+  onCancelAction, busyTaskId, preview, signingOf,
 }: Props) {
   return (
     <ul className="divide-y divide-divider rounded-control border border-divider">
@@ -90,6 +94,7 @@ export function TaskList({
           onCancelAction={onCancelAction}
           busy={busyTaskId === task.id}
           preview={preview}
+          signing={task.kind === "SIGN" && task.envelopeId ? signingOf?.(task.envelopeId) : undefined}
         />
       ))}
     </ul>
@@ -98,8 +103,10 @@ export function TaskList({
 
 function TaskRow({
   task, showAssignee, showSubject, viewerId, onCompleteAction, canComplete, mine, onChangedAction, onEditAction, onCancelAction, busy, preview,
+  signing,
 }: {
   task: Task;
+  signing?: EnvelopeDTO;
   showAssignee?: boolean;
   showSubject?: boolean;
   viewerId?: string;
@@ -144,7 +151,8 @@ function TaskRow({
           </Badge>
           {task.processType && <Badge variant="outline">{t(`processType.${task.processType}`)}</Badge>}
           {overdue && <StatusBadge status="pending" label={t("taskList.due")} size="sm" />}
-          {cancelled && <Badge variant="outline">{t("taskList.cancelled")}</Badge>}
+          {cancelled && !signing && <Badge variant="outline">{t("taskList.cancelled")}</Badge>}
+          {signing && <SigningPill envelope={signing} />}
           {waiting && (
             <Badge variant="outline" className="gap-1 text-tertiary">
               <Icon icon={HourglassIcon} size="sm" />
@@ -153,6 +161,16 @@ function TaskRow({
           )}
         </div>
         {task.description && <p className="mt-1 whitespace-pre-wrap text-body text-tertiary">{task.description}</p>}
+        {signing && signing.status === "DECLINED" && (() => {
+          const who = signing.signers.find((s) => s.status === "DECLINED");
+          return (
+            <p className="mt-1 text-hint text-status-declined-text">
+              {who?.declineReason
+                ? t("taskList.signingDeclined", { name: who.name, comment: who.declineReason })
+                : t("taskList.signingDeclinedNoComment", { name: who?.name ?? "" })}
+            </p>
+          );
+        })()}
         <p className="mt-1 text-hint text-tertiary">
           {[
             task.dueDate

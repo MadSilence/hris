@@ -4,6 +4,25 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-18** — **Home fixes, round 1 built** (`design-fixes-round-1`; what differs is the "Built" of `home`,
+  `home-edit` and `home-widgets`). For the package: **`SegmentedControl` has a small size** (`size="sm"`: a pill 28 high,
+  segments 24, 12/20, the picked one 500 — on Mist with level 0, on white with no shadow, on the band white 16 %) — Q-1's
+  control stays as built, and Who's out, Edit home's Color/Light and the size switch use the small one. New Home-only
+  type roles (`text-home-input` 18/26, `-badge-day` 18/26 500, `-day` 16/16, `-micro` 11/18 600, `-pill` 16 500) and
+  shadows (`--shadow-ai-box`, `--shadow-ai-box-open`); `--text-hero-l` is 52/52 and `--text-hero-s` 44/44. **`--band-tint`**
+  is Rose on Wine and the accent mixed into what sits on the band for any other colour — the package names it
+  `accent-tint`; put it in the next version. **Empty cells on Home are allowed** (each widget keeps its cell); **dates
+  follow the company's country** (US month first, everyone else day first; nobody picks it) and **weeks start on the
+  company's first day**. **To sign** is built; **My time stays out** (the owner). An approval's time-out reads **"Count as
+  declined"** (Q-2). "Red" is measured in OKLCH (Q-30). Q-29 — the nine presets — waits for your next package version.
+- **2026-11-18** — **The documents round built** (nine screens `built`; what differs is each spec's "Built"). New shared components to carry into the package: **`ColumnPicker`** (a header icon and a menu of checkboxes, tinted while a column is hidden), **`InlineRename`** (a preview's title that renames in place, the extension outside the field), **FolderTile** with its **Icon and color** window. **The selection bar is restyled product-wide** as you drew it — white, 48, a hairline and a shadow tinted with the company colour (`--shadow-selection`), above the list — so People's bar changed too. The Upload dialog (M3) is not redrawn yet.
+- **2026-11-18** — **The documents round taken in** (`handoffs/2026-11-17-documents`, nine screens `ready`). The
+  owner took it as drawn: everything it asks of the code is built as designed (`QUESTIONS.md` Q-31–Q-43, answered).
+  **Russian stays** in the product (Q-42), so every string of the round gets its Russian. **The drawn signature** is
+  in, the pad and the phone. **Templates are written in noddo's editor**, not uploaded (Q-44) — the Templates
+  round's brief follows. The round's product rules are in `rules/` now (`DESIGN_SYSTEM.md` §§ 4 and 7, `NAMING.md`
+  § 5, `FORMS_AND_FIELDS.md` § 7, `TABLES_AND_LISTS.md` § 3); the selection bar's earlier rule (Mist, in the
+  toolbar's place) is replaced by yours.
 - **2026-11-13** — **Appearance built** (`screens/sign-in-appearance`, `built`). The presets are the nine (Q-24);
   the package still has the old ten, so seven of the nine are derived in code meanwhile (Q-29). **A light accent writes
   Graphite, not Ink**, on its fill, product-wide. **A red workspace** (Cherry, Tangerine, a close "Your own") turns the

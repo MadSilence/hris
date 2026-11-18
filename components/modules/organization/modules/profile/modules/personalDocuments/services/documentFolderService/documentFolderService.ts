@@ -28,9 +28,10 @@ export class DocumentFolderService {
     );
   }
 
+  /** Every document of the person, the root's folders beside them (the tab's views, documents-tab). */
   public async getRootDocuments(userId: string): Promise<DocumentFolderContentDTO> {
     return internalApiClient.get<DocumentFolderContentDTO>(
-      `/documents/users/${userId}/folders/root`,
+      `/documents/users/${userId}/folders/root?all=true`,
     );
   }
 }

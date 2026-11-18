@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import { NotificationsInbox } from "./NotificationsInbox";
-import { useNotifications } from "@/components/modules/notifications/hooks/useNotifications";
+import { useInboxSummary, useNotificationPages } from "@/components/modules/notifications/hooks/useNotifications";
+import { showUndoToast } from "@/lib/feedback/undoToast";
 import { partialMock } from "@/test/types";
 import type { Notification } from "@/models/notifications";
 
@@ -13,11 +14,16 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(mockQuery),
 }));
 jest.mock("@/components/modules/notifications/components/NotificationActions", () => ({ NotificationActions: () => null }));
-jest.mock("@/components/modules/notifications/hooks/useNotifications", () => ({ useNotifications: jest.fn() }));
+jest.mock("@/components/modules/notifications/hooks/useNotifications", () => ({
+  useNotificationPages: jest.fn(),
+  useInboxSummary: jest.fn(() => ({ data: undefined })),
+}));
+jest.mock("@/lib/feedback/undoToast", () => ({ showUndoToast: jest.fn() }));
+const mockRemove = jest.fn();
 jest.mock("@/components/modules/notifications/hooks/useNotificationMutations", () => {
   const mutation = () => ({ mutate: jest.fn(), isPending: false });
   return {
-    useDeleteNotification: mutation,
+    useDeleteNotification: () => ({ mutate: mockRemove, isPending: false }),
     useMarkAllNotificationsRead: mutation,
     useMarkAllNotificationsSeen: mutation,
     useMarkNotificationRead: mutation,
@@ -25,8 +31,24 @@ jest.mock("@/components/modules/notifications/hooks/useNotificationMutations", (
   };
 });
 
-const answer = (over: Partial<ReturnType<typeof useNotifications>>) =>
-  jest.mocked(useNotifications).mockReturnValue(partialMock<ReturnType<typeof useNotifications>>(over));
+type Pages = ReturnType<typeof useNotificationPages>;
+/** The server answers one page with these lines (B5); nothing more to load. */
+const answer = ({ data, isLoading }: { data: Notification[] | undefined; isLoading: boolean }) =>
+  jest.mocked(useNotificationPages).mockReturnValue(
+    // A loading and a loaded result are different members of react-query's union; the test states only what it reads.
+    partialMock<Pages>({
+      data: data === undefined ? undefined : partialMock<NonNullable<Pages["data"]>>({ pages: [{ items: data, nextCursor: null }] }),
+      isLoading,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+    } as Partial<Pages>),
+  );
+
+beforeEach(() => {
+  // No summary yet: the counts fall back to what is loaded (the mocks are reset between tests).
+  jest.mocked(useInboxSummary).mockReturnValue(partialMock<ReturnType<typeof useInboxSummary>>({ data: undefined }));
+});
 
 describe("NotificationsInbox", () => {
   // WALK_QUESTIONS § 17: before the first answer nothing is known, least of all that nothing is unread.
@@ -103,5 +125,38 @@ describe("NotificationsInbox — Needs action (sitting 2, H5)", () => {
 
     expect(screen.getByRole("button", { name: /^All/ })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText(/Anna/)).toBeInTheDocument();
+  });
+});
+
+describe("NotificationsInbox — paging and delete (B5, B2)", () => {
+  beforeEach(() => {
+    mockQuery = "";
+    mockRemove.mockClear();
+    jest.mocked(showUndoToast).mockClear();
+  });
+
+  it("asks the server for the filter the URL names, and counts from its summary of the whole inbox", () => {
+    mockQuery = "filter=unread";
+    jest.mocked(useInboxSummary).mockReturnValue(
+      partialMock<ReturnType<typeof useInboxSummary>>({ data: { all: 120, unread: 7, starred: 1, needsAction: 3, categories: [] } }),
+    );
+    answer({ isLoading: false, data: [notification({ read: false })] });
+    render(<NotificationsInbox />);
+
+    expect(useNotificationPages).toHaveBeenCalledWith("unread", null);
+    expect(screen.getByRole("button", { name: /^All/ })).toHaveTextContent("120");
+    expect(screen.getByRole("button", { name: /Needs action/ })).toHaveTextContent("3");
+  });
+
+  it("hides a deleted line at once and deletes it only when the Undo window ends", () => {
+    answer({ isLoading: false, data: [notification({ id: "gone", params: { requesterName: "Deleted Dora" } })] });
+    render(<NotificationsInbox />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.queryByText(/Deleted Dora/)).not.toBeInTheDocument();
+    expect(mockRemove).not.toHaveBeenCalled();
+
+    jest.mocked(showUndoToast).mock.calls[0][0].onExpire?.();
+    expect(mockRemove).toHaveBeenCalledWith("gone");
   });
 });

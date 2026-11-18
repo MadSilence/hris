@@ -48,7 +48,9 @@ export const LEAVE_FOR_ROOT_ROUTE = "/leave-for-root";
 // signed in on, carrying a one-time token. Short because it is typed into nothing and scanned from a
 // phone camera, where every character is a pixel of the code.
 // `/unsubscribe` is an email's "Stop these emails" link: the signed token is the credential (EMAIL_NOTIFICATIONS_DESIGN.md § 9.2).
-const COMPANY_PUBLIC_PATHS = ["/invite", "/preboarding", "/confirm-email", "/m", "/unsubscribe", "/link-expired"];
+// `/sign` is a guest's signing page and their signed copy (documents-signing G09–G12): the link in the email is the
+// credential, and a guest has no account to sign in with.
+const COMPANY_PUBLIC_PATHS = ["/invite", "/preboarding", "/confirm-email", "/m", "/unsubscribe", "/link-expired", "/sign"];
 
 /** Where the app opens, and where signing in goes when nothing asked for somewhere else. */
 export const APP_HOME = "/dashboard";

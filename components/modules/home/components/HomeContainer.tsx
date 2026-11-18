@@ -32,6 +32,7 @@ export const HomeContainer: React.FC = () => {
   const { access, loading } = useAccess();
   const settings = useUserSettings();
   const [editing, setEditing] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
 
   // A held Approve or task done leaves when Home is left (DECISIONS.md § "The home redesign").
   useEffect(() => () => flushWrites(), []);
@@ -66,16 +67,22 @@ export const HomeContainer: React.FC = () => {
 
   return (
     <HomeRequestTimeOffProvider>
-      {/* The band runs under the page's own padding, edge to edge; Home's own padding is 56 (48 at 1280). */}
+      {/*
+        * The band runs under the page's own padding, edge to edge — always the full width of the page, never the
+        * container's. Home's own padding is 56 (48 at 1280); inside it the header and the grid share one container,
+        * the full width up to 1200 and centred beyond (the designers' Home fixes, Part 3). Narrow is the container
+        * under 1000 px: three columns, and the AI box under the greeting.
+        */}
       <div className="relative -mx-(--page-padding-narrow) -mt-(--page-padding-narrow) xl:-mx-(--page-padding) xl:-mt-(--page-padding)">
         <HomeBand style={header} />
-        <div className="relative mx-auto flex max-w-[1200px] flex-col px-14 pt-14 pb-14 max-[1281px]:px-12 max-[1281px]:pt-12">
+        <div className="relative px-14 pt-14 pb-14 max-[1281px]:px-12 max-[1281px]:pt-12">
+        <div className="@container mx-auto flex w-full max-w-[1200px] flex-col">
           <div className="flex justify-end">
-            <ProfileMenu style={header} onEditHome={openEdit} />
+            <ProfileMenu style={header} />
           </div>
-          <div className="mt-7 flex items-end justify-between gap-10 max-[1281px]:flex-col max-[1281px]:items-start max-[1281px]:gap-6">
-            <Greeting style={header} />
-            <AiBox onEditHome={openEdit} />
+          <div className="relative mt-7 flex items-end justify-between gap-10 @max-[999px]:flex-col @max-[999px]:items-start @max-[999px]:gap-6">
+            <Greeting style={header} faded={askOpen} />
+            <AiBox onEditHome={openEdit} onOpenChange={setAskOpen} />
           </div>
 
           <div className="mt-10">
@@ -83,8 +90,8 @@ export const HomeContainer: React.FC = () => {
               <div aria-hidden className="h-[344px]" />
             ) : (
               <WidgetGrid>
-                {placed.map(({ widget, size }) => (
-                  <WidgetCell key={widget.id} size={size}>
+                {placed.map(({ widget, size, col, row }) => (
+                  <WidgetCell key={widget.id} size={size} col={col} row={row}>
                     <ErrorBoundary>
                       <widget.Component size={size} />
                     </ErrorBoundary>
@@ -96,7 +103,7 @@ export const HomeContainer: React.FC = () => {
 
           {/* Never empty: Waiting on you cannot be removed and is everybody's (WALK_QUESTIONS § 35 (a)). */}
           {openEdit && (
-            <div className="mt-8 flex max-w-[1088px] justify-end">
+            <div className="mt-8 flex justify-end">
               <button
                 type="button"
                 onClick={openEdit}
@@ -110,6 +117,7 @@ export const HomeContainer: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
         </div>
       </div>
     </HomeRequestTimeOffProvider>

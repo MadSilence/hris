@@ -10,6 +10,7 @@ import {
   FolderOption,
   UploadDocumentForm,
   UploadDocumentFormValues,
+  type UploadFileStatus,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/UploadDocumentForm";
 
 export interface UploadDocumentModalProps {
@@ -19,6 +20,10 @@ export interface UploadDocumentModalProps {
   categories?: CategoryOption[];
   defaultFolderId?: string;
   defaultVisibility?: DocumentVisibility;
+  /** Files dropped before it opened (T07). */
+  initialFiles?: File[];
+  /** Each file's progress while it uploads (M3). */
+  statuses?: Record<string, UploadFileStatus>;
   /** Kept in the dialog rather than the console — a failed upload is otherwise silent. */
   errorMessage?: string | null;
   onCancelAction: () => void;
@@ -32,6 +37,8 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
   categories,
   defaultFolderId,
   defaultVisibility,
+  initialFiles,
+  statuses,
   errorMessage,
   onCancelAction,
   onConfirmAction,
@@ -51,7 +58,7 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
         if (!open) requestClose();
       }}
     >
-      <DialogContent hideClose className="sm:max-w-2xl">
+      <DialogContent hideClose className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>{t("documents.upload.title")}</DialogTitle>
           <DialogDescription>
@@ -67,6 +74,8 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
           categories={categories}
           defaultFolderId={defaultFolderId}
           defaultVisibility={defaultVisibility}
+          initialFiles={initialFiles}
+          statuses={statuses}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}
         />

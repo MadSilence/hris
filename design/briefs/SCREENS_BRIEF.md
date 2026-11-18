@@ -207,6 +207,9 @@ person; an approver who has left.
 
 ## A6. Notifications
 
+**The whole area — the inbox, every type, preferences, the emails and this page — is
+`NOTIFICATIONS_BRIEF.md` (2026-11-18); where the two differ, that brief is current.**
+
 **What exists**
 - A catalogue of notification types in code: each with its trigger, recipients, category (Approvals,
   Org changes, Policies, Documents, Tasks, System), channels and whether it is mandatory.

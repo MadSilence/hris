@@ -112,6 +112,16 @@ describe("a company colour close to a status colour", () => {
     expect(isRedAccent("#2e7d32")).toBe(false);
   });
 
+  it("measures red in OKLCH, with the designers' check values (Q-30)", () => {
+    expect(isRedAccent("#BE123C")).toBe(true); // Cherry
+    expect(isRedAccent("#C7501E")).toBe(true); // Tangerine
+    expect(isRedAccent("#E53935")).toBe(true);
+    expect(isRedAccent("#6E1630")).toBe(false); // Wine: too dark
+    expect(isRedAccent("#9B1B30")).toBe(false); // L 0.45
+    expect(isRedAccent("#F06A2A")).toBe(false); // hue 43
+    expect(isRedAccent("#C2185B")).toBe(false); // hue 6
+  });
+
   it("finds none of the nine close to Approved, and a custom green that is", () => {
     expect(ACCENT_GRID.filter((preset) => isCloseToApproved(preset))).toEqual([]);
     expect(isCloseToApproved("#047857")).toBe(true);

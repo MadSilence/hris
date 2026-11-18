@@ -32,6 +32,8 @@ export type WhosOut = {
   people: WhosOutPerson[];
   /** Rows the cap left out. */
   more: number;
+  /** WEEK only: leave starting in the two weeks after this one — "Upcoming" under the lanes (H12). */
+  upcoming?: WhosOutPerson[];
 };
 
 export type CelebrationKind = "BIRTHDAY" | "ANNIVERSARY" | "NEW_JOINER";
@@ -63,8 +65,18 @@ export type Celebrations = {
 /** A widget's size on Home's grid: Small 1 × 1, Medium 1 × 2, Large 2 × 2 (the home redesign). */
 export type HomeWidgetSize = "S" | "M" | "L";
 
-/** One widget in a person's own arrangement of home, in their order; `size` null is the widget's default. */
-export type HomeWidgetPlacement = { id: string; hidden: boolean; size?: HomeWidgetSize | null };
+/**
+ * One widget in a person's own arrangement of home; `size` null is the widget's default. `col` and `row` are the cell
+ * it was dropped on in the four-column grid, 1-based — null for an arrangement saved before cells existed, which is
+ * placed in its order (the designers' Home fixes, E15: empty cells are allowed).
+ */
+export type HomeWidgetPlacement = {
+  id: string;
+  hidden: boolean;
+  size?: HomeWidgetSize | null;
+  col?: number | null;
+  row?: number | null;
+};
 
 /** Home's header: the accent band (`COLOUR`, the default) or plain white (`LIGHT`). */
 export type HomeHeaderStyle = "COLOUR" | "LIGHT";

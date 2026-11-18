@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -11,7 +11,8 @@ import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
-import { useNotifications } from "@/components/modules/notifications/hooks/useNotifications";
+import { useInboxSummary, useNotificationPages } from "@/components/modules/notifications/hooks/useNotifications";
+import { showUndoToast } from "@/lib/feedback/undoToast";
 import {
   useDeleteNotification,
   useMarkAllNotificationsRead,
@@ -115,7 +116,6 @@ export const NotificationsInbox: FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { data: notifications, isLoading } = useNotifications();
 
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
@@ -136,7 +136,17 @@ export const NotificationsInbox: FC = () => {
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
   const [query, setQuery] = useState("");
 
-  const all = useMemo(() => notifications ?? [], [notifications]);
+  /* A page at a time (B5): the status and the category are asked of the server; the counts and the chips come from
+     its summary of the whole inbox, not from what happens to be loaded. */
+  const { data: summary } = useInboxSummary();
+  const pages = useNotificationPages(status, category === ALL_CATEGORIES ? null : category);
+  const isLoading = pages.isLoading;
+  /** Deleted, waiting out its Undo (B2): hidden here, sent when the toast ends. */
+  const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
+  const all = useMemo(
+    () => (pages.data?.pages ?? []).flatMap((page) => page.items).filter((n) => !hiddenIds.has(n.id)),
+    [pages.data, hiddenIds],
+  );
 
   /* The badge counts what has not been seen, and being on this page is seeing it: clear it when the inbox
      opens and again whenever a refetch brings something new while it is open. Items stay unread until
@@ -144,26 +154,55 @@ export const NotificationsInbox: FC = () => {
   const hasUnseen = all.some((n) => !n.seen);
   useEffect(() => {
     if (isLoading) return;
-    if (hasUnseen || notifications === undefined) markAllSeen.mutate();
+    if (hasUnseen || pages.data === undefined) markAllSeen.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasUnseen, isLoading]);
 
   const counts = useMemo(
     () => ({
-      all: all.length,
-      unread: all.filter((n) => !n.read).length,
-      starred: all.filter((n) => n.starred).length,
-      "needs-action": all.filter(needsAction).length,
+      all: summary?.all ?? all.length,
+      unread: summary?.unread ?? all.filter((n) => !n.read).length,
+      starred: summary?.starred ?? all.filter((n) => n.starred).length,
+      "needs-action": summary?.needsAction ?? all.filter(needsAction).length,
     }),
-    [all],
+    [summary, all],
   );
 
-  // Categories actually present in the data — no empty placeholder chips.
-  const categories = useMemo(() => {
-    const seen = new Set<string>();
-    for (const n of all) if (n.category) seen.add(n.category);
-    return [...seen].sort();
-  }, [all]);
+  // Categories actually present in the inbox — no empty placeholder chips.
+  const categories = summary?.categories ?? [];
+
+  /* Search reads the words on the screen, which only the browser composes — so a search keeps loading pages until the
+     whole inbox is in hand. An inbox is bounded (read lines are kept a year, B1). */
+  const searching = query.trim().length > 0;
+  useEffect(() => {
+    if (searching && pages.hasNextPage && !pages.isFetchingNextPage) void pages.fetchNextPage();
+  }, [searching, pages.hasNextPage, pages.isFetchingNextPage, pages]);
+
+  /** The end of the list: in view, the next page loads. */
+  const sentinel = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinel.current;
+    if (!node || !pages.hasNextPage) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting) && !pages.isFetchingNextPage) void pages.fetchNextPage();
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [pages.hasNextPage, pages.isFetchingNextPage, pages]);
+
+  const deleteWithUndo = (n: Notification) => {
+    setHiddenIds((prev) => new Set(prev).add(n.id));
+    showUndoToast({
+      message: t("inbox.deleted"),
+      onUndo: () =>
+        setHiddenIds((prev) => {
+          const next = new Set(prev);
+          next.delete(n.id);
+          return next;
+        }),
+      onExpire: () => remove.mutate(n.id),
+    });
+  };
 
   const filtered = useMemo(() => {
     let rows = all.filter((n) => matchesInboxFilter(n, status));
@@ -331,11 +370,13 @@ export const NotificationsInbox: FC = () => {
                   busy={busy}
                   onOpen={handleOpen}
                   onToggleStar={(x) => setStarred.mutate({ id: x.id, starred: !x.starred })}
-                  onDelete={(x) => remove.mutate(x.id)}
+                  onDelete={deleteWithUndo}
                 />
               ))}
             </div>
           ))}
+          {pages.isFetchingNextPage && <div className="h-20 shimmer rounded-control border border-divider bg-subtle" />}
+          <div ref={sentinel} aria-hidden className="h-px" />
         </div>
       )}
       </div>

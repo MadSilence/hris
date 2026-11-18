@@ -136,6 +136,7 @@ export function TaskSidePanel({ item, items, type, readOnly, onChange, onRemove,
           categoryId={item.categoryId}
           materials={item.materials}
           questions={item.questions}
+          templateId={item.templateId ?? null}
           disabled={readOnly}
           onChange={onChange}
         />

@@ -11,6 +11,8 @@ import { ThisWeekWidget } from "./ThisWeekWidget";
 import { MyTasksWidget } from "./MyTasksWidget";
 import { ProcessesWidget } from "./ProcessesWidget";
 import { AutomationsWidget } from "./AutomationsWidget";
+import { ExpiringDocumentsWidget } from "./ExpiringDocumentsWidget";
+import { ToSignWidget } from "./ToSignWidget";
 
 type HomeWidgetName = keyof Messages["home"]["widgets"];
 export type HomeWidgetTextKey = `widgets.${HomeWidgetName}.${"title" | "description"}`;
@@ -40,8 +42,9 @@ const can = (resource: Parameters<typeof canAccess>[0]["resource"], action: Para
   (access: EffectiveAccess | null) => canAccess({ access, resource, action });
 
 /**
- * Home's widgets (`home-widgets`), less My time and To sign, which the owner left out (DECISIONS.md § "The home
- * redesign"). The ids of the widgets that were on Home before keep their names, so a saved arrangement keeps them.
+ * Home's widgets (`home-widgets`), less My time, which the owner left out (DECISIONS.md § "The home redesign", kept on
+ * 2026-11-18). To sign arrived with e-signing (the designers' Home fixes, Q-7). The ids of the widgets that were on
+ * Home before keep their names, so a saved arrangement keeps them.
  */
 export const HOME_WIDGETS: HomeWidgetDefinition[] = [
   {
@@ -75,6 +78,17 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
     defaultSize: "S",
     isAvailable: can("PEOPLE.TIME_OFF", "VIEW"),
     Component: NextTimeOffWidget,
+  },
+  {
+    id: "to-sign",
+    titleKey: "widgets.toSign.title",
+    descriptionKey: "widgets.toSign.description",
+    category: "FOR_ME",
+    sizes: ["S", "M", "L"],
+    defaultSize: "S",
+    // Anybody may be asked to sign; the list is the reader's own (`/me/actions`).
+    isAvailable: everyone,
+    Component: ToSignWidget,
   },
   {
     id: "my-tasks",
@@ -125,6 +139,17 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
     defaultSize: "M",
     isAvailable: can("SETTINGS.AUTOMATIONS", "VIEW"),
     Component: AutomationsWidget,
+  },
+  {
+    id: "expiring-documents",
+    titleKey: "widgets.expiringDocuments.title",
+    descriptionKey: "widgets.expiringDocuments.description",
+    category: "COMPANY",
+    sizes: ["S", "M", "L"],
+    defaultSize: "M",
+    // The list's own read refuses without it; within the reader's scope — their own documents for the person (X11).
+    isAvailable: can("PEOPLE.DOCUMENTS", "VIEW"),
+    Component: ExpiringDocumentsWidget,
   },
 ];
 

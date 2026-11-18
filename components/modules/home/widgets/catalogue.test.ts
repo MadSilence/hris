@@ -38,9 +38,9 @@ const HR = accessWith({
 const ids = (access: EffectiveAccess | null) => availableWidgets(access).map((widget) => widget.id);
 
 describe("home's catalogue", () => {
-  it("offers an ordinary employee their own widgets and the company's — no HR ones, no My time, no To sign", () => {
+  it("offers an ordinary employee their own widgets and the company's — no HR ones, no My time", () => {
     expect(ids(DEFAULT_USER)).toEqual([
-      "waiting-on-you", "my-time-off", "next-time-off", "my-tasks", "whos-out", "celebrations",
+      "waiting-on-you", "my-time-off", "next-time-off", "to-sign", "my-tasks", "whos-out", "celebrations",
     ]);
   });
 

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { partsToISO, useDisplayLocale, useShortDates } from "@/lib/date";
+import { partsToISO, useDisplayLocale, useShortDates, useWeekStartsOn } from "@/lib/date";
 import type { ScheduleFrequency, TriggerSpec } from "@/models/automations";
 import { cn } from "@/lib/cn";
 import { CompactPick } from "../conditions/chrome";
@@ -78,7 +78,7 @@ const DayGrid: React.FC<{ value: number | null | undefined; onChange: (day: numb
   );
 };
 
-/** Mo–Su: several (a week) or one (a month's weekday). */
+/** The seven days from the company's first day of the week: several (a week) or one (a month's weekday). */
 const WeekdayButtons: React.FC<{ value: number[]; onChange: (days: number[]) => void; single?: boolean; label: string }> = ({
   value,
   onChange,
@@ -86,9 +86,15 @@ const WeekdayButtons: React.FC<{ value: number[]; onChange: (days: number[]) => 
   label,
 }) => {
   const tA = useTranslations("automations");
+  // ISO numbers (1 = Monday … 7 = Sunday), laid out from the company's first day (0 = Sunday as Date counts).
+  const weekStartsOn = useWeekStartsOn();
+  const days = React.useMemo(
+    () => WEEKDAYS.map((_, i) => (((weekStartsOn + 6 + i) % 7) + 1) as Weekday),
+    [weekStartsOn],
+  );
   return (
     <div role="group" aria-label={label} className="flex gap-1">
-      {WEEKDAYS.map((d: Weekday) => {
+      {days.map((d: Weekday) => {
         const picked = value.includes(d);
         return (
           <button

@@ -18,6 +18,7 @@ import { useInvalidateNotifications } from "@/components/modules/notifications/h
 import { useMarkNotificationRead } from "@/components/modules/notifications/hooks/useNotificationMutations";
 import { showError } from "@/lib/errors/errorToast";
 import { PublicHolidayDriftActions } from "@/components/modules/notifications/components/PublicHolidayDriftActions";
+import { TASK_SOURCE_TYPES, TaskSourceActions } from "@/components/modules/notifications/components/TaskSourceActions";
 
 type OutcomeKey =
   | "actions.outcomes.approved"
@@ -83,6 +84,11 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
   // A holiday drift asks a different question of a different domain; it has its own controls.
   if (notification.type === PUBLIC_HOLIDAY_DRIFT_TYPE) {
     return <PublicHolidayDriftActions notification={notification} />;
+  }
+
+  // A task, a signing, a review step: the line goes quiet when done, and one-click answers are given in place.
+  if (notification.source && TASK_SOURCE_TYPES.has(notification.source.type)) {
+    return <TaskSourceActions notification={notification} />;
   }
 
   const source = notification.source;

@@ -137,3 +137,21 @@ Every string in the frames, including example data, is in `words.md`.
   - **The empty home's action** is the empty state's primary button, as drawn in words.
   - **Waiting on you is on everybody's default, an employee's too** (answered 2026-11-14, `WALK_QUESTIONS.md` § 35 (a)); being locked, it is shown even where an older arrangement saved it hidden, so the empty home is no longer reached.
 - **Images of the real screen:** owed — the walk of 2026-11-11 ran with the window hidden (`(claude)/testing/OWNER_VISUAL_REVIEW.md` § 21).
+
+### The designers' fixes, round 1 (2026-11-18)
+
+Built from `design-fixes-round-1` (FIXES.md Parts 3 and 4.1; the owner's calls `(claude)/DECISIONS.md` § "The designers'
+Home fixes, round 1"). Where the text above disagrees, these win:
+
+- **Width (Part 3):** `main` keeps 56 either side; the header and the grid share one container, the full width up to
+  1200 and centred beyond; the band runs the full width of `main`. Narrow is the **container** under 1000 px (a container
+  query, not the window): 3 columns and the AI box under the greeting.
+- **Empty cells are allowed** — this replaces "Nothing ever leaves an empty hole" and the dense flow. Each widget keeps
+  the cell it was dropped on; a role's default is still packed without holes. Under 1000 px the cells are ignored and the
+  widgets are packed in reading order.
+- **AI box (H1, H16):** open, it takes the whole greeting row on the closed box's bottom line; the date and greeting fade
+  out in place (150 ms). The "Shift + Enter" hint is gone. Closed: the soft drop shadow only, the chip transparent 12/20.
+- **Date (H2):** "Wednesday, 18 November" — the company's date order (US: "Wednesday, November 18"), Rose on the band.
+- **Profile menu (H13):** no name header, no Edit home item; My profile · My time off · My documents ("{n} to sign") ·
+  My attendance — Personal settings — Log out. Edit home is only the button at the end of Home.
+- **My profile pill (H17):** 16 px 500.

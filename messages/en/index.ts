@@ -29,6 +29,7 @@ import peopleImport from "./peopleImport.json";
 import structure from "./structure.json";
 import hub from "./hub.json";
 import demo from "./demo.json";
+import signing from "./signing.json";
 
 const en = {
   common,
@@ -56,6 +57,7 @@ const en = {
   structure,
   hub,
   demo,
+  signing,
 };
 
 export default en;

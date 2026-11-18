@@ -146,6 +146,23 @@ function TaskBody({ token, task, onPageAction, preview }: {
     else setError(res.errorMessage ?? null);
   };
 
+  // A document to sign (documents-signing P08): the signing screen, on the same token, opens from here.
+  if (task.kind === "SIGN") {
+    return (
+      <div className="pl-8">
+        {preview ? (
+          <Button type="button" size="sm" disabled>
+            {t("taskKind.SIGN")}
+          </Button>
+        ) : (
+          <Button asChild size="sm">
+            <a href={`/preboarding/sign/${task.id}?token=${encodeURIComponent(token)}`}>{t("taskKind.SIGN")}</a>
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   if (task.kind === "QUESTIONNAIRE") {
     return (
       <div className="pl-8">

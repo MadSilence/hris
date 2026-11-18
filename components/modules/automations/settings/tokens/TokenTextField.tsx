@@ -45,6 +45,7 @@ const KNOWN = [
   "leaveDays",
   "processName",
   "processType",
+  "document",
 ] as const;
 type Known = (typeof KNOWN)[number];
 

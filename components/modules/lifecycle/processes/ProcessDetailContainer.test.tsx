@@ -12,6 +12,7 @@ jest.mock("@/components/providers/CurrentUserProvider/CurrentUserProvider", () =
   useCurrentUser: () => ({ userId: "me" }),
 }));
 jest.mock("@/components/modules/lifecycle/actions/lifecycleActions");
+jest.mock("@/components/modules/signing/hooks/useSigning", () => ({ useEnvelopesForPerson: () => ({ data: [] }) }));
 jest.mock("@/components/modules/lifecycle/hooks", () => ({
   useLifecycleProcess: jest.fn(),
   useInvalidateLifecycle: () => jest.fn(),

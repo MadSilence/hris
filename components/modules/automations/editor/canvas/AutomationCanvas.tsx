@@ -290,7 +290,7 @@ function CanvasInner(props: AutomationCanvasProps) {
           skipped: Boolean(step.skipped),
           edited: edited.has(step.id),
           needsDetails: needs.get(step.id) ?? null,
-          notConnected: step.type === "SIGN_DOCUMENT" || step.type === "SEND_SURVEY",
+          notConnected: step.type === "SEND_SURVEY",
           runState: runStates?.[step.id] ?? null,
           ariaLabel: t("canvas.cardLabel", { number: n.number ?? "", kind, title }),
           onClick: () => onSelectStep(step.id),

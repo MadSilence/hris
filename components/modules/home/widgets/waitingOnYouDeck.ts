@@ -2,6 +2,7 @@ import type { TimeOffRequest } from "@/models/timeOff";
 import type { Task } from "@/models/lifecycle";
 import type { AutomationsWeekRun } from "@/models/home";
 import type { AgreementRow } from "@/models/hub";
+import type { EnvelopeDTO } from "@/api/modules/signing/dto";
 
 /**
  * One card of *Waiting on you* (`home-widgets` § 1). Only the kinds that have a module today (DECISIONS.md § "The home
@@ -16,6 +17,8 @@ export type DeckCard =
   | { key: string; group: "DO"; kind: "REVIEW"; task: Task }
   /** A must-read page waiting for the reader's yes (COMPANY_HUB_DESIGN.md U3): read on its page, never agreed here. */
   | { key: string; group: "DO"; kind: "AGREE"; agreement: AgreementRow }
+  /** A document to sign that no task stands for — sent from a profile (A1); signing opens its screen. */
+  | { key: string; group: "DO"; kind: "SIGN"; envelope: EnvelopeDTO }
   | { key: string; group: "READ"; kind: "FAILED_RUN"; run: AutomationsWeekRun };
 
 export const REVIEW_KINDS = new Set<Task["kind"]>(["REVIEW", "NOMINATE_PEERS", "APPROVE_PEERS", "APPROVE_REVIEW"]);
@@ -26,6 +29,7 @@ export const cardKey = {
   task: (id: string) => `task:${id}`,
   run: (id: string) => `run:${id}`,
   agreement: (pageId: string) => `agree:${pageId}`,
+  envelope: (id: string) => `sign:${id}`,
 };
 
 /** The key a held write is kept under in Home's deferred queue — one per card that can be answered on Home. */
@@ -41,9 +45,15 @@ const byDueDate = (a: Task, b: Task) => {
   return a.title.localeCompare(b.title);
 };
 
-/** A Do card's date: a task's due date, a page's agree-by. None sorts last. */
+/** A Do card's date: a task's due date, a page's agree-by, a signing's last day. None sorts last. */
 const dueOf = (card: DeckCard): string | null =>
-  card.kind === "AGREE" ? card.agreement.dueOn : card.kind === "TASK" || card.kind === "REVIEW" ? card.task.dueDate : null;
+  card.kind === "AGREE"
+    ? card.agreement.dueOn
+    : card.kind === "SIGN"
+      ? card.envelope.expiresAt?.slice(0, 10) ?? null
+      : card.kind === "TASK" || card.kind === "REVIEW"
+        ? card.task.dueDate
+        : null;
 
 /** Two lists already in due order, merged into one; on the same day the task comes first. */
 const mergeByDue = (tasks: DeckCard[], agreements: DeckCard[]): DeckCard[] => {
@@ -68,6 +78,8 @@ export const buildDeck = (input: {
   failedRuns: AutomationsWeekRun[];
   /** The hub's pages waiting for the reader's yes (`GET /hub/agreements`, its `waiting` list). */
   agreements?: AgreementRow[];
+  /** Documents to sign that no task stands for (`/me/actions`, its `envelopes`). */
+  envelopes?: EnvelopeDTO[];
   skipped: readonly string[];
   held: ReadonlySet<string>;
   /** The held keys of tasks ticked done (My tasks shares them). */
@@ -98,7 +110,10 @@ export const buildDeck = (input: {
   const agreeCards: DeckCard[] = [...(input.agreements ?? [])]
     .sort((a, b) => (a.dueOn ?? "9999").localeCompare(b.dueOn ?? "9999"))
     .map((agreement): DeckCard => ({ key: cardKey.agreement(agreement.pageId), group: "DO", kind: "AGREE", agreement }));
-  const doing = mergeByDue(taskCards, agreeCards);
+  const signCards: DeckCard[] = [...(input.envelopes ?? [])]
+    .map((envelope): DeckCard => ({ key: cardKey.envelope(envelope.id), group: "DO", kind: "SIGN", envelope }))
+    .sort((a, b) => (dueOf(a) ?? "9999").localeCompare(dueOf(b) ?? "9999"));
+  const doing = mergeByDue(mergeByDue(taskCards, agreeCards), signCards);
   const reading: DeckCard[] = input.failedRuns.map((run): DeckCard => ({ key: cardKey.run(run.id), group: "READ", kind: "FAILED_RUN", run }));
 
   const all = [...decide, ...doing, ...reading];

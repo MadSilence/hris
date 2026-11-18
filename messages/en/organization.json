@@ -367,42 +367,46 @@
       "blankDescriptionEditable": "Contracts, IDs and certificates live here.\nDrop files here or upload them below.",
       "uploadFile": "Upload file",
       "newFolder": "New folder",
-      "noMatchTitle": "No documents match",
-      "noMatchHint": "Try a different search or filter.",
       "emptyFolderTitle": "This folder is empty",
-      "emptyFolderDescription": "Drop files here or use Add."
+      "emptyFolderDescription": "Drop files here or use Add.",
+      "add": "Add",
+      "uploadFiles": "Upload files",
+      "selectAll": "Select all {count}",
+      "noResultsTitle": "Nothing called “{query}”",
+      "noResultsHint": "Try a different word. Search looks in every folder.",
+      "loadFailed": "We couldn’t load the documents"
     },
     "emptyState": {
       "title": "No folders or files",
       "description": "This location is empty. Create a folder or upload a file to get started."
     },
     "folderCard": {
-      "actions": "Folder actions"
-    },
-    "toolbar": {
-      "starredOnly": "Show starred only",
-      "hrOnly": "Show HR-only documents",
-      "addFolder": "Add folder",
-      "uploadDocuments": "Upload documents"
+      "actions": "Folder actions",
+      "files": "{count, plural, one {# file} other {# files}}",
+      "uploadHere": "Upload here",
+      "rename": "Rename",
+      "look": "Icon and color",
+      "delete": "Delete folder"
     },
     "table": {
       "category": "Category",
       "visibility": "Visibility",
       "size": "Size",
       "uploaded": "Uploaded",
-      "hrOnly": "HR only",
-      "employee": "Employee",
       "star": "Star",
       "unstar": "Unstar",
       "actions": "Document actions",
       "move": "Move",
-      "changeVisibility": "Change visibility",
       "movedToTrash": "{name} moved to the trash",
       "visibilityFailed": "Could not change who can see it.",
       "selectAll": "Select all",
       "select": "Select {name}",
       "batchFailed": "Could not do that to the selection.",
-      "movedManyToTrash": "{count, plural, one {# document} other {# documents}} moved to the trash"
+      "movedManyToTrash": "{count, plural, one {# document} other {# documents}} moved to the trash",
+      "whoCanSee": "Who can see",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "moveToTrash": "Move to trash"
     },
     "trash": {
       "restoreFailed": "Failed to restore",
@@ -460,8 +464,9 @@
     },
     "preview": {
       "readOnly": "Read-only preview.",
-      "readOnlyWithCategory": "{category} · Read-only preview.",
-      "downloadInstead": "Download instead"
+      "downloadInstead": "Download instead",
+      "renamed": "Renamed",
+      "validUntil": "Valid until {date}"
     },
     "purge": {
       "title": "Delete forever",
@@ -486,11 +491,37 @@
       "removeFile": "Remove {name}",
       "folder": "Folder",
       "visibility": "Who can see this",
-      "visibilityHrOnly": "HR only — hidden from the employee",
-      "visibilityEmployee": "Visible to the employee — read-only for them",
       "category": "Category",
       "selectCategory": "Select category",
-      "submit": "{count, plural, =0 {Upload} =1 {Upload} other {Upload # files}}"
+      "submit": "{count, plural, =0 {Upload} =1 {Upload} other {Upload # files}}",
+      "uploading": "Uploading…",
+      "waiting": "Waiting",
+      "done": "Uploaded"
+    },
+    "folders": "Folders",
+    "views": {
+      "label": "Show",
+      "LOOSE": "Not in a folder",
+      "ALL": "All documents",
+      "STARRED": "Starred",
+      "EXPIRING": "Expiring"
+    },
+    "folderLook": {
+      "title": "Icon and color",
+      "icon": "Icon",
+      "color": "Color",
+      "icons": {
+        "folder": "Folder",
+        "briefcase": "Briefcase",
+        "shield": "Shield",
+        "heart": "Health",
+        "file": "Page",
+        "book": "Book",
+        "building": "Building",
+        "calendar": "Calendar",
+        "people": "People",
+        "laptop": "Laptop"
+      }
     }
   },
   "views": {

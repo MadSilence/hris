@@ -80,8 +80,7 @@ export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: St
       rows.push({ icon: BeachIcon, value: w.stepTitle(step), caption: t("policy.label") });
       break;
     case "SIGN_DOCUMENT":
-      rows.push({ icon: SignatureIcon, value: w.stepTitle(step), caption: t("sign.documents") });
-      rows.push({ icon: UserIcon, value: who(step.assignee ? w.recipient(step.assignee) : null), caption: t("read.signs") });
+      rows.push({ icon: SignatureIcon, value: w.stepTitle(step), caption: t("sign.template") });
       break;
     case "SEND_SURVEY":
       rows.push({ icon: NoteEditIcon, value: w.stepTitle(step), caption: t("survey.name") });
@@ -114,9 +113,7 @@ export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: St
   return (
     <div className="flex flex-col gap-4">
       <ReadRows rows={rows} />
-      {(step.type === "SIGN_DOCUMENT" || step.type === "SEND_SURVEY") && (
-        <MistNote>{t(step.type === "SIGN_DOCUMENT" ? "notConnected.documents" : "notConnected.surveys")}</MistNote>
-      )}
+      {step.type === "SEND_SURVEY" && <MistNote>{t("notConnected.surveys")}</MistNote>}
     </div>
   );
 };

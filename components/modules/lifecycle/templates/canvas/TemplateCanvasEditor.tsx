@@ -136,6 +136,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   const guard = useUnsavedChangesGuard(dirty);
 
   const items = useMemo(() => draft?.items ?? [], [draft]);
+  const misplacedSign = readOnly ? undefined : items.find((i) => i.kind === "SIGN" && i.assigneeKind !== "TARGET");
   const lanes = useMemo(() => deriveLanes(items, t, extraLanes, type), [items, t, extraLanes, type]);
   const axis = useMemo(() => buildAxis(items, t, type), [items, t, type]);
   const layout = useMemo(() => layoutTemplate(items, lanes, axis), [items, lanes, axis]);
@@ -190,7 +191,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
     }));
   }, [items, setItems, t]);
 
-  const addTask = useCallback((laneId: string, timing: Pick<DraftItem, "dueKind" | "offsetDays">, title: string, kind: TaskKind) => {
+  const addTask = useCallback((laneId: string, timing: Pick<DraftItem, "dueKind" | "offsetDays">, title: string, kind: TaskKind,
+    templateId: string | null = null) => {
     const lane = laneById(laneId);
     const item: DraftItem = {
       key: newItemKey(),
@@ -203,6 +205,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       categoryId: null,
       materials: [],
       questions: [],
+      templateId,
       waitsFor: [],
     };
     setItems((list) => [...list, item]);
@@ -400,11 +403,19 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
         {!readOnly && <p className="text-body text-tertiary">{t("editor.howTo")}</p>}
       </div>
 
-      {((saveState === "failed" && saveError) || notice || refusal || archived) && (
+      {((saveState === "failed" && saveError) || notice || refusal || archived || misplacedSign) && (
         <div className="space-y-2 px-8">
           {/* A draft that cannot be saved yet says nothing — it is half-typed, and the panel shows what is
               missing; only a save the server refused is an error. */}
           {saveState === "failed" && <FormError message={saveError} />}
+          {/* …except a Sign task out of the person's lane: nothing is half-typed, the move shows as made, and the
+              save waits for good (walk of 2026-11-18). Said here, so it reads the same after a drag as after the
+              panel's Done by. */}
+          {misplacedSign && (
+            <p role="alert" className="text-body text-status-pending-text">
+              {t("draftProblems.signByPerson", { title: misplacedSign.title.trim() })}
+            </p>
+          )}
           {archived && (
             <p className="text-body text-tertiary">{t("editor.archivedNote")}</p>
           )}
@@ -498,8 +509,8 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
       <AddTaskDialog
         open={quickAdd !== null && quickAddLane !== null && quickAddTiming !== null}
         where={quickAddLane && quickAddTiming ? t("editor.where", { lane: quickAddLane.label, day: dayLabel(quickAddTiming, t, type) }) : ""}
-        onAddAction={({ title, kind }) => {
-          if (quickAdd && quickAddTiming) addTask(quickAdd.laneId, quickAddTiming, title, kind);
+        onAddAction={({ title, kind, templateId }) => {
+          if (quickAdd && quickAddTiming) addTask(quickAdd.laneId, quickAddTiming, title, kind, templateId ?? null);
         }}
         onCancelAction={() => setQuickAdd(null)}
       />

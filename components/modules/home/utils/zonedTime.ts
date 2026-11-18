@@ -34,10 +34,6 @@ export const timeInZone = (now: Date, zone: string | null | undefined, locale?: 
     ...(zone ? { timeZone: safeZone(zone) } : {}),
   }).format(now);
 
-/** The weekday of a calendar date, in the reader's own locale. A calendar date is never moved by a zone. */
-export const weekdayOf = (iso: string, locale?: string): string =>
-  new Intl.DateTimeFormat(locale ?? displayLocale(), { weekday: "long", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00Z`));
-
 /** The part of the day a greeting names — the `part` of `home.greeting.line`. */
 export const greetingFor = (hour: number): "morning" | "afternoon" | "evening" =>
   hour < 5 ? "evening" : hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";

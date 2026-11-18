@@ -6,6 +6,7 @@ import { automationCatalogFixture, definitionFixture } from "@/test/fixtures/aut
 import { StepFields } from "./StepFields";
 
 jest.mock("@/components/modules/automations/settings/conditions/chrome", () => jest.requireActual("@/test/automationPickersMock"));
+jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
 jest.mock("@/components/hooks/useReferenceOptions", () => jest.requireActual("@/test/automationSettingsMocks").referenceOptions);
 jest.mock("@/components/modules/organization/hooks/useUserFields", () => jest.requireActual("@/test/automationSettingsMocks").userFields);
 jest.mock("@/components/auth/useAccess", () => jest.requireActual("@/test/automationSettingsMocks").access);
@@ -17,6 +18,16 @@ jest.mock("@/components/modules/settings/modules/time/publicHolidays/hooks/usePu
   jest.requireActual("@/test/automationSettingsMocks").holidayCalendars);
 jest.mock("@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies", () =>
   jest.requireActual("@/test/automationSettingsMocks").timeOffPolicies);
+
+jest.mock("@/components/modules/signing/hooks/useDocumentsSection", () => ({
+  useDocumentTemplates: () => ({
+    isLoading: false,
+    data: [{
+      id: "tpl-1", name: "Employment contract", isActive: true, envelopeExpiryDays: 30, problems: [],
+      signers: [{ key: "employee", kind: "PERSON", order: 1 }, { key: "manager", kind: "MANAGER", order: 2 }],
+    }],
+  }),
+}));
 
 const catalog = automationCatalogFixture();
 
@@ -79,17 +90,26 @@ describe("StepFields", () => {
     const seen = renderStep({ id: "s1", type: "REQUEST_APPROVAL", assignee: { kind: "MANAGER" }, maxDays: 3, ifNoAnswer: "ASK_THEIR_MANAGER" });
     fireEvent.change(screen.getByLabelText("What happens then"), { target: { value: "DECLINE" } });
     expect(seen.step.ifNoAnswer).toBe("DECLINE");
-    expect(screen.getByRole("option", { name: "Treat it as declined" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Count as declined" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Remind them every day" }));
     expect(seen.step.remindDaily).toBe(true);
   });
 
   it("Wait until: with no task above, waiting for a task is disabled and says why", () => {
     const seen = renderStep({ id: "s1", type: "WAIT_UNTIL", until: "TASK_DONE", maxDays: 10, onTimeout: "STOP" });
-    expect(screen.getByRole("radio", { name: /A task from this run is done/ })).toBeDisabled();
-    expect(screen.getByText("Add a “Create a task” step before this one.")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /A task or signing from this run is done/ })).toBeDisabled();
+    expect(screen.getByText("Add a “Create a task” or “Send for signature” step before this one.")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Field"), { target: { value: "attr:a-contact" } });
     expect(seen.step).toMatchObject({ until: "FIELD_FILLED", field: "attr:a-contact" });
+  });
+
+  it("Wait until: a signing step above it is offered as \"… is signed\", with what signed means", () => {
+    const sign: StepSpec = { id: "g1", type: "SIGN_DOCUMENT", documents: ["tpl-1"], title: "Employment contract" };
+    const wait: StepSpec = { id: "w1", type: "WAIT_UNTIL", until: "TASK_DONE", maxDays: 30, onTimeout: "STOP" };
+    const seen = renderStep(wait, { definition: definitionFixture({ steps: [sign, wait] }) });
+    fireEvent.change(screen.getByLabelText("Task"), { target: { value: "g1" } });
+    expect(seen.step.taskStepId).toBe("g1");
+    expect(screen.getByText(/Declined or cancelled counts as not signed/)).toBeInTheDocument();
   });
 
   it("Wait until: a task step above it is offered, and Stop and tell someone opens Tell", () => {
@@ -139,13 +159,15 @@ describe("StepFields", () => {
     expect(seen.step.dueDays).toBe(21);
   });
 
-  it("Ask to sign a document: documents by name, and the note that it is not connected", () => {
+  it("Send for signature: one template, its name the step's title; who signs and the time from the template", () => {
     const seen = renderStep({ id: "s1", type: "SIGN_DOCUMENT" });
-    const docs = screen.getByRole("textbox", { name: "Documents" });
-    fireEvent.change(docs, { target: { value: "Handbook" } });
-    fireEvent.keyDown(docs, { key: "Enter" });
-    expect(seen.step.documents).toEqual(["Handbook"]);
-    expect(screen.getByText(/Not connected yet/)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Template/), { target: { value: "tpl-1" } });
+    expect(seen.step.documents).toEqual(["tpl-1"]);
+    expect(seen.step.title).toBe("Employment contract");
+    expect(screen.getByText("The person")).toBeInTheDocument();
+    expect(screen.getByText("Their manager")).toBeInTheDocument();
+    expect(screen.getByText("30 days · from the template")).toBeInTheDocument();
+    expect(screen.queryByText(/Not connected yet/)).not.toBeInTheDocument();
   });
 
   it("Send a survey: the survey's name", () => {

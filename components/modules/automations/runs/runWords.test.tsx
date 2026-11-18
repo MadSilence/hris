@@ -10,7 +10,7 @@ const words = () => renderHook(() => useRunWords()).result.current;
 const year = new Date().getFullYear();
 
 // Day before month, as the frames write dates.
-beforeAll(() => setDisplayPreferences({ dateFormat: "DMY" }));
+beforeAll(() => setDisplayPreferences({ dateStyle: "EUROPEAN" }));
 afterAll(() => resetDisplayPreferences());
 
 describe("a reason as a sentence", () => {

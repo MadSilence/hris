@@ -179,7 +179,7 @@ export const RequestTimeOffModal: FC<Props> = ({
     if (r.from && r.to) setPickerOpen(false);
   };
 
-  // Both ends in full, as the owner's specification writes it: "Wed, 11 Nov – Fri, 13 Nov".
+  // Both ends in full, each with its weekday, in the company's order: "Wed 11 Nov – Fri 13 Nov", "Wed, Nov 11 – Fri, Nov 13".
   const dateLabel = startDate
     ? endDate && endDate !== startDate
       ? `${shortDates.date(startDate, { weekday: true })} – ${shortDates.date(endDate, { weekday: true })}`

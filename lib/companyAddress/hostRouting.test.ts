@@ -87,7 +87,7 @@ describe("routeForHost — a company's address", () => {
     });
   });
 
-  it.each(["/invite", "/confirm-email", "/preboarding", "/link-expired"])(
+  it.each(["/invite", "/confirm-email", "/preboarding", "/link-expired", "/sign/abc", "/sign/copy/abc", "/m/sign"])(
     "opens %s without a session — the link in the email is the credential",
     (path) => {
       expect(routeForHost(acme, path, "?token=x", SIGNED_OUT)).toEqual({ type: "next" });

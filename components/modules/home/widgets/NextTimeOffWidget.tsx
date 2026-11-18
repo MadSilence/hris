@@ -33,16 +33,19 @@ const daysBetween = (from: string, to: string) =>
 
 type Next = { kind: "LEAVE" | "HOLIDAY"; start: string; end: string; name: string | null; amount: number | null; href: string };
 
-/** The calendar leaf in the top right of the Small one: the month in the accent, the day under it. */
+/**
+ * The calendar leaf in the top right of the Small one (H7): 42 × 46, radius 12 — the month 11/18 600 in the accent on
+ * its soft tint, the day under it in Inter Tight 18/26 500.
+ */
 const CalendarLeaf: React.FC<{ date: string }> = ({ date }) => {
   const locale = useDisplayLocale();
   const d = new Date(`${date}T12:00:00Z`);
   return (
-    <span className="flex w-9 shrink-0 flex-col items-center overflow-hidden rounded-control border border-divider bg-card" aria-hidden>
-      <span className="w-full bg-accent-subtle text-center text-hint font-semibold text-accent-text">
+    <span className="flex h-[46px] w-[42px] shrink-0 flex-col items-center overflow-hidden rounded-tint border border-divider bg-card" aria-hidden>
+      <span className="w-full bg-accent-subtle text-center text-home-micro text-accent-text">
         {new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }).format(d)}
       </span>
-      <span className="text-card-title text-primary">{d.getUTCDate()}</span>
+      <span className="text-home-badge-day text-primary">{d.getUTCDate()}</span>
     </span>
   );
 };
@@ -107,7 +110,7 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
           line={t("nextTimeOff.emptyLine")}
           action={
             requestTimeOff && size !== "S" ? (
-              <Button type="button" variant="secondary" size="sm" disabled={preview} onClick={requestTimeOff}>
+              <Button type="button" variant="secondary" size="md" tabIndex={preview ? -1 : undefined} onClick={requestTimeOff}>
                 {t("nextTimeOff.requestTimeOff")}
               </Button>
             ) : undefined
@@ -134,6 +137,7 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
         size={size === "S" ? "s" : "xxl"}
         value={until}
         word={t("nextTimeOff.daysTo", { count: until, what })}
+        wordClassName={size === "S" ? "text-label font-normal" : undefined}
         className={size === "S" ? "flex-wrap whitespace-normal" : "flex-col items-start gap-0"}
       />
     );

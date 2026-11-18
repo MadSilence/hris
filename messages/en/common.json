@@ -287,5 +287,16 @@
   "selection": {
     "selected": "{count} selected",
     "clear": "Clear selection"
+  },
+  "columns": {
+    "pick": "Columns",
+    "title": "Show columns"
+  },
+  "pdf": {
+    "page": "{current} / {total}",
+    "pageLabel": "Page {n}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "failed": "We couldn’t show this document. Download it instead."
   }
 }

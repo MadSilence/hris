@@ -319,7 +319,7 @@ export const automationWords = (d: WordsDeps) => {
       case "START_REVIEW":
         return names.form(step.formId) ?? stepKind(step);
       case "SIGN_DOCUMENT":
-        return step.documents?.length ? d.list(step.documents) : stepKind(step);
+        return step.title?.trim() || stepKind(step);
       case "SEND_SURVEY":
         return step.survey?.trim() || stepKind(step);
       case "SPLIT":
@@ -364,9 +364,6 @@ export const automationWords = (d: WordsDeps) => {
       case "START_REVIEW":
         if (step.assignee) parts.push(t("words.step.by", { who: recipient(step.assignee) }));
         if (step.dueDays != null) parts.push(t("words.step.dueIn", { days: step.dueDays }));
-        break;
-      case "SIGN_DOCUMENT":
-        if (step.assignee) parts.push(t("words.step.signedBy", { who: recipient(step.assignee) }));
         break;
       case "SEND_SURVEY": {
         const who = recipients(step.recipients);

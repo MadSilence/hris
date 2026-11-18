@@ -1,0 +1,570 @@
+# Words — documents-requests
+
+Every string in each frame, in reading order, exactly as drawn (English, sentence case). The app sidebar and the profile header are left out (they are the existing chrome). Names, dates, file names and counts are sample data, not copy. The spec quotes the copy that matters; where they differ, the spec wins.
+
+
+## R01-Menu
+_R01 · ⋯ on a file that expires soon or has expired: Request the new one_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Rename
+- Edit expiry date
+- Request the new one
+- Move to…
+- Move to trash
+
+## R01b-Preview
+_R01b · In the preview: Request the new one sits on the expiry line_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- In the Identity folder
+- Visible to Meryem
+- Expires 26 Nov 2026
+- Request the new one
+- Move to trash
+- Download
+
+## R02-RequestFile
+_R02 · Request the new one: who uploads it, an optional due date, a note written for you; what happens next is said by the button_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Request the new one
+- Passport.pdf · expires 26 Nov 2026
+- Who should upload it
+- MA
+- Meryem Alaoui
+- Due by
+- (optional)
+- No due date
+- Note
+- Your passport expires on 26 Nov 2026. Please upload the new one.
+- Meryem gets a task and a notification. The task closes by itself when she uploads the file.
+- Cancel
+- Send request
+
+## R03-WhoPicker
+_R03 · Who should upload it: the person first, then anyone in the company_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Request the new one
+- Passport.pdf · expires 26 Nov 2026
+- Who should upload it
+- MA
+- Meryem Alaoui
+- Due by
+- (optional)
+- No due date
+- Note
+- Your passport expires on 26 Nov 2026. Please upload the new one.
+- Meryem gets a task and a notification. The task closes by itself when she uploads the file.
+- Cancel
+- Send request
+- The person
+- People
+- LN
+- Lena Novak
+- People partner · Vilnius
+- IK
+- Inga Kazlauskė
+- Payroll · Vilnius
+- JS
+- Jonas Stankus
+- Engineering · Kaunas
+
+## R04-Sent
+_R04 · Sent: a toast with Undo; Meryem gets a task and a notice_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Request sent to Meryem
+- Undo
+
+## R05-RequestButton
+_R05 · One Request button next to Add — for a new copy of an expiring file or for something new_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+
+## R06-RequestGeneral
+_R06 · Request: tick the documents to replace, like in the list; “Something else” for anything new_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Request documents
+- From Meryem Alaoui
+- What should Meryem upload
+- Replace a document
+- Something else
+- Anything new
+- Who should upload it
+- MA
+- Meryem Alaoui
+- Due by
+- (optional)
+- No due date
+- Note
+- Your passport expires on 26 Nov 2026 and your residence permit expired on 2 Nov 2026. Please upload the new ones.
+- Meryem gets a task and a notification. The task closes by itself when she uploads the file.
+- Cancel
+- Send request
+
+## R06b-SomethingElse
+_R06b · Something else: type what you need; it becomes the task “Upload: Medical certificate”_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Request
+- Add
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Training
+- 2 files
+- Not in a folder
+- All documents
+- Starred
+- Expiring
+- Name
+- Category
+- Expires
+- Who can see
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- Visible
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+- Equipment handover.xlsx
+- Hidden
+- 15 Jul 2024
+- Confirmation of completed onboarding training — information security and data protection 2026.pdf
+- 20 Jul 2024
+- Request documents
+- From Meryem Alaoui
+- What should Meryem upload
+- Replace a document
+- Something else
+- Medical certificate
+- Who should upload it
+- MA
+- Meryem Alaoui
+- Due by
+- (optional)
+- No due date
+- Note
+- Please upload your medical certificate.
+- Meryem gets a task and a notification. The task closes by itself when she uploads the file.
+- Cancel
+- Send request
+
+## R07-PersonSide
+_R07 · Meryem’s side: the request on top of her tab — what, who asked, when, the note apart_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Upload your new passport
+- LN
+- Asked by Lena Novak
+- Due 23 Nov
+- Your passport expires on 26 Nov 2026. Please upload the new one.
+- Upload
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Name
+- Category
+- Expires
+- Uploaded
+- Passport.pdf
+- 26 Nov 2026
+- 3 Feb 2024
+- Residence permit.pdf
+- 2 Nov 2026
+- 11 Nov 2024
+- Employment contract.pdf
+- 14 Jul 2024
+- Driving licence.jpg
+- 14 Mar 2031
+- First aid certificate.pdf
+- Certificates
+- 8 Sep 2027
+- 9 Sep 2025
+
+## R08-PersonUpload
+_R08 · Meryem uploads for the request: no folder, no category — they come from the request; only the optional date_
+
+- [profile header and tabs]
+- Search
+- Trash
+- Add
+- Upload your new passport
+- LN
+- Asked by Lena Novak
+- Due 23 Nov
+- Your passport expires on 26 Nov 2026. Please upload the new one.
+- Upload
+- Folders
+- Contracts
+- 4 files
+- Identity
+- 3 files
+- Payslips
+- 28 files
+- Upload documents
+- To your documents
+- For Lena’s request: your new passport
+- Drop files here
+- or
+- choose them
+- Passport 2026.pdf
+- 2.1 MB
+- Valid until
+- (optional)
+- Pick a date
+- Saved with your Identity documents
+- Cancel
+
+## R09-HomeCard
+_R09 · On Home: a “Do” card in the Waiting on you deck — the due date is the main line, as on every Do card_
+
+- Home · Waiting on you · a “Do” card: a document to upload
+- Waiting on you
+- Inbox
+- 1 of 3
+- New passport
+- from Lena Novak · to upload
+- Today
+- Due Mon, 23 Nov
+- Your passport expires on 26 Nov 2026. Please upload the new one.
+- ← Skip
+- Upload
+
+## R10-ManyResult
+_R10 · Asking many people at once (from People): who was asked and who wasn’t, with why_
+
+- Organization
+- People
+- The People table — not redesigned here.
+- Request sent
+- Upload: First aid certificate · due 4 Dec
+- Asked 35 people.
+- 2 weren’t asked
+- RB
+- Rūta Bielskė
+- Sales
+- Hasn’t logged in yet
+- KW
+- Karl Weber
+- Finance
+- You can’t manage their documents
+- Done

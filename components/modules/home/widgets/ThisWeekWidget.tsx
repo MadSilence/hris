@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { useShortDates } from "@/lib/date";
 import type { Celebration } from "@/models/home";
 import { useCelebrations } from "@/components/modules/home/hooks";
+import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import {
   PersonFace,
   WidgetCard,
@@ -51,8 +52,22 @@ const Confetti: React.FC = () => (
   </svg>
 );
 
-/** A row of what is coming: face, name, what, and the day in the accent ("Thu 12"). */
-const Row: React.FC<{ item: Celebration; isToday: boolean; preview?: boolean; face?: 22 | 28 }> = ({ item, isToday, preview, face = 28 }) => {
+const WEEKDAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
+/**
+ * The last day of the company's week that holds `today` (both ISO dates), from the company's first day of the week
+ * (`weekStartDay`, Monday unless the company says otherwise) — "Later this week" never reaches into the next one (H4).
+ */
+export const lastDayOfWeek = (today: string, weekStartDay: string | null | undefined): string => {
+  const start = Math.max(0, WEEKDAYS.indexOf((weekStartDay ?? "MONDAY").toUpperCase()));
+  const date = new Date(`${today}T00:00:00Z`);
+  const toEnd = (start + 6 - date.getUTCDay() + 7) % 7;
+  date.setUTCDate(date.getUTCDate() + toEnd);
+  return date.toISOString().slice(0, 10);
+};
+
+/** A row of what is coming: face, name, what, and the day in the accent ("21 Nov", or "Today"). */
+const Row: React.FC<{ item: Celebration; isToday: boolean; preview?: boolean; face?: 22 | 24 }> = ({ item, isToday, preview, face = 24 }) => {
   const t = useTranslations("home");
   const dates = useShortDates();
   const name = nameOf(item, t);
@@ -64,12 +79,12 @@ const Row: React.FC<{ item: Celebration; isToday: boolean; preview?: boolean; fa
         className="-mx-2 flex items-center gap-2.5 rounded-control px-2 py-1.5 hover:bg-subtle"
       >
         <PersonFace name={name} avatarUrl={item.avatarUrl} size={face} />
-        <span className="min-w-0 flex-1 truncate text-body">
+        <span className="min-w-0 flex-1 truncate text-label leading-[22px] font-normal">
           <span className="font-medium text-primary">{firstOf(item, t)}</span>
           <span className="text-tertiary">{t("thisWeek.rowWhat", { what: what(item, t) })}</span>
         </span>
-        <span className="shrink-0 text-label text-accent-text">
-          {isToday ? t("card.today") : dates.date(item.date, { weekday: true })}
+        <span className="flex-none text-label leading-[22px] text-accent-text">
+          {isToday ? t("card.today") : dates.date(item.date)}
         </span>
       </Link>
     </li>
@@ -110,6 +125,7 @@ const Faces: React.FC<{ items: Celebration[]; label: string }> = ({ items, label
 export const ThisWeekWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const t = useTranslations("home");
   const query = useCelebrations(true);
+  const { company } = useCompanyData();
   const title = t("widgets.thisWeek.title");
 
   if (query.isLoading) {
@@ -128,11 +144,14 @@ export const ThisWeekWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => 
   }
 
   const day = query.data.from;
-  const today = query.data.items.filter((item) => item.date === day);
-  const later = query.data.items.filter((item) => item.date !== day);
+  // The read is the next seven days; the widget is this week, to the company's last day of it (H4).
+  const weekEnd = lastDayOfWeek(day, company?.weekStartDay);
+  const items = query.data.items.filter((item) => item.date <= weekEnd);
+  const today = items.filter((item) => item.date === day);
+  const later = items.filter((item) => item.date !== day);
   const confetti = today.length > 0 && <Confetti />;
 
-  if (query.data.items.length === 0) {
+  if (items.length === 0) {
     if (size === "S") {
       return (
         <WidgetCard title={title} size={size}>
@@ -151,7 +170,7 @@ export const ThisWeekWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => 
   const manyLabel = allBirthdays
     ? t("thisWeek.birthdaysToday", { count: today.length })
     : t("thisWeek.celebrationsToday", { count: today.length });
-  const laterList = (face: 22 | 28 = 28) => (
+  const laterList = (face: 22 | 24 = 24) => (
     <ul className="flex flex-col">{later.map((item) => <Row key={`${item.kind}-${item.userId}`} item={item} isToday={false} preview={preview} face={face} />)}</ul>
   );
 
@@ -175,7 +194,7 @@ export const ThisWeekWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => 
             {size === "L" && <p className="text-label text-accent-text">{t("thisWeek.comingUp")}</p>}
           </div>
           <div className={cn("flex min-h-0 flex-col gap-1", size === "M" && "border-t border-divider pt-3")}>
-            <p className="text-hint font-semibold text-tertiary">{t("thisWeek.laterThisWeek")}</p>
+            <p className="text-hint font-medium text-tertiary">{t("thisWeek.laterThisWeek")}</p>
             <WidgetScroll>{laterList()}</WidgetScroll>
           </div>
         </div>
@@ -252,7 +271,7 @@ export const ThisWeekWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => 
         {todayBlock}
         {later.length > 0 && (
           <div className={cn("flex min-h-0 flex-col gap-1", size === "M" ? "border-t border-divider pt-3" : "border-l border-divider pl-6")}>
-            <p className="text-hint font-semibold text-tertiary">{t("thisWeek.laterThisWeek")}</p>
+            <p className="text-hint font-medium text-tertiary">{t("thisWeek.laterThisWeek")}</p>
             <WidgetScroll>{laterList()}</WidgetScroll>
           </div>
         )}

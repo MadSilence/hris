@@ -8,12 +8,11 @@
   },
   "profileMenu": {
     "label": "Меню моего профиля",
-    "jobLine": "{hasJob, select, yes {{job}} other {}}{both, select, yes { · } other {}}{hasTeam, select, yes {{team}} other {}}",
     "myProfile": "Мой профиль",
     "myTimeOff": "Мои отсутствия",
     "myDocuments": "Мои документы",
+    "toSign": "{count, plural, one {# на подпись} few {# на подпись} many {# на подпись} other {# на подпись}}",
     "myAttendance": "Мой учёт времени",
-    "editHome": "Настроить главную",
     "personalSettings": "Личные настройки",
     "logOut": "Выйти"
   },
@@ -25,7 +24,6 @@
       "whosOutFriday": "Кто отсутствует в пятницу?",
       "myBalance": "Мой остаток"
     },
-    "hint": "Shift + Enter — новая строка",
     "send": "Отправить",
     "groups": {
       "people": "Люди",
@@ -57,6 +55,10 @@
       "title": "Следующий отдых",
       "description": "Тихий отсчёт до вашего следующего выходного"
     },
+    "toSign": {
+      "title": "На подпись",
+      "description": "Документы, которые ждут вашей подписи, со сроком"
+    },
     "whosOut": {
       "title": "Кто отсутствует",
       "description": "Кого нет сегодня или на этой неделе"
@@ -76,6 +78,10 @@
     "automations": {
       "title": "Автоматизации",
       "description": "Что noddo сделал за неделю и что нужно исправить"
+    },
+    "expiringDocuments": {
+      "title": "Истекающие документы",
+      "description": "Документы, срок которых скоро выйдет или уже вышел"
     }
   },
   "sizes": {
@@ -176,7 +182,8 @@
       "task": "Задача",
       "review": "Ревью",
       "failedRun": "Сбой автоматизации",
-      "agree": "Страница для согласия"
+      "agree": "Страница для согласия",
+      "sign": "Документ на подпись"
     },
     "toasts": {
       "approved": "Отпуск одобрен",
@@ -187,7 +194,10 @@
     "agreeWaits": "Страница ждёт вашего согласия",
     "agreeBy": "Согласиться до {date}",
     "agreeOverdue": "Срок был {date}",
-    "read": "Читать"
+    "read": "Читать",
+    "signWaits": "Документ ждёт вашей подписи",
+    "signBy": "Подписать до {date}",
+    "sign": "Подписать"
   },
   "timeOff": {
     "link": "Мои отсутствия",
@@ -204,7 +214,7 @@
     "approved": "Одобрено",
     "requestTimeOff": "Запросить отпуск",
     "emptyTitle": "Политики отсутствий пока нет",
-    "emptyLine": "Попросите HR подключить вас к ней."
+    "emptyLine": "Вас пока не добавили ни в одну."
   },
   "nextTimeOff": {
     "approved": "Одобрено",
@@ -312,5 +322,26 @@
     "emptyLine": "Пусть noddo берёт на себя рутину.",
     "create": "Создать автоматизацию",
     "failureLine": "{name}: {reason}"
+  },
+  "expiringDocuments": {
+    "couldNotLoad": "Не удалось загрузить истекающие документы",
+    "emptyTitle": "Ничего не истекает",
+    "emptyLine": "Все документы со сроком ещё действуют.",
+    "all": "Все",
+    "toRenew": "обновить",
+    "expired": "{count, plural, one {# истёк} few {# истекли} many {# истекли} other {# истекли}}",
+    "expiresOn": "{date}",
+    "expiredOn": "Истёк {date}"
+  },
+  "toSign": {
+    "all": "Все документы",
+    "couldNotLoad": "Не удалось загрузить документы",
+    "emptyTitle": "Подписывать нечего",
+    "emptyLine": "Все ваши документы подписаны.",
+    "pending": "ждут",
+    "nextDue": "Ближайший срок {date}",
+    "due": "Срок {date}",
+    "overdue": "Просрочено",
+    "sign": "Подписать"
   }
 }

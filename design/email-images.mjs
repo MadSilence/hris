@@ -143,9 +143,56 @@ const warn = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width=
 const arrow = (color) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><g stroke="${color}" ${STROKE}><path d="M18.5 12L4.99997 12"/><path d="M13 18C13 18 19 13.5811 19 12C19 10.4188 13 6 13 6"/></g></svg>`;
 
+/**
+ * The Document band's sheet (EMAIL-RULES.md "Document", G14 / G16): white, 340 wide, radius 10 at the top, a soft
+ * shadow, grey text lines, and at its foot either a dashed "sign here" box in the accent — a pen, no words, so one image
+ * serves every language — or a drawn signature beside a green check. Transparent around it, so it stands on any band.
+ */
+const PAPER_W = 340;
+const PAPER_H = 150;
+const PAD = 16;
+const SIGN_PEN = `<path d="M22 12.6344C18 16.1465 17.4279 10.621 15.3496 11.0165C13 11.4637 11.5 16.4445 13 16.4445C14.5 16.4445 12.5 10.5 10.5 12.5556C8.5 14.6111 7.85936 17.2946 6.23526 15.3025C-1.5 5.81446 4.99998 -1.14994 8.16322 3.45685C10.1653 6.37256 6.5 16.9769 2 22"/><path d="M9 21H19"/>`;
+function paper(foot) {
+  const w = PAPER_W + PAD * 2;
+  const h = PAPER_H + PAD;
+  const x = PAD;
+  const y = PAD;
+  const lines = [
+    [28, 24, 0.55, 8, GRAY_200],
+    [28, 42, 1, 6, MIST],
+    [28, 57, 1, 6, MIST],
+    [28, 72, 0.7, 6, MIST],
+  ]
+    .map(([lx, ly, share, lh, c]) => `<rect x="${x + lx}" y="${y + ly}" width="${(PAPER_W - 56) * share}" height="${lh}" rx="${lh / 2}" fill="${c}"/>`)
+    .join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">
+    <defs><filter id="s" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="8"/><feOffset dy="6"/><feComponentTransfer><feFuncA type="linear" slope="0.22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <path filter="url(#s)" d="M${x} ${y + 10}a10 10 0 0 1 10 -10h${PAPER_W - 20}a10 10 0 0 1 10 10v${PAPER_H}h-${PAPER_W}z" fill="${WHITE}"/>
+    ${lines}${foot(x, y)}</svg>`;
+}
+const ask = (accent) =>
+  paper((x, y) => {
+    const bx = x + 28;
+    const by = y + 92;
+    const bw = PAPER_W - 56;
+    return `<path d="M${bx} ${by + PAPER_H - 92}V${by + 6}a6 6 0 0 1 6 -6h${bw - 12}a6 6 0 0 1 6 6V${by + PAPER_H - 92}" fill="${mix(WHITE, accent, 0.06)}" stroke="${mix(WHITE, accent, 0.22)}" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <g transform="translate(${bx + bw / 2 - 12} ${by + 18})" stroke="${accentText(accent)}" ${STROKE}>${SIGN_PEN}</g>`;
+  });
+const GREEN = '#1E7B45';
+const GREEN_BG = '#E6F4EC';
+const signed = paper((x, y) => {
+  const bx = x + 28;
+  const by = y + 98;
+  return `<path d="M${bx + 6} ${by + 34}c14 -30 22 -36 26 -22s-10 30 4 18 18 -34 26 -20 -4 26 10 14 16 -20 26 -10 8 12 22 4" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="${bx}" y="${by + 42}" width="${PAPER_W - 56}" height="1" fill="${GRAY_200}"/>
+    <rect x="${x + PAPER_W - 28 - 40}" y="${by + 6}" width="40" height="24" rx="12" fill="${GREEN_BG}"/>
+    <g transform="translate(${x + PAPER_W - 28 - 40 + 12} ${by + 10}) scale(0.6667)" stroke="${GREEN}" ${STROKE}>${ICONS.check}</g>`;
+});
+
 rmSync(out, { recursive: true, force: true });
 mkdirSync(join(out, 'rings'), { recursive: true });
 mkdirSync(join(out, 'icons'), { recursive: true });
+mkdirSync(join(out, 'paper'), { recursive: true });
 
 await png('noddo-white.png', wordmark(WHITE, ROSE), (26 * 234) / 68, 26);
 await png('noddo-ink.png', wordmark(INK, WINE), (26 * 234) / 68, 26);
@@ -173,5 +220,14 @@ for (const [name, paths] of Object.entries(ICONS)) {
   await png(`icons/${name}-neutral.png`, icon(paths, MIST, SECONDARY), 48, 48);
   await png(`icons/${name}-pending.png`, icon(paths, PENDING_BG, PENDING_ICON), 48, 48);
 }
+
+// The Document band's sheets: asking to sign in each preset (and Wine for noddo's own), a neutral one for a company's
+// own HEX, and one signed sheet for all.
+await png('paper/ask-wine.png', ask(WINE), PAPER_W + PAD * 2, PAPER_H + PAD);
+for (const [key, accent] of Object.entries(PRESETS)) {
+  if (key !== 'wine') await png(`paper/ask-${key}.png`, ask(accent), PAPER_W + PAD * 2, PAPER_H + PAD);
+}
+await png('paper/ask-neutral.png', ask(GRAPHITE), PAPER_W + PAD * 2, PAPER_H + PAD);
+await png('paper/signed.png', signed, PAPER_W + PAD * 2, PAPER_H + PAD);
 
 console.log(`Wrote ${out}`);

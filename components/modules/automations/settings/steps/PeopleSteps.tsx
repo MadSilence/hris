@@ -10,7 +10,8 @@ import { PeoplePicker } from "../people/PeoplePicker";
 import { TokenTextField } from "../tokens/TokenTextField";
 import { DaysInput, Field, FieldStack, MistNote } from "../parts/parts";
 import { errorFor } from "../parts/problems";
-import { NameList } from "./NameList";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { useDocumentTemplates } from "@/components/modules/signing/hooks/useDocumentsSection";
 import type { StepPartProps } from "./stepPartProps";
 
 /** Send a notification (S1): who gets it, and the message with field tokens. */
@@ -169,22 +170,55 @@ export const ReviewFields: React.FC<StepPartProps> = ({ step, catalog, problems,
   );
 };
 
-/** Ask to sign a document (K9): the documents by name — no documents module yet — and who signs. */
-export const SignFields: React.FC<StepPartProps> = ({ step, catalog, problems, onStep, event }) => {
+/**
+ * Send for signature (automations-send-for-signature A02): one template; who signs and the time to sign are the
+ * template's, shown read-only — the step names nothing else (DOCUMENTS_DESIGN.md § 5.5). The template's name is the
+ * signing's title.
+ */
+export const SignFields: React.FC<StepPartProps> = ({ step, problems, onStep }) => {
   const t = useTranslations("automationsSettings");
-  const ids = { docs: React.useId(), who: React.useId() };
+  const ids = { template: React.useId() };
+  const { data: templates = [] } = useDocumentTemplates();
+  const usable = templates.filter((x) => x.isActive || x.id === step.documents?.[0]);
+  const chosen = templates.find((x) => x.id === step.documents?.[0]) ?? null;
+  const error = errorFor(t, problems, "documents");
+  const signers = [...(chosen?.signers ?? [])].sort((a, b) => (a.order ?? 1) - (b.order ?? 1));
   return (
     <FieldStack>
-      <Field label={t("sign.documents")} labelId={ids.docs} required error={errorFor(t, problems, "documents")} hint={t("sign.documentsHint")}>
-        <NameList labelledBy={ids.docs} value={step.documents ?? []} onChange={(documents) => onStep({ documents })}
-          invalid={Boolean(errorFor(t, problems, "documents"))} />
+      <Field label={t("sign.template")} htmlFor={ids.template} required error={error} hint={t("sign.templateHint")}>
+        <SearchableSelect
+          id={ids.template}
+          options={usable.map((x) => ({ value: x.id, label: x.name }))}
+          value={chosen?.id ?? step.documents?.[0] ?? null}
+          onChange={(id) => {
+            const picked = templates.find((x) => x.id === id);
+            onStep({ documents: id ? [id] : [], title: picked?.name ?? "" });
+          }}
+          placeholder={t("sign.pick")}
+          emptyLabel={t("sign.noTemplate")}
+          clearable={false}
+        />
       </Field>
-      <Field label={t("sign.who")} labelId={ids.who} required error={errorFor(t, problems, "assignee", step.type)}>
-        <PeoplePicker mode="single" aria-labelledby={ids.who} value={step.assignee ? [step.assignee] : []}
-          onChange={(v) => onStep({ assignee: v[0] ?? null })} catalog={catalog} event={event}
-          invalid={Boolean(errorFor(t, problems, "assignee"))} />
-      </Field>
-      <MistNote>{t("notConnected.documents")}</MistNote>
+      {chosen && (
+        <>
+          <Field label={t("sign.who")} hint={t("sign.whoHint")}>
+            <ol className="flex flex-col gap-1 rounded-control bg-subtle p-2">
+              {signers.map((s, i) => (
+                <li key={s.key} className="flex h-8 items-center gap-2 text-body text-primary">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-surface text-label text-secondary">
+                    {s.order ?? i + 1}
+                  </span>
+                  <span className="truncate">{s.label?.trim() ? s.label : t(`sign.kind.${s.kind}`)}</span>
+                </li>
+              ))}
+            </ol>
+          </Field>
+          <Field label={t("sign.timeToSign")}>
+            <p className="text-body text-primary">{t("sign.days", { count: chosen.envelopeExpiryDays })}</p>
+          </Field>
+          {chosen.problems.length > 0 && <p className="text-label text-status-declined-text">{t("sign.templateProblem")}</p>}
+        </>
+      )}
     </FieldStack>
   );
 };

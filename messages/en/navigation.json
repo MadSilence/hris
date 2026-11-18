@@ -18,7 +18,8 @@
     "finishProfile": "Finish your profile",
     "myPreferences": "My preferences",
     "changePassword": "Change password",
-    "signOut": "Log out"
+    "signOut": "Log out",
+    "documents": "Documents"
   },
   "public": {
     "nav": {

@@ -1,13 +1,16 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/DatePicker";
+
 import { FC, FormEvent, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Cancel01Icon, CloudUploadIcon, FileTextIcon, Upload01Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, Cancel01Icon, CheckmarkCircle02Icon, CloudUploadIcon, FileTextIcon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { DialogFooter } from "@/components/desact/dialog";
 import { Label } from "@/components/desact/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/desact/select";
+import { NodRing } from "@/components/desact/nod";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { cn } from "@/lib/cn";
 import { formatBytes } from "../../../utils/formatBytes";
 import type { DocumentVisibility } from "@/api/modules/documents/dto";
@@ -30,9 +33,21 @@ export type UploadDocumentFormValues = {
   folderId?: string;
   categoryId?: string;
   visibility: DocumentVisibility;
+  /** Valid until (documents-expiry X05), ISO; "" for none. */
+  expiresOn?: string;
 };
 
+/** Where one file stands in an upload (M3): queued, going, in, or refused with why — a refused one stays listed. */
+export type UploadFileStatus = { state: "waiting" | "uploading" | "done" } | { state: "failed"; message: string };
+
+/** A file's key in {@link UploadDocumentFormProps.statuses}: the same file picked twice is one. */
+export const uploadFileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
+
 export interface UploadDocumentFormProps {
+  /** Files dropped on the tab or a folder tile before the window opened (T07). */
+  initialFiles?: File[];
+  /** Each file's progress while the upload runs, by {@link uploadFileKey}. */
+  statuses?: Record<string, UploadFileStatus>;
   isLoading?: boolean;
   folders: FolderOption[];
   categories?: CategoryOption[];
@@ -65,6 +80,8 @@ function shortenFileName(fileName: string) {
 }
 
 export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
+  initialFiles = [],
+  statuses = {},
   isLoading = false,
   folders,
   categories = [],
@@ -74,13 +91,15 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   onSubmitAction,
 }) => {
   const t = useTranslations("organization");
+  const tSigning = useTranslations("signing");
   const tCommon = useTranslations("common");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>(initialFiles);
   const [folderId, setFolderId] = useState(defaultFolderId ?? ROOT_FOLDER_ID);
   const [categoryId, setCategoryId] = useState(NO_CATEGORY_ID);
   const [visibility, setVisibility] = useState<DocumentVisibility>(defaultVisibility);
+  const [expiresOn, setExpiresOn] = useState("");
   const [tried, setTried] = useState(false);
 
   const addFiles = (incoming: FileList | null) => {
@@ -118,13 +137,15 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
       folderId: folderId === ROOT_FOLDER_ID ? undefined : folderId,
       categoryId: categoryId === NO_CATEGORY_ID ? undefined : categoryId,
       visibility,
+      expiresOn: expiresOn || undefined,
     });
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="space-y-5">
-        <div className="space-y-2">
+      {/* M3: the files on the left, where they go on the right. */}
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_260px]">
+        <div className="min-w-0 space-y-2">
           <RequiredLabel required>{t("documents.upload.files")}</RequiredLabel>
 
           <div
@@ -154,7 +175,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
               addFiles(e.dataTransfer.files);
             }}
             className={cn(
-              "flex min-h-[200px] items-center justify-center rounded-card border-2 border-dashed p-6 text-center transition-all",
+              "flex min-h-[180px] items-center justify-center rounded-card border-2 border-dashed p-6 text-center transition-all",
               isLoading
                 ? "cursor-not-allowed opacity-60"
                 : "cursor-pointer hover:border-field hover:bg-subtle/50",
@@ -206,19 +227,32 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
           </div>
 
           {files.length > 0 && (
-            <ul className="divide-y divide-divider rounded-control border border-divider">
-              {files.map((file, index) => (
+            <ul className="max-h-64 divide-y divide-divider overflow-y-auto rounded-control border border-divider">
+              {files.map((file, index) => {
+                const status = statuses[uploadFileKey(file)];
+                return (
                 <li
                   key={`${file.name}-${file.size}-${file.lastModified}`}
                   className="flex items-center gap-3 px-3 py-2"
  >
                   <Icon icon={FileTextIcon} size="sm" className="shrink-0 text-tertiary" />
-                  <span className="min-w-0 flex-1 truncate text-body" title={file.name}>
-                    {shortenFileName(file.name)}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-body" title={file.name}>{shortenFileName(file.name)}</span>
+                    {status?.state === "failed" && (
+                      <span className="text-hint text-status-declined-text">{status.message}</span>
+                    )}
                   </span>
                   <span className="shrink-0 text-hint text-tertiary">
-                    {formatBytes(file.size)}
+                    {status?.state === "uploading" ? t("documents.upload.uploading")
+                      : status?.state === "waiting" ? t("documents.upload.waiting")
+                      : formatBytes(file.size)}
                   </span>
+                  {status?.state === "uploading" && <NodRing size="sm" />}
+                  {status?.state === "done" && (
+                    <Icon icon={CheckmarkCircle02Icon} size="sm" className="shrink-0 text-status-approved-icon" label={t("documents.upload.done")} />
+                  )}
+                  {status?.state === "failed" && <Icon icon={Alert02Icon} size="sm" className="shrink-0 text-status-declined-icon" />}
+                  {(!status || status.state === "failed") && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -230,14 +264,17 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
  >
                     <Icon icon={Cancel01Icon} size="sm" />
                   </Button>
+                  )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
 
           <FieldError>{tried && files.length === 0 ? t("documents.upload.chooseAtLeastOne") : null}</FieldError>
         </div>
 
+        <div className="flex flex-col gap-5">
         <div className="space-y-2">
           <Label>{t("documents.upload.folder")}</Label>
 
@@ -256,24 +293,24 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="upload-valid-until">{tSigning("expiry.validUntil")}</Label>
+          <DatePicker id="upload-valid-until" value={expiresOn} onChange={setExpiresOn} disabled={isLoading} />
+        </div>
+
+        <div className="space-y-2">
           <Label>{t("documents.upload.visibility")}</Label>
 
-          <Select
+          {/* Who can see (M3): the two words the list says — Visible, Hidden. */}
+          <SegmentedControl
+            aria-label={t("documents.upload.visibility")}
             value={visibility}
-            onValueChange={(v) => setVisibility(v as DocumentVisibility)}
+            onChange={(v: DocumentVisibility) => setVisibility(v)}
             disabled={isLoading}
- >
-            <SelectTrigger>
-              <SelectValue/>
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="HR_ONLY">{t("documents.upload.visibilityHrOnly")}</SelectItem>
-              <SelectItem value="VISIBLE_TO_EMPLOYEE">
-                {t("documents.upload.visibilityEmployee")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            options={[
+              { value: "VISIBLE_TO_EMPLOYEE", label: t("documents.table.visible") },
+              { value: "HR_ONLY", label: t("documents.table.hidden") },
+            ]}
+          />
         </div>
 
         {categories.length > 0 && (
@@ -294,6 +331,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
             />
           </div>
         )}
+        </div>
       </div>
 
       <DialogFooter className="mt-8">

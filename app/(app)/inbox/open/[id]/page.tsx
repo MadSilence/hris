@@ -6,6 +6,7 @@ import {
   type NotificationsTranslator,
 } from "@/components/modules/notifications/components/notificationPresenter";
 import type { Notification } from "@/models/notifications";
+import { languageOf } from "@/i18n/locales";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -25,6 +26,6 @@ export default async function OpenNotificationPage({ params }: Props) {
   }
   if (!notification) redirect("/inbox");
   const t = (await getTranslations("notifications")) as unknown as NotificationsTranslator;
-  const href = presentNotification(notification, t, await getLocale()).href;
+  const href = presentNotification(notification, t, languageOf(await getLocale())).href;
   redirect(href ?? "/inbox");
 }

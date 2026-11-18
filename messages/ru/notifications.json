@@ -33,7 +33,8 @@
       "minutes": "{count} мин назад",
       "hours": "{count} ч назад",
       "days": "{count} дн. назад"
-    }
+    },
+    "deleted": "Уведомление удалено"
   },
   "categories": {
     "APPROVALS": "Согласования",
@@ -77,6 +78,15 @@
       "cancelled": "Отменено",
       "cancellationApproved": "Отмена согласована",
       "cancellationDeclined": "В отмене отказано"
+    },
+    "markDone": "Готово",
+    "taskOutcomes": {
+      "done": "Сделано",
+      "cancelled": "Больше не нужно",
+      "reassigned": "Передано другому",
+      "signed": "Подписано",
+      "declined": "Отклонено",
+      "closed": "Закрыто"
     }
   },
   "drift": {
@@ -269,6 +279,38 @@
       "title": "Добавлен документ",
       "message": "{who} добавил(а) в ваше дело: {file}."
     },
+    "documentExpiringSoon": {
+      "title": "Скоро истекает документ",
+      "message": "{hasPerson, select, yes {{person}: {file}} other {Ваш документ {file}}} действует{hasDue, select, yes { до {due}} other {}}. Продлите его или загрузите новый."
+    },
+    "signatureRequested": {
+      "title": "Нужна подпись",
+      "message": "{what} ждёт вашей подписи."
+    },
+    "signatureCompleted": {
+      "title": "Подписано всеми",
+      "message": "{what} подписан(о) всеми."
+    },
+    "signatureDeclined": {
+      "title": "Отказ от подписи",
+      "message": "{who} отказался(-ась) подписать {what}.{hasReason, select, yes { «{reason}»} other {}}"
+    },
+    "signatureExpired": {
+      "title": "Не подписано вовремя",
+      "message": "{what} не подписали до срока."
+    },
+    "signatureCancelled": {
+      "title": "Подписание отменено",
+      "message": "{who} отменил(а) подписание: {what}.{hasReason, select, yes { «{reason}»} other {}}"
+    },
+    "documentRequested": {
+      "title": "Запрошен документ",
+      "message": "{who} просит загрузить: {what}{hasDue, select, yes { — до {due}} other {}}."
+    },
+    "documentExpired": {
+      "title": "Документ истёк",
+      "message": "{hasPerson, select, yes {{person}: {file}} other {Ваш документ {file}}} больше не действует{hasDue, select, yes { — срок {due}} other {}}. Загрузите новый."
+    },
     "taskDue": {
       "title": "Срок задачи — сегодня",
       "message": "«{task}» ({kind, select, onboarding {онбординг} offboarding {оффбординг} other {пребординг}}: {target}) — срок сегодня."
@@ -421,6 +463,32 @@
     "hubPostPublished": {
       "title": "Новости компании",
       "message": "{author} опубликовал(а) «{title}»."
+    },
+    "documentRequestFulfilled": {
+      "title": "Документ загружен",
+      "message": "{who} загрузил(а) «{what}»."
+    },
+    "teamMemberJoining": {
+      "title": "В вашей команде новый человек",
+      "todayTitle": "Сегодня первый день",
+      "message": "{today, select, yes {Сегодня первый день: {person}.} other {{person} выходит в вашу команду {date}.}}"
+    },
+    "teamMemberLeaving": {
+      "title": "Человек уходит из вашей команды",
+      "todayTitle": "Сегодня последний день",
+      "message": "{today, select, yes {Сегодня последний рабочий день: {person}.} other {Последний рабочий день: {person}, {date}.}}"
+    },
+    "processCompleted": {
+      "title": "{kind, select, offboarding {Офбординг завершён} other {Онбординг завершён}}",
+      "message": "{kind, select, offboarding {Офбординг} other {Онбординг}}: {target} — завершён."
+    },
+    "carryoverExpiring": {
+      "title": "Перенесённые дни скоро сгорят",
+      "message": "{count, plural, one {{amount} перенесённый день} few {{amount} перенесённых дня} many {{amount} перенесённых дней} other {{amount} перенесённого дня}} {hasPolicy, select, yes {«{policy}»} other {отпуска}} сгорят {date}. Используйте их до этого дня."
+    },
+    "sharedWithYou": {
+      "title": "С вами поделились",
+      "message": "{hasActor, select, yes {{actor}: } other {}}{kind, select, report {отчёт} other {представление людей}}{hasName, select, yes { «{name}»} other {}} — теперь доступно вам."
     }
   },
   "unsubscribe": {

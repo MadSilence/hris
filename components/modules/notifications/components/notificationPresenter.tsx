@@ -415,6 +415,83 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         href: userId ? `/organization/people/${userId}/documents` : null,
       };
     }
+    case "DOCUMENT_EXPIRING_SOON":
+    case "DOCUMENT_EXPIRED": {
+      const userId = str(p.userId);
+      const key = n.type === "DOCUMENT_EXPIRED" ? "documentExpired" : "documentExpiringSoon";
+      const person = str(p.personName);
+      return {
+        title: t(`presenter.${key}.title`),
+        // The person reads "your", HR reads whose: the name travels only to others.
+        message: t(`presenter.${key}.message`, {
+          file: str(p.fileName) || t("fallback.aDocument"),
+          hasPerson: person ? "yes" : "no",
+          person,
+          ...dueOn(p.expiresOn, language),
+        }),
+        icon: FileTextIcon,
+        href: userId ? `/organization/people/${userId}/documents` : null,
+      };
+    }
+    case "DOCUMENT_REQUESTED": {
+      return {
+        title: t("presenter.documentRequested.title"),
+        message: t("presenter.documentRequested.message", {
+          who: str(p.actorName) || t("fallback.somebody"),
+          what: str(p.title) || t("fallback.aDocument"),
+          ...dueOn(p.dueDate, language),
+        }),
+        icon: FileTextIcon,
+        href: "/tasks",
+      };
+    }
+    case "DOCUMENT_REQUEST_FULFILLED": {
+      // B4: what the reader asked for came — the file, in the person's Documents.
+      const userId = str(p.userId);
+      return {
+        title: t("presenter.documentRequestFulfilled.title"),
+        message: t("presenter.documentRequestFulfilled.message", {
+          who: str(p.actorName) || t("fallback.somebody"),
+          what: str(p.title) || t("fallback.aDocument"),
+        }),
+        icon: FileTextIcon,
+        href: userId ? `/organization/people/${userId}/documents` : null,
+      };
+    }
+    case "DOCUMENT_SIGNATURE_REQUESTED":
+    case "DOCUMENT_SIGNATURE_COMPLETED":
+    case "DOCUMENT_SIGNATURE_DECLINED":
+    case "DOCUMENT_SIGNATURE_EXPIRED":
+    case "DOCUMENT_SIGNATURE_CANCELLED": {
+      const keys: Record<
+        string,
+        "signatureRequested" | "signatureCompleted" | "signatureDeclined" | "signatureExpired" | "signatureCancelled"
+      > = {
+        DOCUMENT_SIGNATURE_REQUESTED: "signatureRequested",
+        DOCUMENT_SIGNATURE_COMPLETED: "signatureCompleted",
+        DOCUMENT_SIGNATURE_DECLINED: "signatureDeclined",
+        DOCUMENT_SIGNATURE_EXPIRED: "signatureExpired",
+        DOCUMENT_SIGNATURE_CANCELLED: "signatureCancelled",
+      };
+      const key = keys[n.type];
+      const userId = str(p.userId);
+      const reason = str(p.reason);
+      const envelopeId = str(p.envelopeId);
+      const documentsHref = userId ? `/organization/people/${userId}/documents` : null;
+      return {
+        title: t(`presenter.${key}.title`),
+        message: t(`presenter.${key}.message`, {
+          what: str(p.title) || t("fallback.aDocument"),
+          who: str(p.signerName) || str(p.actorName) || t("fallback.somebody"),
+          hasReason: reason ? "yes" : "no",
+          reason,
+        }),
+        icon: FileTextIcon,
+        // A request to sign opens the signing screen, as Home's card does (documents-signing G01); the outcomes
+        // open the documents of the person the envelope is about.
+        href: n.type === "DOCUMENT_SIGNATURE_REQUESTED" && envelopeId ? `/documents/sign/${envelopeId}` : documentsHref,
+      };
+    }
     case "LIFECYCLE_TASK_DUE": {
       return {
         title: t("presenter.taskDue.title"),
@@ -509,7 +586,8 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         title: str(p.ruleName) || t("fallback.automation"),
         message: str(p.text) || t("fallback.automationMessage"),
         icon: FlashIcon,
-        href: ownProfile(p.personId),
+        // A message naming a signed document opens that person's documents (A05).
+        href: str(p.documentUserId) ? `/organization/people/${str(p.documentUserId)}/documents` : ownProfile(p.personId),
       };
     }
     case "AUTOMATION_TASK_ASSIGNED": {
@@ -866,13 +944,69 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         icon: Notification01Icon,
         href: str(p.postId) ? `/hub/news/${str(p.postId)}` : "/hub/news",
       };
+    case "TEAM_MEMBER_JOINING":
+    case "TEAM_MEMBER_LEAVING": {
+      const joining = n.type === "TEAM_MEMBER_JOINING";
+      const key = joining ? "teamMemberJoining" : "teamMemberLeaving";
+      const today = str(p.when) === "TODAY";
+      return {
+        title: t(`presenter.${key}.${today ? "todayTitle" : "title"}`),
+        message: t(`presenter.${key}.message`, {
+          person: str(p.personName) || t("fallback.APerson"),
+          today: yesNo(today),
+          date: formatDisplayDate(str(p.date), { language }),
+        }),
+        icon: UserGroupIcon,
+        href: str(p.userId) ? `/organization/people/${str(p.userId)}` : null,
+      };
+    }
+    case "LIFECYCLE_PROCESS_COMPLETED": {
+      const processId = str(p.processId);
+      return {
+        title: t("presenter.processCompleted.title", { kind: str(p.processType) === "OFFBOARDING" ? "offboarding" : "onboarding" }),
+        message: t("presenter.processCompleted.message", {
+          kind: str(p.processType) === "OFFBOARDING" ? "offboarding" : "onboarding",
+          target: str(p.targetName) || t("fallback.aPerson"),
+        }),
+        icon: CheckmarkCircle02Icon,
+        href: processId ? `/processes/${processId}` : null,
+      };
+    }
+    case "TIMEOFF_CARRYOVER_EXPIRING": {
+      return {
+        title: t("presenter.carryoverExpiring.title"),
+        message: t("presenter.carryoverExpiring.message", {
+          ...leave(p),
+          ...dayArgs(str(p.amount)),
+          date: formatDisplayDate(str(p.expiresOn), { language }),
+        }),
+        icon: CalendarLock01Icon,
+        href: ownTimeOff(p.userId),
+      };
+    }
+    case "SHARED_WITH_YOU": {
+      const report = str(p.kind) === "REPORT";
+      return {
+        title: t("presenter.sharedWithYou.title"),
+        message: t("presenter.sharedWithYou.message", {
+          ...by(p),
+          kind: report ? "report" : "view",
+          hasName: has(p.name),
+          name: str(p.name),
+        }),
+        icon: FileTextIcon,
+        // A saved view opens in People; reports have no screen yet (they wait for the designers).
+        href: report ? null : "/organization/people",
+      };
+    }
     default:
       return {
         // An unknown type shows its own code, humanised — there is no text for it to translate.
         title: n.type.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
         message: "",
         icon: Notification01Icon,
-        href: n.targetType && n.targetId ? null : null,
+        // No destination is known for a type the presenter has no case for.
+        href: null,
       };
   }
 };

@@ -14,7 +14,22 @@ import { cookies, headers as nextHeaders } from "next/headers";
 import publicConfig from "@/config/publicConfig";
 import { backendTunnelHeaders } from "@/config/backendTunnel";
 import { isPublicBackendPath } from "@/config/security/publicBackendPaths";
-import { ACCESS_COOKIE } from "@/config/security/sessionCookieNames";
+import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/config/security/sessionCookieNames";
+import { setSessionCookies } from "@/api/modules/auth/services/sessionCookies";
+
+/**
+ * One renewal per refresh token at a time: two calls of the same action that both meet an expired token share it,
+ * instead of the second trading a token the first has just spent (the backend rotates it on every use).
+ */
+const renewals = new Map<string, Promise<string | null>>();
+
+/** One cookie's value out of a `Set-Cookie` header — the refresh token the backend hands back. */
+const setCookieValue = (response: Response, name: string): string | undefined => {
+  const header = response.headers.get("set-cookie");
+  if (!header) return undefined;
+  const match = new RegExp(`(?:^|,\\s*)${name.replace(/[-]/g, "\\-")}=([^;]*)`).exec(header);
+  return match?.[1] || undefined;
+};
 
 type HeaderReader = { get(name: string): string | null };
 
@@ -180,6 +195,22 @@ export class HrisApiClient {
    * it is down, the port is wrong, DNS failed — which is not a 500 from the API.
    */
   private async send(path: string, init: RequestInit): Promise<Response> {
+    const response = await this.reach(path, init);
+    // B1 (2026-11-18): an access token that expired is renewed here and the call made once more. A read from the
+    // browser renewed itself already (`internalApiClient`); a server action did not, and its first try after the
+    // expiry answered "An error occurred".
+    if (response.status !== 401 || isPublicBackendPath(path)) return response;
+    const sent = new Headers(init.headers);
+    if (!sent.get("Authorization")) return response;
+    const code = await response.clone().json().then((b: { code?: string }) => b?.code).catch(() => undefined);
+    if (code !== "TOKEN_INVALID") return response;
+    const renewed = await this.renewSession();
+    if (!renewed) return response;
+    sent.set("Authorization", `Bearer ${renewed}`);
+    return this.reach(path, { ...init, headers: sent });
+  }
+
+  private async reach(path: string, init: RequestInit): Promise<Response> {
     try {
       return await fetch(this.BASE_URL + path, init);
     } catch (cause) {
@@ -187,6 +218,47 @@ export class HrisApiClient {
         `Cannot reach the API at ${this.BASE_URL} — is the backend running?`,
         { cause },
       );
+    }
+  }
+
+  /**
+   * Trades the refresh cookie for a new pair and writes it back — **only where cookies can be written** (a server
+   * action, a route handler). In a server component the write throws, and nothing is traded: renewing there would spend
+   * the refresh token the browser still holds, and its next request would be refused. Null when it could not renew.
+   */
+  private async renewSession(): Promise<string | null> {
+    let store: Awaited<ReturnType<typeof cookies>>;
+    try {
+      store = await cookies();
+    } catch {
+      return null;
+    }
+    const refreshToken = store.get(REFRESH_COOKIE)?.value;
+    const current = store.get(ACCESS_COOKIE)?.value ?? "";
+    if (!refreshToken) return null;
+    try {
+      // Rewriting the access cookie as it stands answers whether this context may write cookies at all.
+      store.set({ name: ACCESS_COOKIE, value: current, httpOnly: true, sameSite: "lax", secure: true, path: "/", maxAge: 30 * 24 * 60 * 60 });
+    } catch {
+      return null;
+    }
+    const pending = renewals.get(refreshToken);
+    if (pending) return pending;
+    const renewal = (async () => {
+      const headers = new Headers({ Accept: "application/json", Cookie: `${REFRESH_COOKIE}=${refreshToken}` });
+      for (const [name, value] of Object.entries(callerHeaders(await incomingHeaders()))) headers.set(name, value);
+      const res = await this.reach("/auth/refresh", { method: "POST", headers, cache: "no-store" });
+      if (!res.ok) return null;
+      const data = (await res.json().catch(() => ({}))) as { accessToken?: string };
+      if (!data.accessToken) return null;
+      setSessionCookies({ cookies: store }, { accessToken: data.accessToken, refreshToken: setCookieValue(res, REFRESH_COOKIE) });
+      return data.accessToken;
+    })();
+    renewals.set(refreshToken, renewal);
+    try {
+      return await renewal;
+    } finally {
+      setTimeout(() => renewals.delete(refreshToken), 5_000);
     }
   }
 

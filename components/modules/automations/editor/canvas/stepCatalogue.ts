@@ -11,8 +11,8 @@ export const STEP_GROUPS: { key: "ask" | "tell" | "change" | "flow"; types: Auto
   { key: "flow", types: ["WAIT_UNTIL", "SPLIT"] },
 ];
 
-/** The quick add's short list (D4), before anything is typed. */
-export const COMMON_STEPS: AutomationStepType[] = ["CREATE_TASK", "REQUEST_APPROVAL", "NOTIFY", "SEND_EMAIL", "WAIT_UNTIL"];
+/** The quick add's short list (D4; automations-send-for-signature A01), before anything is typed. */
+export const COMMON_STEPS: AutomationStepType[] = ["NOTIFY", "SEND_EMAIL", "CREATE_TASK", "SIGN_DOCUMENT", "WAIT_UNTIL"];
 
 /** The groups with only what the catalogue offers, filtered by a search over the names. */
 export const filterGroups = (

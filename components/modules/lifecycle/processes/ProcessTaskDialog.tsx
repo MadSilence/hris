@@ -52,6 +52,8 @@ type Form = {
   categoryId: string | null;
   materials: Material[];
   questions: Question[];
+  /** SIGN: the template made and sent when the task is added (A6). */
+  templateId: string | null;
 };
 
 const formOf = (process: Process, task: Task | null): Form => ({
@@ -66,6 +68,7 @@ const formOf = (process: Process, task: Task | null): Form => ({
   categoryId: null,
   materials: [],
   questions: [],
+  templateId: null,
 });
 
 /**
@@ -107,7 +110,8 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
     e.preventDefault();
     setError(null);
     if (!form.title.trim()) return setError(t("processTask.giveTitle"));
-    if (form.assigneeKind === "SPECIFIC_USER" && !form.assignee) return setError(t("processTask.chooseAssignee"));
+    if (form.kind === "SIGN" && !form.templateId) return setError(t("addTask.pickDocument"));
+    if (form.kind !== "SIGN" && form.assigneeKind === "SPECIFIC_USER" && !form.assignee) return setError(t("processTask.chooseAssignee"));
     setBusy(true);
     try {
       const assigneeUserId = form.assigneeKind === "SPECIFIC_USER" ? form.assignee?.id ?? null : null;
@@ -119,13 +123,15 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
             title: form.title.trim(),
             description: form.description.trim() || null,
             dueDate: form.dueDate || null,
-            assigneeKind: form.assigneeKind,
-            assigneeUserId,
+            // A Sign task is the person's own (A6): who signs after them is the template's.
+            assigneeKind: form.kind === "SIGN" ? "TARGET" : form.assigneeKind,
+            assigneeUserId: form.kind === "SIGN" ? null : assigneeUserId,
             config: {
               attributeIds: form.attributeIds,
               categoryId: form.categoryId,
               materials: form.materials.length ? form.materials : null,
               questions: form.kind === "QUESTIONNAIRE" ? form.questions : null,
+              ...(form.kind === "SIGN" ? { templateId: form.templateId } : {}),
             },
           },
         })
@@ -177,9 +183,10 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
                 <div className="space-y-1.5">
                   <Label htmlFor="process-task-kind">{t("shared.kind")}</Label>
                   <Select value={form.kind} disabled={busy}
-                    onValueChange={(v) => patch({ kind: v as TaskKind, categoryId: null, attributeIds: [], questions: [] })}>
+                    onValueChange={(v) => patch({ kind: v as TaskKind, categoryId: null, attributeIds: [], questions: [], templateId: null })}>
                     <SelectTrigger id="process-task-kind"><SelectValue /></SelectTrigger>
                     <SelectContent>
+                      {/* A6 (2026-11-18): Sign too — its document is sent as soon as it is added. */}
                       {EDITABLE_TASK_KINDS.map((k) => (
                         <SelectItem key={k} value={k}>{t(`taskKind.${k}`)}</SelectItem>
                       ))}
@@ -194,6 +201,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
                   categoryId={form.categoryId}
                   materials={form.materials}
                   questions={form.questions}
+                  templateId={form.templateId}
                   disabled={busy}
                   onChange={(p) => patch(p)}
                 />
@@ -205,6 +213,8 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
               <DatePicker id="process-task-due" value={form.dueDate} onChange={(v) => patch({ dueDate: v })} disabled={busy} ariaLabel={t("processTask.due")} />
             </div>
 
+            {/* A Sign task is always the person's own (A6): nobody else is asked to do it. */}
+            {form.kind !== "SIGN" && (
             <div className="space-y-1.5">
               <Label htmlFor="process-task-assignee">{t("shared.doneBy")}</Label>
               <Select value={form.assigneeKind} disabled={busy}
@@ -220,6 +230,7 @@ export function ProcessTaskDialog({ process, task, open, onCloseAction, onSavedA
                 <UserPickerField value={form.assignee} onChange={(u) => patch({ assignee: u })} disabled={busy} />
               )}
             </div>
+            )}
 
             <FormError message={error} />
             <DialogFooter>

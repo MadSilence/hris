@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApiError } from "@/components/clients/exceptions";
+import { getWaitingOnMeQueryKey } from "@/components/modules/notifications/utils/notificationsQueryKeys";
 
 type QueryClientProviderWrapperProps = {
   children: React.ReactNode;
@@ -21,8 +22,16 @@ focusManager.setFocused(true);
 
 const QueryClientProviderWrapper: React.FC<QueryClientProviderWrapperProps> = ({ children }) => {
   const [client] = React.useState(
-    () =>
-      new QueryClient({
+    () => {
+      const queryClient: QueryClient = new QueryClient({
+        /* What waits on a person (`/me/actions`, A1) is read by Home, a profile and the inbox, and almost any write can
+           change it — approving leave, ticking a task, agreeing to a page, signing. Refreshing it after every successful
+           mutation is one small read; listing every mutation that matters would be a list that goes stale. */
+        mutationCache: new MutationCache({
+          onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: getWaitingOnMeQueryKey() });
+          },
+        }),
         defaultOptions: {
           queries: {
             refetchOnWindowFocus: false,
@@ -36,7 +45,9 @@ const QueryClientProviderWrapper: React.FC<QueryClientProviderWrapperProps> = ({
             },
           },
         },
-      }),
+      });
+      return queryClient;
+    },
   );
 
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;

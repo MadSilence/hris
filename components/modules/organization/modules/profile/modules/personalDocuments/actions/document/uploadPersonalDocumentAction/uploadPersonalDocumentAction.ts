@@ -14,6 +14,7 @@ export const uploadPersonalDocumentAction = async (
       folderId: submission.folderId ?? null,
       categoryId: submission.categoryId ?? null,
       visibility: submission.visibility ?? null,
+      expiresOn: submission.expiresOn ?? null,
     });
 
     return {
@@ -31,6 +32,8 @@ export type UploadPersonalDocumentActionInput = {
   folderId?: string | null;
   categoryId?: string | null;
   visibility?: DocumentVisibility | null;
+  /** The last valid day (documents-expiry X05); required when the category requires one — the backend says so. */
+  expiresOn?: string | null;
 };
 
 export type UploadPersonalDocumentActionOutput = {

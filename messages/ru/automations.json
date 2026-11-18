@@ -46,7 +46,7 @@
     "CREATE_TASK": "Создать задачу",
     "REQUEST_APPROVAL": "Запросить согласование",
     "START_REVIEW": "Начать ревью",
-    "SIGN_DOCUMENT": "Попросить подписать документ",
+    "SIGN_DOCUMENT": "Отправить на подпись",
     "SEND_SURVEY": "Отправить опрос",
     "NOTIFY": "Отправить уведомление",
     "SEND_EMAIL": "Отправить письмо",
@@ -146,7 +146,8 @@
     "leaveEnd": "Последний день отсутствия",
     "leaveDays": "Дней отсутствия",
     "processName": "Процесс",
-    "processType": "Тип процесса"
+    "processType": "Тип процесса",
+    "document": "Документ"
   },
   "eventField": {
     "leaveType": "Тип отсутствия",

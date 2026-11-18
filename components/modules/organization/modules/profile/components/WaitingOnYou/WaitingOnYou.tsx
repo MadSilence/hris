@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { CalendarLock01Icon, TaskDone01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
-import { useTimeOffRequestsAwaitingMe } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsAwaitingMe";
+import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
 import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { useMyReviews } from "@/components/modules/reviews/hooks";
@@ -52,7 +52,9 @@ const readNotNow = (): string[] => {
 export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId, firstName }) => {
   const t = useTranslations("organization");
   const shortDates = useShortDates();
-  const { data: awaiting } = useTimeOffRequestsAwaitingMe();
+  // The one list of what waits on the reader (A1), narrowed to this person — Home and the inbox read the same list.
+  const { data: waiting } = useWaitingOnMe();
+  const awaiting = waiting?.requests;
   const { data: policies } = useTimeOffPolicies();
   const { data: myReviews } = useMyReviews();
   const approve = useApproveTimeOffRequest();

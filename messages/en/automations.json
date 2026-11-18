@@ -46,7 +46,7 @@
     "CREATE_TASK": "Create a task",
     "REQUEST_APPROVAL": "Ask for approval",
     "START_REVIEW": "Start a review",
-    "SIGN_DOCUMENT": "Ask to sign a document",
+    "SIGN_DOCUMENT": "Send for signature",
     "SEND_SURVEY": "Send a survey",
     "NOTIFY": "Send a notification",
     "SEND_EMAIL": "Send an email",
@@ -146,7 +146,8 @@
     "leaveEnd": "Last day off",
     "leaveDays": "Days off",
     "processName": "Process",
-    "processType": "Process type"
+    "processType": "Process type",
+    "document": "Document"
   },
   "eventField": {
     "leaveType": "Leave type",

@@ -13,6 +13,7 @@ import {
   Megaphone01Icon,
   Settings01Icon,
   StarIcon,
+  File01Icon,
   UserGroupIcon,
   WorkflowSquare03Icon,
 } from "@hugeicons/core-free-icons";
@@ -96,6 +97,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
     // The company hub (COMPANY_HUB_DESIGN.md): everybody reads it; what each person sees is each item's audience.
     { label: t("menu.hub"), href: "/hub", icon: Megaphone01Icon },
     { label: t("menu.organization"), href: "/organization/people", icon: UserGroupIcon, resources: ["PEOPLE.PROFILE"] },
+    // Everyone's documents (documents-section, Q-41): only for those whose view of people's documents reaches past
+    // themselves; an employee's own are on their profile.
+    { label: t("menu.documents"), href: "/documents", icon: File01Icon, resources: ["PEOPLE.DOCUMENTS"], widerThanSelf: true },
     {
       label: t("menu.calendar"),
       href: "/calendar",

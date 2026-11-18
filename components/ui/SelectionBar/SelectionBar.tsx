@@ -22,10 +22,11 @@ export type SelectionAction = {
 const MAX_VISIBLE = 4;
 
 /**
- * The bar a list shows while rows are selected — **Mist, in the toolbar's place**, never SPEC § 13.5's dark floating bar
- * (`technical_documentation/ui/DESIGN_SYSTEM.md` § 7). 40 px, radius 10, 4 px inside; × and "N selected" on the left,
- * the actions ghost on the right (white on hover, because the bar is already Mist), a hairline before Delete, "⋯" past
- * four. It sticks to the top of the scrolling area and takes `shadow-1` while stuck; Esc clears the selection.
+ * The bar a list shows while rows are selected — **white, right above the list it acts on**, never SPEC § 13.5's dark
+ * floating bar (`technical_documentation/ui/DESIGN_SYSTEM.md` § 7; the owner's product-wide rule of 2026-11-17, first
+ * drawn in `documents-tab`): 48 px, radius 10, a hairline and a shadow tinted with the company colour; × and
+ * "N selected" on the left, the actions ghost on the right, a hairline before Delete, "⋯" past four. It sticks to the
+ * top of the scrolling area; Esc clears the selection.
  */
 export const SelectionBar: React.FC<{
   count: number;
@@ -67,7 +68,7 @@ export const SelectionBar: React.FC<{
         {action.label}
       </>
     );
-    const className = "h-8 gap-1.5 px-2 text-label text-primary hover:bg-overlay";
+    const className = "h-8 gap-1.5 px-2 text-label text-primary hover:bg-mist";
     return action.href ? (
       <Button key={action.key} asChild variant="ghost" className={className}>
         <a href={action.href} download className="no-underline">{body}</a>
@@ -86,12 +87,12 @@ export const SelectionBar: React.FC<{
         role="region"
         aria-label={t("selection.selected", { count })}
         className={cn(
-          "sticky top-0 z-20 flex h-10 items-center gap-1 rounded-popover bg-mist p-1 transition-shadow",
-          stuck && "shadow-raised",
+          "sticky top-0 z-20 flex h-12 items-center gap-1 rounded-popover border border-accent-ring bg-card px-2 shadow-selection transition-shadow",
+          stuck && "shadow-popover",
         )}
       >
         <Button type="button" variant="ghost" size="icon-sm" aria-label={t("selection.clear")} onClick={onClear}
-                className="hover:bg-overlay">
+                className="hover:bg-mist">
           <Icon icon={Cancel01Icon} size="sm" />
         </Button>
         <span className="text-label text-primary tabular-nums">{label ?? t("selection.selected", { count })}</span>
@@ -108,7 +109,7 @@ export const SelectionBar: React.FC<{
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" variant="ghost" size="icon-sm" aria-label={t("actions.moreActions")}
-                        className="hover:bg-overlay">
+                        className="hover:bg-mist">
                   <Icon icon={MoreHorizontalIcon} size="sm" />
                 </Button>
               </DropdownMenuTrigger>

@@ -60,7 +60,6 @@ jest.mock("@/components/modules/firstRun/hooks", () => ({
     data: {
       timeZone: null,
       companyTimeZone: "UTC",
-      dateFormat: "SYSTEM",
       timeFormat: "SYSTEM",
       language: null,
       companyLanguage: "en",

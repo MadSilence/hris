@@ -2,98 +2,82 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Add01Icon, FolderAddIcon, StarIcon, Upload01Icon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Delete02Icon, FolderAddIcon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/desact/dropdown-menu";
-import { cn } from "@/lib/cn";
 import { SearchBox } from "@/components/ui/SearchBox";
 
 type PersonalDocumentsToolbarProps = {
   search: string;
   onSearchChange: (value: string) => void;
-  starredOnly: boolean;
-  onStarredOnlyChange: (value: boolean) => void;
-  hrOnly: boolean;
-  onHrOnlyChange: (value: boolean) => void;
-  /** The filter is pointless for someone who can only see documents shared with them. */
-  showHrOnlyFilter?: boolean;
   onUploadFromLocal: () => void;
   onCreateFolder: () => void;
   /** Hides the Add menu for a reader — the backend would reject the call anyway. */
   canEdit?: boolean;
+  /** "Request" beside Add (documents-requests R05): only for those who may ask the person for documents. */
+  onRequest?: () => void;
+  /** Trash, a secondary button with its label (documents-tab § 1); absent for those who cannot manage. */
+  onOpenTrash?: () => void;
 };
 
+/**
+ * The tab's toolbar (documents-tab § 1): Search on the left, 260 wide; on the right Trash, then Request where it is
+ * offered, then Add — Upload files · New folder. The views replaced the starred toggle; Who can see sorts instead of
+ * filtering.
+ */
 export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> = ({
   search,
   onSearchChange,
-  starredOnly,
-  onStarredOnlyChange,
-  hrOnly,
-  onHrOnlyChange,
-  showHrOnlyFilter = false,
   onUploadFromLocal,
   onCreateFolder,
   canEdit = true,
+  onRequest,
+  onOpenTrash,
 }) => {
+  const tSigning = useTranslations("signing");
   const t = useTranslations("organization");
-  const tCommon = useTranslations("common");
 
   return (
-    // Search leads the row — it is what the reader reaches for first — and the primary action is
-    // pushed to the far end, next to Trash. The row used to open with the word "Documents" above a
-    // tab already called Documents.
     <div className="flex flex-1 items-center gap-3">
-      <SearchBox value={search} onChange={onSearchChange}/>
+      <div className="w-[260px] max-w-full">
+        <SearchBox value={search} onChange={onSearchChange} />
+      </div>
 
-      <Button type="button"
-        variant="secondary"
-        size="icon"
-        aria-label={t("documents.toolbar.starredOnly")}
-        aria-pressed={starredOnly}
-        title={t("documents.toolbar.starredOnly")}
-        onClick={() => onStarredOnlyChange(!starredOnly)}
-        className={cn(starredOnly && "border-field bg-subtle")}
- >
-        <Icon icon={StarIcon} className={cn("h-4 w-4", starredOnly && "fill-current text-status-pending-icon")} />
-      </Button>
+      <div className="ml-auto flex items-center gap-2">
+        {onOpenTrash && (
+          <Button type="button" variant="secondary" onClick={onOpenTrash}>
+            <Icon icon={Delete02Icon} size="sm" />
+            {t("documents.container.trash")}
+          </Button>
+        )}
+        {onRequest && (
+          <Button type="button" variant="secondary" onClick={onRequest}>
+            {tSigning("section.request")}
+          </Button>
+        )}
+        {canEdit && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button">
+                <Icon icon={Add01Icon} size="sm" />
+                {t("documents.container.add")}
+              </Button>
+            </DropdownMenuTrigger>
 
-      {showHrOnlyFilter && (
-        <Button type="button"
-          variant="secondary"
-          size="icon"
-          aria-label={t("documents.toolbar.hrOnly")}
-          aria-pressed={hrOnly}
-          title={t("documents.toolbar.hrOnly")}
-          onClick={() => onHrOnlyChange(!hrOnly)}
-          className={cn(hrOnly && "border-field bg-subtle")}
- >
-          <Icon icon={ViewOffSlashIcon} className={cn("h-4 w-4", hrOnly && "text-secondary")} />
-        </Button>
-      )}
-
-      {canEdit && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" className="ml-auto">
-              <Icon icon={Add01Icon} size="sm" />
-              {tCommon("actions.add")}
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={onCreateFolder} className="cursor-pointer">
-              <Icon icon={FolderAddIcon} size="sm" />
-              {t("documents.toolbar.addFolder")}
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={onUploadFromLocal} className="cursor-pointer">
-              <Icon icon={Upload01Icon} size="sm" />
-              {t("documents.toolbar.uploadDocuments")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={onUploadFromLocal} className="cursor-pointer">
+                <Icon icon={Upload01Icon} size="sm" />
+                {t("documents.container.uploadFiles")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onCreateFolder} className="cursor-pointer">
+                <Icon icon={FolderAddIcon} size="sm" />
+                {t("documents.container.newFolder")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
     </div>
   );
 };

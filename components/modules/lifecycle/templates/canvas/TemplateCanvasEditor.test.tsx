@@ -18,6 +18,15 @@ jest.mock("@/components/modules/lifecycle/hooks", () => ({
   useLifecycleTemplate: jest.fn(),
   useInvalidateLifecycle: () => jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock("@/components/modules/signing/hooks/useDocumentsSection", () => ({
+  useDocumentTemplates: () => ({
+    isLoading: false,
+    data: [{
+      id: "tpl-1", name: "Employment contract", isActive: true, envelopeExpiryDays: 30, problems: [],
+      signers: [{ key: "employee", kind: "PERSON", order: 1 }, { key: "manager", kind: "MANAGER", order: 2 }],
+    }],
+  }),
+}));
 jest.mock("@/lib/errors/errorToast", () => ({ showSuccess: jest.fn(), showActionError: jest.fn(), showError: jest.fn() }));
 jest.mock("@/components/ui/DatePicker", () => ({ DatePicker: () => null }));
 jest.mock("@/components/desact/select", () => jest.requireActual("@/test/selectMock"));
@@ -105,6 +114,24 @@ describe("TemplateCanvasEditor", () => {
     expect(saveTemplateAction).not.toHaveBeenCalled();
     expect(screen.queryByText(/Not saved/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Give the template a name/)).not.toBeInTheDocument();
+  });
+
+  // Walk of 2026-11-18: a Sign task moved to the manager's lane held the save and said nothing anywhere — the change
+  // looked made and was lost on leaving. Unlike a half-typed field, nothing on screen shows what is wrong.
+  it("says why it does not save a Sign task out of the person's lane", async () => {
+    jest.mocked(useLifecycleTemplate).mockReturnValue(partialMock<ReturnType<typeof useLifecycleTemplate>>({
+      data: { ...template, items: [...template.items, {
+        id: "sign", position: 2, kind: "SIGN", title: "Sign: Employment contract", description: null, dueKind: "OFFSET",
+        offsetDays: 0, assigneeKind: "TARGET", assigneeUserId: null, assigneeName: null,
+        assigneeProblem: null, config: { templateId: "tpl-1" }, waitsFor: [],
+      }] },
+      isLoading: false, error: null,
+    }));
+    render(<TemplateCanvasEditor type="ONBOARDING" templateId="t1" />);
+    act(() => canvas.onMoveAction("sign", { dueKind: "OFFSET", offsetDays: 0 }, "ONBOARDING_MANAGER"));
+    await new Promise((r) => setTimeout(r, 1000));
+    expect(saveTemplateAction).not.toHaveBeenCalled();
+    expect(screen.getByText(/a Sign task is the person’s own/)).toBeInTheDocument();
   });
 
   it("previews the person's own tasks", () => {

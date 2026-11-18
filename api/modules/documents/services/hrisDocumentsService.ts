@@ -17,8 +17,12 @@ import {
 import type { CreateResponse, UpdateResponse } from "@/api/models/misc";
 
 export class HrisDocumentsService {
-  public async getRootDocuments(userId: string): Promise<DocumentFolderContentDTO> {
-    return hrisApiDocumentsClient.getRootDocuments(userId);
+  public async getRootDocuments(userId: string, all = false): Promise<DocumentFolderContentDTO> {
+    return hrisApiDocumentsClient.getRootDocuments(userId, all);
+  }
+
+  public async updateFolderLook(userId: string, folderId: string, body: { icon: string | null; color: string | null }) {
+    return hrisApiDocumentsClient.updateFolderLook(userId, folderId, body);
   }
 
   public async getFolderContent(

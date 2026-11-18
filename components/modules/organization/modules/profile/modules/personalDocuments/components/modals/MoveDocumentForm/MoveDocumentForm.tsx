@@ -8,11 +8,15 @@ import { Button } from "@/components/desact/button";
 import { DialogFooter } from "@/components/desact/dialog";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { FolderGlyph } from "../../PersonalDocumentsFolderCard/PersonalDocumentsFolderCard";
 import { FieldError } from "@/components/desact/field-error";
 
 export type MoveDocumentFolderOption = {
   id: string;
   name: string;
+  /** The folder's look (T06): its icon in its colour beside the name. */
+  icon?: string | null;
+  color?: string | null;
 };
 
 export type MoveDocumentFormValues = {
@@ -104,7 +108,7 @@ export const MoveDocumentForm: FC<MoveDocumentFormProps> = ({
           aria-label={t("documents.moveDocument.destination")}
           options={[
             { value: ROOT_FOLDER_ID, label: tCommon("values.none") },
-            ...folders.map((folder) => ({ value: folder.id, label: folder.name })),
+            ...folders.map((folder) => ({ value: folder.id, label: folder.name, icon: <FolderGlyph folder={folder} /> })),
           ]}
           value={formik.values.folderId || null}
           onChange={(value) => formik.setFieldValue("folderId", value ?? ROOT_FOLDER_ID)}

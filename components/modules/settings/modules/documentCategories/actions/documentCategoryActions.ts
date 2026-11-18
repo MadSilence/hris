@@ -14,6 +14,10 @@ export type SaveDocumentCategoryInput = {
   name: string;
   description?: string | null;
   isActive?: boolean;
+  /** documents-expiry X07: a date is required; remind N days before (0 = no reminder); who sees an upload by default. */
+  requiresExpiry?: boolean;
+  remindDaysBefore?: number | null;
+  defaultVisibility?: "HR_ONLY" | "VISIBLE_TO_EMPLOYEE" | "" | null;
   /** Edit only: the version the dialog was opened with; a stale one comes back as E00409. */
   version?: number;
 };
@@ -26,6 +30,10 @@ export const saveDocumentCategoryAction = async (
       name: submission.name,
       description: submission.description ?? null,
       isActive: submission.isActive ?? true,
+      // Sent only when the form gave them: an absent field is left as it is (DocumentCategorySettings is partial).
+      ...(submission.requiresExpiry !== undefined ? { requiresExpiry: submission.requiresExpiry } : {}),
+      ...(submission.remindDaysBefore !== undefined ? { remindDaysBefore: submission.remindDaysBefore ?? 0 } : {}),
+      ...(submission.defaultVisibility !== undefined ? { defaultVisibility: submission.defaultVisibility ?? "" } : {}),
     };
 
     if (submission.id) {

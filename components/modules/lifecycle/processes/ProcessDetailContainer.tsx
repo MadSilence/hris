@@ -35,6 +35,7 @@ import { ConfirmDialog } from "@/components/modules/lifecycle/shared/ConfirmDial
 import { TaskList } from "@/components/modules/lifecycle/tasks/TaskList";
 import type { Task } from "@/models/lifecycle";
 import { assigneeKindText } from "@/components/modules/lifecycle/i18n";
+import { useEnvelopesForPerson } from "@/components/modules/signing/hooks/useSigning";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { cancelProcessTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
@@ -59,6 +60,9 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
   const [taskOf, setTaskOf] = useState<Task | null>(null);
   const canEdit = useCanAccess("PEOPLE.LIFECYCLE_PROCESSES", "EDIT");
   const { userId: me } = useCurrentUser();
+  // A1: how each Sign task's signing stands or ended — read only when the process has one.
+  const hasSigning = Boolean(process?.tasks.some((task) => task.kind === "SIGN" && task.envelopeId));
+  const signings = useEnvelopesForPerson(hasSigning ? process?.target.id ?? "" : "");
 
   if (error) return <ErrorState error={error} />;
   if (isLoading || !process) {
@@ -222,6 +226,7 @@ export function ProcessDetailContainer({ processId }: { processId: string }) {
         ) : (
           <TaskList
             tasks={process.tasks}
+            signingOf={(id) => signings.data?.find((e) => e.id === id)}
             showAssignee
             busyTaskId={busyTask}
             canComplete={() => canEdit}

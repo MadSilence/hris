@@ -86,7 +86,6 @@ export const WhoSeesWhat: React.FC<{
     switch (step.type) {
       case "WAIT_UNTIL":
       case "SPLIT":
-      case "SIGN_DOCUMENT":
       case "SEND_SURVEY":
         return <p className="text-body text-tertiary">{t("whoSeesWhat.nothingSent")}</p>;
       default:
@@ -94,6 +93,17 @@ export const WhoSeesWhat: React.FC<{
     }
     if (!example) return <p className="text-body text-tertiary">{t("whoSeesWhat.waitingForDetails")}</p>;
     switch (step.type) {
+      case "SIGN_DOCUMENT":
+        // A02: the person's inbox, then a line for the signers after them — their order is the template's.
+        return (
+          <>
+            <Place icon={InboxIcon} label={t("whoSeesWhat.withRole", { place: t("whoSeesWhat.inbox", { name: person }), role: t("whoSeesWhat.role.PERSON") })}>
+              <p className="text-body font-medium text-primary">{t("whoSeesWhat.signRequested")}</p>
+              <p className="text-body text-secondary">{t("whoSeesWhat.signAsks", { company: companyName, document: example.title ?? "" })}</p>
+            </Place>
+            <p className="text-hint text-tertiary">{t("whoSeesWhat.signThen")}</p>
+          </>
+        );
       case "REQUEST_APPROVAL":
         return (
           <>

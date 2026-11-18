@@ -19,7 +19,7 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
 import { updateUserSettingsAction } from "@/components/modules/firstRun/actions";
 import { USER_SETTINGS_QK, useUserSettings } from "@/components/modules/firstRun/hooks";
-import { setDisplayPreferences, type DisplayDateFormat } from "@/lib/date";
+import { setDisplayPreferences } from "@/lib/date";
 import { offsetOf, timeZoneChoices } from "@/lib/timeZones";
 import { LOCALES, toLanguage } from "@/i18n/locales";
 
@@ -120,8 +120,9 @@ export function LanguageSelect({
 }
 
 /**
- * The preferences a person sets about how the product reads to them: the time zone, the date format and the
- * language. A time format would be the fourth — the column is there — but nothing in the product writes a clock
+ * The preferences a person sets about how the product reads to them: the time zone and the language. The date
+ * format is not one of them — it is the company's, by its country (DECISIONS.md § "The designers' Home fixes,
+ * round 1"). A time format would be the third — the column is there — but nothing in the product writes a clock
  * time yet, and `DECISIONS.md` § "A setting that is offered must work" is why it is not on this screen.
  *
  * <p>The language is also asked in the welcome (W4); it is here so a person who chose one there can change it again.
@@ -133,7 +134,6 @@ export const PersonalPreferencesForm: React.FC = () => {
   const { data, isLoading } = useUserSettings();
 
   const [timeZone, setTimeZone] = React.useState<string | null>(null);
-  const [dateFormat, setDateFormat] = React.useState<DisplayDateFormat>("SYSTEM");
   const [language, setLanguage] = React.useState<string | null>(null);
   const [seeded, setSeeded] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
@@ -141,7 +141,6 @@ export const PersonalPreferencesForm: React.FC = () => {
   React.useEffect(() => {
     if (!data || seeded) return;
     setTimeZone(data.timeZone);
-    setDateFormat(data.dateFormat as DisplayDateFormat);
     setLanguage(toLanguage(data.language));
     setSeeded(true);
   }, [data, seeded]);
@@ -153,7 +152,6 @@ export const PersonalPreferencesForm: React.FC = () => {
     const res = await updateUserSettingsAction({
       timeZone: timeZone ?? undefined,
       clearTimeZone: timeZone === null,
-      dateFormat,
       // Blank is "follow the company" on the wire (UserSettingsService).
       ...(languageChanged ? { language: language ?? "" } : {}),
     });
@@ -169,11 +167,10 @@ export const PersonalPreferencesForm: React.FC = () => {
       return;
     }
     // Applied at once rather than on the next full load: the person is looking at dates right now.
-    setDisplayPreferences({ timeZone, dateFormat });
+    setDisplayPreferences({ timeZone });
     await queryClient.invalidateQueries({ queryKey: USER_SETTINGS_QK });
   };
 
-  const today = new Date();
   const companyLanguage = toLanguage(data?.companyLanguage);
 
   return (
@@ -190,25 +187,6 @@ export const PersonalPreferencesForm: React.FC = () => {
         <p className="text-hint text-tertiary">
           {t("preferences.timeZone.hint")}
         </p>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <RequiredLabel htmlFor="settings-date-format">{t("preferences.dateFormat.label")}</RequiredLabel>
-        <Select
-          value={dateFormat}
-          onValueChange={(v) => setDateFormat(v as DisplayDateFormat)}
-          disabled={isLoading}
-        >
-          <SelectTrigger id="settings-date-format" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="SYSTEM">{t("preferences.dateFormat.system")}</SelectItem>
-            <SelectItem value="DMY">{t("preferences.dateFormat.dayFirst", { sample: sample(today, "DMY") })}</SelectItem>
-            <SelectItem value="MDY">{t("preferences.dateFormat.monthFirst", { sample: sample(today, "MDY") })}</SelectItem>
-            <SelectItem value="YMD">{t("preferences.dateFormat.yearFirst", { sample: sample(today, "YMD") })}</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -233,16 +211,4 @@ export const PersonalPreferencesForm: React.FC = () => {
       </div>
     </form>
   );
-};
-
-/** What today looks like in each format, so the choice is read rather than decoded. */
-const sample = (date: Date, format: Exclude<DisplayDateFormat, "SYSTEM">): string => {
-  const parts = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
-    .formatToParts(date);
-  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
-  const [d, m, y] = [value("day"), value("month"), value("year")];
-
-  if (format === "DMY") return `${d}.${m}.${y}`;
-  if (format === "MDY") return `${m}/${d}/${y}`;
-  return `${y}-${m}-${d}`;
 };

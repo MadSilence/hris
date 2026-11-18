@@ -29,7 +29,10 @@ export const contentSecurityPolicy = (nonce: string, mode: CspMode): string => {
     "img-src": ["'self'", "data:", "blob:", "https:"],
     "font-src": ["'self'", "data:"],
     // The browser talks only to its own host (`/api/…` — hris/CLAUDE.md); development adds the reload socket.
-    "connect-src": ["'self'", ...(development ? ["ws:", "wss:"] : [])],
+    // `blob:` is the page reading back bytes it already holds: `PdfViewer` fetches the blob URL its caller made from
+    // the downloaded file. Only a script on this page can mint one, so it reaches no other host. Without it every
+    // PDF on the signing screen and in a document preview read "We couldn't show this document" (walk of 2026-11-18).
+    "connect-src": ["'self'", "blob:", ...(development ? ["ws:", "wss:"] : [])],
     // A document preview opens the downloaded file as a blob in an iframe (PreviewDocumentModal).
     "frame-src": ["'self'", "blob:"],
     "worker-src": ["'self'", "blob:"],

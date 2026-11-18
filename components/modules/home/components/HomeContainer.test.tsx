@@ -37,6 +37,8 @@ jest.mock("@/components/modules/home/widgets/WhosOutWidget", () => ({ WhosOutWid
 jest.mock("@/components/modules/home/widgets/ThisWeekWidget", () => ({ ThisWeekWidget: mockStub("This week") }));
 jest.mock("@/components/modules/home/widgets/ProcessesWidget", () => ({ ProcessesWidget: mockStub("Processes") }));
 jest.mock("@/components/modules/home/widgets/AutomationsWidget", () => ({ AutomationsWidget: mockStub("Automations") }));
+jest.mock("@/components/modules/home/widgets/ToSignWidget", () => ({ ToSignWidget: mockStub("To sign") }));
+jest.mock("@/components/modules/notifications/hooks/useWaitingOnMe", () => ({ useWaitingOnMe: () => ({ data: undefined }) }));
 
 const accessWith = (permissions: Partial<Record<ResourceCode, ResourceAccess>>): EffectiveAccess => ({
   systemOwner: false, permissions, fields: {}, moduleSummary: {}, accessHash: "h",
@@ -99,6 +101,7 @@ describe("HomeContainer", () => {
       { id: "my-time-off", hidden: true },
       { id: "next-time-off", hidden: true },
       { id: "celebrations", hidden: true },
+      { id: "to-sign", hidden: true },
     ]);
     render(<HomeContainer />);
 
@@ -108,7 +111,7 @@ describe("HomeContainer", () => {
   });
 
   it("never empties: with every other widget removed, Waiting on you stays", () => {
-    given(EMPLOYEE, ["waiting-on-you", "my-time-off", "next-time-off", "my-tasks", "whos-out", "celebrations"].map((id) => ({ id, hidden: true })));
+    given(EMPLOYEE, ["waiting-on-you", "my-time-off", "next-time-off", "to-sign", "my-tasks", "whos-out", "celebrations"].map((id) => ({ id, hidden: true })));
     render(<HomeContainer />);
 
     expect(screen.queryByText("Your home is empty")).not.toBeInTheDocument();

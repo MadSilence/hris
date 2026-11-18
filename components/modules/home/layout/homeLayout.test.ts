@@ -26,6 +26,8 @@ const PROCESSES = w("processes");
 const ALL = [WAITING, TIME_OFF, NEXT, TASKS, WEEK, PROCESSES];
 
 const shape = (placed: { widget: ArrangeableWidget; size: string }[]) => placed.map((p) => `${p.widget.id}:${p.size}`);
+const cellsOf = (placed: { widget: ArrangeableWidget; size: string; col: number; row: number }[]) =>
+  placed.map((p) => `${p.widget.id}:${p.size}@${p.col},${p.row}`);
 
 describe("home's arrangement", () => {
   it("shows a widget that cannot be removed even where an older arrangement saved it hidden", () => {
@@ -59,11 +61,11 @@ describe("home's arrangement", () => {
     expect(shape(placed).slice(1)).toEqual(["waiting-on-you:L", "my-time-off:M", "my-tasks:L", "celebrations:M", "processes:M"]);
   });
 
-  it("saves what is on the page, what was removed, and what the reader cannot see right now", () => {
-    const placed = [{ widget: TASKS, size: "L" as const }];
+  it("saves what is on the page with its cell, what was removed, and what the reader cannot see right now", () => {
+    const placed = [{ widget: TASKS, size: "L" as const, col: 3, row: 2 }];
     const saved = toPlacements(placed, [TASKS, WEEK], [{ id: "automations", hidden: false, size: "M" }]);
     expect(saved).toEqual([
-      { id: "my-tasks", hidden: false, size: "L" },
+      { id: "my-tasks", hidden: false, size: "L", col: 3, row: 2 },
       { id: "celebrations", hidden: true, size: null },
       { id: "automations", hidden: false, size: "M" },
     ]);
@@ -71,18 +73,48 @@ describe("home's arrangement", () => {
     expect(arrangeHome([TASKS, WEEK], toPlacements([], [TASKS, WEEK], []), "EMPLOYEE")).toEqual([]);
   });
 
-  it("adds, moves, resizes and removes", () => {
+  it("keeps each widget in the cell it was saved in, empty cells included (E15)", () => {
+    const placed = arrangeHome([TASKS, WEEK], [
+      { id: "my-tasks", hidden: false, size: "L", col: 3, row: 3 },
+      { id: "celebrations", hidden: false, size: "S", col: 1, row: 1 },
+    ], "EMPLOYEE");
+    expect(cellsOf(placed)).toEqual(["celebrations:S@1,1", "my-tasks:L@3,3"]);
+  });
+
+  it("puts a widget the arrangement does not place in the first free cell", () => {
+    const placed = arrangeHome([TASKS, WEEK], [{ id: "my-tasks", hidden: false, size: "L", col: 1, row: 1 }], "EMPLOYEE");
+    expect(cellsOf(placed)).toEqual(["my-tasks:L@1,1", "celebrations:M@3,1"]);
+  });
+
+  it("moves a widget to a cell and pushes the one it lands on down; its old cells stay empty", () => {
+    let placed = arrangeHome([TASKS, WEEK, PROCESSES], [
+      { id: "my-tasks", hidden: false, size: "L", col: 1, row: 1 },
+      { id: "celebrations", hidden: false, size: "M", col: 3, row: 1 },
+      { id: "processes", hidden: false, size: "M", col: 4, row: 1 },
+    ], "HR");
+    placed = moveTo(placed, "processes", 3, 1);
+    expect(cellsOf(placed)).toEqual(["my-tasks:L@1,1", "processes:M@3,1", "celebrations:M@3,3"]);
+    // A wide one never hangs off the right edge.
+    placed = moveTo(placed, "my-tasks", 4, 5);
+    expect(cellsOf(placed)).toContain("my-tasks:L@3,5");
+  });
+
+  it("adds at a cell or in the first free one, resizes in place and removes without moving the rest (E17)", () => {
     let placed = defaultHome(ALL, "EMPLOYEE");
-    placed = addAt(placed, PROCESSES, "L");
-    expect(shape(placed).at(-1)).toBe("processes:L");
-    placed = moveTo(placed, "processes", 0);
-    expect(shape(placed)[0]).toBe("processes:L");
+    const before = cellsOf(placed);
+    placed = addAt(placed, PROCESSES, "S");
+    expect(cellsOf(placed)).toContain("processes:S@4,3");
+    placed = removeWidget(placed, "processes");
+    expect(cellsOf(placed)).toEqual(before);
+    placed = addAt(placed, PROCESSES, "L", { col: 1, row: 1 });
+    expect(cellsOf(placed)[0]).toBe("processes:L@1,1");
+    expect(cellsOf(placed)).toContain("waiting-on-you:L@1,3");
     placed = resizeWidget(placed, "next-time-off", "L");
     expect(shape(placed)).toContain("next-time-off:S");
-    placed = resizeWidget(placed, "processes", "S");
-    expect(shape(placed)[0]).toBe("processes:S");
     placed = removeWidget(placed, "processes");
-    expect(sameHome(placed, defaultHome(ALL, "EMPLOYEE"))).toBe(true);
+    // Removing it leaves its cells empty: Waiting on you stays where it was pushed.
+    expect(sameHome(placed, defaultHome(ALL, "EMPLOYEE"))).toBe(false);
+    expect(cellsOf(placed)).toContain("waiting-on-you:L@1,3");
   });
 
   it("packs every role's default without a hole in the middle at four columns (walk of 2026-11-11)", () => {

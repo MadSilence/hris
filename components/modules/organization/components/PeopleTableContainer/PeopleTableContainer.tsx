@@ -2,7 +2,9 @@
 
 import { useIsDemo } from "@/components/modules/demo";
 import { SelectionBar } from "@/components/ui/SelectionBar";
-import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { File01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { RequestManyDialog } from "@/components/modules/signing/components/RequestManyDialog";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -73,6 +75,8 @@ const isColumnVisible = (f: FieldDTO): boolean =>
 const PeopleTableContainer: React.FC = () => {
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
+  const tSigning = useTranslations("signing");
+  const canRequestDocuments = useCanAccess("PEOPLE.DOCUMENTS", "EDIT");
   const nameLabel = tCommon("fields.personName");
   const [addPersonOpen, setAddPersonOpen] = useState(false);
   // First name, not last: the table shows one Name column and it sorts by first name, so a default
@@ -399,6 +403,7 @@ const PeopleTableContainer: React.FC = () => {
   const viewsBusy = viewMutations.create.isPending || viewMutations.update.isPending;
 
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [requestManyOpen, setRequestManyOpen] = useState(false);
 
   // Selection lives in one place now: the header checkbox picks everyone up or puts everyone down,
   // and the Edit button in the topbar appears while anyone is held. The old action bar said the same
@@ -470,7 +475,13 @@ const PeopleTableContainer: React.FC = () => {
                 {t("table.selection.clearSelection")}
               </button>
             ) : null}
-            actions={[{ key: "edit", label: tCommon("actions.edit"), icon: PencilEdit02Icon, onClick: () => setBulkOpen(true) }]}
+            actions={[
+              { key: "edit", label: tCommon("actions.edit"), icon: PencilEdit02Icon, onClick: () => setBulkOpen(true) },
+              // R10: ask everyone picked to upload a document — offered to those who may edit others' documents.
+              ...(canRequestDocuments
+                ? [{ key: "request", label: tSigning("requests.documents"), icon: File01Icon, onClick: () => setRequestManyOpen(true) }]
+                : []),
+            ]}
           />
         ) : (
           <PeopleTopbar
@@ -540,6 +551,16 @@ const PeopleTableContainer: React.FC = () => {
         fields={fieldsData ?? []}
         onApplied={onBulkApplied}
       />
+
+      {requestManyOpen && (
+        <RequestManyDialog
+          target={bulkTarget.kind === "ids"
+            ? bulkTarget
+            : { kind: "segment", filters: bulkTarget.filters, q: bulkTarget.q ?? null, drafts: bulkTarget.drafts ?? null }}
+          count={heldCount}
+          onCloseAction={() => setRequestManyOpen(false)}
+        />
+      )}
 
       <AddPersonModal open={addPersonOpen} onCloseAction={() => setAddPersonOpen(false)} />
 

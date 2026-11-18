@@ -5,14 +5,32 @@ import type {
   UnreadCountDTO,
 } from "@/api/modules/notifications/dto";
 import { notificationMapper } from "@/api/modules/notifications/mappers";
-import type { Notification, NotificationChannel, NotificationPreference } from "@/models/notifications";
+import type { TimeOffRequestDTO } from "@/api/modules/timeOff/timeOffRequests/dto";
+import { timeOffRequestMapper } from "@/api/modules/timeOff/timeOffRequests/mappers";
+import {
+  notificationPageQueryString,
+  type InboxSummary,
+  type Notification,
+  type NotificationChannel,
+  type NotificationPage,
+  type NotificationPageQuery,
+  type NotificationPreference,
+  type WaitingOnMe,
+} from "@/models/notifications";
 
 export class HrisApiNotificationsClient {
   private readonly PATH = "/notifications";
 
-  public async list(): Promise<Notification[]> {
-    const dtos = await hrisApiClient.get<NotificationDTO[]>(this.PATH);
-    return notificationMapper.mapNotificationDTOs(dtos);
+  /** One page of the inbox (B5). */
+  public async list(query: NotificationPageQuery = {}): Promise<NotificationPage> {
+    const dto = await hrisApiClient.get<{ items: NotificationDTO[]; nextCursor: string | null }>(
+      `${this.PATH}${notificationPageQueryString(query)}`,
+    );
+    return { items: notificationMapper.mapNotificationDTOs(dto.items), nextCursor: dto.nextCursor };
+  }
+
+  public async summary(): Promise<InboxSummary> {
+    return hrisApiClient.get<InboxSummary>(`${this.PATH}/summary`);
   }
 
   public async unreadCount(): Promise<number> {
@@ -49,6 +67,13 @@ export class HrisApiNotificationsClient {
 
   public async setPreference(category: string, enabled: boolean, channel: NotificationChannel = "IN_APP"): Promise<void> {
     await hrisApiClient.put<void>(`${this.PATH}/preferences/${category}/${channel}`, { enabled });
+  }
+
+  /** What waits on the caller — one list for the inbox, Home and a profile (A1). Lives at `/me/actions`. */
+  public async waitingOnMe(): Promise<WaitingOnMe> {
+    const dto = await hrisApiClient.get<Omit<WaitingOnMe, "requests"> & { requests: TimeOffRequestDTO[] }>("/me/actions");
+    // Leave reads as the awaiting-me list does: through the time-off mapper, never as raw DTOs.
+    return { ...dto, requests: timeOffRequestMapper.mapTimeOffRequestDTOs(dto.requests) };
   }
 }
 

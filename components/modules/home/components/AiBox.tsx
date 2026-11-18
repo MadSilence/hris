@@ -13,8 +13,8 @@ import { NEEDS_ACTION_INBOX_HREF } from "@/components/modules/notifications/util
 import { cn } from "@/lib/cn";
 import { useRequestTimeOff } from "./HomeRequestTimeOff";
 
-/** Six lines of 20 px, then the text scrolls inside (A02). */
-const MAX_TEXT_HEIGHT = 120;
+/** Six lines of 26 px, then the text scrolls inside (A02). */
+const MAX_TEXT_HEIGHT = 156;
 
 type Row = { key: string; group: "people" | "do" | "ask"; label: string; detail?: string | null; avatarUrl?: string | null; run: () => void };
 
@@ -22,18 +22,26 @@ const initialsOf = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "?";
 
 /**
- * The box next to the greeting (`home` spec, A01–A02): ask, search or tell noddo what to do. Focused, it grows upward
- * for the text and the chips; what it finds opens **under** it, over the cards. **A stub where the
+ * The box next to the greeting (`home` spec, A01–A02; the designers' Home fixes H1, H16): ask, search or tell noddo
+ * what to do. Focused, it **takes the whole greeting row** — the container's left edge to its right — on the same
+ * bottom line as the closed box, and grows upward for the text and the chips; the greeting fades out meanwhile
+ * (`onOpenChange`). What it finds opens **under** it, over the cards. The greeting row must be `relative`. **A stub where the
  * assistant goes** (DECISIONS.md § "The home redesign"): People are quick search's, Do is a short list of Home's own
  * actions, and *Ask noddo* says the assistant is on its way and sends nothing. `/` focuses it from anywhere on Home;
  * Esc closes it and keeps the text.
  */
-export const AiBox: React.FC<{ onEditHome?: () => void; className?: string }> = ({ onEditHome, className }) => {
+export const AiBox: React.FC<{ onEditHome?: () => void; onOpenChange?: (open: boolean) => void; className?: string }> = ({
+  onEditHome,
+  onOpenChange,
+  className,
+}) => {
   const t = useTranslations("home");
   const router = useRouter();
   const { userId } = useCurrentUser();
   const requestTimeOff = useRequestTimeOff();
   const [open, setOpen] = useState(false);
+  // The greeting fades while the box is open (H1).
+  useEffect(() => onOpenChange?.(open), [open, onOpenChange]);
   const [text, setText] = useState("");
   const [active, setActive] = useState(-1);
   const area = useRef<HTMLTextAreaElement>(null);
@@ -153,7 +161,10 @@ export const AiBox: React.FC<{ onEditHome?: () => void; className?: string }> = 
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex h-8 shrink-0 items-center rounded-pill border border-field bg-card px-3 text-label text-secondary hover:border-strong hover:text-primary"
+      className={cn(
+        "inline-flex h-8 shrink-0 items-center rounded-pill border border-field bg-transparent text-secondary hover:border-strong hover:text-primary",
+        open ? "px-3 text-label leading-5" : "px-2.5 text-hint leading-5 font-medium",
+      )}
     >
       {label}
     </button>
@@ -182,16 +193,19 @@ export const AiBox: React.FC<{ onEditHome?: () => void; className?: string }> = 
   const doFound = rows.some((r) => r.group === "do");
 
   return (
-    <div ref={root} className={cn("relative h-14 w-[520px] max-w-full shrink-0", className)}>
+    // Open, the box leaves its own place for the greeting row's: the root stops being the box's frame.
+    <div ref={root} className={cn("h-14 w-[520px] max-w-full shrink-0", !open && "relative", className)}>
       <div
         className={cn(
-          "absolute right-0 bottom-0 z-20 flex flex-col rounded-ai-box bg-card shadow-popover transition-[width] duration-(--duration-reorder)",
-          open ? "w-[640px] max-w-[calc(100vw-48px)] gap-3 p-4" : "h-14 w-full flex-row items-center gap-3 py-0 pr-2 pl-[18px]",
+          "absolute bottom-0 z-20 flex flex-col rounded-ai-box bg-card",
+          open
+            ? "inset-x-0 gap-2.5 pt-3 pr-2 pb-2 pl-[18px] shadow-ai-box-open"
+            : "right-0 h-14 w-full flex-row items-center gap-3 py-0 pr-2 pl-[18px] shadow-ai-box",
         )}
       >
         {!open && <Icon icon={SparklesIcon} size="md" className="shrink-0 text-accent" />}
-        <div className={cn("flex min-w-0 items-start gap-3", open ? "w-full" : "flex-1")}>
-          {open && <Icon icon={SparklesIcon} size="md" className="mt-0.5 shrink-0 text-accent" />}
+        <div className={cn("flex min-w-0 items-start gap-3", open ? "w-full pt-0.5" : "flex-1")}>
+          {open && <Icon icon={SparklesIcon} size="md" className="mt-1 size-[18px] shrink-0 text-accent" />}
           <textarea
             ref={area}
             rows={1}
@@ -208,7 +222,10 @@ export const AiBox: React.FC<{ onEditHome?: () => void; className?: string }> = 
               setActive(-1);
             }}
             onKeyDown={onKeyDown}
-            className="min-w-0 flex-1 resize-none bg-transparent py-0.5 text-body text-primary outline-none placeholder:text-tertiary"
+            className={cn(
+              "min-w-0 flex-1 resize-none bg-transparent text-primary outline-none placeholder:text-tertiary",
+              open ? "text-home-input" : "py-0.5 text-body",
+            )}
           />
         </div>
         {open ? (
@@ -217,10 +234,7 @@ export const AiBox: React.FC<{ onEditHome?: () => void; className?: string }> = 
               {requestTimeOff && chip(t("ai.chips.requestTimeOff"), () => { close(); requestTimeOff(); })}
               {chip(t("ai.chips.whosOutFriday"), () => setText(t("ai.chips.whosOutFriday")))}
               {chip(t("ai.chips.myBalance"), () => setText(t("ai.chips.myBalance")))}
-              <span className="ml-auto flex items-center gap-3">
-                <span className="text-hint text-tertiary">{t("ai.hint")}</span>
-                {send}
-              </span>
+              <span className="ml-auto">{send}</span>
             </div>
           </>
         ) : (
@@ -234,7 +248,7 @@ export const AiBox: React.FC<{ onEditHome?: () => void; className?: string }> = 
               <ul
                 id={listId}
                 role="listbox"
-                className="absolute top-full right-0 z-30 mt-2 flex max-h-[360px] w-[640px] max-w-[calc(100vw-48px)] flex-col gap-1 overflow-y-auto rounded-popover border border-divider bg-overlay p-2 shadow-popover"
+                className="absolute inset-x-0 top-full z-30 mt-2 flex max-h-[360px] flex-col gap-1 overflow-y-auto rounded-popover border border-divider bg-overlay p-2 shadow-popover"
               >
                 {!peopleFound && !doFound && !search.isLoading && (
                   <li className="px-2 py-1 text-label text-tertiary">{t("ai.noResults", { text: term })}</li>

@@ -203,7 +203,9 @@ export const PublicHolidayDriftActions: FC<{ notification: Notification }> = ({ 
   const busy = apply.isPending || dismiss.isPending;
   const hiddenRequests = details.affectedRequestCount - details.affectedRequests.length;
   const moreChanges = details.changeCount - details.changes.length;
-  const calendarHref = notification.targetId ? `/settings/time/public-holidays/${notification.targetId}` : null;
+  // The same field the presenter's row link reads, so the two links cannot point at different calendars.
+  const calendarId = typeof notification.params.calendarId === "string" ? notification.params.calendarId : notification.targetId;
+  const calendarHref = calendarId ? `/settings/time/public-holidays/${calendarId}` : null;
 
   const answered = () => {
     invalidateNotifications();

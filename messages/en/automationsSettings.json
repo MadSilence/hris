@@ -256,7 +256,7 @@
     "ifNoAnswer": {
       "ASK_THEIR_MANAGER": "Ask their manager",
       "STOP": "Stop the run",
-      "DECLINE": "Treat it as declined"
+      "DECLINE": "Count as declined"
     },
     "remind": "Remind them every day"
   },
@@ -269,22 +269,34 @@
     "afterStarts": "after it starts"
   },
   "sign": {
-    "documents": "Documents",
-    "documentsHint": "Type a document's name and press Enter.",
-    "who": "Who signs"
+    "documents": "Template",
+    "template": "Template",
+    "templateHint": "The document is made for the person when the step runs, and filed in their Documents.",
+    "pick": "Pick a template",
+    "noTemplate": "No template by that name",
+    "who": "Who signs",
+    "whoHint": "Set on the template.",
+    "timeToSign": "Time to sign",
+    "days": "{count, plural, one {# day} other {# days}} · from the template",
+    "templateProblem": "This template can't be used as it is: open it in Settings and fix it.",
+    "kind": {
+      "PERSON": "The person",
+      "MANAGER": "Their manager",
+      "USER": "A named person",
+      "GUEST": "A guest"
+    }
   },
   "survey": {
     "name": "Survey",
     "who": "Who gets it"
   },
   "notConnected": {
-    "documents": "Not connected yet: a run skips this step until documents are connected.",
     "surveys": "Not connected yet: a run skips this step until surveys are connected."
   },
   "wait": {
     "until": "Wait until",
-    "taskDone": "A task from this run is done",
-    "noTask": "Add a “Create a task” step before this one.",
+    "taskDone": "A task or signing from this run is done",
+    "noTask": "Add a “Create a task” or “Send for signature” step before this one.",
     "task": "Task",
     "pickTask": "Pick a task",
     "taskOption": "{number} · {title}",
@@ -310,7 +322,10 @@
       "STOP": "Stop",
       "STOP_AND_TELL": "Stop and tell someone"
     },
-    "tell": "Tell"
+    "tell": "Tell",
+    "signedOption": "{number} · {title} is signed",
+    "untitledDocument": "The document",
+    "signedHint": "Signed means everyone has signed. Declined or cancelled counts as not signed: the run doesn't wait for the date."
   },
   "assign": {
     "action": "Action",

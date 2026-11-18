@@ -116,6 +116,12 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedScopes: COMPANY_ONLY,
       },
       {
+        code: "PEOPLE.DOCUMENT_TEMPLATES",
+        messageKey: "peopleDocumentTemplates",
+        supportedActions: ["MANAGE"],
+        supportedScopes: COMPANY_ONLY,
+      },
+      {
         code: "PEOPLE.TIME_OFF",
         messageKey: "peopleTimeOff",
         supportedActions: ALL_ACTIONS,

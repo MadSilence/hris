@@ -141,3 +141,22 @@ Every string in the frames is in `words.md`.
   - **"+" adds at the end of the order**; the dense grid then puts the widget in the first free place it fits.
   - The category counts and the list leave out My time and To sign (not built).
 - **Images of the real screen:** owed by the first walk.
+
+### The designers' fixes, round 1 (2026-11-18)
+
+Built from `design-fixes-round-1` (FIXES.md Part 4.2, E1–E21). Where the text above disagrees, these win:
+
+- **Zoom (E2, E3):** the edit bar runs from the page's 56 to 520 from the window's right edge; the page is Home at its
+  own width (Part 3) zoomed to the bar's width — 894 ÷ 1200 = 0.745 at 1710, 654 ÷ 1118 = 0.585 at 1470. The band is
+  189 + 198 × zoom high.
+- **Drag and drop (E14, E15):** pointer events, from the panel and on the page — the widget lifts (level 4, 2°, a 3 px
+  accent outline on the page), a dashed drop place in grid cells follows the pointer. A press that does not move opens the
+  size popover as before. **"+" puts a widget in the first free cell**; removing one leaves its cells empty (E17).
+- **Bar (E4–E7, E21):** Cancel transparent 38 high, Save 36 as wide as its word, Reset a text link, "Header" 12/20 and the
+  small Color/Light switch; the word is **Color**.
+- **Panel (E8–E13, E19, E20, E11b, E11c):** Mist chips with the picked one Ink; rows without a box, a line between them;
+  the "+" a 32 accent outline square with a plus icon; square corners and a border on the left; the search its own field
+  (accent border when focused or filled, a plain × inside); no results centred.
+- **Toasts (E16):** Cancel, Discard and Save dismiss the session's toasts.
+- **Widgets (E18)** look exactly as on Home; they take no pointer.
+- Opening scrolls the editor to its top (E1).

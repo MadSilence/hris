@@ -33,7 +33,8 @@
       "minutes": "{count} min ago",
       "hours": "{count}h ago",
       "days": "{count}d ago"
-    }
+    },
+    "deleted": "Notification deleted"
   },
   "categories": {
     "APPROVALS": "Approvals",
@@ -77,6 +78,15 @@
       "cancelled": "Cancelled",
       "cancellationApproved": "Cancellation approved",
       "cancellationDeclined": "Cancellation declined"
+    },
+    "markDone": "Mark done",
+    "taskOutcomes": {
+      "done": "Done",
+      "cancelled": "No longer needed",
+      "reassigned": "Given to somebody else",
+      "signed": "Signed",
+      "declined": "Declined",
+      "closed": "Closed"
     }
   },
   "drift": {
@@ -269,6 +279,38 @@
       "title": "Document added",
       "message": "{who} added {file} to your file."
     },
+    "documentExpiringSoon": {
+      "title": "Document expires soon",
+      "message": "{hasPerson, select, yes {{person}: {file}} other {Your {file}}} is valid{hasDue, select, yes { until {due}} other {}}. Renew it or upload the new one."
+    },
+    "signatureRequested": {
+      "title": "Signature requested",
+      "message": "{what} waits for your signature."
+    },
+    "signatureCompleted": {
+      "title": "Signed by everyone",
+      "message": "{what} has been signed by everyone."
+    },
+    "signatureDeclined": {
+      "title": "Signature declined",
+      "message": "{who} declined to sign {what}.{hasReason, select, yes { “{reason}”} other {}}"
+    },
+    "signatureExpired": {
+      "title": "Not signed in time",
+      "message": "{what} was not signed before its deadline."
+    },
+    "signatureCancelled": {
+      "title": "Signing cancelled",
+      "message": "{who} cancelled the signing of {what}.{hasReason, select, yes { “{reason}”} other {}}"
+    },
+    "documentRequested": {
+      "title": "Document requested",
+      "message": "{who} asks you to upload {what}{hasDue, select, yes { by {due}} other {}}."
+    },
+    "documentExpired": {
+      "title": "Document expired",
+      "message": "{hasPerson, select, yes {{person}: {file}} other {Your {file}}} has expired{hasDue, select, yes { on {due}} other {}}. Upload the new one."
+    },
     "taskDue": {
       "title": "A task is due",
       "message": "\"{task}\" in {target}'s {kind, select, onboarding {onboarding} offboarding {offboarding} other {preboarding}} is due today."
@@ -421,6 +463,32 @@
     "hubPostPublished": {
       "title": "Company news",
       "message": "{author} posted “{title}”."
+    },
+    "documentRequestFulfilled": {
+      "title": "Document uploaded",
+      "message": "{who} uploaded {what}."
+    },
+    "teamMemberJoining": {
+      "title": "Somebody joins your team",
+      "todayTitle": "Somebody starts today",
+      "message": "{today, select, yes {Today is {person}’s first day.} other {{person} joins your team on {date}.}}"
+    },
+    "teamMemberLeaving": {
+      "title": "Somebody leaves your team",
+      "todayTitle": "A last day today",
+      "message": "{today, select, yes {Today is {person}’s last working day.} other {{person}’s last working day is {date}.}}"
+    },
+    "processCompleted": {
+      "title": "{kind, select, offboarding {Offboarding finished} other {Onboarding finished}}",
+      "message": "{target}’s {kind, select, offboarding {offboarding} other {onboarding}} is complete."
+    },
+    "carryoverExpiring": {
+      "title": "Carried-over days expire soon",
+      "message": "{count, plural, one {{amount} carried-over day} other {{amount} carried-over days}} of {hasPolicy, select, yes {{policy}} other {your leave}} expire on {date}. Take them before then."
+    },
+    "sharedWithYou": {
+      "title": "Shared with you",
+      "message": "{hasActor, select, yes {{actor} shared} other {Somebody shared}} {kind, select, report {a report} other {a view of people}}{hasName, select, yes { “{name}”} other {}} with you."
     }
   },
   "unsubscribe": {

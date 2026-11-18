@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, { useContext } from "react";
 import useSWR from "swr";
 import type { Company } from "@/models/company/Company";
+import { CompanyDataContext } from "./companyDataContext";
 
 const fetcher = async <T, >(url: string): Promise<T> => {
   const res = await fetch(url, { credentials: "include" });
@@ -13,20 +14,6 @@ const fetcher = async <T, >(url: string): Promise<T> => {
 
   return res.json();
 };
-
-type CompanyDataContextValue = {
-  company: Company | undefined;
-  companyId: string | undefined;
-
-  error: unknown;
-  isLoading: boolean;
-  isValidating: boolean;
-
-  refreshCompany: () => Promise<Company | undefined>;
-  clearCompanyCache: () => void;
-};
-
-const CompanyDataContext = createContext<CompanyDataContextValue | null>(null);
 
 const CompanyDataProvider = ({ children }: { children: React.ReactNode }) => {
   const {

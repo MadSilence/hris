@@ -129,4 +129,17 @@ describe("TaskList — done where shown", () => {
     rerender(<TaskList tasks={[task()]} onEditAction={jest.fn()} onCancelAction={jest.fn()} />);
     expect(screen.getByRole("button", { name: "Task actions" })).toBeInTheDocument();
   });
+
+  it("a Sign task in a process says how its signing ended — declined, by whom and why (A1)", () => {
+    const signing = {
+      id: "env-1", title: "Contract", status: "DECLINED", subjectUserId: "u1", sourceDocumentId: null, signedDocumentId: null,
+      templateId: "tpl", documentHash: "h", sentBy: "hr", sentAt: "2026-11-18T10:00:00Z", expiresAt: null, completedAt: null,
+      closedAt: "2026-11-18T11:00:00Z", closeReason: null, sentByName: "Lena", youSignerId: null,
+      signers: [{ id: "s1", order: 1, label: null, userId: "u1", name: "Maria Santos", email: null, isGuest: false,
+        status: "DECLINED", pendingSince: null, signedAt: null, declinedAt: "2026-11-18T11:00:00Z", declineReason: "Wrong salary" }],
+    } as unknown as import("@/api/modules/signing/dto").EnvelopeDTO;
+    render(<TaskList tasks={[task({ kind: "SIGN", status: "CANCELLED", envelopeId: "env-1" })]} signingOf={(id) => (id === "env-1" ? signing : undefined)} />);
+    expect(screen.getByText("Maria Santos declined to sign: “Wrong salary”")).toBeInTheDocument();
+    expect(screen.queryByText("Cancelled")).not.toBeInTheDocument();
+  });
 });

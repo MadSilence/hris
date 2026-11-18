@@ -1,7 +1,6 @@
 import type { HomeHeaderStyle, HomeWidgetPlacement } from "@/models/home";
 
 /** One person's own preferences. Mirrors `UserSettingsDTO` on the backend. */
-export type UserDateFormat = "SYSTEM" | "DMY" | "MDY" | "YMD";
 export type UserTimeFormat = "SYSTEM" | "H24" | "H12";
 
 export type UserSettingsDTO = {
@@ -9,7 +8,6 @@ export type UserSettingsDTO = {
   timeZone: string | null;
   /** Which zone that currently is, so a screen can name it without a second call. */
   companyTimeZone: string;
-  dateFormat: UserDateFormat;
   timeFormat: UserTimeFormat;
   /** The person's own language; null means "follow the company" (I18N.md § 5). */
   language: string | null;
@@ -30,13 +28,14 @@ export type UserSettingsDTO = {
   showBirthdayOnHome: boolean;
   /** The hour (0-23, own time zone) of the daily email digest; 8 unless chosen. */
   digestHour: number;
+  /** The columns this person hid, per table — `{ "documents": ["size"] }` (documents-tab T22–T23). */
+  hiddenColumns?: Record<string, string[]>;
 };
 
 export type UpdateUserSettingsRequest = {
   timeZone?: string | null;
   /** null on `timeZone` means "leave it alone"; this is how "follow the company" is said. */
   clearTimeZone?: boolean;
-  dateFormat?: UserDateFormat;
   timeFormat?: UserTimeFormat;
   language?: string | null;
   delegateApprovalsOnLeave?: boolean;
@@ -48,4 +47,6 @@ export type UpdateUserSettingsRequest = {
   homeSkipped?: string[];
   showBirthdayOnHome?: boolean;
   digestHour?: number;
+  /** Merged by table: the tables named are replaced, the rest kept. */
+  hiddenColumns?: Record<string, string[]>;
 };
