@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-company-login
 owner: Ulia
 updated: 2026-11-13
@@ -69,6 +69,17 @@ None beyond § Common (`AuthSplit` company variant, `CodeInput`).
 
 ## Open questions
 None blocking. Backend points for C10 (lifetime, single use, link bound to the browser, second step still asked, shared rate limit, whether a code login resets the password-failure counter) are in `decisions-for-petya.md` § C10.
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** `/login` and `/login/owner` on a company's address. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - **C10 is a step of the login, not a route** — no email sits in an address (`SIGN_IN_IMPLEMENTATION_DESIGN.md` § 14).
+  - "Email me a login code" is not offered on C6 nor under required SSO; the one-click link works only in the browser
+    that asked, and says so in another.
+  - The code boxes keep the 3 px muted-accent focus ring every field has (Q-55).
+  - Google / Microsoft not walked for real (`(claude)/testing/CONFIGURATION_REQUIRED.md` § 8.G).
 
 ## Built from design-fixes-login-1
 - **A code for an address that can't log in here** (C14): nothing is sent, but the screen answers as for a real code — "That code doesn’t match. Try again." for each try, "Too many attempts. Try again later." at the fifth, "This code has expired. Send a new one." after ten minutes. "Expired" never appears for an address that was never sent a code.

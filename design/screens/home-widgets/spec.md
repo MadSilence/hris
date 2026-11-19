@@ -244,21 +244,21 @@ Q-5 (where the Skip order is kept), Q-6 (the per-day automation read) — in `ha
 ## Built
 *Filled by the code side when the screen is built.*
 
-- **Where to see it:** the widgets on `/dashboard` — `components/modules/home/widgets/`. Built 2026-11-11, **not yet
-  looked at in a browser**.
+- **Where to see it:** the widgets on `/dashboard` — `components/modules/home/widgets/`. Built 2026-11-11, walked with the window hidden
+  that day and in the pane with the designers' rounds of 2026-11-18 and 19.
 - **Differs from the design:**
-  - **My time (§ 4) and To sign (§ 7) are not built** (the owner).
+  - **My time (§ 4) is not built** (the owner). To sign (§ 7) is built — the designers' round 1 below.
   - **Waiting on you's cards are the kinds with a module** (the owner): time off and its cancellation, an
     automation's approval, tasks, review steps, and for HR a failed automation run. Expense, attendance correction,
     document, missing data, policy, answered request and announcement arrive with their modules. A failed run offers
-    **Fix it only** — a run has no "read" state to mark.
+    **Mark as read** and **Fix it** (since the fixes of 2026-11-19; "read" is the person's own skip, a `read-run:` key).
   - **Approve's Undo delays the answer** (the owner): it is held five seconds and sent when the toast closes.
   - **Mark done** is offered only for a task with nothing to fill (to do, acknowledge); others offer Start.
   - **Who's out Large** shows Monday to Friday but has data only from today on (the read is "the rest of the week");
-    the "Upcoming" filler in the free space is not built.
+    **Upcoming** under the lanes is built (`WhosOutWidget.tsx`, the designers' round 1 below).
   - **My team / Everyone** is remembered in the browser, not on the server.
   - **Next time off Small** shows the countdown at 44; the calendar leaf sits where the title's link would.
-- **Images of the real screen:** owed by the first walk.
+- **Images of the real screen:** owed — a person's eye (`(claude)/testing/OWNER_VISUAL_REVIEW.md`).
 
 ### The designers' fixes, round 1 (2026-11-18)
 

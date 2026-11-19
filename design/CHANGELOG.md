@@ -4,6 +4,18 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-19** — **Two briefs are yours**: `briefs/DOCUMENTS_TEMPLATES_BRIEF.md` (the template editor — the most urgent: Send for signature, the Sign task and "Open the template" wait on it) and `briefs/NOTIFICATIONS_BRIEF.md` (its § 11 holds seven questions). Open questions after the fix rounds, written out with where to look: `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
+- **2026-11-19** — **Corrections to the lines below, and the documents answers built.** The 2026-11-18 line "The Upload
+  dialog (M3) is not redrawn yet" is no longer true: the documents build's answers of 2026-11-18 (batch 11) landed —
+  **our own `PdfViewer`** on pdf.js in the signing screens and the tab's preview (not the browser's viewer); **"Their
+  manager · {name}"** first in the signer picker, a one-click button that adds today's manager as a person;
+  **the upload window as drawn (M3)**, 800 wide in two columns; **dropping files onto a folder tile**, with its
+  drop-target state; **Sign in a running process** (Add task offers it; the document goes out when the task opens);
+  **a Home card for every signing waiting on you**, sent from a profile too; the automation step's **meta line** and
+  A01's **New** mark. What differs is the "Built" of `documents-tab`, `documents-send-for-signature`,
+  `documents-signing`, `automations-send-for-signature` and `process-sign-task`. The nine `sign-in-*` login screens are
+  now `built` (they were built and walked on 2026-11-13; each "Built" says what differs). Home round 1's package is
+  filed at `handoffs/2026-11-18-fixes-home`. New questions Q-56–Q-63.
 - **2026-11-19** — **Login fixes round 1 built and walked** (`handoffs/2026-11-19-fixes-login`; what differs is the "Built" of
   `sign-in-root`, `sign-in-registration`, `sign-in-company-login`; your answers Q-54, your question Q-55). For the package:
   **a refusal on any login form is one `InlineAlert` (declined) at the head of the form**; field errors are Error text

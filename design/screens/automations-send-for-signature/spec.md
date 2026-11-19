@@ -75,10 +75,10 @@ Q-38 (who sends a document an automation sends), Q-39 (Wait ends on declined / c
 *Filled by the code side when the screen is built.*
 
 - **Where to see it:** Automations → an automation → "+" → Send for signature (`settings/steps/PeopleSteps.tsx`
-  `SignFields`, `WaitFields`, `editor/windows/WhoSeesWhat.tsx`). Built 2026-11-18, **not yet looked at in a browser**.
-- **Differs from the design:** the step card's meta line ("The person, then their manager · 30 days to sign") is not
-  drawn; the step shows the template's name only. A01's "New" mark is not drawn. "Open the template" waits for the
-  Templates screens.
+  `SignFields`, `WaitFields`, `editor/windows/WhoSeesWhat.tsx`). Built 2026-11-18, walked in the pane with the automations fixes (2026-11-19).
+- **Differs from the design:** "Open the template" waits for the Templates screens. The step card's meta line
+  ("The person, then their manager · 30 days to sign", `AutomationCanvas.tsx` `signMeta`) and A01's "New" mark
+  (`QuickAdd.tsx` `addStep.new`) were built later (documents batch 11, 2026-11-18).
 
 ### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
 

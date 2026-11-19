@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-root
 owner: Ulia
 updated: 2026-11-13
@@ -94,7 +94,18 @@ See "Common" above.
 See "Common". A2's company tile is new (`RememberedCompany`): 56 logo tile, name 18/26 600, address 13/18 tertiary, the whole tile not clickable — "Continue" is the action.
 
 ## Open questions
-- Q-14 (A2 needs the remembered company's public logo and name) — blocks nothing; without it A2 shows the address only.
+- ~~Q-14~~ — answered as recommended and built: A2 reads the remembered company's public logo and name (Built).
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** `/login` and `/login/find` on the root — `components/modules/auth/layout` (`AuthSplit`, `RingGrid`,
+  `AuthHeading`, `AuthBack`), `components/modules/companyAddress`. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - A2's remembered company shows its public logo and name (Q-14, as recommended: `readRememberedCompany`,
+    `CompanyAddressStep` `CompanyTile`); without them, the address only.
+  - The pane's slogan "Every yes, handled." has only a placeholder Russian line of the code side's («Каждое «да» — в
+    деле.») until the designers give one (`SIGN_IN_PLAN.md` A3).
 
 ## Built from design-fixes-login-1
 - **An address with no company** (R3, the owner's call of 19 Nov): A1 now asks before it follows the address, and stays with the field error "We can’t find that company. Check the address, or find your company by email." ("find your company by email" → A3). This replaces "goes to that address's own 'no such company' page" under States → Error. A company address visited directly (`unknown.<root>/login` and every step under it) is sent to the root at `/login/unknown?address=unknown`: A1 with the address typed in and the same error. If the check itself cannot be made (the backend is down), A1 follows the address as before.

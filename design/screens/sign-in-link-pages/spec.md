@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-link-pages
 owner: Ulia
 updated: 2026-11-13
@@ -46,3 +46,11 @@ None.
 
 ## Open questions
 None.
+
+---
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** N1 `/link-expired`, N3 `?reason=ended`. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:** nothing known.

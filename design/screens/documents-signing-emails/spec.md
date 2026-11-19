@@ -81,5 +81,5 @@ None blocks this.
 *Filled by the code side when the screen is built.*
 
 - **Where to see it:** Mailpit, after sending for signature, signing, cancelling — the Document kind of
-  email (`LoginEmail` Kind.DOCUMENT, the paper band from `design/email-images.mjs`). Built 2026-11-18, **not yet looked at in a browser**.
+  email (`LoginEmail` Kind.DOCUMENT, the paper band from `design/email-images.mjs`). Built 2026-11-18, walked in Mailpit the same day.
 - **Differs from the design:** nothing known.

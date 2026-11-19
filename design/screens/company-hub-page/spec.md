@@ -173,7 +173,7 @@ Page padding 32 48. The reading column is 760 wide, left-aligned.
 - Reused: `AiBox` (hub variant), `TagChip`, `EmptyState`, `ErrorState`, `ErrorPage`, `Skeleton`, `NodRing`, toasts.
 
 ## Open questions
-Q-11 (how What changed is made) is in `QUESTIONS-to-add.md`. It does not block: the design follows the recommended answer. Whether a new version asks people again is the editor's choice when publishing (`company-hub-manage`, CM06; Ulia, 12 Nov). A small fix keeps agreements and shows readers no What changed block.
+**Q-11, answered by the owner (2026-11-12):** in v1 the editor writes the What changed points in the publish dialog, with no "Drafted by AI" label; points drafted by the assistant come with the assistant. Whether a new version asks people again is the editor's choice when publishing (`company-hub-manage`, CM06; Ulia, 12 Nov). A small fix keeps agreements and shows readers no What changed block.
 
 ---
 
@@ -183,7 +183,8 @@ Q-11 (how What changed is made) is in `QUESTIONS-to-add.md`. It does not block: 
 - **Where to see it:** `/hub/handbook`, `/hub/handbook/{id}` — `components/modules/hub/reader/`. Built 2026-11-12; walked by the assistant the same day with the window hidden — **not yet looked at by a person**.
 - **Differs from the design:**
   - "What changed" compares with the version the reader agreed to, so a small fix since then is shown as changed too.
-  - The "What changed" block and the changed paragraph render grey, not in the accent tint — for the designers to say.
+  - The "What changed" block is on `accent-subtle` (`PageContainer.tsx`) and a changed paragraph's words are marked
+    `accent-muted` (`HubDocumentView.tsx`), as drawn.
   - A reader outside the page's audience sees "This page is private"; a deleted or unpublished page is not found.
 - **Images of the real screen:** not added — the walk's window was hidden.
 

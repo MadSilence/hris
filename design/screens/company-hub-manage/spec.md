@@ -428,7 +428,7 @@ Page padding 32 48.
 - Reused: `SegmentedControl`, `FilterChip`, `StatusBadge`, `TagChip`, toggles, checkboxes, `ConfirmActionModal`, the Mist `SelectionBar`, `EmptyState`, `ListEmptyState`, `ErrorState`, `Skeleton`, `NodRing`, toasts.
 
 ## Open questions
-Q-9 (who manages the hub), Q-11 (What changed drafted by AI) and Q-12 (news on Home) are in `QUESTIONS-to-add.md`. None blocks: each has a recommended default that the spec follows.
+Answered by the owner (2026-11-12): **Q-9** — HR only in v1, no team-lead mode yet (the team-lead lines above wait for scoped authors); the right is granted in Settings, "Who can post and edit pages" (CH2, CH4). **Q-11** — the editor writes the What changed points in the publish dialog, no "Drafted by AI" label, until the assistant exists. **Q-12** — deferred to a later Home round; `showOnHome` is stored on posts and the toggle stays hidden.
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-registration
 owner: Ulia
 updated: 2026-11-13
@@ -68,6 +68,18 @@ Heading 40/44 Inter Tight 600 (Changes to SPEC, § Common), lead 15/22, controls
 
 ## Open questions
 - Q-15 — terms as a line vs a checkbox (legal, EU). Blocks nothing.
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** the trial on the root (`/signup` since the login round of 2026-11-19, below) —
+  `AuthFirstExperience` with the orbit; the code is `EmailCodeService` (six digits, ten minutes, five tries, bound to the
+  browser). Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - **Terms and Privacy policy are plain text**, no checkbox and no links: the pages do not exist yet (`SIGN_IN_PLAN.md`
+    A4, Q-15).
+  - The provider buttons show only when the installation has Google and Microsoft configured.
+  - The old confirmation link and its page are gone; a draft that runs out starts again at B1.
 
 ## Built from design-fixes-login-1
 - **Addresses** (B1): `/signup`, `/signup/verify`, `/signup/company` as above; `/trial` and anything under it redirect to `/signup`. The email being proved lives in the page, not the URL, so opening `/signup/verify` or `/signup/company` on its own (a reload) starts again at B1 — except `/signup/company` back from Google or Microsoft, which opens B3. The address follows the step without adding history entries: the browser's Back leaves the registration, the back arrow goes one step back.

@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-emails
 owner: Ulia
 updated: 2026-11-13
@@ -73,3 +73,23 @@ Email template (moment / notice), facts table, code box, steps flow (M18).
 ## Open questions
 - ~~Q-21 — senders and reply-to.~~ Closed 18 Nov: every email from "noddo <no-reply@noddo.so>" (Sender above).
 - Q-28 — the ring row is a PNG per accent: with "Your own" and with Light it has to be generated per company. Blocks nothing: the band works without it.
+
+---
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** Mailpit — `LoginEmail` / `LoginEmailLayout` (Moment, Notice, Light), the ring and icon PNGs drawn by
+  `design/email-images.mjs` into `public/email/`. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - **The ring row for a company's own colour and for Light uses the nearest preset's PNG** — no image is drawn per
+    company yet (`SIGN_IN_PLAN.md` A17, Q-28).
+  - **No postal address in the footer**: the product has no such field; the line names the company only (A21).
+  - **M14 (SSO logins failing) is not built** — it waits on what counts as a run of failures (A6).
+  - M5 for a locked person without a factor says to ask the administrator — no reset is sent to such an account (A15).
+  - M7b goes at confirmation ("was changed", Before / Now), not when the change is asked (A16).
+  - M12 is not sent when a company turns the Google / Microsoft buttons off — the emailed login code covers them (A18).
+  - M9 is not sent after joining with Google at an invitation or through the domain's SSO (A19).
+  - M18 to an owner whose address is not proved is held and never re-sent (A20).
+  - The Appearance stage's email preview no longer matches the real email (the heading and rings sit in the band) — to
+    be redrawn.

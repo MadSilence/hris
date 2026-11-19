@@ -122,6 +122,7 @@ Q-35 (reading before your turn), Q-36 (the drawn signature and the phone hand-of
 *Filled by the code side when the screen is built.*
 
 - **Where to see it:** `/documents/sign/[id]` (in the company), `/sign/[token]` and `/sign/copy/[token]` (a
-  guest), `/m/sign` (the phone), `/preboarding/sign/[taskId]` (a joiner) — `components/modules/signing`. Built 2026-11-18, **not yet looked at in a browser**.
-- **Differs from the design:** the document is shown in the browser's own PDF viewer, not a `PdfViewer` of ours; a
-  signing sent from a profile, with no task behind it, has no Home card yet.
+  guest), `/m/sign` (the phone), `/preboarding/sign/[taskId]` (a joiner) — `components/modules/signing`. Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part"). The guest's signing was walked; the PDF viewer has not been seen drawing in a visible window.
+- **Differs from the design:** nothing known since documents batch 11 (2026-11-18): the document is drawn by our own
+  `PdfViewer` on pdf.js (`components/ui/PdfViewer`, also the tab's preview), and a signing sent from a profile has
+  its Home card (`/me/actions`, `toSign.ts`, `waitingOnYouDeck.ts`).

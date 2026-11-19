@@ -82,5 +82,5 @@ Q-41 (the company-wide requests list, for D04) blocks nothing here.
 
 - **Where to see it:** Request beside Add on a person's tab; "Request the new one" on an expiring row; the
   person's own tab (the boxes, R07–R08); Home's card (R09); People table → tick people → Request documents (R10,
-  `RequestManyDialog`). Built 2026-11-18, **not yet looked at in a browser**.
+  `RequestManyDialog`). Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part").
 - **Differs from the design:** R10 names who was not asked by reason and count, not one by one.

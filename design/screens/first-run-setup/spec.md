@@ -62,7 +62,7 @@ Bars 28 × 4 gap 6; cards radius card, padding 16, chosen = accent border on acc
 - **Where to see it:** `/setup` for the owner of a company not set up yet —
   `components/modules/firstRun/components/CompanySetupContainer.tsx` on `AuthFirstExperience`; the pieces (two-bar
   stepper, choice card, stops slider, progress list) in `FirstRunPieces.tsx`, their look `.fr-*` in
-  `styles/globals.css`. Built 2026-11-13, **not yet looked at in a browser**, no images yet.
+  `styles/globals.css`. Built 2026-11-13, walked in the browser the same day (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes"); no images yet.
 - **Differs from the design:**
   - S1's required errors appear when *Continue* is pressed (the button is never disabled); the API itself still
     accepts an unanswered question.

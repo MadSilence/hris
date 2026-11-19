@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-provider
 owner: Ulia
 updated: 2026-11-13
@@ -45,3 +45,17 @@ None.
 
 ## Open questions
 None.
+
+---
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** the provider buttons on the login, the trial, an invitation and *Ways to log in*; E3 at the root's
+  `/login/problem`. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - **E1, the white page, is not rendered**: the routes answer with plain redirects, and the page the person pressed the
+    button on shows the button's busy label ("Taking you to Google…") instead (`SIGN_IN_PLAN.md` A5).
+  - E3 is on the root (the auth host is an alias of it); a refusal at any step returns to the page the button was on,
+    naming the provider.
+  - Not walked with Google or Microsoft for real (`(claude)/testing/CONFIGURATION_REQUIRED.md` § 8.G).

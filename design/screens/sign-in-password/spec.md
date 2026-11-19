@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-password
 owner: Ulia
 updated: 2026-11-13
@@ -56,3 +56,14 @@ None.
 
 ## Open questions
 None.
+
+---
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** F1–F8 at `/login/forgot` and `/login/reset` (the reset email links there). Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - The common-password check is a starter list written by the code side (~80 entries) plus rules for runs, repeats
+    and the person's own words — not a breach list yet (`SIGN_IN_PLAN.md` A1).
+  - An emailed reset disconnects the person's Google / Microsoft accounts, and says so.

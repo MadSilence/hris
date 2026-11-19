@@ -288,7 +288,7 @@ Every string in the frames, including example data, is in `words.md`.
 - Reused as they are: `SegmentedControl`, `FilterChip`, `EmptyState`, `ErrorState`, `Skeleton`, `NodRing`, `StatusBadge`, the light tooltip.
 
 ## Open questions
-Q-9 (who manages the hub), Q-10 (what the ask box answers from) and Q-13 ("For me") are in `QUESTIONS-to-add.md`. None blocks: each has a recommended default that the design follows.
+Answered by the owner (2026-11-12, `(claude)/DECISIONS.md` § "The company hub — what the owner settled"): **Q-9** — HR only in v1, no team-lead mode yet; the right is granted in Manage hub → Settings, "Who can post and edit pages" (CH2, CH4). **Q-10** — as recommended: Pages and News from the hub's search over what the person may see; Ask noddo is Home's stub until the assistant exists. **Q-13** — as recommended: For me is a narrowed audience that includes the reader; Everyone is everything they may see; the last choice is kept.
 
 ---
 

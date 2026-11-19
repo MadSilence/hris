@@ -133,14 +133,13 @@ Every string in the frames is in `words.md`.
 *Filled by the code side when the screen is built.*
 
 - **Where to see it:** Edit home on `/dashboard`, from the end of the page or My profile —
-  `components/modules/home/edit/EditHome.tsx`. Built 2026-11-11, **not yet looked at in a browser**.
+  `components/modules/home/edit/EditHome.tsx`. Built 2026-11-11, walked with the window hidden that day and in the pane
+  with the designers' round 1 (2026-11-18).
 - **Differs from the design:**
   - **The panel has no loading or error state** (EF04, EF07): the catalogue is the screen's own and never loads.
-  - **Drag and drop is the browser's own** (no new library): the dragged item is the browser's drag image, not a
-    level-4 card tilted 2°; the drop place is drawn as specified.
-  - **"+" adds at the end of the order**; the dense grid then puts the widget in the first free place it fits.
-  - The category counts and the list leave out My time and To sign (not built).
-- **Images of the real screen:** owed by the first walk.
+  - Drag and drop, "+" and the empty cells are as the designers' round 1 below (pointer drag, first free cell).
+  - The category counts and the list leave out My time (not built); To sign is in them.
+- **Images of the real screen:** owed — a person's eye (`(claude)/testing/OWNER_VISUAL_REVIEW.md`).
 
 ### The designers' fixes, round 1 (2026-11-18)
 

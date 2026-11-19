@@ -12,7 +12,7 @@ How to read it — as `DOCUMENTS_BRIEF.md`:
 - **> Note for the designer** — a call left to you. Answer it in the screen's spec.
 
 The words quoted are proposals in the product's voice; better words are welcome in the spec. Every string is
-translated into Russian by the code — Russian stays in the product (`QUESTIONS.md` Q-42).
+translated into Russian by the code — Russian stays in the product (Q-42, answered by the owner on 2026-11-18).
 
 ---
 

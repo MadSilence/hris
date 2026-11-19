@@ -63,8 +63,8 @@ Column 400 (W2 560), greeting 112/104, logo tile 44, rings r 22 stroke 7 (deskto
 *Filled by the code side when the screen is built.*
 
 - **Where to see it:** `/welcome` — `components/modules/firstRun/components/WelcomeContainer.tsx` (W0–W4), the
-  photo `PhotoStep.tsx`, the frame `WelcomeFrame` in `FirstRunPieces.tsx`. Built 2026-11-13, **not yet looked at in a
-  browser**, no images yet.
+  photo `PhotoStep.tsx`, the frame `WelcomeFrame` in `FirstRunPieces.tsx`. Built 2026-11-13, walked in `live-sandbox`
+  on 2026-11-19 (an invitation's first login and the welcome); no images yet.
 - **Differs from the design:**
   - W1 also offers *Set a password instead* to somebody who has no password (an SSO person in a company that offers
     Google or Microsoft) — the code side's addition; the wording is ours.
@@ -72,6 +72,6 @@ Column 400 (W2 560), greeting 112/104, logo tile 44, rings r 22 stroke 7 (deskto
     on."
   - W1's buttons say "Taking you to Google…" while the round trip starts; Connect may ask "confirm it is you" first
     (the product's step-up dialog) when the login is not fresh.
-  - W4's language is also offered on My Preferences (with "Same as the company"), so a choice made here can be
-    changed again.
+  - W4's language is personal (Q-19, as recommended: it overrides the company's for screens and emails), and is also
+    offered on My Preferences (with "Same as the company"), so a choice made here can be changed again.
   - The phone's welcome (Q-20) is the same steps; on W2 the drop zone carries one *Upload a photo*.

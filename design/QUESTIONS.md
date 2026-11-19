@@ -3,34 +3,12 @@
 Only open questions. When one is answered, delete it and write the answer where it lives (the
 screen's spec, the package, or the owner's rules). The format is in `HANDOFF.md` § "Questions".
 
-## Q-9 — Who can manage the hub · company-hub, company-hub-manage · from designers · 2026-11-12
-**Answered by the owner (CH2, CH4):** HR only in v1 — no team-lead mode yet (scoped authors come later); the right is granted in Manage hub → Settings, "Who can post and edit pages".
 
-## Q-10 — What the hub's ask box answers from · company-hub, company-hub-page · from designers · 2026-11-12
-**Answered by the owner:** as recommended — Pages and News from the hub's search over what the person may see; Ask noddo is Home's stub until the assistant exists.
-
-## Q-11 — How "What changed" is made · company-hub-page, company-hub-manage · from designers · 2026-11-12
-**Answered by the owner:** in v1 the editor writes the points in the publish dialog, with no "Drafted by AI" label; points drafted by the assistant come later, with the assistant.
-
-## Q-12 — A widget required for everyone on Home · company-hub-manage, home, home-edit · from designers · 2026-11-12
-**Answered by the owner:** deferred to the next Home round; `showOnHome` is stored on posts from the start and the toggle stays hidden.
-
-## Q-13 — What "For me" means in News · company-hub · from designers · 2026-11-12
-**Answered by the owner:** as recommended — For me is a narrowed audience that includes the reader; Everyone is everything they may see; the last choice is kept.
-
-## Q-14 — The root's remembered company needs its public logo and name · sign-in-root · from designers · 2026-11-13
-A2 shows the company the browser last logged in to as its logo, name and address. Today the browser remembers only the address. The company's own login page already shows its logo and name publicly.
-Recommended: the root reads the same public data for the remembered address. Without it A2 shows the address only.
-**Blocks:** nothing
+> **2026-11-19:** Q-45–Q-47, Q-50–Q-52, Q-55 and Q-56–Q-70 are written out in detail — where to look, what is drawn and built, the options and the answer format — in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md` (ids DQ-01–DQ-22).
 
 ## Q-15 — Terms as a line instead of a checkbox · sign-in-registration · from designers · 2026-11-13
 B1 has "By continuing, you agree to the Terms and the Privacy policy." under the three ways in; Notion had a checkbox (which Google/Microsoft skipped anyway).
 Recommended: the line. Legal should confirm an explicit checkbox isn't required for our EU markets.
-**Blocks:** nothing
-
-## Q-16 — "Remember this device" length · sign-in-second-step · from designers · 2026-11-13
-D1 draws "Remember this device for 30 days". The length should come from the company's setting (MFA_DESIGN § 3.4); shown only when the company allows it and the person is not a System Owner.
-Recommended: the setting's value in the label ("for {n} days").
 **Blocks:** nothing
 
 ## Q-17 — Setting two-step up again from D3 · sign-in-second-step · from designers · 2026-11-13
@@ -38,19 +16,9 @@ With 1 or 0 backup codes left, D3 offers "Set up again" → D4 → D5 with a new
 Recommended: allow it (the person just proved a factor). If the backend can't, D3 keeps "Continue" and the warning only.
 **Blocks:** nothing
 
-## Q-18 — "Full demo" leaves the setup wizard · first-run-setup · from designers · 2026-11-13
-S2 offers only Example company (with a size slider 8 · 25 · 60 · 150) or Start empty; the code has three presets.
-Recommended: drop the third from the wizard. Does the full demo stay reachable anywhere (e.g. for sales demos)?
-**Blocks:** nothing
-
-## Q-19 — A personal language in the welcome · first-run-welcome · from designers · 2026-11-13
-W4 asks for the time zone and the language, pre-filled with the company's. Today the language is the company's ("Everybody in the company sees noddo in it").
-Recommended: a personal language overrides the company's for screens and emails; exports stay in the company's language. If not built, W4 shows the time zone only.
-**Blocks:** nothing
-
-## Q-20 — The welcome opened on a phone · first-run-welcome, first-run-photo · from designers · 2026-11-13
-Notion § 14.10 covers the photo from a phone while the welcome is on a computer, not the welcome itself on a phone. Drawn: one "Upload a photo" button using the phone's own picker.
-Recommended: as drawn.
+## Q-18 — The full demo for sales demos · first-run-setup · from designers · 2026-11-13
+The wizard offers only Example company (8 · 25 · 60 · 150) or Start empty, as you drew; "Full demo" is removed from the code, not hidden. What is left of the question: should a full demo stay reachable anywhere, for example for sales demos?
+Recommended: not in the wizard; if sales needs one, it is a separate operator tool, asked for when sales exists.
 **Blocks:** nothing
 
 ## Q-25 — Logo file formats and size · sign-in-appearance · from designers · 2026-11-13
@@ -63,65 +31,6 @@ Recommended: the limits the code already uses for the logo; tell us and we fix t
 The band's rings are a static image; with "Your own" and with the Light background they have to be generated per company (or drawn as a table of circles).
 Recommended: generate the PNG when the colour or the background is saved.
 **Blocks:** nothing
-
-## Documents round (2026-11-17) — Q-31 … Q-43, answered by the owner on 2026-11-18
-
-The owner took the round as drawn: **everything the design asks of the code is built as designed**. The entries keep
-the designers' question in one line and the answer; the work is `(claude)/development_plan/DOCUMENTS_PLAN.md` § 7.
-
-## Q-31 — A signer without a label · documents-send-for-signature · from designers · 2026-11-17
-**Answered:** yes, the label is optional. The API already takes a signer with none; the certificate then prints the
-name and email only.
-
-## Q-32 — Telling signers that a signing was cancelled · documents-send-for-signature · from designers · 2026-11-17
-**Answered:** as recommended. Whoever was already asked to sign, in the company or a guest, gets "Lena Novak cancelled
-the signing of …", with the comment if there is one. Signers still waiting for their turn are not told.
-
-## Q-33 — Automatic reminders: day 3 and the day before the due date · documents-send-for-signature · from designers · 2026-11-17
-**Answered:** as drawn. It replaces the day-3-and-day-7 rule built on 2026-11-16 (`DECISIONS.md` D6). No setting.
-
-## Q-34 — Signing history needs an event list · documents-send-for-signature · from designers · 2026-11-17
-**Answered:** the events exist in the journal, one per sent, signed, declined, cancelled, expired and completed,
-for every signing. A per-document list across all its signings is added for S13.
-
-## Q-35 — Reading before your turn · documents-signing · from designers · 2026-11-17
-**Answered:** as recommended, and already so: a signer in the company may read the document from the moment it is
-sent. A guest's link is only issued at their turn.
-
-## Q-36 — A drawn signature and the phone hand-off · documents-signing · from designers · 2026-11-17
-**Answered:** yes, both the pad on the computer and the phone through the QR code, for people in the company, guests
-and new joiners. The certificate records "typed" or "drawn".
-
-## Q-37 — The typed signature's font in the PDF · documents-signing · from designers · 2026-11-17
-**Answered:** yes, Marck Script is embedded in the PDF engine for the typed name. The certificate page stays in the
-engine's text font.
-
-## Q-38 — Who sends a document an automation sends · automations-send-for-signature · from designers · 2026-11-17
-**Answered:** as recommended, and as built: the automation's owner is the sender ("Sent by …", "… asks you to sign");
-the email's sender line is the company.
-
-## Q-39 — "Wait until signed" ends on declined or cancelled · automations-send-for-signature · from designers · 2026-11-17
-**Answered:** yes, as drawn. The engine did not do it yet: a declined, cancelled or expired signing left its task open
-and the wait sat out its days. It is fixed in this round.
-
-## Q-40 — Test run: "Send the document to me" · automations-send-for-signature · from designers · 2026-11-17
-**Answered:** yes. The test run makes the PDF, marked [Test], and emails it to the tester only. Nothing is filed in
-anyone's Documents.
-
-## Q-41 — Company-wide documents lists and the Documents item · documents-section · from designers · 2026-11-17
-**Answered:** yes. The API gains the three lists it lacks (all documents, open signings, requests; expiring exists).
-The item shows for whoever may see documents beyond their own profile: a scope on *People documents — view* wider
-than oneself.
-
-## Q-42 — Languages: no Russian · system · from designers · 2026-11-17
-**Answered: Russian stays.** The product keeps English and Russian, as built and walked
-(`(claude)/DECISIONS.md` § "Internationalisation"); Ukrainian or Bulgarian may join later. Every new string of this
-round gets its Russian. The spec line "there is no Russian in the product" (`documents-signing`, Changes to SPEC) is
-superseded by this answer.
-
-## Q-43 — A "document" field in notifications · automations-send-for-signature · from designers · 2026-11-17
-**Answered:** yes. `TokenTextField` offers **document** after a Send for signature step: the signed document, as a
-link.
 
 ## Q-44 — The Templates round: templates are written in noddo, not uploaded · documents templates · from code · 2026-11-18
 The owner decided on 2026-11-18 that a document template is **a document written in noddo's own editor** (the
@@ -172,11 +81,6 @@ Widgets A1 lists berry #FBE7ED and sand #F5EBDD; the package's tag tokens are be
 Recommended: the tokens; change them in the package if the HEX in the file is the intent.
 **Blocks:** nothing
 
-## Q-53 — Your sandbox runs the last commit, not the working tree · all · from code · 2026-11-19
-The Light-top greeting (widgets H1) and "Split adds nothing" were fixed in the code before your checks, but not yet committed; a sandbox built from the last commit shows the old bugs.
-Recommended: before the next round's live check, ask Petya which build the sandbox runs.
-**Blocks:** nothing
-
 ## Q-54 — Answers to the login package · sign-in-* · from code · 2026-11-19
 Built and walked: A, C9–C15, R1–R4, B1, B4, B5, P1–P3, D7, E1. **Not built:** B3 — the Terms and Privacy pages don't exist yet, so the words stay text until they do. **No bot check for now** (S2–S3, the owner); the limits instead (S1), refused with the existing words:
 
@@ -197,4 +101,87 @@ Built and walked: A, C9–C15, R1–R4, B1, B4, B5, P1–P3, D7, E1. **Not built
 ## Q-55 — The code box in focus: ring or no ring · sign-in-company-login, sign-in-registration · from code · 2026-11-19
 C12 says "a 1 px accent border"; `CodeInput` in sign-in-registration § Values adds the 3 px muted-accent ring every field has in focus. Built with the ring.
 Recommended: keep the ring — the code boxes are fields and every field has it; drop it in the spec if the plain border is the intent.
+**Blocks:** nothing
+
+## Q-56 — Home widgets H6 for Small · home-widgets · from code · 2026-11-19
+H6 (round 1) gives an empty widget an illustration, a line and a button. A Small widget is a 160-high card: below its title row there is no room for all three, so Small was left as it was.
+Recommended: Small shows the line and the button, no illustration; draw it if you want something else.
+**Blocks:** nothing
+
+## Q-57 — CM07's Apply while the audience reaches nobody · company-hub-manage · from code · 2026-11-19
+The spec says twice (CM07's footer, and States → No results) that Apply is disabled while the result is 0 people. It is built hidden: the product rule is that nothing is shown disabled, and the summary already says "No one matches these filters".
+Recommended: change the two places in the spec to "Apply is not shown".
+**Blocks:** nothing
+
+## Q-58 — CM08's overdue rows · company-hub-manage · from code · 2026-11-19
+The package says the CM08 overdue rows were not checked live, and draws no frame for them. They are built with no mark of their own; the page header already says "due 12 Nov".
+Recommended: no row mark; or draw one (a Pending "Overdue" pill as in CH03, say) and we build it.
+**Blocks:** nothing
+
+## Q-59 — Edit home's zoom on Windows · home-edit · from code · 2026-11-19
+The package's arithmetic gives 0.745 at 1710 and 0.585 at 1470. On Windows the classic scrollbar takes 15 px of the page, so the real zoom is 0.7325 and 0.579; the band follows the same zoom.
+Recommended: accept — the arithmetic follows the real width, so nothing is cut or overflows.
+**Blocks:** nothing
+
+## Q-60 — The Automations chart's grey dot has no token · home-widgets · from code · 2026-11-19
+The widgets package draws the "no runs" dot #D3D3D8, which is no token. It is built with `field` #DADADF.
+Recommended: add a token for it in the package, or accept `field`.
+**Blocks:** nothing
+
+## Q-61 — Two things for the next package version: the nine presets and `--band-tint` · system · from code · 2026-11-19
+The package's `tokens.css` still has the old ten accent presets; seven of the nine are derived in code meanwhile (the former Q-29, deleted on 2026-11-18 although the CHANGELOG line of that day still says it waits). Home's band tint is built as `--band-tint` (Rose on Wine, the accent mixed into what sits on the band otherwise); the package calls it `accent-tint`.
+Recommended: put the nine presets and the band tint (under one name — ours or yours, tell us) into the next package version.
+**Blocks:** nothing
+
+## Q-62 — Edit home's panel never loads · home-edit · from code · 2026-11-19
+The spec and round 1 draw a loading state (EF04) and an error state (EF07) for the widget panel. The panel's list is part of the app itself, not read from the server, so it can neither load nor fail, and neither state is built. The zoomed page under it is Home's own grid, with each widget's own loading and error states.
+Recommended: drop EF04 and EF07 from the spec; or tell us what should load there.
+**Blocks:** nothing
+
+## Q-63 — Small deviations to fold into the specs · several screens · from code · 2026-11-19
+Each screen's "Built" lists small differences that the owner accepted. Please fold them into your specs (or tell us which you want built as drawn):
+- **home-widgets:** Approve's Undo is a 5-second hold, the answer sent when the toast closes; Mark done only on a task with nothing to fill (others offer Start).
+- **automations-editor:** conditions are one flat AND list everywhere; initials in the editor are 12, not 11.
+- **automations-list:** Change owner's "Owner now" shows no role; times show without a zone abbreviation.
+- **automations-run-history:** steps on a path the run did not take are not listed.
+- **company-hub:** the agree bar on a short page sits 32 above the edge.
+- **company-hub-page:** What changed compares with the version the reader agreed to, so a small fix since then shows as changed too.
+- **company-hub-manage:** "Add filter" opens the CM07 dialog, not a popover; the hub's editors are an ordinary role, "Hub editors", also in Settings → Roles.
+- **documents-tab:** folder icons are the folder plus nine from the hub's set.
+- **documents-requests:** R10 names who was not asked by reason and count, not one by one.
+- **documents-send-for-signature:** "Their manager · {name}" is a one-click button that adds today's manager as a person, not a role resolved later.
+- **process-sign-task:** Add task keeps its kind cards, not a three-way segmented control.
+- **first-run-photo:** P7's progress bar is simulated (an upload gives no progress); it completes with the answer.
+- **first-run-welcome:** W1 also offers *Set a password instead* to someone with no password.
+- **sign-in-appearance, first-run-welcome:** a logo or photo is PNG, JPEG or WebP, no SVG (Q-25).
+Recommended: accept, fold into the specs.
+**Blocks:** nothing
+
+## Q-64 — The slogan in Russian · sign-in-root, sign-in-registration · from code · 2026-11-19
+The Wine pane says "Every yes, handled." with "handled." in Rose; a Russian page shows it in English.
+Recommended: send the Russian line and which word is Rose.
+**Blocks:** nothing
+
+## Q-65 — A code used up by wrong tries says "expired" · sign-in-company-login, sign-in-registration · from code · 2026-11-19
+Written out as DQ-17 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
+**Blocks:** nothing
+
+## Q-66 — Finish your profile: which fields a person fills in themselves · profile-finish, first-run-welcome · from code · 2026-11-19
+Written out as DQ-18 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
+**Blocks:** nothing
+
+## Q-67 — Data the Home cards draw but noddo does not have (W10, W11, W12, K7) · home-widgets · from code · 2026-11-19
+Written out as DQ-19 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
+**Blocks:** nothing
+
+## Q-68 — Agreeing to a hub page from the inbox · inbox-needs-action, company-hub-page · from code · 2026-11-19
+Written out as DQ-20 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
+**Blocks:** nothing
+
+## Q-69 — Where the test envelope of "Send the document to me" lands · automations-send-for-signature · from code · 2026-11-19
+Written out as DQ-21 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
+**Blocks:** nothing
+
+## Q-70 — Two new lines of text (W15, CM01) · home-widgets, company-hub-manage · from code · 2026-11-19
+Written out as DQ-22 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
 **Blocks:** nothing

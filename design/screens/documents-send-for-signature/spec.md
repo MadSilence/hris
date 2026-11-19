@@ -105,5 +105,7 @@ Q-31, Q-32, Q-33, Q-34 — none blocks the drawing.
 
 - **Where to see it:** a PDF's ⋯ → Send for signature on a person's tab; the signing panel in the preview's
   right column, and from the ⋯ (`SendForSignatureDialog`, `SigningPanel`, `CancelSigningDialog`,
-  `SigningHistoryDialog`). Built 2026-11-18, **not yet looked at in a browser**.
-- **Differs from the design:** "Their manager" is not a choice of its own in the signer picker — pick the person.
+  `SigningHistoryDialog`). Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part").
+- **Differs from the design:** "Their manager · {name}" is a one-click button first in the signer picker
+  (`SendForSignatureDialog.tsx`): it adds today's manager **as a person**, not a role resolved later — a change of
+  manager after sending does not move the step. With no manager it is not shown.

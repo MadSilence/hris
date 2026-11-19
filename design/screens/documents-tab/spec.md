@@ -105,10 +105,11 @@ None blocks this.
 - **Where to see it:** a person's profile → Documents —
   `components/modules/organization/modules/profile/modules/personalDocuments` (`PersonalDocumentsContainer`,
   `PersonalDocumentsFolderCard` = FolderTile, `FolderLookDialog`, `PersonalDocumentsFilesTable`); the shared pieces
-  `components/ui/ColumnPicker`, `components/ui/InlineRename`, `components/ui/SelectionBar`. Built 2026-11-18, **not yet looked at in a browser**.
+  `components/ui/ColumnPicker`, `components/ui/InlineRename`, `components/ui/SelectionBar`. Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part").
 - **Differs from the design:**
-  - **The Upload dialog (M3)** is still the single-column one; dropping on the tab uploads into the open folder as
-    before. Dropping onto a folder tile, and the tile's drop-target state, are not built.
+  - **The Upload dialog (M3)** is built as drawn (800 wide, two columns, per-file progress, a refused file kept with
+    why), and so are dropping onto a folder tile and the tile's drop-target state (`UploadDocumentForm.tsx`,
+    `PersonalDocumentsFolderCard.tsx` `onDropFiles`) — documents batch 11, 2026-11-18, not yet seen in a visible window.
   - **Folder icons** are the folder plus nine from the hub's set; the colours are the package's eight.
   - **All documents** heads groups by the root's folders; a file in a nested folder sits under its own folder's id with
     no name yet.

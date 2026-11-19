@@ -75,5 +75,6 @@ None blocks the window. The running-process states wait for the processes design
   (`lifecycle/templates/canvas/AddTaskDialog.tsx`, `TaskKindConfigFields.tsx` `SignTemplateField`). Built 2026-11-18, **not yet looked at in a browser**.
 - **Differs from the design:** the Add task window keeps its kind cards (not a three-way `SegmentedControl`) and its
   timing is the cell clicked, as for every kind; When is changed in the side panel. A Sign task added to a lane that
-  is not the person's is flagged by the draft's problems rather than refused in the window. A running process is not
-  offered Sign.
+  is not the person's is flagged by the draft's problems rather than refused in the window. Sign in a running
+  process is built (documents batch 11, A6): offered in Add task with the template field and no assignee; the
+  envelope is sent when the task opens (`SignTaskStarter`, as whoever added it).

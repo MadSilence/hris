@@ -121,16 +121,16 @@ Every string in the frames, including example data, is in `words.md`.
 *Filled by the code side when the screen is built.*
 
 - **Where to see it:** `/dashboard` — `components/modules/home/components/HomeContainer.tsx` (`HomeHeader`, `AiBox`,
-  `WidgetGrid`, `WidgetCard`). Built 2026-11-11, **not yet looked at in a browser**.
+  `WidgetGrid`, `WidgetCard`). Built 2026-11-11, walked with the window hidden that day and in the pane with the designers' round 1 (2026-11-18).
 - **Differs from the design:**
-  - **My time and To sign are not built** (the owner: clock-in is not something the product does; e-signing is not
-    planned) — so they are not in the role defaults, and the HR default is the drawn one without them. `QUESTIONS.md`
-    Q-7.
+  - **My time is not built** (the owner: clock-in is not something the product does) — so it is not in the role
+    defaults. **To sign is built** (`ToSignWidget.tsx`, since the designers' round 1 below). `QUESTIONS.md` Q-7.
   - **The AI box is a stub** (the owner): People come from quick search, Do from a fixed list of Home's own actions,
     and *Ask noddo* says the assistant is on its way and sends nothing.
-  - **My documents carries no "2 to sign" tag** — there is nothing to sign without e-signing.
+  - **My documents carries the "{n} to sign" tag** when something waits to be signed (`HomeHeader.tsx`,
+    `profileMenu.toSign`, counted from `toSign.ts`).
   - **The role default** is read from rights: HR runs processes or automations, a manager sees leave beyond their own.
-    **Its order is re-packed**: without My time and To sign the drawn order left a hole in the middle of the grid, so
+    **Its order is re-packed**: without My time the drawn order left a hole in the middle of the grid, so
     each default is the drawn set placed to fill each pair of rows (Large, Medium, Medium, …, the Small one last). At
     1280 the HR default still leaves one cell at the end of a row.
     Every new widget a person is given later joins at the end of their order at its default size.

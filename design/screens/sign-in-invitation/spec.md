@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-invitation
 owner: Ulia
 updated: 2026-11-13
@@ -66,3 +66,12 @@ None beyond § Common.
 
 ## Open questions
 None.
+
+---
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** the invitation link → G1–G5 on the company's address; Google / Microsoft through `INVITE`. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:** nothing known. G5's reasons (used, expired, withdrawn, broken) are read from the link's
+  own state.

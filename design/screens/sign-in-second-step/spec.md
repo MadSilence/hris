@@ -1,5 +1,5 @@
 ---
-status: ready
+status: built
 screen: sign-in-second-step
 owner: Ulia
 updated: 2026-11-13
@@ -62,5 +62,18 @@ QR 168 in a white tile (radius popover, hairline). Key block: Mist, radius popov
 None beyond § Common.
 
 ## Open questions
-- Q-16 — "Remember this device" length from the company's setting (30 days drawn). Blocks nothing.
+- ~~Q-16~~ — built as recommended: the company's days in the label (Built).
 - Q-17 — may D3 start a new two-step setup right from login? Blocks nothing (if not, D3 shows only "Continue" and the warning).
+
+---
+
+## Built
+*Filled by the code side when the screen is built.*
+
+- **Where to see it:** D1–D6 and the timeout at `/login/second-step` and `/login/set-up-two-step` (single sign-on sends a
+  second step there too). Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
+- **Differs from the design:**
+  - "Remember this device for {n} days" takes the company's days and shows only when the company allows it (Q-16, as
+    recommended).
+  - **D3's "Set up again" is not built** (Q-17, `SIGN_IN_PLAN.md` A2): D3 shows the warning and *Continue*; a new phone
+    is set up from My Preferences. The `setUpAgain` catalogue key is unused.
