@@ -8,7 +8,7 @@ updated: 2026-11-12
 # Company hub: the handbook and a page
 
 ## What it is for
-The handbook is where people find how things work at the company: policies, guides, offices, benefits, teams and tools. **CP01** shows every section with its first pages. **CP02** is one page to read. When a page is **must read** and the reader has not agreed to its current version, CP02 shows what changed since they last agreed and a bar at the bottom with **I agree**. The reader leaves having read the page and, where needed, agreed to it. HR sees when (`company-hub-manage`, CM08).
+The handbook is where people find how things work at the company: policies, guides, offices, benefits, teams and tools. **CP01** shows every section with its first pages. **CP02** is one page to read. When a page is **must read** and the reader has not agreed to its current version, CP02 shows what changed since they last agreed and a bar at the bottom with **I agree**. The reader leaves having read the page and, where needed, agreed to it. The page owner sees when (`company-hub-manage`, CM08).
 
 ## Where it lives
 - **Routes:**
@@ -55,7 +55,7 @@ Page padding 32 48. The reading column is 760 wide, left-aligned.
    - "{n} min read" (12/16, tertiary), right after the title on its first line;
    - on the right of the column:
      - the audience as a tag (`TagChip`, the **Ocean** dot), e.g. "Everyone at Acme" or "Vilnius office";
-     - after it, the save icon button (`bookmark-02`).
+     - after it, the save icon button (`bookmark-02`; when saved, `bookmark-02` filled with the accent — fill and stroke #6E1630, no checkmark; Ulia, 18 Nov).
 3. **Meta line**, 16 under the title row:
    - the owner's avatar 22 and name;
    - 24 apart, "Version {n} · updated {d Mon yyyy}" (12/16, tertiary);
@@ -186,3 +186,7 @@ Q-11 (how What changed is made) is in `QUESTIONS-to-add.md`. It does not block: 
   - The "What changed" block and the changed paragraph render grey, not in the accent tint — for the designers to say.
   - A reader outside the page's audience sees "This page is private"; a deleted or unpublished page is not found.
 - **Images of the real screen:** not added — the walk's window was hidden.
+
+### Built from the fixes of 2026-11-19
+
+Built from `design-fixes-company-hub-1` (2026-11-19, walked). F1's title takes the free width and never shrinks below one line beside the audience chip, which truncates first.

@@ -22,7 +22,6 @@ import type {
   PostEdit,
   PostPage,
   PostStatusFilter,
-  PostType,
   SavedItem,
   SectionDeleteImpact,
   WhoAgreed,
@@ -32,7 +31,7 @@ import type {
 export const hubQueryKeys = {
   root: ["HUB"] as const,
   home: (scope: FeedScope) => ["HUB", "HOME", scope] as const,
-  posts: (scope: FeedScope, type: PostType | null, q: string) => ["HUB", "POSTS", scope, type, q] as const,
+  posts: (scope: FeedScope, q: string) => ["HUB", "POSTS", scope, q] as const,
   post: (id: string) => ["HUB", "POST", id] as const,
   handbook: ["HUB", "HANDBOOK"] as const,
   page: (id: string, preview: boolean) => ["HUB", "PAGE", id, preview] as const,
@@ -75,13 +74,13 @@ export const useHubHome = (scope: FeedScope) => {
 };
 
 /** CH02: 20 a page, the next page when the reader nears the end. */
-export const useHubPosts = (scope: FeedScope, type: PostType | null, q: string) => {
+export const useHubPosts = (scope: FeedScope, q: string) => {
   const { internalApiClient } = useAppDataContext();
   return useInfiniteQuery<PostPage>({
-    queryKey: hubQueryKeys.posts(scope, type, q),
+    queryKey: hubQueryKeys.posts(scope, q),
     initialPageParam: null as string | null,
     queryFn: ({ pageParam }) =>
-      internalApiClient.get<PostPage>(`/hub/posts${qs({ scope, type, q: q.trim() || null, cursor: pageParam as string | null })}`),
+      internalApiClient.get<PostPage>(`/hub/posts${qs({ scope, q: q.trim() || null, cursor: pageParam as string | null })}`),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     placeholderData: keepPreviousData,
   });

@@ -164,7 +164,8 @@ describe("the test run window", () => {
     expect(automationTestSendAction).toHaveBeenCalledWith({ automationId: "rule-1", definition, caseId: "request:1", stepId: "e1" });
     expect(screen.getByText("Sent to you")).toBeInTheDocument();
     expect(screen.getByText("1 test item sent to you")).toBeInTheDocument();
-    expect(screen.getByText("Removes the notifications and tasks; emails stay in your inbox.")).toBeInTheDocument();
+    // F7: one strip — the count and Delete test items; what deleting removes is the line's title.
+    expect(screen.getByTitle("Removes the notifications, tasks and test documents; emails stay in your inbox.")).toBeInTheDocument();
 
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Delete test items" })));
     expect(deleteAutomationTestItemsAction).toHaveBeenCalledWith("rule-1");
@@ -186,6 +187,6 @@ describe("the test run window", () => {
       data: [{ ...lena, id: "example", label: "Alex Example", example: true }],
     });
     show();
-    expect(await screen.findByText("No requests in the last 30 days. Try it on a made-up one.")).toBeInTheDocument();
+    expect(await screen.findByText("No requests in the last 30 days.")).toBeInTheDocument();
   });
 });

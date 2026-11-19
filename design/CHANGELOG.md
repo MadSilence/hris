@@ -4,6 +4,34 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-19** — **Login fixes round 1 built and walked** (`handoffs/2026-11-19-fixes-login`; what differs is the "Built" of
+  `sign-in-root`, `sign-in-registration`, `sign-in-company-login`; your answers Q-54, your question Q-55). For the package:
+  **a refusal on any login form is one `InlineAlert` (declined) at the head of the form**; field errors are Error text
+  #A12215 with the alert icon, 8 under the field; **`CodeInput` fills the form width** (60 × 56); **the trial lives at
+  `/signup`**; **an unknown company address never shows a login form**; **no dialog draws an outline around itself** (the
+  shared dialog, every dialog in the product); **an email address inside an email is never a link**. A second local
+  company, `live-sandbox`, is live, for invitations and first logins.
+- **2026-11-19** — **Company hub fixes round 1 and Home widgets fixes round 1 built and walked** (`handoffs/2026-11-19-fixes-*`;
+  what differs is the "Built" of `company-hub`, `company-hub-page`, `company-hub-manage`, `home-widgets`, `home-edit`;
+  your questions Q-49–Q-53). For the package: **a dropdown is its own search** — the shared `Combobox` (single, multiple,
+  multiple with chips inside the field) under every searchable select; **initials follow one rule** inside the avatar
+  itself (a type role sized to the avatar, 600, a per-person tag tint from berry, ocean, indigo, teal, bronze, plum —
+  never gray); **dates with a weekday take a comma** ("Fri, 20 Nov"), the weekday alone inside this week, relative times
+  "15h ago"; the **`saved` scene** is in; **`<Illustration size="s">` draws a scene without `-s` at 160** (Home widgets
+  keep 96); **every date picker** now greys refused and other-month days (it drew them in Ink); post types are gone; the
+  login ring grid has 4 px of room (C3 of the misc round is closed).
+- **2026-11-19** — **Automations fixes round 1 and misc fixes round 1 built and walked** (`design-fixes-automations-1`,
+  `design-fixes-misc-1`, kept in `handoffs/2026-11-18-fixes-*`; what differs is the "Built" of each `automations-*`
+  screen, `home-widgets` and the new `automations-split` and `profile-finish`). Your questions are Q-45–Q-48. For the
+  package: **`SearchBox` has two sizes** (`sm` 32 / 13 for toolbars — the default — and `md` 36 / 14), **`FilterChip`
+  carries a count** and can drop its check, **every dropdown menu is the A11 menu** (min 210, rows 32, gap 2, Ink icons,
+  a divider line before the last), **every confirmation dialog is one column 16 apart**, **`SegmentedControl` has a
+  `window` size** (C9), new type roles `text-avatar-xs` (10/10 600) and `text-avatar-s` (11/16 600), shadows
+  `--shadow-segment` and `--shadow-bar`, and This week's `--confetti-2` / `--confetti-light`. The no-results magnifier
+  has the solid ring everywhere. **Conditions are one flat AND list everywhere**, the trigger's "Only when" included.
+  **Every email is from "noddo <no-reply@noddo.so>"** (Q-21 closed). **Times follow the company's country** like dates:
+  12-hour in the US, 24-hour elsewhere. Split works in the current build — "it adds nothing" was the sandbox you checked,
+  which was older.
 - **2026-11-18** — **Home fixes, round 1 built** (`design-fixes-round-1`; what differs is the "Built" of `home`,
   `home-edit` and `home-widgets`). For the package: **`SegmentedControl` has a small size** (`size="sm"`: a pill 28 high,
   segments 24, 12/20, the picked one 500 — on Mist with level 0, on white with no shadow, on the band white 16 %) — Q-1's

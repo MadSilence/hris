@@ -347,7 +347,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                     <div className="flex items-center gap-2.5">
                       <Avatar className="h-7 w-7 shrink-0">
                         {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt={fullName(u)} /> : null}
-                        <AvatarFallback className="text-hint">{initials(u)}</AvatarFallback>
+                        <AvatarFallback name={[u.firstName, u.lastName].filter(Boolean).join(" ") || u.email}>{initials(u)}</AvatarFallback>
                       </Avatar>
                       <span className="min-w-0">
                         <span className="block truncate text-body font-medium">{fullName(u)}</span>

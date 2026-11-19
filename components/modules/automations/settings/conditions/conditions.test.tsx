@@ -5,7 +5,7 @@ import type { Segment } from "@/models/segment/Segment";
 import type { EventCondition } from "@/models/automations";
 import { ConditionBuilder } from "./ConditionBuilder";
 import { blankRow, rowComplete, segmentFromRows, rowsFromSegment, type ConditionRow } from "./segmentRows";
-import { fromTree, toTree, blankGroup, comparisons, type EventLeaf } from "./eventConditionModel";
+import { fromTree, toTree, isFlatAnd, comparisons, type EventLeaf } from "./eventConditionModel";
 
 jest.mock("@/components/modules/automations/settings/conditions/chrome", () => jest.requireActual("@/test/automationPickersMock"));
 jest.mock("@/components/modules/organization/hooks/useUserFields", () => jest.requireActual("@/test/automationSettingsMocks").userFields);
@@ -53,20 +53,20 @@ describe("segment rows", () => {
 });
 
 describe("event condition tree", () => {
-  it("writes ALL / ANY with MATCH leaves, and nothing for no complete condition", () => {
-    const leaf = (field: string, op: EventLeaf["op"], value: string): EventLeaf => ({ kind: "leaf", id: Math.random(), field, op, value });
-    const root = blankGroup("AND", [leaf("days", "gt", "10"), blankGroup("OR", [leaf("leaveType", "eq", "Vacation"), leaf("days", "lt", "")])]);
-    expect(toTree(root)).toEqual({
+  const leaf = (field: string, op: EventLeaf["op"], value: string): EventLeaf => ({ kind: "leaf", id: Math.random(), field, op, value });
+
+  it("writes one ALL over the complete comparisons — a flat list joined by AND — and nothing for none", () => {
+    expect(toTree([leaf("days", "gt", "10"), leaf("leaveType", "eq", "Vacation"), leaf("days", "lt", "")])).toEqual({
       kind: "ALL",
       children: [
         { kind: "MATCH", field: "days", op: "gt", value: "10" },
-        { kind: "ANY", children: [{ kind: "MATCH", field: "leaveType", op: "eq", value: "Vacation" }] },
+        { kind: "MATCH", field: "leaveType", op: "eq", value: "Vacation" },
       ],
     });
-    expect(toTree(blankGroup("AND", [leaf("days", "gt", "")]))).toBeNull();
+    expect(toTree([leaf("days", "gt", "")])).toBeNull();
   });
 
-  it("reads a stored tree back, a NOT over one comparison as its opposite", () => {
+  it("reads a stored tree back as its comparisons, a NOT over one comparison as its opposite, and says when OR was in it", () => {
     const tree: EventCondition = {
       kind: "ANY",
       children: [
@@ -74,15 +74,10 @@ describe("event condition tree", () => {
         { kind: "MATCH", field: "leaveType", op: "eq", value: "Sick" },
       ],
     };
-    const root = fromTree(tree);
-    expect(root.joiner).toBe("OR");
-    expect(toTree(root)).toEqual({
-      kind: "ANY",
-      children: [
-        { kind: "MATCH", field: "days", op: "lte", value: "5" },
-        { kind: "MATCH", field: "leaveType", op: "eq", value: "Sick" },
-      ],
-    });
+    expect(fromTree(tree).map((l) => `${l.field} ${l.op} ${l.value}`)).toEqual(["days lte 5", "leaveType eq Sick"]);
+    expect(isFlatAnd(tree)).toBe(false);
+    expect(isFlatAnd({ kind: "ALL", children: [{ kind: "MATCH", field: "days", op: "gt", value: "5" }] })).toBe(true);
+    expect(isFlatAnd(null)).toBe(true);
     expect(comparisons(tree).map((l) => `${l.field} ${l.op} ${l.value}`)).toEqual(["days lte 5", "leaveType eq Sick"]);
   });
 });
@@ -102,11 +97,12 @@ describe("ConditionBuilder", () => {
     );
   };
 
-  it("a picked field and value make a valid Segment; the operator and value wait for the field", () => {
+  it("a picked field and value make a valid Segment; before the field, the operator and value are not shown disabled", () => {
     const onChange = jest.fn();
     render(<Harness initial={null} onChange={onChange} autoOpen />);
-    expect(screen.getByLabelText("Comparison")).toBeDisabled();
-    expect(screen.getByLabelText("Value")).toBeDisabled();
+    // D5: nothing is shown disabled — pressing them opens the field list.
+    expect(screen.getByLabelText("Comparison")).not.toBeDisabled();
+    expect(screen.getByLabelText("Value")).not.toBeDisabled();
     fireEvent.change(screen.getByLabelText("Field"), { target: { value: "sys:office" } });
     expect(screen.getByLabelText("Comparison")).not.toBeDisabled();
     fireEvent.change(screen.getByLabelText("Value"), { target: { value: "o-war" } });
@@ -153,7 +149,8 @@ describe("ConditionBuilder", () => {
       />,
     );
     expect(screen.getByText("Vilnius or Warsaw")).toBeInTheDocument();
-    expect(screen.getByText(/^48.people match$/).textContent).toBe("48\u00a0people match");
+    // The count is bold (E8): the line is split over two elements.
+    expect(screen.getByText((_, el) => el?.tagName === "SPAN" && /^48.people match$/.test(el.textContent ?? ""))).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "See who" })).toBeInTheDocument();
   });
 });

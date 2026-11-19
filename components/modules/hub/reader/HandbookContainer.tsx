@@ -4,15 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Add01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
 import { Skeleton } from "@/components/desact/skeleton";
-import { EmptyState } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
 import { useCanAccess } from "@/components/auth";
 import type { HandbookSection } from "@/models/hub";
 import { useHandbook } from "../hooks";
-import { BackLink, HubAskBox, HubPage, HubTitle, hubIcon, IconTile, LoadingBlock, TruncatedTitle, useCompanyName } from "../shared";
+import { BackLink, HubAskBox, HubLoadError, HubPage, HubState, HubTitle, hubIcon, IconTile, LoadingBlock, TruncatedTitle, useCompanyName } from "../shared";
 
 /** A section's first pages: those waiting for the reader first, then the editor's order (CP01). */
 export const orderSectionPages = <T extends { waiting: boolean }>(pages: T[]): T[] => [
@@ -28,21 +27,23 @@ const SectionCardView: React.FC<{ section: HandbookSection }> = ({ section }) =>
   const shown = open ? pages : pages.slice(0, 3);
   const waits = section.toAgree > 0;
   return (
-    <section id={`section-${section.id}`} className="flex scroll-mt-6 flex-col rounded-panel bg-mist p-6">
-      <div className="flex items-start gap-3">
+    // Mist #F7F7F8, padding 20 22 22, 14 from the tile to the name, the name 16/22 (FIXES E3).
+    <section id={`section-${section.id}`} className="flex scroll-mt-6 flex-col rounded-panel bg-subtle px-5.5 pt-5 pb-5.5">
+      <div className="flex items-start gap-3.5">
         <IconTile icon={hubIcon(section.icon)} color={section.color} size={40} dot={waits} />
         <div className="flex min-w-0 flex-col">
-          <h2 className="line-clamp-2 text-card-title text-primary">{section.name}</h2>
+          <h2 className="line-clamp-2 text-hub-card text-primary">{section.name}</h2>
           <span className="text-hint text-tertiary">
             {t("handbook.pages", { count: section.pageCount })}
-            {waits && <span className="text-accent-text">{t("handbook.toAgreeSuffix", { count: section.toAgree })}</span>}
+            {waits && <span className="font-medium text-accent">{t("handbook.toAgreeSuffix", { count: section.toAgree })}</span>}
           </span>
         </div>
       </div>
-      <ul className="mt-4 flex flex-col border-t border-divider pt-3">
+      {/* A hairline, 16, then rows 20 high and 12 apart, 10 from the icon to the title (FIXES E4). */}
+      <ul className="mt-4 flex flex-col gap-3 border-t border-divider pt-4">
         {shown.map((page) => (
           <li key={page.id}>
-            <Link href={`/hub/handbook/${page.id}`} className="flex h-8 items-center gap-2 rounded-control text-body text-primary no-underline hover:underline">
+            <Link href={`/hub/handbook/${page.id}`} className="flex h-5 items-center gap-2.5 rounded-control text-body text-primary no-underline hover:underline">
               <Icon icon={hubIcon(page.icon)} size="sm" className="shrink-0 text-tertiary" />
               <TruncatedTitle title={page.title} className="min-w-0" />
               {page.waiting && <span aria-label={t("handbook.waits")} className="size-1.5 shrink-0 rounded-pill bg-accent" />}
@@ -79,12 +80,12 @@ export const HandbookContainer: React.FC = () => {
       <BackLink href="/hub" label={t("home.title")} />
       <HubTitle className="mt-3">{t("handbook.title")}</HubTitle>
       {data && (
-        <p className="mt-1 text-body text-secondary">
+        <p className="mt-1.5 text-body text-secondary">
           {t("handbook.lead", { company, pages: data.pageCount, sections: data.sectionCount })}
         </p>
       )}
-      <HubAskBox className="mt-8 max-w-[860px]" placeholder={t("ask.handbookPlaceholder")} pagesOnly />
-      <div className="mt-10">
+      <HubAskBox className="mt-7 max-w-[860px]" placeholder={t("ask.handbookPlaceholder")} pagesOnly />
+      <div className="mt-10 flex flex-1 flex-col">
         {handbook.isLoading ? (
           <LoadingBlock
             skeleton={
@@ -96,14 +97,23 @@ export const HandbookContainer: React.FC = () => {
             }
           />
         ) : handbook.isError || !data ? (
-          <ErrorState error={handbook.error} title={t("handbook.error")} onRetry={() => void handbook.refetch()} />
+          <HubLoadError error={handbook.error} title={t("handbook.error")} onRetry={() => void handbook.refetch()} />
         ) : data.sections.length === 0 ? (
-          <EmptyState
+          // Centred in the free area under the ask box; employees get no button (FIXES U5).
+          <HubState
             scene="policies"
+            size="m"
+            titleSize="section"
             title={t("handbook.empty")}
-            description={t("handbook.emptyLine")}
-            onCreate={canEdit ? () => router.push("/hub/manage/pages") : undefined}
-            createLabel={t("handbook.addPage")}
+            line={t("handbook.emptyLine")}
+            action={
+              canEdit ? (
+                <Button type="button" onClick={() => router.push("/hub/manage/pages")}>
+                  <Icon icon={Add01Icon} size="sm" />
+                  {t("handbook.addPage")}
+                </Button>
+              ) : undefined
+            }
           />
         ) : (
           <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-3">

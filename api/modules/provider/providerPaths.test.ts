@@ -4,6 +4,7 @@ import { backPage, failedPage } from "./providerPaths";
 describe("backPage", () => {
   it.each([
     ["/login", "/login"],
+    ["/signup", "/signup"],
     ["/trial", "/trial"],
     ["/invite?token=abc_-123", "/invite?token=abc_-123"],
     ["/preferences", "/preferences"],

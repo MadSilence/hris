@@ -71,6 +71,7 @@ export const AssignFields: React.FC<StepPartProps> = ({ step, catalog, problems,
     <FieldStack>
       <Field label={t("assign.action")} labelId={actionId} error={errorFor(t, problems, "action")}>
         <SegmentedControl<"ASSIGN" | "UNASSIGN">
+          size="window"
           aria-labelledby={actionId}
           value={step.type === "UNASSIGN" ? "UNASSIGN" : "ASSIGN"}
           onChange={(type) => onStep({ type })}

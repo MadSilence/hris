@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
+import { InlineAlert } from "@/components/desact/alert";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { cn } from "@/lib/cn";
 
@@ -29,7 +30,10 @@ export function AuthBack({ href, onClick }: { href?: string; onClick?: () => voi
   );
 }
 
-/** The heading of a step, its lead under it, and — for "check your email" or an error — the circle above. */
+/**
+ * The heading of a step, its lead under it, and — for "check your email" or an error — the circle above: a block of
+ * its own, 20 above the title (the designers' login fix A3; the head's own gap is 8, so 12 more here).
+ */
 export function AuthHeading({
   title,
   lead,
@@ -44,13 +48,27 @@ export function AuthHeading({
   return (
     <div className="auth-step-head">
       {icon && (
-        <span className="auth-icon-circle mb-4" data-tone={tone} aria-hidden="true">
+        <span className="auth-icon-circle mb-3" data-tone={tone} aria-hidden="true">
           <Icon icon={icon} size="lg" />
         </span>
       )}
       <h1 className="text-auth-title text-primary">{title}</h1>
       {lead && <p className="text-auth-lead text-secondary">{lead}</p>}
     </div>
+  );
+}
+
+/**
+ * A refusal on a login screen (the designers' login fix C10): the shared declined `InlineAlert`, drawn the login's way —
+ * Declined soft with no border, radius 10, 12 inside, gap 8, 13/18 in Error text. It is the first thing in the form,
+ * above the provider buttons or the first field, and every refusal takes this one place: a wrong password, too many
+ * attempts, a provider's or our side's failure. Elsewhere the alert keeps its border.
+ */
+export function AuthAlert({ children }: { children: React.ReactNode }) {
+  return (
+    <InlineAlert tone="declined" className="gap-2 rounded-popover border-0 p-3 text-label font-normal">
+      {children}
+    </InlineAlert>
   );
 }
 

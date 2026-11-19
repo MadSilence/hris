@@ -47,7 +47,7 @@ export const ConditionValue: React.FC<{
 
   if (source === "people") {
     return (
-      <div className="min-w-40 flex-1">
+      <div className="min-w-0 flex-1">
         {row.value ? <PickedPerson id={row.value} onPick={(id) => onPatch({ value: id })} /> : (
           <UserPickerField value={null} onChange={(u) => onPatch({ value: u?.id ?? "" })} placeholder={t("conditions.pickValue")} />
         )}
@@ -71,7 +71,7 @@ export const ConditionValue: React.FC<{
       );
     }
     return (
-      <div className="min-w-28 flex-1">
+      <div className="min-w-0 flex-1">
         <CompactPick
           options={list}
           value={row.value || null}
@@ -88,14 +88,14 @@ export const ConditionValue: React.FC<{
   if (source === "date") {
     if (isRangeOp(op)) {
       return (
-        <div className="flex flex-1 items-center gap-1">
+        <div className="flex min-w-0 flex-1 items-center gap-1">
           <DatePicker className="h-7" value={row.value} onChange={(value) => onPatch({ value })} ariaLabel={t("conditions.from")} />
           <DatePicker className="h-7" value={row.valueTo} onChange={(valueTo) => onPatch({ valueTo })} ariaLabel={t("conditions.to")} />
         </div>
       );
     }
     return (
-      <div className="min-w-32 flex-1">
+      <div className="min-w-0 flex-1">
         <DatePicker className="h-7" value={row.value} onChange={(value) => onPatch({ value })} ariaLabel={t("conditions.value")} />
       </div>
     );
@@ -104,10 +104,10 @@ export const ConditionValue: React.FC<{
   const numeric = source === "number";
   if (isRangeOp(op)) {
     return (
-      <div className="flex flex-1 items-center gap-1">
-        <Input className="h-7 text-label" inputMode={numeric ? "decimal" : undefined} value={row.value}
+      <div className="flex min-w-0 flex-1 items-center gap-1">
+        <Input className="h-7 bg-card text-label" inputMode={numeric ? "decimal" : undefined} value={row.value}
           aria-label={t("conditions.from")} onChange={(e) => onPatch({ value: e.target.value })} />
-        <Input className="h-7 text-label" inputMode={numeric ? "decimal" : undefined} value={row.valueTo}
+        <Input className="h-7 bg-card text-label" inputMode={numeric ? "decimal" : undefined} value={row.valueTo}
           aria-label={t("conditions.to")} onChange={(e) => onPatch({ valueTo: e.target.value })} />
       </div>
     );
@@ -116,7 +116,7 @@ export const ConditionValue: React.FC<{
     // A typed list: one value per comma.
     return (
       <Input
-        className="h-7 min-w-28 flex-1 text-label"
+        className="h-7 min-w-0 flex-1 bg-card text-label"
         value={row.values.join(", ")}
         aria-label={t("conditions.value")}
         onChange={(e) => onPatch({ values: e.target.value.split(",").map((v) => v.trim()).filter(Boolean) })}
@@ -125,7 +125,7 @@ export const ConditionValue: React.FC<{
   }
   return (
     <Input
-      className="h-7 min-w-28 flex-1 text-label"
+      className="h-7 min-w-0 flex-1 bg-card text-label"
       inputMode={numeric ? "decimal" : undefined}
       value={row.value}
       aria-label={t("conditions.value")}

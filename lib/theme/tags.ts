@@ -13,8 +13,11 @@ export const TAG_COLORS = [
 
 export type TagColor = (typeof TAG_COLORS)[number];
 
-/** The package's own eight — what initials are coloured from, so the package's `avatarColor()` stays the same. */
-const PACKAGE_TAG_COLORS: readonly TagColor[] = ["gray", "berry", "plum", "indigo", "ocean", "teal", "cocoa", "bronze"];
+/**
+ * The six tints initials sit on (the designers' widgets fixes A1, 2026-11-19): berry, ocean, indigo, teal, sand —
+ * the `bronze` tag — and plum. Never gray: a gray face read as "nobody" beside the coloured ones.
+ */
+export const AVATAR_COLORS: readonly TagColor[] = ["berry", "ocean", "indigo", "teal", "bronze", "plum"];
 
 /**
  * A time off policy's colours: every tag but gray, because a gray bar on the calendar is "Away" (the designers'
@@ -67,15 +70,15 @@ export const TAG_CLASSES: Record<TagColor, { chip: string; bar: string; dot: str
 
 /**
  * The colour of a person's initials when there is no photo (SPEC § 4.7): the soft tag colour chosen by a
- * stable hash of the name — the package's `avatarColor()`, unchanged, so the same name gets the same colour
- * in the app, in e-mail and in the package's own reference page.
+ * stable hash of the name — the package's `avatarColor()` hash over the six {@link AVATAR_COLORS}, so a person keeps
+ * their colour on every screen.
  */
 export function avatarColor(name: string): TagColor {
   let hash = 0;
   for (const ch of String(name)) {
     hash = (hash * 31 + (ch.codePointAt(0) ?? 0)) >>> 0;
   }
-  return PACKAGE_TAG_COLORS[hash % PACKAGE_TAG_COLORS.length];
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
 /** The order new options take their colours in — the backend seeds in the same order (`TagColor.seededAt`). */

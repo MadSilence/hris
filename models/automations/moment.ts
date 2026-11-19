@@ -1,4 +1,4 @@
-import { displayLocale, formatDisplayDate } from "@/lib/date";
+import { formatDisplayDate, formatTime } from "@/lib/date";
 
 /**
  * A moment from the backend. Its `LocalDateTime` fields are UTC wall-clock with no zone suffix
@@ -10,6 +10,7 @@ export const formatMoment = (value: string | null | undefined, language?: string
   const hasZone = /[zZ]|[+-]\d{2}:?\d{2}$/.test(value);
   const date = new Date(hasZone ? value : `${value}Z`);
   if (Number.isNaN(date.getTime())) return value;
-  const time = new Intl.DateTimeFormat(displayLocale(language), { hour: "2-digit", minute: "2-digit" }).format(date);
+  // The company's clock (12-hour in the US), as `UserSettingsProvider` set its order.
+  const time = formatTime(date, { language });
   return `${formatDisplayDate(date, { style: "medium", language })}, ${time}`;
 };

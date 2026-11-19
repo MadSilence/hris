@@ -35,7 +35,7 @@ First-experience base (`sign-in-root` § Common): form on the left, the Wine car
 | Loading | Button busy: "Sending code…" (B1), "Checking…" (B2), "Creating your company…" (B2a, B3). | RB1-States, RB2-States, RB2a-States, RB3-States |
 | Empty | B1 empty field; B2 empty boxes. | RB1-Desktop, RB2-Desktop |
 | No results | Not applicable. | — |
-| Error | B1: "Enter a valid email, like anna@company.com." · B1a (provider failed or cancelled): declined alert "We couldn’t continue with Google. Try again, or use your email." · B2: "That code doesn’t match. Try again." · "This code has expired. Resend a new one." · "Too many attempts. Try again later." (resend link then reads "Didn’t get it? Check your spam folder.") · B2a/B3 empty: "Enter your first name." · "Enter your last name." · "Enter your company’s name." · password "Use at least 8 characters." · B3a expired. | States boards |
+| Error | B1: "Enter a valid email, like anna@company.com." · B1a (provider failed or cancelled): declined alert "We couldn’t continue with Google. Try again, or use your email." · B2: "That code doesn’t match. Try again." · "This code has expired. Send a new one." · "Too many attempts. Try again later." (resend link then reads "Didn’t get it? Check your spam folder.") · B2a/B3 empty: "Enter your first name." · "Enter your last name." · "Enter your company’s name." · password "Use at least 8 characters." · B3a expired. | States boards |
 | No permission | Not applicable. | — |
 | Normal | B1, B2, B2a, B3 desktop and phone. | RB*-Desktop / Phone |
 | Long content | 70-char email; long first/last name and a 63-char company name (fields wrap nothing, the heading wraps); Microsoft with a long identity. | RB1-States, RB2a-States, RB3-States |
@@ -68,3 +68,8 @@ Heading 40/44 Inter Tight 600 (Changes to SPEC, § Common), lead 15/22, controls
 
 ## Open questions
 - Q-15 — terms as a line vs a checkbox (legal, EU). Blocks nothing.
+
+## Built from design-fixes-login-1
+- **Addresses** (B1): `/signup`, `/signup/verify`, `/signup/company` as above; `/trial` and anything under it redirect to `/signup`. The email being proved lives in the page, not the URL, so opening `/signup/verify` or `/signup/company` on its own (a reload) starts again at B1 — except `/signup/company` back from Google or Microsoft, which opens B3. The address follows the step without adding history entries: the browser's Back leaves the registration, the back arrow goes one step back.
+- **Provider buttons** (B2) show when the installation has the Google and Microsoft applications configured — the same list the company login reads; B1 is the email form alone without them.
+- **Terms and Privacy policy** (B3) are still plain words: the pages do not exist yet (the owner supplies the texts). They become 12/16 500 accent-text links when the pages do.

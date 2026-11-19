@@ -102,3 +102,8 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
   trigger and its date) — "Probation ends 25 Nov" reads as the trigger's name and the date. A card's See why opens the
   failed run itself.
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- H5: as E3b, "Last name: Novak".

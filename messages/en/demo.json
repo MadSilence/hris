@@ -8,8 +8,7 @@
     "running": "Going live — removing the sample data…",
     "failed": "Going live stopped part of the way. Open it to try again.",
     "goLive": "Go live",
-    "open": "Open",
-    "askOwner": "Ask your account owner to go live."
+    "open": "Open"
   },
   "sample": {
     "chip": "Sample",

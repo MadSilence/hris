@@ -21,8 +21,9 @@ import {
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { TAG_CLASSES, toTagColor, type TagColor } from "@/lib/theme/tags";
-import { hubFileUrl, type PersonRef, type PostType } from "@/models/hub";
+import { hubFileUrl, type PersonRef } from "@/models/hub";
 import { cn } from "@/lib/cn";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 
 /**
  * The icons a section or page may carry (CM06 "Change icon"): Hugeicons, never emoji (product rule 28). Stored by
@@ -53,67 +54,74 @@ export const hubIcon = (key: string | null | undefined): IconSvgElement => (isHu
 /** A section's colour is one of the package's eight tag colours (`company-hub-manage` Changes to SPEC 4). */
 export const HUB_COLORS: readonly TagColor[] = ["gray", "berry", "plum", "indigo", "ocean", "teal", "cocoa", "bronze"];
 
-/** The post type's icon (CH01 rows): an announcement, a policy update, an event. */
-export const POST_TYPE_ICONS: Record<PostType, IconSvgElement> = {
-  ANNOUNCEMENT: Megaphone01Icon,
-  POLICY_UPDATE: File01Icon,
-  EVENT: Calendar03Icon,
-};
-
 const TILE_SIZES = {
-  24: { box: "size-6 rounded-tag", icon: "sm" as const },
-  32: { box: "size-8 rounded-popover", icon: "sm" as const },
+  // CM03's section tile: radius 6, the icon 14 (FIXES J3).
+  24: { box: "size-6 rounded-tag [&_svg]:size-3.5", icon: "sm" as const },
+  // CH01's section cards: radius 12 (FIXES B8).
+  32: { box: "size-8 rounded-tint", icon: "sm" as const },
   40: { box: "size-10 rounded-tint", icon: "md" as const },
   44: { box: "size-11 rounded-tint", icon: "md" as const },
   48: { box: "size-12 rounded-tint", icon: "md" as const },
   52: { box: "size-[52px] rounded-card", icon: "lg" as const },
 };
 
-/** An icon on a soft tile in a tag colour — sections, pages, and (on Mist) post types. */
+/**
+ * An icon on a soft tile in a tag colour — sections and pages. `dot` is "to agree": 14 accent with a 2 px border in the
+ * card's colour, its centre on the tile's corner (FIXES A15); `dotOn` is that colour.
+ */
 export const IconTile: React.FC<{
   icon: IconSvgElement;
   color?: string | null;
-  /** Mist instead of a tag colour (a post's type on CH01). */
+  /** Mist instead of a tag colour. */
   mist?: boolean;
   size: keyof typeof TILE_SIZES;
   dot?: boolean;
+  dotOn?: "subtle" | "card";
   className?: string;
-}> = ({ icon, color, mist, size, dot, className }) => {
+}> = ({ icon, color, mist, size, dot, dotOn = "subtle", className }) => {
   const s = TILE_SIZES[size];
   const tag = TAG_CLASSES[toTagColor(color)];
   return (
     <span className={cn("relative flex shrink-0 items-center justify-center", s.box, mist ? "bg-mist text-secondary" : tag.chip, className)}>
       <Icon icon={icon} size={s.icon} />
-      {dot && <span aria-hidden className="absolute -top-0.5 -right-0.5 size-2 rounded-pill bg-accent ring-2 ring-card" />}
+      {dot && (
+        <span
+          aria-hidden
+          className={cn(
+            "absolute -top-[3px] -right-[3px] size-3.5 rounded-pill border-2 bg-accent",
+            dotOn === "subtle" ? "border-subtle" : "border-card",
+          )}
+        />
+      )}
     </span>
   );
 };
 
-/** A post's cover as a thumbnail in its tile, or its type icon on Mist. */
-export const PostTile: React.FC<{ coverFileId: string | null; type: PostType; size: 48 | 56; alt: string }> = ({ coverFileId, type, size, alt }) =>
+/** A post's cover as a thumbnail in its tile, or the megaphone on Mist — posts have no type (FIXES Q1). */
+export const PostTile: React.FC<{ coverFileId: string | null; size: 48 | 56; alt: string; className?: string }> = ({ coverFileId, size, alt, className }) =>
   coverFileId ? (
     // eslint-disable-next-line @next/next/no-img-element -- a session-bound hub file
-    <img src={hubFileUrl(coverFileId)} alt={alt} className={cn("shrink-0 object-cover", size === 48 ? "size-12 rounded-tint" : "size-14 rounded-card")} />
+    <img src={hubFileUrl(coverFileId)} alt={alt} className={cn("shrink-0 object-cover", size === 48 ? "size-12 rounded-tint" : "size-14 rounded-card", className)} />
   ) : (
-    <span className={cn("flex shrink-0 items-center justify-center bg-mist text-secondary", size === 48 ? "size-12 rounded-tint" : "size-14 rounded-card")}>
-      <Icon icon={POST_TYPE_ICONS[type]} size="md" />
+    <span className={cn("flex shrink-0 items-center justify-center bg-mist text-secondary", size === 48 ? "size-12 rounded-tint" : "size-14 rounded-card", className)}>
+      <Icon icon={Megaphone01Icon} size="md" />
     </span>
   );
 
 const initialsOf = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "?";
 
-export const PersonAvatar: React.FC<{ person: Pick<PersonRef, "name" | "avatarUrl"> | null; size?: 22 | 28 | 32 | 40; className?: string }> = ({
+export const PersonAvatar: React.FC<{ person: Pick<PersonRef, "name" | "avatarUrl"> | null; size?: 20 | 22 | 26 | 28 | 32 | 40; className?: string }> = ({
   person,
   size = 22,
   className,
 }) => {
   const name = person?.name ?? "";
-  const box = { 22: "size-[22px]", 28: "size-7", 32: "size-8", 40: "size-10" }[size];
+  const box = { 20: "size-5", 22: "size-[22px]", 26: "size-[26px]", 28: "size-7", 32: "size-8", 40: "size-10" }[size];
   return (
     <Avatar className={cn(box, "shrink-0", className)}>
       {person?.avatarUrl && <AvatarImage src={person.avatarUrl} alt="" />}
-      <AvatarFallback name={name} className="text-hint">
+      <AvatarFallback name={name}>
         {initialsOf(name)}
       </AvatarFallback>
     </Avatar>
@@ -136,3 +144,11 @@ export const ProgressBar: React.FC<{ value: number; max: number; className?: str
     </span>
   );
 };
+
+/**
+ * The hub's segmented control (FIXES A6): the shared control on its Mist track, its segments radius 6 with nothing
+ * between them, hugging its content. The hub draws it this way; the shared default is not the hub's to change.
+ */
+export function HubSegmented<T extends string>(props: Omit<React.ComponentProps<typeof SegmentedControl<T>>, "fill">) {
+  return <SegmentedControl<T> {...props} fill={false} className={cn("w-fit gap-0 [&>button]:rounded-tag", props.className)} />;
+}

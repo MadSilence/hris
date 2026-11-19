@@ -15,13 +15,16 @@ jest.mock("../../document", () => ({
 }));
 jest.mock("./CoverField", () => ({ CoverField: () => <div /> }));
 jest.mock("../audience", () => ({ AudienceDialog: () => null }));
+type ResolveState = { data: { total: number; people: never[]; label: string } | undefined; isFetching: boolean };
+const resolveState: { current: ResolveState } = { current: { data: { total: 12, people: [], label: "EVERYONE" }, isFetching: false } };
 jest.mock("../../hooks", () => ({
   unwrapHub: jest.requireActual("../../hooks/useHubMutation").unwrapHub,
   useInvalidateHub: () => jest.fn(),
-  useAudienceResolve: () => ({ data: { total: 12, people: [], label: "EVERYONE" }, isFetching: false }),
+  useAudienceResolve: () => resolveState.current,
   usePostEdit: () => ({ data: undefined, isLoading: false }),
 }));
 jest.mock("@/components/auth", () => ({ useCanAccess: () => true }));
+jest.mock("@/components/modules/organization/hooks/useUserFields", () => ({ useUserFields: () => ({ data: [], isLoading: false }) }));
 jest.mock("@/components/providers/CompanyDataProvider/CompanyDataProvider", () => ({
   useCompanyData: () => ({ company: { name: "Acme" } }),
 }));
@@ -41,6 +44,21 @@ const renderForm = () => {
 };
 
 describe("New post (CM05)", () => {
+  afterEach(() => {
+    resolveState.current = { data: { total: 12, people: [], label: "EVERYONE" }, isFetching: false };
+  });
+
+  it("says how many people see it only once that is known — never '0 people' while it loads (walk of 2026-11-19)", () => {
+    resolveState.current = { data: undefined, isFetching: true };
+    renderForm();
+    expect(screen.queryByText(/0 people/)).not.toBeInTheDocument();
+  });
+
+  it("says how many people see it with no filter", () => {
+    renderForm();
+    expect(screen.getByText(/12 people/)).toBeInTheDocument();
+  });
+
   it("needs a title on Publish and on Save draft, and sends nothing without one", async () => {
     renderForm();
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Publish" })));

@@ -12,7 +12,7 @@ import { cn } from "@/lib/cn";
 function FieldError({ children, className, id }: { children?: React.ReactNode; className?: string; id?: string }) {
   if (!children) return null;
   return (
-    <p id={id} role="alert" className={cn("mt-1.5 flex items-start gap-1.5 text-hint text-danger-text", className)}>
+    <p id={id} role="alert" data-slot="field-error" className={cn("mt-1.5 flex items-start gap-1.5 text-hint text-danger-text", className)}>
       <Icon icon={Alert02Icon} size="sm" className="mt-px shrink-0" />
       <span>{children}</span>
     </p>

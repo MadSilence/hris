@@ -8,12 +8,13 @@ import { Input } from "@/components/desact/input";
 import { FieldError } from "@/components/desact/field-error";
 import { NodRing } from "@/components/desact/nod";
 import { Button } from "@/components/desact/button";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
+import { Label } from "@/components/desact/label";
 import { cn } from "@/lib/cn";
 
 /*
- * The small pieces every settings window is built from (`automations-triggers` § Values): fields full width, labels
- * 13/18 500, hints 12/16 tertiary, 16 between fields, a hairline between parts and no section headings.
+ * The small pieces every settings window is built from (`automations-triggers` § Values, the designers' fixes C4): fields
+ * full width, labels 13/18 500 and 8 above the control, no "*" (the step cannot be saved without them anyway), hints
+ * 12/16 tertiary, 16 between fields, a hairline between parts — and a few parts that are sections of their own (C21).
  */
 
 /** A window's fields, 16 apart. */
@@ -24,25 +25,50 @@ export const FieldStack: React.FC<{ children: React.ReactNode; className?: strin
 /** The hairline between the parts of a window — the only thing that separates them (no headings). */
 export const PartDivider: React.FC = () => <div role="separator" className="-mx-5 h-px bg-divider" />;
 
-/** A label over a control, the hint under it; the error replaces the hint (SPEC § 13.3). */
+/**
+ * A label over a control, the hint under it; the error replaces the hint (SPEC § 13.3). `required` is kept for the
+ * callers' sake and draws nothing (C4). `labelAction` sits at the right of the label's row ("Insert a field", C18).
+ */
 export const Field: React.FC<{
   label?: React.ReactNode;
   htmlFor?: string;
   labelId?: string;
   required?: boolean;
+  labelAction?: React.ReactNode;
   hint?: React.ReactNode;
   error?: string | null;
   children: React.ReactNode;
   className?: string;
-}> = ({ label, htmlFor, labelId, required, hint, error, children, className }) => (
-  <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
-    {label != null && (
-      <RequiredLabel htmlFor={htmlFor} required={required} className="text-label">
-        <span id={labelId}>{label}</span>
-      </RequiredLabel>
-    )}
+}> = ({ label, htmlFor, labelId, labelAction, hint, error, children, className }) => (
+  <div className={cn("flex min-w-0 flex-col gap-2", className)}>
+    {label != null &&
+      (labelAction ? (
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor={htmlFor} className="text-label">
+            <span id={labelId}>{label}</span>
+          </Label>
+          {labelAction}
+        </div>
+      ) : (
+        <Label htmlFor={htmlFor} className="text-label">
+          <span id={labelId}>{label}</span>
+        </Label>
+      ))}
     {children}
     {error ? <FieldError className="mt-0">{error}</FieldError> : hint ? <Hint>{hint}</Hint> : null}
+  </div>
+);
+
+/**
+ * A part of a window that is a section of its own (C21): a hairline above it across the whole window, then its title
+ * 12/16 600 — "If the date has already passed", "If the change starts later", "When someone stops matching".
+ */
+export const WindowSection: React.FC<{ title: React.ReactNode; titleId?: string; children: React.ReactNode }> = ({ title, titleId, children }) => (
+  <div className="-mx-5 flex flex-col gap-2 border-t border-divider px-5 pt-4">
+    <p id={titleId} className="text-hint font-semibold text-secondary">
+      {title}
+    </p>
+    {children}
   </div>
 );
 
@@ -56,12 +82,12 @@ export const GreyLine: React.FC<{ children: React.ReactNode; className?: string 
 );
 
 /**
- * The Mist note (`automations-steps` § Values): Mist, radius 8, 10 × 12 inside, a 16 info icon in tertiary and 13/18
- * secondary text — `InlineAlert`'s info message in the neutral look the design draws.
+ * The Mist note (`automations-steps` § Values, the designers' fixes C17): Mist, radius 8, 10 × 12 inside, a 14 info
+ * icon and 13/18 secondary text — `InlineAlert`'s info message in the neutral look the design draws.
  */
 export const MistNote: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
   <div role="note" className={cn("flex items-start gap-2 rounded-control bg-mist px-3 py-2.5 text-label font-normal text-secondary", className)}>
-    <Icon icon={InformationCircleIcon} size="sm" className="mt-px shrink-0 text-tertiary" />
+    <Icon icon={InformationCircleIcon} size="sm" className="mt-0.5 size-3.5 shrink-0 text-secondary" />
     <div className="min-w-0">{children}</div>
   </div>
 );
@@ -192,7 +218,7 @@ export const TimeInput: React.FC<{
       aria-invalid={bad || invalid || undefined}
       aria-label={ariaLabel}
       aria-labelledby={labelledBy}
-      className="w-24 tabular-nums"
+      className="w-26 px-3 tabular-nums"
     />
   );
 };

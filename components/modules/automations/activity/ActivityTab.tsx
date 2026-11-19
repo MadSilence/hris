@@ -15,7 +15,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useAutomation, useAutomationRuns, useAutomations } from "@/components/modules/automations/hooks";
-import { ConditionBuilder, RunStatusBadge, RunWindow } from "./seams";
+import { ConditionBuilder, RunStatusBadge, RunWindow, useFieldChangeLine } from "./seams";
 import { AutomationIcon, PersonAvatar } from "@/components/modules/automations/shared";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import type { AutomationRun, RunChip, RunCounts } from "@/models/automations";
@@ -100,12 +100,13 @@ export const ActivityTab: React.FC<{
   const toolbar = (
     // Wraps rather than overlaps: beside an open run the column is narrow, and "Open in editor" sat on the pill.
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-      <div className="flex min-w-0 items-center gap-3">
+      {/* 8 between every item of the toolbar (H6). */}
+      <div className="flex min-w-0 items-center gap-2">
         <SearchBox value={search} onChange={setSearch} />
         <Popover>
           <PopoverTrigger asChild>
-            <FilterChip selected={filterCount > 0} withArrow={false} className={filterCount > 0 ? undefined : "pl-2.5"}>
-              <Icon icon={FilterHorizontalIcon} size="sm" />
+            <FilterChip selected={filterCount > 0} withArrow={false} noCheck>
+              <Icon icon={FilterHorizontalIcon} size="sm" className="size-3.5" />
               {filterCount > 0 ? t("activity.filtersCount", { count: filterCount }) : t("activity.filters")}
             </FilterChip>
           </PopoverTrigger>
@@ -130,17 +131,22 @@ export const ActivityTab: React.FC<{
   );
 
   const chips = (
-    <div className="flex flex-wrap items-center gap-2" role="group">
+    // H2: 6 apart, no check — the chips carry a count, 13/18 400.
+    <div className="flex flex-wrap items-center gap-1.5" role="group">
       {ACTIVITY_CHIPS.map((entry) => (
-        <FilterChip key={entry.chip} selected={chip === entry.chip} onClick={() => setChip(entry.chip)}>
+        <FilterChip
+          key={entry.chip}
+          selected={chip === entry.chip}
+          onClick={() => setChip(entry.chip)}
+          count={
+            counts ? (
+              <span className="tabular-nums">{count(counts[entry.count])}</span>
+            ) : (
+              <Skeleton className="inline-block h-3 w-5 rounded-pill align-middle" />
+            )
+          }
+        >
           {t(`activity.chips.${entry.chip}`)}
-          {counts ? (
-            <span className={cn("tabular-nums", chip === entry.chip ? "text-on-inverse/70" : "text-tertiary")}>
-              {count(counts[entry.count])}
-            </span>
-          ) : (
-            <Skeleton className="h-3 w-5 rounded-pill" />
-          )}
         </FilterChip>
       ))}
     </div>
@@ -179,6 +185,8 @@ export const ActivityTab: React.FC<{
         scene="automations"
         title={t("activity.empty.title")}
         description={t("activity.empty.description")}
+        // Centred in the space under the chips (H4, I1): the page has no height of its own to fill.
+        className="min-h-[calc(100dvh-20rem)] py-0"
         action={
           <Button type="button" variant="secondary" onClick={onGoToAutomations}>
             {t("activity.empty.action")}
@@ -202,7 +210,8 @@ export const ActivityTab: React.FC<{
 
   return (
     <div className="flex min-h-0 gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+      {/* Toolbar → 20 → chips → 20 → table (H3). */}
+      <div className="flex min-w-0 flex-1 flex-col gap-5">
         {toolbar}
         {chips}
         {body}
@@ -216,7 +225,11 @@ export const ActivityTab: React.FC<{
   );
 };
 
-/** The endless table (§ 13.5, rows 60): Person · Automation · When · Status · See why; V8b drops Automation. */
+/** H5: header cells padding 8 12; body cells padding 12 with their content at the top, a hairline under each row. */
+const HEAD = "h-auto py-2 text-hint font-medium text-tertiary";
+const CELL = "h-auto p-3 align-top";
+
+/** The endless table (§ 13.5): Person · Automation · When · Status · See why; V8b drops Automation. */
 const RunsTable: React.FC<{
   oneAutomation: boolean;
   rows: AutomationRun[];
@@ -252,14 +265,14 @@ const RunsTable: React.FC<{
       <div className="overflow-hidden rounded-t-card border border-b-0 border-divider bg-card">
         <Table className="table-fixed">
           <TableHeader className="sticky top-0 z-10 bg-card">
-            <TableRow className="h-9">
-              <TableHead className={cn(widths[0], "text-hint font-medium text-tertiary")}>{t("activity.columns.person")}</TableHead>
+            <TableRow>
+              <TableHead className={cn(widths[0], HEAD)}>{t("activity.columns.person")}</TableHead>
               {!oneAutomation && (
-                <TableHead className={cn(widths[1], "text-hint font-medium text-tertiary")}>{t("activity.columns.automation")}</TableHead>
+                <TableHead className={cn(widths[1], HEAD)}>{t("activity.columns.automation")}</TableHead>
               )}
-              <TableHead className={cn(widths[oneAutomation ? 1 : 2], "text-hint font-medium text-tertiary")}>{t("activity.columns.when")}</TableHead>
-              <TableHead className={cn(widths[oneAutomation ? 2 : 3], "text-hint font-medium text-tertiary")}>{t("activity.columns.status")}</TableHead>
-              <TableHead className={widths[oneAutomation ? 3 : 4]}>
+              <TableHead className={cn(widths[oneAutomation ? 1 : 2], HEAD)}>{t("activity.columns.when")}</TableHead>
+              <TableHead className={cn(widths[oneAutomation ? 2 : 3], HEAD)}>{t("activity.columns.status")}</TableHead>
+              <TableHead className={cn(widths[oneAutomation ? 3 : 4], HEAD)}>
                 <span className="sr-only">{t("activity.seeWhy")}</span>
               </TableHead>
             </TableRow>
@@ -292,15 +305,19 @@ const RunsTable: React.FC<{
                       data-test="run-row"
                       tabIndex={0}
                       aria-selected={run.id === selectedRunId}
-                      className={cn("h-[60px] cursor-pointer", run.id === selectedRunId && "bg-accent-subtle")}
+                      className={cn("cursor-pointer", run.id === selectedRunId && "bg-accent-subtle")}
                       onClick={() => open(run)}
                       onKeyDown={(event) => {
                         if (event.key === "Enter") open(run);
                       }}
                     >
-                      <TableCell>
-                        <div className="flex min-w-0 items-center gap-3">
-                          <PersonAvatar name={run.person?.name} avatarUrl={run.person?.avatarUrl} size={28} />
+                      <TableCell className={CELL}>
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <PersonAvatar
+                            name={run.person?.name}
+                            avatarUrl={run.person?.avatarUrl}
+                            size={28}
+                          />
                           <div className="min-w-0">
                             <p className="truncate text-body font-medium text-primary" title={run.person?.name ?? undefined}>
                               {run.person?.name ?? t("card.someone")}
@@ -310,18 +327,18 @@ const RunsTable: React.FC<{
                         </div>
                       </TableCell>
                       {!oneAutomation && (
-                        <TableCell>
+                        <TableCell className={CELL}>
                           <span className="flex min-w-0 items-center gap-2 text-body text-primary">
                             <AutomationIcon icon={run.ruleIcon} size={16} className="text-tertiary" />
                             <span className="truncate" title={run.ruleName ?? undefined}>{run.ruleName}</span>
                           </span>
                         </TableCell>
                       )}
-                      <TableCell className="text-body text-primary tabular-nums">{when(runMoment(run), true)}</TableCell>
-                      <TableCell>
+                      <TableCell className={cn(CELL, "text-body text-primary tabular-nums")}>{when(runMoment(run), true)}</TableCell>
+                      <TableCell className={CELL}>
                         <RunStatusBadge status={run.status} />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={CELL}>
                         {run.status === "FAILED" ? (
                           <Button
                             type="button"
@@ -361,6 +378,7 @@ const useAboutLine = () => {
   const t = useTranslations("automationsList");
   const tShared = useTranslations("automations");
   const language = useDisplayLanguage();
+  const fieldChange = useFieldChangeLine();
   return (run: AutomationRun): string => {
     const about = run.about ?? {};
     const text = (key: string) => (typeof about[key] === "string" ? (about[key] as string) : "");
@@ -373,6 +391,9 @@ const useAboutLine = () => {
       return Number.isFinite(days) && days > 0 ? t("activity.about.leaveDays", { type, days }) : type;
     }
     if (about.kind === "PROCESS") return text("name");
+    // H5: "Last name: Novak" for a field change.
+    const changed = fieldChange(run);
+    if (changed) return changed;
     const date = text("anchorDate") || text("date");
     const trigger = tShared(`trigger.${run.triggerType === "EVENT" ? "PROCESS_COMPLETED" : run.triggerType}`);
     return date ? t("activity.about.dated", { trigger, date: formatShortDate(date, { language }) }) : trigger;

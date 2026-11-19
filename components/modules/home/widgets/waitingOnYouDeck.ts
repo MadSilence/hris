@@ -32,6 +32,14 @@ export const cardKey = {
   envelope: (id: string) => `sign:${id}`,
 };
 
+/**
+ * The key a card is **read** under — a failed run's *Mark as read* (the owner, 2026-11-19, widgets W13): the run
+ * leaves that person's deck for good. It is kept in the same `homeSkipped` list as the skip order, as
+ * `read-run:<id>`, so it needs no storage of its own; the list's own cap lets the oldest fall off.
+ */
+export const readKey = (key: string) => `read-${key}`;
+const isReadKey = (key: string) => key.startsWith("read-");
+
 /** The key a held write is kept under in Home's deferred queue — one per card that can be answered on Home. */
 export const writeKey = {
   timeOff: (id: string) => `approve-time-off:${id}`,
@@ -114,17 +122,27 @@ export const buildDeck = (input: {
     .map((envelope): DeckCard => ({ key: cardKey.envelope(envelope.id), group: "DO", kind: "SIGN", envelope }))
     .sort((a, b) => (dueOf(a) ?? "9999").localeCompare(dueOf(b) ?? "9999"));
   const doing = mergeByDue(mergeByDue(taskCards, agreeCards), signCards);
-  const reading: DeckCard[] = input.failedRuns.map((run): DeckCard => ({ key: cardKey.run(run.id), group: "READ", kind: "FAILED_RUN", run }));
+  const read = new Set(input.skipped.filter(isReadKey));
+  const reading: DeckCard[] = input.failedRuns.filter((run) => !read.has(readKey(cardKey.run(run.id)))).map((run): DeckCard => ({ key: cardKey.run(run.id), group: "READ", kind: "FAILED_RUN", run }));
 
   const all = [...decide, ...doing, ...reading];
-  const skippedAt = new Map(input.skipped.map((key, i) => [key, i]));
+  const skippedAt = new Map(input.skipped.filter((key) => !isReadKey(key)).map((key, i) => [key, i]));
   const fresh = all.filter((card) => !skippedAt.has(card.key));
   const later = all.filter((card) => skippedAt.has(card.key)).sort((a, b) => (skippedAt.get(a.key) ?? 0) - (skippedAt.get(b.key) ?? 0));
   return [...fresh, ...later];
 };
 
-/** The skip order after skipping `key`: it goes last; keys of cards that are no longer in the deck are forgotten. */
+/**
+ * The skip order after skipping `key`: it goes last; keys of cards that are no longer in the deck are forgotten. What
+ * was marked as read is kept — its card is out of the deck because it was read.
+ */
 export const skipCard = (skipped: readonly string[], key: string, deck: DeckCard[]): string[] => {
   const live = new Set(deck.map((card) => card.key));
-  return [...skipped.filter((k) => k !== key && live.has(k)), key];
+  return [...skipped.filter((k) => isReadKey(k) || (k !== key && live.has(k))), key];
 };
+
+/** The list after marking `key` as read: its skip goes, its read mark is added. */
+export const markRead = (skipped: readonly string[], key: string): string[] => [
+  ...skipped.filter((k) => k !== key && k !== readKey(key)),
+  readKey(key),
+];

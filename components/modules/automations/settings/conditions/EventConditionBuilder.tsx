@@ -4,19 +4,9 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/desact/input";
 import type { EventCondition } from "@/models/automations";
-import { AddConditionButton, CompactMultiPick, CompactPick, ConditionCard, ConditionGroup, ConditionJoiner } from "./chrome";
-import {
-  blankGroup,
-  blankLeaf,
-  fieldKind,
-  fromTree,
-  opsFor,
-  toTree,
-  type EventGroup,
-  type EventItem,
-  type EventLeaf,
-  type EventOp,
-} from "./eventConditionModel";
+import { AddConditionButton, CompactMultiPick, CompactPick, ConditionCard, ConditionGroup, ConditionJoiner, PendingPick } from "./chrome";
+import { blankLeaf, fieldKind, fromTree, isFlatAnd, opsFor, toTree, type EventLeaf, type EventOp } from "./eventConditionModel";
+import { MistNote } from "../parts/parts";
 import type { SettingsTranslator } from "../parts/problems";
 
 export type EventFieldDef = { name: string; type: string };
@@ -40,8 +30,10 @@ export const eventValueLabel = (t: SettingsTranslator, value: string): string =>
 
 /**
  * "Only when" of a time-off or process trigger (T3, T6): the same look as `ConditionBuilder`, over the event's own
- * fields (the catalogue's `events[].fields`), writing the `EventCondition` tree — which, unlike a segment, has And /
- * Or and groups, so both are drawn.
+ * fields (the catalogue's `events[].fields`) — a flat list joined by "and", as every condition list in automations
+ * (the designers' fixes D6–D7, owner 2026-11-18). It writes the backend's `EventCondition` tree as one `ALL`. A tree
+ * stored with "or" or groups loads as its comparisons in one list, with a note that saving a change joins them with
+ * "and"; untouched, it is kept as stored.
  */
 export const EventConditionBuilder: React.FC<{
   value: EventCondition | null | undefined;
@@ -49,108 +41,68 @@ export const EventConditionBuilder: React.FC<{
   onChange: (value: EventCondition | null) => void;
   /** Start with one condition whose field list is open — "Add a condition" was just pressed. */
   autoOpen?: boolean;
-}> = ({ value, fields, onChange, autoOpen = false }) => {
+  /** The last condition was removed — a caller that shows "Add a condition" in its place goes back to it. */
+  onEmpty?: () => void;
+}> = ({ value, fields, onChange, autoOpen = false, onEmpty }) => {
   const t = useTranslations("automationsSettings");
-  const [root, setRoot] = React.useState<EventGroup>(() => {
+  const [leaves, setLeaves] = React.useState<EventLeaf[]>(() => {
     const seeded = fromTree(value);
-    return autoOpen && seeded.items.length === 0 ? { ...seeded, items: [blankLeaf()] } : seeded;
+    return autoOpen && seeded.length === 0 ? [blankLeaf()] : seeded;
   });
-  const [openLeaf, setOpenLeaf] = React.useState<number | null>(() => (autoOpen && root0(root) ? root0(root) : null));
+  const [openLeaf, setOpenLeaf] = React.useState<number | null>(() =>
+    autoOpen && leaves.length === 1 && !leaves[0].field ? leaves[0].id : null,
+  );
   const emitted = React.useRef<string>(JSON.stringify(value ?? null));
+  const [mixed, setMixed] = React.useState(() => !isFlatAnd(value));
 
   React.useEffect(() => {
     const incoming = JSON.stringify(value ?? null);
     if (incoming !== emitted.current) {
       emitted.current = incoming;
-      setRoot(fromTree(value));
+      setLeaves(fromTree(value));
+      setMixed(!isFlatAnd(value));
     }
   }, [value]);
 
-  const commit = (next: EventGroup) => {
-    setRoot(next);
+  const commit = (next: EventLeaf[]) => {
+    setLeaves(next);
     const tree = toTree(next);
     emitted.current = JSON.stringify(tree);
     onChange(tree);
   };
 
-  const replace = (group: EventGroup, id: number, f: (item: EventItem) => EventItem | null): EventGroup => ({
-    ...group,
-    items: group.items.flatMap((item) => {
-      if (item.id === id) {
-        const out = f(item);
-        return out ? [out] : [];
-      }
-      return item.kind === "group" ? [replace(item, id, f)] : [item];
-    }),
-  });
-
-  const addLeaf = (groupId: number) => {
+  const add = () => {
     const leaf = blankLeaf();
     setOpenLeaf(leaf.id);
-    const append = (g: EventGroup): EventGroup =>
-      g.id === groupId ? { ...g, items: [...g.items, leaf] } : { ...g, items: g.items.map((i) => (i.kind === "group" ? append(i) : i)) };
-    setRoot(append(root));
+    setLeaves([...leaves, leaf]);
   };
-  const addGroup = () => {
-    const leaf = blankLeaf();
-    setOpenLeaf(leaf.id);
-    setRoot({ ...root, items: [...root.items, blankGroup(root.joiner === "AND" ? "OR" : "AND", [leaf])] });
+  const remove = (id: number) => {
+    const next = leaves.filter((l) => l.id !== id);
+    commit(next);
+    if (next.length === 0) onEmpty?.();
   };
 
-  const renderItems = (group: EventGroup, nested: boolean) => (
-    <ConditionGroup nested={nested}>
-      {group.items.map((item, i) => (
-        <React.Fragment key={item.id}>
-          {i > 0 && (
-            <ConditionJoiner
-              value={group.joiner}
-              onChange={(joiner) => commit(group.id === root.id ? { ...root, joiner } : replace(root, group.id, (g) => ({ ...(g as EventGroup), joiner })))}
-            />
-          )}
-          {item.kind === "group" ? (
-            renderItems(item, true)
-          ) : (
+  return (
+    <div className="flex flex-col gap-3">
+      {mixed && <MistNote>{t("conditions.mixedNote")}</MistNote>}
+      <ConditionGroup>
+        {leaves.map((leaf, i) => (
+          <React.Fragment key={leaf.id}>
+            {i > 0 && <ConditionJoiner />}
             <LeafCard
-              leaf={item}
+              leaf={leaf}
               fields={fields}
-              autoOpen={openLeaf === item.id}
-              onChange={(next) => commit(replace(root, item.id, () => next))}
-              onRemove={() =>
-                commit(
-                  // A group left empty goes with its last condition.
-                  pruneEmpty(replace(root, item.id, () => null)),
-                )
-              }
+              autoOpen={openLeaf === leaf.id}
+              onChange={(next) => commit(leaves.map((l) => (l.id === leaf.id ? next : l)))}
+              onRemove={() => remove(leaf.id)}
             />
-          )}
-        </React.Fragment>
-      ))}
-      <div className="flex flex-wrap gap-1">
-        {group.items.every((i) => i.kind === "group" || i.field) && (
-          <AddConditionButton onClick={() => addLeaf(group.id)}>{t("conditions.add")}</AddConditionButton>
-        )}
-        {!nested && group.items.length > 0 && (
-          <AddConditionButton onClick={addGroup}>{t("conditions.addGroup")}</AddConditionButton>
-        )}
-      </div>
-    </ConditionGroup>
+          </React.Fragment>
+        ))}
+        {leaves.every((l) => l.field) && <AddConditionButton onClick={add}>{t("conditions.add")}</AddConditionButton>}
+      </ConditionGroup>
+    </div>
   );
-
-  return renderItems(root, false);
 };
-
-/** The first condition of a fresh group, when it has no field yet — the one to open. */
-const root0 = (g: EventGroup): number | null => {
-  const first = g.items[0];
-  return first && first.kind === "leaf" && !first.field ? first.id : null;
-};
-
-const pruneEmpty = (g: EventGroup): EventGroup => ({
-  ...g,
-  items: g.items
-    .map((i) => (i.kind === "group" ? pruneEmpty(i) : i))
-    .filter((i) => i.kind === "leaf" || i.items.length > 0),
-});
 
 const LeafCard: React.FC<{
   leaf: EventLeaf;
@@ -163,6 +115,42 @@ const LeafCard: React.FC<{
   const label = useEventFieldLabel();
   const def = fields.find((f) => f.name === leaf.field) ?? null;
   const kind = def ? fieldKind(def.type) : null;
+  const [fieldOpen, setFieldOpen] = React.useState(autoOpen);
+  const openField = () => setFieldOpen(true);
+  if (!def) {
+    // D5: before a field is picked, the operator and the value look like any select and open the field list.
+    return (
+      <ConditionCard
+        removeLabel={t("conditions.remove")}
+        onRemove={onRemove}
+        first={
+          <CompactPick
+            options={fields.map((f) => ({ value: f.name, label: label(f.name) }))}
+            value={leaf.field || null}
+            onChange={(name) => {
+              const type = fields.find((f) => f.name === name)?.type ?? "TEXT";
+              onChange({ ...leaf, field: name, op: opsFor(type)[0], value: "" });
+            }}
+            placeholder={t("conditions.pickField")}
+            emptyLabel={t("common.noFieldsMatch")}
+            ariaLabel={t("conditions.field")}
+            open={fieldOpen}
+            onOpenChange={setFieldOpen}
+          />
+        }
+        second={
+          <>
+            <div className="w-[108px] shrink-0">
+              <PendingPick placeholder={t("conditions.is")} ariaLabel={t("conditions.operator")} onPress={openField} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <PendingPick placeholder={t("conditions.pickValue")} ariaLabel={t("conditions.value")} onPress={openField} />
+            </div>
+          </>
+        }
+      />
+    );
+  }
   return (
     <ConditionCard
       removeLabel={t("conditions.remove")}
@@ -178,12 +166,13 @@ const LeafCard: React.FC<{
           placeholder={t("conditions.pickField")}
           emptyLabel={t("common.noFieldsMatch")}
           ariaLabel={t("conditions.field")}
-          defaultOpen={autoOpen}
+          open={fieldOpen}
+          onOpenChange={setFieldOpen}
         />
       }
       second={
         <>
-          <div className="w-28 shrink-0">
+          <div className="w-[108px] shrink-0">
             <CompactPick
               options={def ? opsFor(def.type).map((op) => ({ value: op, label: t(`eventOperator.${op}`) })) : []}
               value={leaf.op}
@@ -191,7 +180,6 @@ const LeafCard: React.FC<{
               placeholder={t("conditions.is")}
               emptyLabel={t("conditions.noValues")}
               ariaLabel={t("conditions.operator")}
-              disabled={!def}
             />
           </div>
           {kind?.kind === "list" ? (
@@ -205,7 +193,7 @@ const LeafCard: React.FC<{
                 ariaLabel={t("conditions.value")}
               />
             ) : (
-              <div className="min-w-28 flex-1">
+              <div className="min-w-0 flex-1">
                 <CompactPick
                   options={kind.values.map((v) => ({ value: v, label: eventValueLabel(t, v) }))}
                   value={leaf.value || null}
@@ -218,10 +206,9 @@ const LeafCard: React.FC<{
             )
           ) : (
             <Input
-              className="h-7 min-w-20 flex-1 text-label"
+              className="h-7 min-w-0 flex-1 bg-card text-label"
               inputMode={kind?.kind === "number" ? "decimal" : undefined}
               value={leaf.value}
-              disabled={!def}
               aria-label={t("conditions.value")}
               onChange={(e) =>
                 onChange({ ...leaf, value: kind?.kind === "number" ? e.target.value.replace(/[^0-9.,-]/g, "") : e.target.value })

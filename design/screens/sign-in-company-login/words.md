@@ -379,7 +379,7 @@
 - C10-3Wrong code
 - That code doesn’t match. Try again.
 - C10-4Expired
-- This code has expired. Resend a new one.
+- This code has expired. Send a new one.
 - C10-5Resent
 - We’ve sent a new code. Check your spam folder too.
 - C10-6Too many attempts

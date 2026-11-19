@@ -60,4 +60,43 @@ describe("CompanyAddressStep (sign-in-root A1, A2)", () => {
 
     expect(screen.getByRole("link", { name: "Forgot company address?" })).toHaveAttribute("href", "/login/find");
   });
+
+  it("R3: stays here for an address no company holds, and offers to find the company by email", async () => {
+    const user = userEvent.setup();
+    const navigate = jest.fn();
+    const exists = jest.fn().mockResolvedValue(false);
+    render(<CompanyAddressStep web={web} remembered={null} navigate={navigate} exists={exists} />);
+
+    await user.type(screen.getByLabelText("Company address"), "no-such-company-zz");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(exists).toHaveBeenCalledWith("no-such-company-zz");
+    expect(navigate).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent("We can’t find that company. Check the address, or find your company by email.");
+    expect(screen.getByRole("link", { name: "find your company by email" })).toHaveAttribute("href", "/login/find");
+  });
+
+  it("R3: follows the address when the check could not be asked", async () => {
+    const user = userEvent.setup();
+    const navigate = jest.fn();
+    render(<CompanyAddressStep web={web} remembered={null} navigate={navigate} exists={jest.fn().mockResolvedValue(null)} />);
+
+    await user.type(screen.getByLabelText("Company address"), "acme");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(navigate).toHaveBeenCalledWith("http://acme.localhost:3000/login");
+  });
+
+  it("R3: an address sent back by its own page arrives typed in, with the error", () => {
+    render(<CompanyAddressStep web={web} remembered={{ subdomain: "acme", name: "Acme", logoUrl: null }} unknown="zz" navigate={jest.fn()} />);
+
+    expect(screen.getByLabelText("Company address")).toHaveValue("zz");
+    expect(screen.getByRole("alert")).toHaveTextContent("We can’t find that company.");
+  });
+
+  it("R1: the root's ending sits inside the field, after the dot", () => {
+    render(<CompanyAddressStep web={web} remembered={null} navigate={jest.fn()} />);
+
+    expect(screen.getByText(".localhost:3000")).toHaveClass("auth-address-suffix");
+  });
 });

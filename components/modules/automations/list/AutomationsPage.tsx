@@ -2,11 +2,9 @@
 
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Add01Icon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
-import { Icon } from "@/components/desact/icon";
 import { Tabs, TabsList, TabsTrigger } from "@/components/desact/tabs";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { ActivityTab, isActivityChip } from "@/components/modules/automations/activity";
@@ -54,16 +52,16 @@ export const AutomationsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <header className="flex items-start justify-between gap-4">
+    // Header → 20 → tabs → 20 → toolbar → 20 → grid (A4).
+    <div className="flex w-full flex-col gap-5">
+      <header className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-page-title text-primary">{t("page.title")}</h1>
-          <p className="text-body text-secondary">{t("page.description")}</p>
+          <p className="text-body text-tertiary">{t("page.description")}</p>
           {!canManage ? <p className="mt-2 text-body text-tertiary">{t("page.viewOnly")}</p> : null}
         </div>
         {canManage && tab === "automations" ? (
           <Button type="button" onClick={() => openNew(false)}>
-            <Icon icon={Add01Icon} size="sm" />
             {t("page.add")}
           </Button>
         ) : null}
@@ -79,9 +77,14 @@ export const AutomationsPage: React.FC = () => {
           )
         }
       >
-        <TabsList>
-          <TabsTrigger value="automations">{t("page.tabs.automations")}</TabsTrigger>
-          <TabsTrigger value="activity">{t("page.tabs.activity")}</TabsTrigger>
+        {/* A3: a 30-high tab (the label, 8, the 2 px underline), 24 apart, over one hairline under the whole row. */}
+        <TabsList className="h-auto pb-px">
+          <TabsTrigger value="automations" className="pb-2">
+            {t("page.tabs.automations")}
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="pb-2">
+            {t("page.tabs.activity")}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 

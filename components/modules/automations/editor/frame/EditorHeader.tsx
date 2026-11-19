@@ -9,9 +9,13 @@ import { Skeleton } from "@/components/desact/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { AutomationIcon, AutomationStatusBadge } from "@/components/modules/automations/shared";
 import type { AutomationStatus, TriggerSpec } from "@/models/automations";
+import { cn } from "@/lib/cn";
 import type { HeaderButton } from "../state/editorLogic";
 
 const PRIMARY: HeaderButton[] = ["turnOn", "saveChanges"];
+
+/** B7: whether what is on screen is saved — shown in edit mode only. */
+export type SaveState = "saved" | "unsaved" | "saving";
 
 /**
  * The editor's header (`automations-editor` → Layout 2): 64 high, ×, the icon and the name (click → Name and icon),
@@ -26,10 +30,14 @@ export const EditorHeader: React.FC<{
   disabled?: Partial<Record<HeaderButton, boolean>>;
   busy?: Partial<Record<HeaderButton, boolean>>;
   canRename: boolean;
+  /** B7: "All changes saved", "Unsaved changes", "Saving…"; null in read mode. */
+  saveState?: SaveState | null;
+  /** F1: the test run is open — its button shows pressed. */
+  testRunOpen?: boolean;
   onRename: () => void;
   onClose: () => void;
   onButton: (button: HeaderButton) => void;
-}> = ({ name, icon, trigger, status, buttons, disabled = {}, busy = {}, canRename, onRename, onClose, onButton }) => {
+}> = ({ name, icon, trigger, status, buttons, disabled = {}, busy = {}, canRename, saveState = null, testRunOpen = false, onRename, onClose, onButton }) => {
   const t = useTranslations("automationsEditor");
 
   const title = (
@@ -64,6 +72,18 @@ export const EditorHeader: React.FC<{
         <TooltipContent side="bottom">{name}</TooltipContent>
       </Tooltip>
       <AutomationStatusBadge status={status} />
+      {saveState && (
+        <span
+          role="status"
+          data-test="save-state"
+          className={cn(
+            "shrink-0 text-label font-normal",
+            saveState === "unsaved" ? "text-status-pending-text" : "text-tertiary",
+          )}
+        >
+          {t(`header.saveState.${saveState}`)}
+        </span>
+      )}
       <div className="ml-auto flex shrink-0 items-center gap-3">
         {buttons.map((button) => (
           <Button
@@ -72,10 +92,12 @@ export const EditorHeader: React.FC<{
             variant={PRIMARY.includes(button) ? "primary" : "secondary"}
             disabled={disabled[button] || busy[button]}
             aria-busy={busy[button] || undefined}
+            aria-pressed={button === "testRun" ? testRunOpen : undefined}
             onClick={() => onButton(button)}
             data-test={`header-${button}`}
+            className={cn(button === "testRun" && testRunOpen && "bg-mist hover:bg-mist")}
           >
-            {button === "testRun" && <Icon icon={PlayIcon} size="sm" />}
+            {button === "testRun" && <Icon icon={PlayIcon} />}
             {t(`header.${button}`)}
           </Button>
         ))}

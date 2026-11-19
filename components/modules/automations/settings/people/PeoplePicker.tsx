@@ -7,13 +7,13 @@ import { Icon } from "@/components/desact/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/desact/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
-import { Illustration } from "@/components/illustrations";
 import { useSegmentResolve } from "@/components/audience/hooks/useSegmentResolve";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { emptySegment, type UserRefDTO } from "@/models/segment/Segment";
 import type { AutomationCatalog, AutomationEventOption, RecipientSpec } from "@/models/automations";
 import { cn } from "@/lib/cn";
+import { PersonAvatar } from "../../shared";
 import { ListError, ListLoading } from "../parts/parts";
 import { addRecipient, recipientKey, removeRecipient, roleChoices, splitMatch, includesRecipient } from "./recipients";
 
@@ -30,6 +30,13 @@ export type PeoplePickerProps = {
   "aria-labelledby"?: string;
   invalid?: boolean;
   disabled?: boolean;
+  /** The field's words after the chips — "Add a person or a role" (hub K2), "Search people or roles" (O6). None by default (C6). */
+  placeholder?: string;
+  /**
+   * `compact`: the automations' chip, 26 high and words only (C6). `avatar`: 28 high, an avatar or the role's initials
+   * 20, padding 0 6 0 4, × 14 (the hub's K2 and O6).
+   */
+  chip?: "compact" | "avatar";
 };
 
 const fullName = (u: { firstName?: string | null; lastName?: string | null; email?: string | null }) =>
@@ -67,7 +74,7 @@ const Bolded: React.FC<{ text: string; query: string }> = ({ text, query }) => {
   return (
     <>
       {parts[0]}
-      <span className="font-semibold">{parts[1]}</span>
+      <span className="font-semibold text-primary">{parts[1]}</span>
       {parts[2]}
     </>
   );
@@ -93,6 +100,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
   "aria-labelledby": labelledBy,
   invalid,
   disabled,
+  placeholder,
+  chip = "compact",
 }) => {
   const t = useTranslations("automationsSettings");
   const label = useRecipientLabel(catalog);
@@ -164,7 +173,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
           }}
           data-invalid={invalid || undefined}
           className={cn(
-            "flex min-h-9 w-full cursor-text flex-wrap items-center gap-1 rounded-control border border-field bg-card px-1.5 py-1",
+            "flex min-h-9 w-full cursor-text flex-wrap items-center gap-1.5 rounded-control border border-field bg-card px-1.5 py-1",
             "transition-[border-color,box-shadow] hover:border-field-hover focus-within:border-accent focus-within:shadow-focus",
             "data-[invalid]:border-danger",
             disabled && "cursor-not-allowed bg-subtle",
@@ -176,6 +185,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
               spec={r}
               label={label}
               disabled={disabled}
+              withAvatar={chip === "avatar"}
               onRemove={() => onChange(removeRecipient(value, r))}
             />
           ))}
@@ -198,7 +208,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             }}
             onFocus={() => setOpen(true)}
             onKeyDown={onKeyDown}
-            className="h-6 min-w-12 flex-1 bg-transparent px-1 text-body text-primary outline-none"
+            placeholder={placeholder}
+            className={cn(
+              "h-6 flex-1 bg-transparent px-1 text-body text-primary outline-none placeholder:text-hint placeholder:text-tertiary",
+              placeholder ? "min-w-40" : "min-w-12",
+            )}
           />
         </div>
       </PopoverAnchor>
@@ -271,7 +285,7 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                   >
                     <Avatar className="size-7 shrink-0">
                       {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt="" /> : null}
-                      <AvatarFallback className="text-hint">{initials(name)}</AvatarFallback>
+                      <AvatarFallback name={name}>{initials(name)}</AvatarFallback>
                     </Avatar>
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate">
@@ -286,10 +300,8 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
             {people.isFetchingNextPage && <ListLoading />}
           </div>
           {!people.isLoading && !people.isError && roles.length === 0 && found.length === 0 && (
-            <div className="flex flex-col items-center gap-2 px-3 py-5 text-body text-secondary">
-              <Illustration scene="no-results-s" size="s" />
-              {t("people.noOne")}
-            </div>
+            // Hub A18: nothing matching is one muted row, as in every dropdown.
+            <div className="px-2 py-1.5 text-body text-tertiary">{t("people.noOne")}</div>
           )}
         </div>
       </PopoverContent>
@@ -315,13 +327,27 @@ const RecipientChip: React.FC<{
   spec: RecipientSpec;
   label: (r: RecipientSpec) => string;
   disabled?: boolean;
+  withAvatar?: boolean;
   onRemove: () => void;
-}> = ({ spec, label, disabled, onRemove }) => {
+}> = ({ spec, label, disabled, withAvatar = false, onRemove }) => {
   const t = useTranslations("automationsSettings");
   const text = spec.kind === "USER" ? <UserName id={spec.userId ?? ""} /> : label(spec);
   const name = typeof text === "string" ? text : null;
   return (
-    <span className="inline-flex h-6 max-w-full items-center gap-1 rounded-tag bg-mist pl-2 pr-0.5 text-label text-primary">
+    // C6: 26 high, a pill, Mist, 0 8 inside, 13/20 400, a 12 × with no box. With the avatar (hub K2): 28 high,
+    // padding 0 6 0 4, the avatar or the role's initials 20, a 14 ×.
+    <span
+      className={cn(
+        "inline-flex max-w-full items-center gap-1.5 rounded-pill bg-mist text-label leading-5 font-normal text-primary",
+        withAvatar ? "h-7 pr-1.5 pl-1" : "h-[26px] px-2",
+      )}
+    >
+      {withAvatar &&
+        (spec.kind === "USER" ? (
+          <UserAvatar id={spec.userId ?? ""} />
+        ) : (
+          <PersonAvatar name={label(spec)} size={20} className="shrink-0" />
+        ))}
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="max-w-48 truncate">{text}</span>
@@ -336,13 +362,20 @@ const RecipientChip: React.FC<{
             onRemove();
           }}
           aria-label={name ? t("people.removeNamed", { name }) : t("people.remove")}
-          className="inline-flex size-5 items-center justify-center rounded-control text-tertiary hover:bg-divider hover:text-secondary"
+          className="inline-flex shrink-0 items-center justify-center rounded-pill text-tertiary outline-none hover:text-secondary focus-visible:shadow-focus"
         >
-          <Icon icon={Cancel01Icon} size="sm" />
+          <Icon icon={Cancel01Icon} size="sm" className={withAvatar ? "size-3.5" : "size-3"} />
         </button>
       )}
     </span>
   );
+};
+
+/** A person picked by id, as a 20 avatar: the photo or the initials are read back with the name. */
+const UserAvatar: React.FC<{ id: string }> = ({ id }) => {
+  const { data } = useUser(id);
+  const name = data ? fullName(data) : "";
+  return <PersonAvatar name={name} avatarUrl={data?.avatarUrl} size={20} className="shrink-0" />;
 };
 
 /** A person picked by id: the name is read back. */

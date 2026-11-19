@@ -60,10 +60,8 @@ export function DemoBanner() {
     >
       <div className="flex min-w-0 items-center gap-2">
         <Icon icon={icon} size="sm" className="shrink-0" />
-        <span className="min-w-0">
-          {text}
-          {!mayGoLive && action === "goLive" && <span className="text-tertiary"> {t("askOwner")}</span>}
-        </span>
+        {/* No "Ask your account owner to go live." for the others (the designers' fix B1, 2026-11-18). */}
+        <span className="min-w-0">{text}</span>
       </div>
       {mayGoLive && action && (
         <Button asChild variant="secondary" size="sm">

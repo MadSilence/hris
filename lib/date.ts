@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { useOptionalCompanyData } from "@/components/providers/CompanyDataProvider/companyDataContext";
 import { languageOf } from "@/i18n/locales";
@@ -295,14 +295,25 @@ const numericParts = (date: Date, zone: string | undefined): { day: string; mont
  * | | European | US |
  * |---|---|---|
  * | a date | 18 Nov | Nov 18 |
- * | with its weekday | Wed 18 Nov | Wed, Nov 18 |
+ * | with its weekday | Wed, 18 Nov | Wed, Nov 18 |
  * | a span in a month | 25–27 Nov | Nov 25–27 |
  * | across months | 30 Nov – 2 Dec | Nov 30 – Dec 2 |
  * | with weekdays | Wed 25 – Fri 27 Nov | Wed, Nov 25 – Fri, Nov 27 |
  *
- * A language other than English keeps its own punctuation after a weekday ("ср, 18 нояб.").
+ * One date with its weekday takes a comma in both orders (SPEC § 1, the designers' widgets fixes A5, 2026-11-19:
+ * "Fri, 20 Nov"); a span keeps the board's form without one ("Fri 4 – Mon 7 Dec"). A language other than English
+ * keeps its own punctuation after a weekday ("ср, 18 нояб.").
+ *
+ * `hideYear` drops the year whatever it is — for the near dates a widget shows ("8 Jan", "back 4 Jan", widgets A7),
+ * where the next year goes without saying.
  */
-export type ShortDateOptions = { weekday?: boolean; language?: string; today?: Date; dateStyle?: CompanyDateStyle };
+export type ShortDateOptions = {
+  weekday?: boolean;
+  hideYear?: boolean;
+  language?: string;
+  today?: Date;
+  dateStyle?: CompanyDateStyle;
+};
 
 const toCalendarDate = (value: string | Date): Date =>
   typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? isoToDate(value.trim()) : new Date(value);
@@ -322,16 +333,17 @@ const shapes = (options?: { language?: string; dateStyle?: CompanyDateStyle }) =
   return { mf, locale, afterWeekday };
 };
 
-/** One date in the short style: "18 Nov", "Wed 18 Nov", "Nov 18", "Wed, Nov 18", "18 Nov 2025". */
+/** One date in the short style: "18 Nov", "Wed, 18 Nov", "Nov 18", "Wed, Nov 18", "18 Nov 2025". */
 export const formatShortDate = (value: string | Date | null | undefined, options?: ShortDateOptions): string => {
   if (value == null || value === "") return "";
   const date = toCalendarDate(value);
   if (Number.isNaN(date.getTime())) return typeof value === "string" ? value : "";
-  const { mf, locale, afterWeekday } = shapes(options);
+  const { mf, locale } = shapes(options);
   const thisYear = (options?.today ?? new Date()).getFullYear();
   const dm = mf ? `${monthName(date, locale)} ${date.getDate()}` : `${date.getDate()} ${monthName(date, locale)}`;
-  const withYear = date.getFullYear() === thisYear ? dm : mf ? `${dm}, ${date.getFullYear()}` : `${dm} ${date.getFullYear()}`;
-  return options?.weekday ? `${weekdayName(date, locale)}${afterWeekday}${withYear}` : withYear;
+  const withYear =
+    options?.hideYear || date.getFullYear() === thisYear ? dm : mf ? `${dm}, ${date.getFullYear()}` : `${dm} ${date.getFullYear()}`;
+  return options?.weekday ? `${weekdayName(date, locale)}, ${withYear}` : withYear;
 };
 
 /**
@@ -359,7 +371,7 @@ export const formatShortRange = (
   if (crossesYear || a.getMonth() !== b.getMonth()) {
     // Both ends in full; a span crossing a year names the year on both, one away from this year at its end.
     const yearOn = (d: Date, isEnd: boolean) =>
-      crossesYear || (isEnd && a.getFullYear() !== thisYear) ? d.getFullYear() : null;
+      !options?.hideYear && (crossesYear || (isEnd && a.getFullYear() !== thisYear)) ? d.getFullYear() : null;
     const one = (d: Date, isEnd: boolean) => {
       const y = yearOn(d, isEnd);
       const dm = mf ? `${monthName(d, locale)} ${d.getDate()}` : `${d.getDate()} ${monthName(d, locale)}`;
@@ -369,7 +381,7 @@ export const formatShortRange = (
   }
 
   const month = monthName(a, locale);
-  const year = a.getFullYear() === thisYear ? null : a.getFullYear();
+  const year = options?.hideYear || a.getFullYear() === thisYear ? null : a.getFullYear();
   if (options?.weekday) {
     // Each end its weekday: "Wed 25 – Fri 27 Nov", "Wed, Nov 25 – Fri, Nov 27".
     const left = mf ? `${wd(a)}${month} ${a.getDate()}` : `${wd(a)}${a.getDate()}`;
@@ -410,10 +422,141 @@ export const formatLongDate = (
   return `${weekdayName(date, locale, "long")}, ${withYear}`;
 };
 
-/** The short and long styles in the page's language and the company's order — for render. */
+/** Midnight of the day `value` falls on, in the browser's zone. */
+const dayStart = (value: Date): Date => new Date(value.getFullYear(), value.getMonth(), value.getDate());
+
+/** Whole days from `from` to `to`, counted on the calendar (a DST change does not make a day 23 hours short of one). */
+const calendarDaysBetween = (from: Date, to: Date): number =>
+  Math.round((dayStart(to).getTime() - dayStart(from).getTime()) / 86_400_000);
+
+/**
+ * A day as a widget names it (the designers' widgets fixes A6, 2026-11-19): **its weekday alone while it falls in
+ * this week** — the company's week, from `weekStartsOn` — "Thu", or "Thu 12" with `withDay`; **today** reads
+ * `todayLabel` ("Today" / "today", from the caller's catalogue) when one is passed; any other day is the short date
+ * without its weekday ("8 Jan", and with `hideYear` never a year). Past days of this week read the same ("Mon").
+ */
+export type DayThisWeekOptions = Omit<ShortDateOptions, "weekday"> & {
+  weekStartsOn?: WeekDayIndex;
+  todayLabel?: string;
+  withDay?: boolean;
+};
+
+export const formatDayThisWeek = (value: string | Date | null | undefined, options?: DayThisWeekOptions): string => {
+  if (value == null || value === "") return "";
+  const date = toCalendarDate(value);
+  if (Number.isNaN(date.getTime())) return typeof value === "string" ? value : "";
+  const today = dayStart(options?.today ?? new Date());
+  if (options?.todayLabel && calendarDaysBetween(today, date) === 0) return options.todayLabel;
+  const weekStartsOn = options?.weekStartsOn ?? 1;
+  const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - ((today.getDay() - weekStartsOn + 7) % 7));
+  const offset = calendarDaysBetween(weekStart, date);
+  if (offset >= 0 && offset < 7) {
+    const { locale } = shapes(options);
+    const weekday = weekdayName(date, locale);
+    return options?.withDay ? `${weekday} ${date.getDate()}` : weekday;
+  }
+  return formatShortDate(date, { ...options, weekday: false });
+};
+
+/** The words {@link formatAgo} needs, from the caller's catalogue (`common.relative`). */
+export type AgoLabels = {
+  minutes: (count: number) => string;
+  hours: (count: number) => string;
+  yesterday: string;
+};
+
+/**
+ * A moment as a widget's corner says it (the designers' widgets fixes A8, 2026-11-19): "5m ago" under an hour,
+ * "15h ago" under a day, "Yesterday" for the calendar day before, the weekday ("Mon") inside the last week, and the
+ * short date past that. A backend `LocalDateTime` has no zone suffix and is UTC wall-clock (`hris-api/CLAUDE.md` §
+ * "Time and dates"), so a string without one is read as UTC, never as local time.
+ */
+export const formatAgo = (
+  value: string | Date | null | undefined,
+  labels: AgoLabels,
+  options?: { now?: Date; language?: string; dateStyle?: CompanyDateStyle },
+): string => {
+  if (value == null || value === "") return "";
+  let at: Date;
+  if (value instanceof Date) at = value;
+  else if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) at = isoToDate(value.trim());
+  else at = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(value.trim()) ? value.trim() : `${value.trim()}Z`);
+  if (Number.isNaN(at.getTime())) return "";
+  const now = options?.now ?? new Date();
+  const minutes = Math.floor((now.getTime() - at.getTime()) / 60_000);
+  if (minutes < 60) return labels.minutes(Math.max(minutes, 1));
+  if (minutes < 60 * 24) return labels.hours(Math.floor(minutes / 60));
+  const days = calendarDaysBetween(at, now);
+  if (days <= 1) return labels.yesterday;
+  if (days < 7) return weekdayName(at, shapes(options).locale);
+  return formatShortDate(at, { language: options?.language, dateStyle: options?.dateStyle, today: now });
+};
+
+/**
+ * A time of day, the company's clock (the owner, 2026-11-18): a company in the US writes 12-hour times ("9:05 AM"),
+ * every other company 24-hour ("09:05"). Nobody chooses it — like the month first, the 12-hour clock is English's, so
+ * a Russian page of a US company reads "21:05". The backend's twin is `DateStyle.time`.
+ *
+ * <p>`timeZone` reads the instant in that zone (a company's, a schedule's); without it, the browser's — as every
+ * time on a screen was read before this seam. `withZone` adds the zone's short name ("09:00 CET"), where a screen
+ * draws one.
+ */
+export type TimeOptions = { language?: string; dateStyle?: CompanyDateStyle; timeZone?: string | null; withZone?: boolean };
+
+/** Whether the company's clock is the 12-hour one — the US style on an English page. */
+export const twelveHourClock = (options?: { language?: string; dateStyle?: CompanyDateStyle }): boolean =>
+  monthFirst(options?.dateStyle, options?.language);
+
+export const formatTime = (value: string | Date | null | undefined, options?: TimeOptions): string => {
+  if (value == null || value === "") return "";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const twelve = twelveHourClock(options);
+  const zone = options?.timeZone ?? undefined;
+  return new Intl.DateTimeFormat(wordsLocale(options?.dateStyle, options?.language), {
+    hour: twelve ? "numeric" : "2-digit",
+    minute: "2-digit",
+    hourCycle: twelve ? "h12" : "h23",
+    ...(zone ? { timeZone: zone } : {}),
+    ...(options?.withZone ? { timeZoneName: "short" as const } : {}),
+  }).format(date);
+};
+
+/**
+ * A wall-clock time with no date and no zone — `HH:mm` as the API spells it (an attendance span's From and To) — on
+ * the company's clock: "09:00" stays "09:00", or reads "9:00 AM" for a US company. Anything else comes back as it was.
+ */
+export const formatTimeOfDay = (value: string | null | undefined, options?: Omit<TimeOptions, "timeZone" | "withZone">): string => {
+  if (value == null || value === "") return "";
+  const match = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(value.trim());
+  if (!match) return value;
+  const date = new Date(2000, 0, 1, Number(match[1]), Number(match[2]));
+  return formatTime(date, options);
+};
+
+/** {@link formatTime} and {@link formatTimeOfDay} in the page's language and the company's clock — for render. */
+export const useTimeFormatter = () => {
+  const language = useDisplayLanguage();
+  const dateStyle = useCompanyDateStyle();
+  return useMemo(() => {
+    const format = (value: string | Date | null | undefined, options?: Omit<TimeOptions, "language" | "dateStyle">) =>
+      formatTime(value, { ...options, language, dateStyle });
+    return Object.assign(format, {
+      ofDay: (value: string | null | undefined) => formatTimeOfDay(value, { language, dateStyle }),
+    });
+  }, [language, dateStyle]);
+};
+
+/**
+ * The short and long styles in the page's language and the company's order — for render. `day` is
+ * {@link formatDayThisWeek} with the company's week and the catalogue's "Today" (`lowercase` for "back today");
+ * `ago` is {@link formatAgo} with the catalogue's words.
+ */
 export const useShortDates = () => {
   const language = useDisplayLanguage();
   const dateStyle = useCompanyDateStyle();
+  const weekStartsOn = useWeekStartsOn();
+  const t = useTranslations("common");
   return useMemo(
     () => ({
       date: (value: string | Date | null | undefined, options?: Omit<ShortDateOptions, "language" | "dateStyle">) =>
@@ -425,7 +568,28 @@ export const useShortDates = () => {
       ) => formatShortRange(start, end, { ...options, language, dateStyle }),
       long: (value: string | Date | null | undefined, options?: { weekday?: boolean; hideYear?: boolean }) =>
         formatLongDate(value, { ...options, language, dateStyle }),
+      day: (
+        value: string | Date | null | undefined,
+        options?: { lowercase?: boolean; withDay?: boolean; hideYear?: boolean; today?: Date },
+      ) =>
+        formatDayThisWeek(value, {
+          ...options,
+          language,
+          dateStyle,
+          weekStartsOn,
+          todayLabel: options?.lowercase ? t("values.todayLower") : t("values.today"),
+        }),
+      ago: (value: string | Date | null | undefined, options?: { now?: Date }) =>
+        formatAgo(
+          value,
+          {
+            minutes: (count) => t("relative.minutesAgo", { count }),
+            hours: (count) => t("relative.hoursAgo", { count }),
+            yesterday: t("relative.yesterday"),
+          },
+          { ...options, language, dateStyle },
+        ),
     }),
-    [language, dateStyle],
+    [language, dateStyle, weekStartsOn, t],
   );
 };

@@ -35,7 +35,9 @@ export const PostContainer: React.FC<{ id: string }> = ({ id }) => {
             }
           />
         ) : post.isError || !post.data ? (
-          <HubReadError error={post.error} back={{ href: "/hub", label: t("errors.goToHub") }} onRetry={() => void post.refetch()} />
+          // U1: the hub's own could-not-load (something-broke M 160, the title, Try again) — it was the generic "This didn't
+          // load" with a second line and the code (walk of 2026-11-19).
+          <HubReadError error={post.error} back={{ href: "/hub", label: t("errors.goToHub") }} title={t("news.error")} onRetry={() => void post.refetch()} />
         ) : (
           <article className="mt-10 flex flex-col">
             {post.data.coverFileId && (
@@ -44,13 +46,16 @@ export const PostContainer: React.FC<{ id: string }> = ({ id }) => {
             )}
             <div className="flex items-start gap-4">
               <h1 className="min-w-0 flex-1 text-hub-doc-title text-primary">{post.data.title}</h1>
-              <SaveButton type="POST" id={post.data.id} saved={post.data.saved} className="mt-2" />
+              <SaveButton type="POST" id={post.data.id} saved={post.data.saved} large className="mt-2" />
             </div>
-            <div className="mt-4 flex items-center gap-2 text-label">
-              <PersonAvatar person={post.data.author} />
-              <span className="text-primary">{post.data.author?.name}</span>
-              {post.data.author?.jobTitle && <span className="text-tertiary">{post.data.author.jobTitle}</span>}
-              <span className="ml-auto text-tertiary tabular-nums">{dates.long(post.data.publishedAt)}</span>
+            {/* Avatar 22 + name 14/20 secondary + job title 12/16, then 24, then "15 Nov 2026" 12/16 (FIXES F2). */}
+            <div className="mt-4 flex items-center gap-6">
+              <span className="flex min-w-0 items-center gap-2">
+                <PersonAvatar person={post.data.author} />
+                <span className="truncate text-body text-secondary">{post.data.author?.name}</span>
+                {post.data.author?.jobTitle && <span className="truncate text-hint text-tertiary">{post.data.author.jobTitle}</span>}
+              </span>
+              <span className="shrink-0 text-hint text-tertiary tabular-nums">{dates.long(post.data.publishedAt)}</span>
             </div>
             <HubDocumentView className="mt-10" body={post.data.body} />
           </article>

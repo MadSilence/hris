@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { FlashIcon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, FlashIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/desact/button";
 import { InlineAlert } from "@/components/desact/alert";
 import { FieldError } from "@/components/desact/field-error";
@@ -26,8 +26,10 @@ export const NAME_MAX = 60;
 export type NameAndIcon = { name: string; description: string; icon: string | null };
 
 /**
- * Name and icon (I1): on the first save, and from the name in the header. The icon is picked from what starts it, the
- * name suggested from the steps; 60 characters at most; a description; and how it looks in the list.
+ * Name and icon (I1, the designers' fixes G6–G10): on the first save, and from the name in the header. 560 wide, its
+ * parts 16 apart. The icon is picked from what starts it — 40 tiles, 8 to a row — the name suggested from the steps;
+ * 60 characters at most; a description; and how it looks in the list, as the list's own card. On a draft the button
+ * reads "Save draft".
  */
 export const NameAndIconDialog: React.FC<{
   open: boolean;
@@ -43,7 +45,7 @@ export const NameAndIconDialog: React.FC<{
   error: string | null;
   onCancel: () => void;
   onSave: (value: NameAndIcon) => void;
-}> = ({ open, firstSave, initial, suggested, status, trigger, triggerLine, saving, error, onCancel, onSave }) => {
+}> = ({ open, firstSave, initial, status, trigger, triggerLine, saving, error, onCancel, onSave }) => {
   const t = useTranslations("automationsEditor");
   const [name, setName] = React.useState(initial.name);
   const [description, setDescription] = React.useState(initial.description);
@@ -70,9 +72,12 @@ export const NameAndIconDialog: React.FC<{
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onCancel()}>
-      <DialogContent size="md" aria-describedby={undefined}>
+      <DialogContent size="md" hideClose aria-describedby={undefined}>
+        <Button type="button" variant="ghost" size="icon-sm" onClick={onCancel} aria-label={t("nameDialog.cancel")} className="absolute top-4 right-4">
+          <Icon icon={Cancel01Icon} />
+        </Button>
         <form
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-4"
           onSubmit={(event) => {
             event.preventDefault();
             setTouched(true);
@@ -86,7 +91,7 @@ export const NameAndIconDialog: React.FC<{
 
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-2 text-label text-primary">{t("nameDialog.icon")}</legend>
-            <div role="radiogroup" aria-label={t("nameDialog.icon")} className="flex flex-wrap gap-2">
+            <div role="radiogroup" aria-label={t("nameDialog.icon")} className="grid w-fit grid-cols-8 gap-2">
               {codes.map((code, i) => (
                 <button
                   key={code}
@@ -96,19 +101,19 @@ export const NameAndIconDialog: React.FC<{
                   aria-label={t("nameDialog.iconOption", { number: i + 1 })}
                   onClick={() => setIcon(code)}
                   className={cn(
-                    "flex size-10 items-center justify-center rounded-control border text-secondary outline-none transition-colors duration-(--duration-hover)",
-                    "hover:bg-subtle focus-visible:shadow-focus",
-                    icon === code ? "border-accent bg-accent-subtle text-accent-text" : "border-transparent bg-mist",
+                    "flex size-10 items-center justify-center rounded-control border outline-none transition-colors duration-(--duration-hover)",
+                    "focus-visible:shadow-focus",
+                    icon === code ? "border-accent bg-accent-muted text-accent-text" : "border-transparent bg-mist text-secondary hover:bg-divider",
                   )}
                 >
-                  <Icon icon={AUTOMATION_ICONS[code]} size="sm" />
+                  <Icon icon={AUTOMATION_ICONS[code]} />
                 </button>
               ))}
             </div>
             <p className="text-hint text-tertiary">{t("nameDialog.iconHint")}</p>
           </fieldset>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Label htmlFor={nameId}>{t("nameDialog.name")}</Label>
             <div className="relative">
               <Input
@@ -125,29 +130,33 @@ export const NameAndIconDialog: React.FC<{
                 {t("nameDialog.counter", { count: name.length, max: NAME_MAX })}
               </span>
             </div>
-            {nameError ? <FieldError>{nameError}</FieldError> : suggested && <p className="text-hint text-tertiary">{t("nameDialog.suggested")}</p>}
+            {/* G8: the hint stands under Name whether or not the name was changed. */}
+            {nameError ? <FieldError>{nameError}</FieldError> : <p className="text-hint text-tertiary">{t("nameDialog.suggested")}</p>}
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Label htmlFor={descriptionId}>{t("nameDialog.description")}</Label>
-            <Textarea id={descriptionId} value={description} rows={2} onChange={(e) => setDescription(e.currentTarget.value)} />
+            <Textarea id={descriptionId} value={description} rows={2} className="h-16 min-h-16" onChange={(e) => setDescription(e.currentTarget.value)} />
           </div>
 
           <div className="flex flex-col gap-2">
             <p className="text-label text-primary">{t("nameDialog.preview")}</p>
-            <div className="rounded-popover bg-mist p-3">
-              <div className="flex w-72 flex-col gap-3 rounded-card border border-divider bg-card p-4">
-                <AutomationStatusBadge status={status} />
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-control border border-divider text-secondary">
-                    <Icon icon={AUTOMATION_ICONS[icon]} size="sm" />
+            {/* G9: the list's own card (A7–A10) on a #F7F7F8 box. */}
+            <div className="rounded-popover bg-subtle p-3">
+              <div className="flex w-[300px] flex-col gap-2 rounded-card border border-divider bg-card p-4 shadow-card">
+                <div className="flex h-8 items-center">
+                  <AutomationStatusBadge status={status} />
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-control bg-mist text-secondary">
+                    <Icon icon={AUTOMATION_ICONS[icon]} />
                   </span>
-                  <span className="line-clamp-2 text-card-title text-primary">{trimmed || t("nameDialog.name")}</span>
+                  <span className="line-clamp-2 min-w-0 pt-1.75 text-card-title break-words text-primary">{trimmed || t("nameDialog.name")}</span>
                 </div>
                 {triggerLine && (
-                  <p className="flex items-center gap-1.5 text-label text-secondary">
-                    <Icon icon={FlashIcon} size="sm" className="text-tertiary" />
-                    {triggerLine}
+                  <p className="flex min-w-0 items-center gap-2 text-body text-secondary">
+                    <Icon icon={FlashIcon} size="sm" className="shrink-0 text-tertiary" />
+                    <span className="truncate">{triggerLine}</span>
                   </p>
                 )}
               </div>
@@ -161,7 +170,7 @@ export const NameAndIconDialog: React.FC<{
               {t("nameDialog.cancel")}
             </Button>
             <Button type="submit" aria-busy={saving} disabled={saving}>
-              {firstSave ? t("nameDialog.saveDraft") : t("nameDialog.save")}
+              {firstSave || status === "DRAFT" ? t("nameDialog.saveDraft") : t("nameDialog.save")}
             </Button>
           </DialogFooter>
         </form>

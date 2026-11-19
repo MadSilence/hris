@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Alert02Icon, SparklesIcon, Undo02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowUp02Icon, SparklesIcon, Undo02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
-import { AiPromptField } from "@/components/modules/automations/shared";
 import type { AiReply, AiTurn } from "./noddoAiDraft";
 
 /** "Drafted by AI — review before turning on" (D1). */
@@ -65,17 +64,14 @@ export const AiReplyView: React.FC<{ reply: AiReply; undone?: boolean; onUndo?: 
 };
 
 /**
- * The noddo AI tool window (D1, H1), 400 wide: the conversation, then the prompt field as the reply box. Not
- * connected yet (K10): a prompt gets the fixed reply, and the text stays.
+ * The noddo AI tool window (D1, H1), 400 wide: the conversation; the reply box is the window's footer,
+ * {@link AiComposer}. Not connected yet (K10): a prompt gets the fixed reply, and the text stays.
  */
 export const AiWindow: React.FC<{
   turns: AiTurn[];
-  value: string;
-  busy: boolean;
-  onChange: (value: string) => void;
   onSubmit: (prompt: string) => void;
   onUndo: (turnId: number) => void;
-}> = ({ turns, value, busy, onChange, onSubmit, onUndo }) => {
+}> = ({ turns, onSubmit, onUndo }) => {
   const t = useTranslations("automationsEditor");
   const endRef = React.useRef<HTMLDivElement>(null);
   // A block body, not an expression: Chromium's `scrollIntoView` now returns a Promise, and an effect that returns
@@ -102,8 +98,54 @@ export const AiWindow: React.FC<{
         ))}
       </ol>
       <div ref={endRef} />
-      <div className="mt-auto">
-        <AiPromptField value={value} onChange={onChange} onSubmit={onSubmit} busy={busy} variant="window" />
+    </div>
+  );
+};
+
+/**
+ * The reply box of the noddo AI window (the designers' fixes E9): pinned to the bottom under a hairline; the field and
+ * a 32 × 32 send button in the accent, never greyed — with nothing typed it puts the focus in the field. ⌘/Ctrl +
+ * Enter sends too.
+ */
+export const AiComposer: React.FC<{
+  value: string;
+  busy: boolean;
+  onChange: (value: string) => void;
+  onSubmit: (prompt: string) => void;
+}> = ({ value, busy, onChange, onSubmit }) => {
+  const t = useTranslations("automationsEditor");
+  const ref = React.useRef<HTMLTextAreaElement>(null);
+  const send = () => {
+    if (busy) return;
+    const prompt = value.trim();
+    if (!prompt) {
+      ref.current?.focus();
+      return;
+    }
+    onSubmit(prompt);
+  };
+  return (
+    <div className="shrink-0 border-t border-divider px-5 pt-4 pb-5">
+      <div className="flex items-end gap-2 rounded-control border border-field bg-card px-3 py-2.5 transition-[border-color,box-shadow] duration-(--duration-hover) hover:border-field-hover focus-within:border-accent focus-within:shadow-focus">
+        <textarea
+          ref={ref}
+          value={value}
+          readOnly={busy}
+          aria-label={t("ai.composerLabel")}
+          placeholder={t("ai.composerPlaceholder")}
+          rows={1}
+          onChange={(event) => onChange(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+              event.preventDefault();
+              send();
+            }
+          }}
+          className="field-sizing-content max-h-36 min-h-8 min-w-0 flex-1 resize-none self-center overflow-y-auto bg-transparent py-1.5 text-body text-primary outline-none placeholder:text-tertiary"
+        />
+        <Button type="button" size="icon-sm" onClick={send} loading={busy} aria-label={t("ai.send")}>
+          {!busy && <Icon icon={ArrowUp02Icon} size="sm" />}
+        </Button>
       </div>
     </div>
   );

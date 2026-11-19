@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
-import { formatDisplayDate, useDisplayLanguage, useDisplayLocale, useShortDates } from "@/lib/date";
+import { formatDisplayDate, useDisplayLanguage, useDisplayLocale, useShortDates, useTimeFormatter } from "@/lib/date";
 import type { AudienceLabel } from "@/models/hub";
 
 /**
@@ -23,6 +23,22 @@ export const useAudienceLabel = () => {
   );
 };
 
+/**
+ * An audience in a row's meta: "Everyone" or "{n} people" — never "Everyone at {company}" (company-hub Words, Row
+ * meta; FIXES H3). The longer form stays for the places that name the company (CM05's hint, CP02).
+ */
+export const useRowAudience = () => {
+  const t = useTranslations("hub");
+  return useCallback(
+    (label: AudienceLabel | null | undefined): string => {
+      if (!label || label === "EVERYONE") return t("audience.everyone");
+      const count = Number(label);
+      return Number.isFinite(count) ? t("audience.people", { count }) : label;
+    },
+    [t],
+  );
+};
+
 /** The company's name, for "Everyone at {company}". */
 export const useCompanyName = (): string => useCompanyData().company?.name ?? "";
 
@@ -34,14 +50,12 @@ export const useHubDates = () => {
   const short = useShortDates();
   const language = useDisplayLanguage();
   const locale = useDisplayLocale();
+  const formatTime = useTimeFormatter();
   return {
     short: (value: string | null | undefined) => short.date(value ?? null),
     long: (value: string | null | undefined) => formatDisplayDate(value ?? null, { style: "medium", language }),
-    time: (value: string | null | undefined) => {
-      if (!value) return "";
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" }).format(date);
-    },
+    // The company's clock: 12-hour in the US, 24-hour elsewhere (lib/date.ts `formatTime`).
+    time: (value: string | null | undefined) => formatTime(value ?? null),
     month: (value: string | null | undefined) => {
       if (!value) return "";
       const date = new Date(value);

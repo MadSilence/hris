@@ -1,4 +1,4 @@
-import { displayLocale, partsToISO } from "@/lib/date";
+import { formatTime, partsToISO } from "@/lib/date";
 
 /**
  * The calendar date in a zone, as `yyyy-MM-dd`. Home's "today" is the company's (HOME_AND_SEARCH.md
@@ -26,13 +26,9 @@ export const hourInZone = (now: Date, zone: string | null | undefined): number =
   return Number(hour ?? 0);
 };
 
-/** A clock reading in a zone, in the reader's own locale — the page's `useDisplayLocale()` during render. */
-export const timeInZone = (now: Date, zone: string | null | undefined, locale?: string): string =>
-  new Intl.DateTimeFormat(locale ?? displayLocale(), {
-    hour: "2-digit",
-    minute: "2-digit",
-    ...(zone ? { timeZone: safeZone(zone) } : {}),
-  }).format(now);
+/** A clock reading in a zone, on the company's clock (12-hour in the US) — pass the page's language during render. */
+export const timeInZone = (now: Date, zone: string | null | undefined, language?: string): string =>
+  formatTime(now, { language, timeZone: zone ? safeZone(zone) : undefined });
 
 /** The part of the day a greeting names — the `part` of `home.greeting.line`. */
 export const greetingFor = (hour: number): "morning" | "afternoon" | "evening" =>

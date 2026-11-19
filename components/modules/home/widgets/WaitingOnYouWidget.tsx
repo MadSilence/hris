@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
-  ArrowLeft01Icon,
+  ArrowLeft02Icon,
   Calendar03Icon,
   CancelCircleIcon,
   FileTextIcon,
   FlashIcon,
   StarIcon,
   TaskDone01Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Icon } from "@/components/desact/icon";
@@ -22,6 +23,8 @@ import { ActionStatus } from "@/components/models/ActionStatus";
 import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { hubIcon } from "@/components/modules/hub/shared";
 import { cn } from "@/lib/cn";
 import { useDisplayLocale, useShortDates } from "@/lib/date";
 import { showActionError, showError } from "@/lib/errors/errorToast";
@@ -37,14 +40,14 @@ import { lifecycleQueryKeys } from "@/components/modules/lifecycle/hooks";
 import { decideAutomationApprovalAction } from "@/components/modules/automations/actions/automationActions";
 import { automationsHref } from "@/components/modules/automations/list";
 import { useRunWords } from "@/components/modules/automations/runs";
-import { ago } from "@/components/modules/home/utils/ago";
 import { useAutomationsWeek, useSaveHomeSettings } from "@/components/modules/home/hooks";
 import { scheduleWrite, showUndoToast, usePendingWrites } from "@/components/modules/home/deferred";
 import { isoDateInZone } from "@/components/modules/home/utils/zonedTime";
 import {
-  BigNumber,
   FactChip,
   PersonFace,
+  SmallFooter,
+  TWO_LINE_ROW,
   WidgetCard,
   WidgetEmpty,
   WidgetError,
@@ -52,7 +55,7 @@ import {
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
 import { TICKABLE_KINDS, taskDoneKey, useTickTask } from "./MyTasksWidget";
-import { buildDeck, skipCard, writeKey, type DeckCard } from "./waitingOnYouDeck";
+import { buildDeck, markRead, skipCard, writeKey, type DeckCard } from "./waitingOnYouDeck";
 import type { HomeWidgetProps } from "./catalogue";
 
 /** The most dashes under the title; past it, the counter alone. */
@@ -115,16 +118,19 @@ const useDeck = () => {
     [waiting.data, week.data, skipped, held],
   );
 
-  const skip = (key: string) => {
-    const next = skipCard(skipped, key, deck);
+  const keep = (next: string[]) => {
     setSkipped(next);
     // Kept for this person between visits (Q-5); a save that fails only loses the order.
     save.mutate({ homeSkipped: next }, { onError: () => undefined });
   };
+  const skip = (key: string) => keep(skipCard(skipped, key, deck));
+  // A failed run's Mark as read (W13): a permanent skip of that run, in the same list.
+  const read = (key: string) => keep(markRead(skipped, key));
 
   return {
     deck,
     skip,
+    read,
     loading: waiting.isLoading,
     error: waiting.error,
     refetch: () => {
@@ -207,26 +213,36 @@ const hrefOf = (card: DeckCard) => {
   }
 };
 
-/** The person a time-off card is about, from the request's decision context. */
-const RequesterLine: React.FC<{ card: Extract<DeckCard, { request: TimeOffRequest }>; context: TimeOffDecisionContext | undefined }> = ({ card, context }) => {
-  const t = useTranslations("home");
-  const tTimeOff = useTranslations("timeOff");
-  const days = tTimeOff("amount.days", dayAmountArgs(card.request.requestedAmount));
-  // Until the context arrives the name is not known; "Someone" would read as an answer (walk of 2026-11-11).
-  if (!context) return <Skeleton className="h-4 w-40" />;
-  const name = context.requesterName ?? t("card.unnamed");
-  return (
-    <span className="flex min-w-0 items-center gap-2">
-      <PersonFace name={name} size={20} />
-      <span className="min-w-0 truncate text-label">
-        <span className="font-semibold text-primary">{name}</span>{" "}
-        <span className="font-normal text-secondary">
-          {card.kind === "CANCELLATION" ? t("waitingOnYou.wantsToCancel", { days }) : t("waitingOnYou.wantsTimeOff", { days })}
-        </span>
+/** A leave type's name inside a sentence: "vacation", "parental leave" (widgets A9) — company data, lower-cased only. */
+const typeWord = (name: string | null | undefined, locale: string | undefined) => (name ? name.toLocaleLowerCase(locale) : "");
+
+/** Whole days from `from` to `to`, both ISO dates. */
+const daysBetween = (from: string, to: string) =>
+  Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86_400_000);
+
+/**
+ * A card's header (widgets W6): line 1 the person (a 20 avatar) or the object, 14/18 600; line 2 what it is about,
+ * 13/18 tertiary. While a time-off card's context is on its way the name is not known — "Someone" would read as an
+ * answer (walk of 2026-11-11) — so it is a skeleton.
+ */
+const CardHeader: React.FC<{ face?: string | null; name: React.ReactNode; line: React.ReactNode; loading?: boolean }> = ({
+  face,
+  name,
+  line,
+  loading,
+}) => (
+  <span className="flex min-w-0 flex-1 flex-col">
+    {loading ? (
+      <Skeleton className="my-0.5 h-3.5 w-40" />
+    ) : (
+      <span className="flex min-w-0 items-center gap-1.5 text-body leading-[18px] font-semibold text-primary">
+        {face && <PersonFace name={face} size={20} />}
+        <span className="truncate">{name}</span>
       </span>
-    </span>
-  );
-};
+    )}
+    {line && <span className="truncate text-label font-normal text-tertiary">{line}</span>}
+  </span>
+);
 
 /** One card of the deck, its front face: the kind, who and what, the main line, the facts, and the actions. */
 const DecisionCard: React.FC<{
@@ -236,7 +252,8 @@ const DecisionCard: React.FC<{
   onApprove: () => void;
   onSkip: () => void;
   onDone: () => void;
-}> = ({ card, leaving, preview, onApprove, onSkip, onDone }) => {
+  onRead: () => void;
+}> = ({ card, leaving, preview, onApprove, onSkip, onDone, onRead }) => {
   const t = useTranslations("home");
   const tTimeOff = useTranslations("timeOff");
   const router = useRouter();
@@ -244,26 +261,43 @@ const DecisionCard: React.FC<{
   const dates = useShortDates();
   const words = useRunWords();
   const settings = useUserSettings();
+  const { userId } = useCurrentUser();
   const today = isoDateInZone(new Date(), settings.data?.companyTimeZone);
   const context = useDecisionContext(card.kind === "TIME_OFF" || card.kind === "CANCELLATION" ? card.request.id : null);
   const tab = preview ? -1 : undefined;
 
-  let who: React.ReactNode = null;
+  let header: React.ReactNode = null;
   let when = "";
   let main = "";
   let under: React.ReactNode = null;
   let actions: React.ReactNode = null;
+  let tile: IconSvgElement = KIND_ICON[card.kind];
 
   if (card.kind === "TIME_OFF" || card.kind === "CANCELLATION") {
-    who = <RequesterLine card={card} context={context.data} />;
-    when = ago(card.request.createdAt, locale);
-    main = dates.range(card.request.startDate, card.request.endDate, { weekday: true });
+    const days = tTimeOff("amount.days", dayAmountArgs(card.request.requestedAmount));
+    const type = typeWord(context.data?.leaveTypeName, locale);
+    const name = context.data?.requesterName ?? t("card.unnamed");
+    header = (
+      <CardHeader
+        loading={!context.data}
+        face={name}
+        name={name}
+        line={t(card.kind === "CANCELLATION" ? "waitingOnYou.wantsToCancel" : "waitingOnYou.wantsTimeOff", {
+          days,
+          hasType: type ? "yes" : "no",
+          type,
+        })}
+      />
+    );
+    when = dates.ago(card.request.createdAt);
+    // "Thu 19 → Sat 21 Nov" (W7): the span's own form, with an arrow.
+    main = dates.range(card.request.startDate, card.request.endDate, { weekday: true, hideYear: true }).replace(" – ", " → ");
     const peer = context.data?.peersAway?.[0];
     if (peer) {
       const peerName = [peer.firstName, peer.lastName].filter(Boolean).join(" ");
-      const date = dates.date(peer.startDate > card.request.startDate ? peer.startDate : card.request.startDate);
+      const date = dates.date(peer.startDate > card.request.startDate ? peer.startDate : card.request.startDate, { hideYear: true });
       under = (
-        <p className="flex min-w-0 items-center gap-2 text-label text-status-pending-text">
+        <p className="mt-0.5 flex min-w-0 items-center gap-2 text-label font-normal text-status-pending-text">
           <PersonFace name={peerName} avatarUrl={peer.avatarUrl} size={20} />
           <span className="truncate">
             {peer.teamName
@@ -275,8 +309,12 @@ const DecisionCard: React.FC<{
     } else {
       const balance = context.data?.balance;
       under = (
-        <span className="flex flex-wrap gap-1.5">
-          <FactChip>{tTimeOff("amount.days", dayAmountArgs(card.request.requestedAmount))}</FactChip>
+        <span className="mt-2 flex flex-wrap gap-1.5">
+          <FactChip>
+            {context.data?.workingDays
+              ? t("waitingOnYou.workingDays", dayAmountArgs(card.request.requestedAmount))
+              : days}
+          </FactChip>
           {balance && card.kind === "TIME_OFF" && (
             <FactChip>{t("waitingOnYou.leftAfter", { left: tTimeOff("amount.days", dayAmountArgs(balance.currentBalance)) })}</FactChip>
           )}
@@ -300,9 +338,9 @@ const DecisionCard: React.FC<{
       </>
     );
   } else if (card.kind === "AUTOMATION") {
-    who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.automationWaits")}</span>;
+    header = <CardHeader name={t("waitingOnYou.automation")} line={t("waitingOnYou.automationWaits")} />;
     main = card.task.title;
-    under = card.task.subject?.name ? <p className="truncate text-label text-secondary">{card.task.subject.name}</p> : null;
+    under = card.task.subject?.name ? <p className="mt-0.5 truncate text-label font-normal text-tertiary">{card.task.subject.name}</p> : null;
     actions = (
       <>
         <Button type="button" variant="secondary" size="sm" tabIndex={tab} onClick={() => router.push("/tasks")}>
@@ -316,63 +354,92 @@ const DecisionCard: React.FC<{
   } else if (card.kind === "TASK" || card.kind === "REVIEW") {
     const task = card.task;
     const process = task.processType ? t(`processes.types.${task.processType}`) : "";
-    const person = task.subject?.name ?? "";
-    const from = process || person
-      ? t("waitingOnYou.taskFrom", { hasProcess: process ? "yes" : "no", process, hasPerson: person ? "yes" : "no", person })
-      : "";
-    who = <span className="truncate text-label"><span className="font-semibold text-primary">{task.title}</span></span>;
-    main =
-      task.dueReached && task.dueDate
-        ? t("waitingOnYou.taskOverdue", { date: dates.date(task.dueDate) })
-        : t("waitingOnYou.taskDue", {
-            hasDate: task.dueDate ? "yes" : "no",
-            date: task.dueDate ? (task.dueDate === today ? t("card.today") : dates.date(task.dueDate, { weekday: true })) : "",
-          });
-    under = from ? <p className="truncate text-label text-secondary">{from}</p> : null;
+    const self = Boolean(userId) && task.subject?.id === userId;
+    // Never the reader's own name (W11): their own review is "your self-review".
+    const person = self ? "" : task.subject?.name ?? "";
+    const line =
+      card.kind === "REVIEW" && self
+        ? t("waitingOnYou.selfReview")
+        : process || person
+          ? t("waitingOnYou.taskFrom", { hasProcess: process ? "yes" : "no", process, hasPerson: person ? "yes" : "no", person })
+          : "";
+    header = <CardHeader name={task.title} line={line} />;
+    const left = task.dueDate ? daysBetween(today, task.dueDate) : null;
+    if (task.dueReached && task.dueDate && task.dueDate < today) {
+      main = t("waitingOnYou.taskOverdue", { date: dates.date(task.dueDate, { weekday: true, hideYear: true }) });
+    } else if (card.kind === "REVIEW") {
+      main = t("waitingOnYou.reviewDue", { hasDate: left === null ? "no" : "yes", count: Math.max(0, left ?? 0) });
+    } else {
+      main = t("waitingOnYou.taskDue", {
+        hasDate: task.dueDate ? "yes" : "no",
+        isToday: left === 0 ? "yes" : "no",
+        date: task.dueDate ? dates.date(task.dueDate, { weekday: true, hideYear: true }) : "",
+      });
+    }
+    if (card.kind === "REVIEW") {
+      under = self ? (
+        <span className="mt-2 flex flex-wrap gap-1.5">
+          <FactChip>{t("waitingOnYou.managerSeesAfter")}</FactChip>
+        </span>
+      ) : null;
+    } else if (task.requestedBy?.name) {
+      under = <p className="mt-0.5 truncate text-label font-normal text-tertiary">{t("waitingOnYou.assignedBy", { name: task.requestedBy.name })}</p>;
+    }
     actions =
       card.kind === "TASK" && TICKABLE_KINDS.has(task.kind) ? (
         <Button type="button" size="sm" tabIndex={tab} onClick={onDone}>
+          <Icon icon={Tick02Icon} size="sm" />
           {t("waitingOnYou.markDone")}
         </Button>
       ) : (
         <Button asChild size="sm" tabIndex={tab}>
-          <Link href={hrefOf(card)}>{t("waitingOnYou.start")}</Link>
+          <Link href={hrefOf(card)}>{card.kind === "TASK" && task.kind === "SIGN" ? t("waitingOnYou.sign") : t("waitingOnYou.start")}</Link>
         </Button>
       );
   } else if (card.kind === "AGREE") {
-    // No agreeing from Home: the person has to read the page first (U3).
+    // No agreeing from Home (W15): the button only opens the page, where the person agrees after reading it.
     const agreement = card.agreement;
-    who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.agreeWaits")}</span>;
-    main = agreement.title;
-    under = agreement.overdue ? (
-      <p className="truncate text-label text-status-declined-text">{t("waitingOnYou.agreeOverdue", { date: dates.date(agreement.dueOn) })}</p>
-    ) : agreement.dueOn ? (
-      <p className="truncate text-label text-secondary">{t("waitingOnYou.agreeBy", { date: dates.date(agreement.dueOn, { weekday: true }) })}</p>
+    tile = hubIcon(agreement.icon);
+    header = <CardHeader name={agreement.title} line={t("waitingOnYou.wasUpdated")} />;
+    main = agreement.overdue
+      ? t("waitingOnYou.agreeOverdue", { date: dates.date(agreement.dueOn, { weekday: true, hideYear: true }) })
+      : agreement.dueOn
+        ? t("waitingOnYou.agreeBy", { date: dates.date(agreement.dueOn, { weekday: true, hideYear: true }) })
+        : t("waitingOnYou.readAndAgree");
+    // The page's What changed points, joined with commas; left out when it has none (W15).
+    const points = agreement.whatChanged ?? [];
+    under = points.length ? (
+      <p className="mt-0.5 truncate text-label font-normal text-tertiary">{t("waitingOnYou.whatChanged", { points: points.join(", ") })}</p>
     ) : null;
     actions = (
       <Button asChild size="sm" tabIndex={tab}>
-        <Link href={hrefOf(card)}>{t("waitingOnYou.read")}</Link>
+        <Link href={hrefOf(card)}>{t("waitingOnYou.readAndAgree")}</Link>
       </Button>
     );
   } else if (card.kind === "SIGN") {
     // Signing is never done on Home: the document has to be read first, on its own screen.
     const envelope = card.envelope;
     const lastDay = envelope.expiresAt ? envelope.expiresAt.slice(0, 10) : null;
-    who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.signWaits")}</span>;
-    main = envelope.title;
-    under = lastDay ? (
-      <p className="truncate text-label text-secondary">{t("waitingOnYou.signBy", { date: dates.date(lastDay, { weekday: true }) })}</p>
-    ) : null;
+    // Its sender by name; the product never says "HR" (W6).
+    header = (
+      <CardHeader
+        name={envelope.title}
+        line={t("waitingOnYou.toSignFrom", { hasSender: envelope.sentByName ? "yes" : "no", sender: envelope.sentByName ?? "" })}
+      />
+    );
+    when = dates.ago(envelope.sentAt);
+    main = lastDay ? t("waitingOnYou.signBy", { date: dates.date(lastDay, { weekday: true, hideYear: true }) }) : envelope.title;
     actions = (
       <Button asChild size="sm" tabIndex={tab}>
         <Link href={hrefOf(card)}>{t("waitingOnYou.sign")}</Link>
       </Button>
     );
   } else {
-    who = <span className="truncate text-label font-semibold text-primary">{t("waitingOnYou.runFailed")}</span>;
+    header = <CardHeader name={t("waitingOnYou.automation")} line={t("waitingOnYou.didntRun")} />;
+    when = t("card.today");
     main = card.run.ruleName ?? "";
     under = (
-      <span className="line-clamp-2 block text-label text-status-declined-text">
+      <span className="mt-0.5 line-clamp-2 block text-label font-normal text-status-declined-text">
         {t("waitingOnYou.runLine", {
           hasPerson: card.run.person?.name ? "yes" : "no",
           person: card.run.person?.name ?? "",
@@ -380,41 +447,52 @@ const DecisionCard: React.FC<{
         })}
       </span>
     );
+    // Mark as read (the owner, 2026-11-19, W13): the run leaves this person's deck for good.
     actions = (
-      <Button asChild size="sm" tabIndex={tab}>
-        <Link href={hrefOf(card)}>{t("waitingOnYou.fixIt")}</Link>
-      </Button>
+      <>
+        <Button type="button" variant="secondary" size="sm" tabIndex={tab} onClick={onRead}>
+          {t("waitingOnYou.markAsRead")}
+        </Button>
+        <Button asChild size="sm" tabIndex={tab}>
+          <Link href={hrefOf(card)}>{t("waitingOnYou.fixIt")}</Link>
+        </Button>
+      </>
     );
   }
 
+  const href = hrefOf(card);
   return (
     <article
       data-deck-leaving={leaving ?? undefined}
-      className="relative flex h-full flex-col gap-3 rounded-panel bg-card px-5 py-[18px] shadow-deck [transform:rotate(-0.5deg)]"
+      className="relative flex h-full flex-col gap-1 rounded-panel bg-card px-5 py-[18px] shadow-deck [transform:rotate(-0.5deg)]"
     >
-      <div className="flex items-start gap-3">
+      <Link href={href} tabIndex={tab} className="flex min-w-0 items-center gap-2.5">
         <span
           className={cn(
             "flex size-9 shrink-0 items-center justify-center rounded-control",
             card.kind === "FAILED_RUN" ? "bg-status-declined-bg text-status-declined-text" : "bg-accent-subtle text-accent-text",
           )}
         >
-          <Icon icon={KIND_ICON[card.kind]} size="md" />
+          <Icon icon={tile} size="md" />
         </span>
-        <Link href={hrefOf(card)} tabIndex={tab} className="flex min-w-0 flex-1 items-center justify-between gap-2">
-          {who}
-          {when && <span className="shrink-0 text-hint text-tertiary">{when}</span>}
-        </Link>
-      </div>
-      <Link href={hrefOf(card)} tabIndex={tab} className="text-deck-line text-primary">
+        {header}
+        {when && <span className="shrink-0 text-hint leading-5 text-tertiary">{when}</span>}
+      </Link>
+      <Link href={href} tabIndex={tab} className="mt-3.5 truncate text-deck-line tracking-[-0.02em] text-primary">
         {main}
       </Link>
-      {context.isLoading && (card.kind === "TIME_OFF" || card.kind === "CANCELLATION") ? <Skeleton className="h-5 w-3/5" /> : under}
+      {context.isLoading && (card.kind === "TIME_OFF" || card.kind === "CANCELLATION") ? <Skeleton className="mt-2 h-5 w-3/5" /> : under}
       <div className="mt-auto flex items-center justify-between gap-2">
-        <Button type="button" variant="ghost" size="sm" tabIndex={tab} onClick={onSkip} className="-ml-2 text-secondary">
-          <Icon icon={ArrowLeft01Icon} size="sm" />
+        <button
+          type="button"
+          tabIndex={tab}
+          onClick={onSkip}
+          className="inline-flex items-center gap-1 text-label leading-5 text-secondary transition-colors duration-100 hover:text-primary"
+        >
+          {/* W9: the arrow at 14. */}
+          <Icon icon={ArrowLeft02Icon} size="sm" className="size-3.5" />
           {t("waitingOnYou.skip")}
-        </Button>
+        </button>
         <span className="flex gap-2">{actions}</span>
       </div>
     </article>
@@ -422,7 +500,12 @@ const DecisionCard: React.FC<{
 };
 
 /** The deck (Large): one card at a time, up to two behind it, the counter and a dash per card. */
-const DecisionDeck: React.FC<{ deck: DeckCard[]; preview?: boolean; onSkip: (key: string) => void }> = ({ deck, preview, onSkip }) => {
+const DecisionDeck: React.FC<{
+  deck: DeckCard[];
+  preview?: boolean;
+  onSkip: (key: string) => void;
+  onRead: (key: string) => void;
+}> = ({ deck, preview, onSkip, onRead }) => {
   const t = useTranslations("home");
   const answers = useAnswers();
   const [leaving, setLeaving] = useState<{ key: string; how: "approve" | "skip" } | null>(null);
@@ -440,12 +523,13 @@ const DecisionDeck: React.FC<{ deck: DeckCard[]; preview?: boolean; onSkip: (key
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <span className="shrink-0 text-label text-accent-text">{t("waitingOnYou.counter", { at: 1, count: deck.length })}</span>
+      {/* W5: "1 of 3" 13/20 600, 10 to the bar; dashes 4 high, 4 apart, on the hairline grey. */}
+      <div className="flex items-center gap-2.5">
+        <span className="shrink-0 text-label leading-5 font-semibold text-accent-text">{t("waitingOnYou.counter", { at: 1, count: deck.length })}</span>
         {deck.length <= MAX_DASHES && (
-          <span className="flex flex-1 gap-1.5" aria-hidden>
+          <span className="flex flex-1 gap-1" aria-hidden>
             {deck.map((card, i) => (
-              <span key={card.key} className={cn("h-1 flex-1 rounded-pill", i === 0 ? "bg-accent" : "bg-mist")} />
+              <span key={card.key} className={cn("h-1 flex-1 rounded-pill", i === 0 ? "bg-accent" : "bg-divider")} />
             ))}
           </span>
         )}
@@ -472,6 +556,7 @@ const DecisionDeck: React.FC<{ deck: DeckCard[]; preview?: boolean; onSkip: (key
             onApprove={() => leave("approve", () => answers.approve(front))}
             onDone={() => leave("approve", () => answers.markDone(front))}
             onSkip={() => leave("skip", () => onSkip(front.key))}
+            onRead={() => leave("approve", () => onRead(front.key))}
           />
         )}
       </div>
@@ -487,9 +572,9 @@ const DecisionDeck: React.FC<{ deck: DeckCard[]; preview?: boolean; onSkip: (key
  */
 export const WaitingOnYouWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const t = useTranslations("home");
-  const { deck, skip, loading, error, refetch } = useDeck();
+  const { deck, skip, read, loading, error, refetch } = useDeck();
   const title = t("widgets.waitingOnYou.title");
-  const inbox = <WidgetLink href={NEEDS_ACTION_INBOX_HREF}>{t("waitingOnYou.inbox")}</WidgetLink>;
+  const inbox = size === "S" ? undefined : <WidgetLink href={NEEDS_ACTION_INBOX_HREF}>{t("waitingOnYou.inbox")}</WidgetLink>;
 
   if (loading) {
     return (
@@ -513,11 +598,11 @@ export const WaitingOnYouWidget: React.FC<HomeWidgetProps> = ({ size, preview })
     );
   }
 
+  // A3: Small has no link; A2: the number on the left and the faces on the right of one bottom row.
   if (size === "S") {
     return (
-      <WidgetCard title={title} size={size} aside={inbox}>
-        <BigNumber size="s" value={deck.length} word={t("waitingOnYou.requests", { count: deck.length })} />
-        <DeckFaces deck={deck} />
+      <WidgetCard title={title} size={size}>
+        <SmallFooter value={deck.length} word={t("waitingOnYou.requests", { count: deck.length })} aside={<DeckFaces deck={deck} />} />
       </WidgetCard>
     );
   }
@@ -525,18 +610,19 @@ export const WaitingOnYouWidget: React.FC<HomeWidgetProps> = ({ size, preview })
   if (size === "M") {
     return (
       <WidgetCard title={title} size={size} aside={inbox}>
-        <p className="text-body text-secondary">
+        {/* W2: the count 13/20 600 in the accent, 8, the words 13/20 400 tertiary. */}
+        <p className="flex items-baseline gap-2 text-label leading-5 font-normal text-tertiary">
           {t.rich("waitingOnYou.needAnswer", {
             count: deck.length,
             b: (chunks) => <span className="font-semibold text-accent-text">{chunks}</span>,
           })}
         </p>
-        <ul className="flex flex-col divide-y divide-divider">
+        <ul className="flex min-w-0 flex-col divide-y divide-divider">
           {deck.slice(0, 3).map((card) => (
             <DeckRow key={card.key} card={card} preview={preview} />
           ))}
         </ul>
-        <Button asChild className="mt-auto w-full" tabIndex={preview ? -1 : undefined}>
+        <Button asChild variant="approve" className="mt-auto w-full" tabIndex={preview ? -1 : undefined}>
           <Link href={NEEDS_ACTION_INBOX_HREF}>{t("waitingOnYou.review", { count: deck.length })}</Link>
         </Button>
       </WidgetCard>
@@ -545,7 +631,7 @@ export const WaitingOnYouWidget: React.FC<HomeWidgetProps> = ({ size, preview })
 
   return (
     <WidgetCard title={title} size={size} aside={inbox}>
-      <DecisionDeck deck={deck} preview={preview} onSkip={skip} />
+      <DecisionDeck deck={deck} preview={preview} onSkip={skip} onRead={read} />
     </WidgetCard>
   );
 };
@@ -555,7 +641,7 @@ const DeckFaces: React.FC<{ deck: DeckCard[] }> = ({ deck }) => {
   const t = useTranslations("home");
   const leave = deck.filter((card): card is Extract<DeckCard, { request: TimeOffRequest }> => card.kind === "TIME_OFF" || card.kind === "CANCELLATION");
   return (
-    <span className="flex -space-x-1.5">
+    <span className="flex -space-x-2">
       {leave.slice(0, 3).map((card) => (
         <FaceOf key={card.key} requestId={card.request.id} fallback={t("card.unnamed")} />
       ))}
@@ -565,6 +651,7 @@ const DeckFaces: React.FC<{ deck: DeckCard[] }> = ({ deck }) => {
 
 const FaceOf: React.FC<{ requestId: string; fallback: string }> = ({ requestId, fallback }) => {
   const context = useDecisionContext(requestId);
+  if (!context.data && context.isLoading) return <Skeleton className="size-7 shrink-0 rounded-pill ring-2 ring-card" />;
   return <PersonFace name={context.data?.requesterName ?? fallback} size={28} />;
 };
 
@@ -573,6 +660,7 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
   const t = useTranslations("home");
   const tTimeOff = useTranslations("timeOff");
   const dates = useShortDates();
+  const locale = useDisplayLocale();
   const leave = card.kind === "TIME_OFF" || card.kind === "CANCELLATION";
   const context = useDecisionContext(leave ? card.request.id : null);
   const name = leave
@@ -584,11 +672,18 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
         : card.kind === "SIGN"
           ? card.envelope.title
           : card.task.title;
+  // W3: "3 days vacation · 12–14 Nov" — the days, the leave type, then the dates ("today" for a day that is today).
+  const type = leave ? typeWord(context.data?.leaveTypeName, locale) : "";
   const line = leave
     ? t("waitingOnYou.rowLine", {
+        cancel: card.kind === "CANCELLATION" ? "yes" : "no",
         days: tTimeOff("amount.days", dayAmountArgs(card.request.requestedAmount)),
-        type: t(`waitingOnYou.kinds.${card.kind === "CANCELLATION" ? "cancellation" : "timeOff"}`),
-        dates: dates.range(card.request.startDate, card.request.endDate),
+        hasType: type ? "yes" : "no",
+        type,
+        dates:
+          card.request.startDate === card.request.endDate
+            ? dates.day(card.request.startDate, { lowercase: true, hideYear: true })
+            : dates.range(card.request.startDate, card.request.endDate, { hideYear: true }),
       })
     : card.kind === "AGREE"
       ? t("waitingOnYou.kinds.agree")
@@ -600,13 +695,26 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
       <Link
         href={hrefOf(card)}
         tabIndex={preview ? -1 : undefined}
-        className="-mx-2 flex items-center gap-3 rounded-control px-2 py-2.5 hover:bg-subtle"
+        className={TWO_LINE_ROW.row}
       >
-        <PersonFace name={name} size={28} />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-body font-medium text-primary">{name}</span>
-          <span className="block truncate text-hint text-tertiary">{line}</span>
-        </span>
+        {/* While a leave's context is on its way its asker is not known: a skeleton, never "Someone" (as the card, W6). */}
+        {leave && !context.data ? (
+          <>
+            <Skeleton className="size-7 shrink-0 rounded-pill" />
+            <span className="flex min-w-0 flex-1 flex-col gap-1.5" aria-busy="true">
+              <Skeleton className="h-3.5 w-28" />
+              <Skeleton className="h-3 w-40" />
+            </span>
+          </>
+        ) : (
+          <>
+            <PersonFace name={name} size={28} />
+            <span className="min-w-0 flex-1">
+              <span className={TWO_LINE_ROW.name}>{name}</span>
+              <span className={TWO_LINE_ROW.line}>{line}</span>
+            </span>
+          </>
+        )}
       </Link>
     </li>
   );

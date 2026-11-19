@@ -30,6 +30,17 @@ const renderModal = (props: Partial<React.ComponentProps<typeof InviteUserModal>
 };
 
 describe("InviteUserModal", () => {
+  it("stays an invitation while it closes, though the caller already knows the person is invited", () => {
+    const props = { open: true, userId: "u1", fullName: "Ada Lovelace", email: "ada@example.com",
+      onCloseAction: jest.fn(), onInvitedAction: jest.fn() };
+    const { rerender } = render(<InviteUserModal {...props} isResend={false} />);
+
+    rerender(<InviteUserModal {...props} isResend />);
+
+    expect(screen.getByRole("heading", { name: "Invite" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Resend invitation" })).not.toBeInTheDocument();
+  });
+
   it("asks for an address when the person has none, instead of refusing", async () => {
     renderModal();
 

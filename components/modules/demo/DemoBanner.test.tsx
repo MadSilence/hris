@@ -36,11 +36,12 @@ describe("DemoBanner", () => {
     expect(screen.getByRole("link", { name: "Go live" })).toHaveAttribute("href", "/settings/admin/subscription");
   });
 
-  it("tells somebody who may not go live whom to ask, with no button", () => {
+  it("shows somebody who may not go live the sentence alone, with no button", () => {
     owner = false;
     state = company({ isDemo: true });
     render(<DemoBanner />);
-    expect(screen.getByText(/Ask your account owner to go live\./)).toBeInTheDocument();
+    expect(screen.getByText(/This is a demo company with sample people\./)).toBeInTheDocument();
+    expect(screen.queryByText(/account owner/)).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Go live" })).not.toBeInTheDocument();
   });
 

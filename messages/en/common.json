@@ -13,6 +13,7 @@
     "continue": "Continue",
     "add": "Add",
     "remove": "Remove",
+    "removeNamed": "Remove {label}",
     "create": "Create",
     "done": "Done",
     "apply": "Apply",
@@ -69,6 +70,7 @@
     "none": "None",
     "all": "All",
     "today": "Today",
+    "todayLower": "today",
     "unknown": "Unknown",
     "notSet": "Not set",
     "entries": "{count, plural, one {# entry} other {# entries}}"
@@ -82,6 +84,11 @@
   },
   "people": {
     "count": "{count, plural, one {# person} other {# people}}"
+  },
+  "relative": {
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "yesterday": "Yesterday"
   },
   "time": {
     "days": "{count, plural, one {# day} other {# days}}",
@@ -133,7 +140,7 @@
     "noResultsHint": "Try a different search."
   },
   "toggles": {
-    "archived": "Archived ({count})",
+    "archived": "Archived",
     "drafts": "Drafts ({count})"
   },
   "brand": {
@@ -162,7 +169,7 @@
     "minute": "Minute"
   },
   "searchableSelect": {
-    "empty": "Nothing matches that."
+    "empty": "Nothing found"
   },
   "searchField": {
     "placeholder": "Search…",

@@ -23,7 +23,7 @@ Sent by the backend (Java `AccentColors` paints the accent). Company emails come
 - **The code (M1, M16):** one selectable text string in an accent-subtle box (radius 14, 1 px accent 18 %), JetBrains Mono 600 36/44 (30 narrow), letter-spacing .16em, shown as 3 + 3 by a visual gap only — the text is "482913" with no space, so copying and mail apps' code detection get one string; the code is also in the subject. No "Copy" button (mail apps run no scripts).
 - **Light background (the company's choice in Appearance):** the band — the big one and the slim one — is **Gray 50** with **Gray 200** rings, the heading is Ink with its second line in the company colour, the canvas around the card turns **white** and the card gets a **1 px Gray 200 border** (many inboxes are grey, and mail apps drop shadows). The nodding rings take the company colour, or the logo's colours when the logo has several. Buttons keep the company colour. Frames: `sign-in-appearance` LT3, LT4 and L7-Light-Mail.
 - **A light company colour** (Sunflower, or a light "Your own"): anything written on a fill is Graphite #2A2A2E, links and text on white take the same hue darkened to 4.5 : 1 — by contrast, as `accent.ts` decides.
-- **Sender (Q-21):** noddo's own from "noddo <no-reply@noddo.so>"; company emails from "Acme <no-reply@acme.noddo.so>" with the company logo as the avatar (noddo's avatar = the mark: Wine circle, Rose ring 8 % below centre — SPEC § 3).
+- **Sender:** "noddo <no-reply@noddo.so>" for every email, company ones included (Ulia, 18 Nov; replaces Q-21's per-company sender). Signed with noddo.so's DKIM and SPF so Gmail drops "via". The subject says what happened and names the company ("785207 is your Local Sandbox login code"); the company is in the email itself. noddo's avatar = the mark: Wine circle, Rose ring 8 % below centre — SPEC § 3.
 
 ## The emails
 | # | When | Subject | Kind | Heading | Text, extras | Button | Small print |
@@ -71,5 +71,5 @@ Display size 44/46 in emails; the ring row image; the accent band (SPEC § 15 em
 Email template (moment / notice), facts table, code box, steps flow (M18).
 
 ## Open questions
-- Q-21 — senders and reply-to. Blocks nothing.
+- ~~Q-21 — senders and reply-to.~~ Closed 18 Nov: every email from "noddo <no-reply@noddo.so>" (Sender above).
 - Q-28 — the ring row is a PNG per accent: with "Your own" and with Light it has to be generated per company. Blocks nothing: the band works without it.

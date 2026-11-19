@@ -31,6 +31,8 @@ jest.mock("./seams", () => ({
   ConditionBuilder: () => <div>condition builder</div>,
   RunStatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
   RunWindow: ({ runId }: { runId: string }) => <div>run window {runId}</div>,
+  useFieldChangeLine: () => (r: { about?: Record<string, unknown> | null }) =>
+    r.about?.field ? `${String(r.about.field)}: ${String(r.about.value)}` : null,
 }));
 
 const run = (id: string, over: Partial<AutomationRun> = {}): AutomationRun =>

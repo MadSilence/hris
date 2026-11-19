@@ -147,14 +147,14 @@ function AddCycleButton({ templates, busy, onBlank, onTemplate }: {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 rounded-control p-1">
-        <DropdownMenuItem onClick={onBlank} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
+        <DropdownMenuItem onClick={onBlank} className="cursor-pointer">
           <Icon icon={FileAddIcon} size="sm" className="text-tertiary" />
           {t("overview.blankCycle")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="px-2.5 py-1 text-hint font-normal text-tertiary">{t("overview.fromTemplate")}</DropdownMenuLabel>
         {templates.map((tpl) => (
-          <DropdownMenuItem key={tpl.id} onClick={() => onTemplate(tpl.id)} className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer">
+          <DropdownMenuItem key={tpl.id} onClick={() => onTemplate(tpl.id)} className="cursor-pointer">
             <Icon icon={Layout01Icon} size="sm" className="text-tertiary" />
             <span className="truncate">{tpl.name}</span>
           </DropdownMenuItem>

@@ -31,8 +31,7 @@ import { cn } from "@/lib/cn";
 import { LanguageSelect, TimeZoneSelect } from "./PersonalPreferencesForm";
 import { PhotoStep } from "./PhotoStep";
 import { SkipButton, StepBars, WelcomeFrame, type FirstRunCompany } from "./FirstRunPieces";
-
-const ATTR_PREFIX = "attr:";
+import { ATTR_PREFIX, ownEditableAttributes } from "./ownFields";
 
 type Provider = "GOOGLE" | "MICROSOFT";
 const PROVIDER_LABEL: Record<Provider, string> = { GOOGLE: "Google", MICROSOFT: "Microsoft" };
@@ -57,8 +56,9 @@ type Step = "hello" | "connect" | "photo" | "about" | "prefs";
  * <h2>Every step skippable, and skipping is an answer</h2>
  *
  * Nothing here is a gate. *Skip* moves on without saving; on the last step it leaves, and the welcome does not come
- * back tomorrow to ask again — finished or skipped write the same timestamp. It is reachable afterwards from the user
- * menu (`?again`), on the person's terms rather than ours.
+ * back tomorrow to ask again — finished or skipped write the same timestamp. It runs once, at the first login, and is
+ * never linked again (the designers' fix P1): a field left blank is offered afterwards by *Finish your profile*
+ * (`/profile/finish`, `FinishProfileContainer`).
  *
  * <h2>Which steps</h2>
  *
@@ -100,21 +100,10 @@ export const WelcomeContainer: React.FC<{ company: FirstRunCompany; returned?: W
     setSeeded(true);
   }, [welcome.data, seeded]);
 
-  const editable = React.useMemo<Attribute[]>(() => {
-    const wanted = new Set(
-      (welcome.data?.fields ?? [])
-        .map((f) => f.id)
-        .filter((id): id is string => Boolean(id) && id.startsWith(ATTR_PREFIX))
-        .map((id) => id.slice(ATTR_PREFIX.length)),
-    );
-    if (!wanted.size) return [];
-
-    // The catalogue comes from `/groups`, which every employee may read — the same list the profile
-    // renders from, so a field looks and validates identically in both places.
-    return (groups.data ?? [])
-      .flatMap((group) => group.attributes)
-      .filter((attribute) => wanted.has(attribute.id));
-  }, [welcome.data, groups.data]);
+  const editable = React.useMemo<Attribute[]>(
+    () => ownEditableAttributes(welcome.data, groups.data),
+    [welcome.data, groups.data],
+  );
 
   const refreshWelcome = React.useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: WELCOME_QK });
@@ -187,17 +176,15 @@ export const WelcomeContainer: React.FC<{ company: FirstRunCompany; returned?: W
   const back = step === "photo" || step === "about" || step === "prefs" ? <AuthBack onClick={() => go(-1)} /> : undefined;
 
   return (
-    <WelcomeFrame company={company} back={back} wide={step === "photo"}>
+    <WelcomeFrame company={company} back={back} wide={step === "photo"} intro={step === "hello"}>
       {step === "hello" && (
         <>
-          <div className="flex flex-col gap-6">
-            <h1 className="fr-greeting">
-              {firstName ? t("welcome.hi", { name: firstName }) : t("welcome.hiNoName")}
-              <span>{t("welcome.glad")}</span>
-            </h1>
-            <p className="text-auth-lead text-secondary">{t("welcome.lead")}</p>
-          </div>
-          <Button type="button" size="lg" className="w-full md:w-auto md:self-start" onClick={() => go(1)}>
+          <h1 className="fr-greeting">
+            {firstName ? t("welcome.hi", { name: firstName }) : t("welcome.hiNoName")}
+            <span>{t("welcome.glad")}</span>
+          </h1>
+          <p className="fr-intro-lead">{t("welcome.lead")}</p>
+          <Button type="button" size="lg" className="fr-intro-start" onClick={() => go(1)}>
             {t("welcome.start")}
           </Button>
         </>

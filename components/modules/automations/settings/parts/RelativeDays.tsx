@@ -29,6 +29,8 @@ export const RelativeDays: React.FC<{
       <div className="flex items-center gap-2">
         <DaysInput value={days} onChange={onDays} disabled={off} invalid={invalid} aria-label={t("common.howManyDays")} />
         <SegmentedControl<Direction>
+          size="window"
+          className="w-[170px] shrink-0"
           aria-label={t("common.beforeOrAfter")}
           value={off ? null : direction}
           onChange={onDirection}

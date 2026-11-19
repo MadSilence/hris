@@ -46,6 +46,12 @@ export const QuickAdd: React.FC<{
         >
           <Icon icon={STEP_TYPE_ICONS[type]} size="sm" className="text-tertiary" />
           {nameOf(type)}
+          {/* A01: Send for signature is new in the quick add. */}
+          {type === "SIGN_DOCUMENT" && (
+            <span className="ml-auto inline-flex h-[18px] items-center rounded-pill bg-accent-subtle px-1.5 text-hint font-semibold text-accent-text">
+              {t("addStep.new")}
+            </span>
+          )}
         </button>
       ))}
       <button

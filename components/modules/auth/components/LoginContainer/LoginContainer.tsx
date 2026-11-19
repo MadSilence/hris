@@ -10,8 +10,8 @@ import { Label } from "@/components/desact/label";
 import { FieldError } from "@/components/desact/field-error";
 import { InlineAlert } from "@/components/desact/alert";
 import { Mail01Icon } from "@hugeicons/core-free-icons";
-import { AuthBack, AuthHeading, AuthOr, AuthSplit, CodeInput, ProviderButton, type AuthBrand } from "@/components/modules/auth/layout";
-import { ResendLine } from "@/components/modules/auth/components/ResendLine";
+import { AuthAlert, AuthBack, AuthHeading, AuthOr, AuthSplit, CodeInput, ProviderButton, type AuthBrand } from "@/components/modules/auth/layout";
+import { CodeErrorMessage, ResendLine, codeErrorOf, type CodeError } from "@/components/modules/auth/components/ResendLine";
 import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
 import { PasswordField } from "@/components/modules/auth/components/PasswordField";
 import { useLoginAction } from "@/components/modules/auth/hooks/useLoginAction";
@@ -74,20 +74,29 @@ export function LoginCodeStep({ email, returnTo }: { email: string; returnTo: st
   const t = useTranslations("auth");
   const auth = useAuthService();
   const [code, setCode] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<CodeError>(null);
   const [busy, setBusy] = React.useState(false);
 
   const verify = async (value: string = code) => {
     if (busy) return;
-    if (value.length < 6) return setError(t("fields.codeRequired"));
+    if (value.length < 6) return setError({ kind: "text", message: t("fields.codeRequired") });
     setBusy(true);
     setError(null);
     try {
       const res = await auth.loginCodeVerify(email, value, returnTo);
       window.location.assign(res.next);
     } catch (err) {
-      setError(messageForError(err));
+      setError(codeErrorOf(err));
       setBusy(false);
+    }
+  };
+
+  const sendAgain = async (): Promise<string | null> => {
+    try {
+      await auth.loginCodeSend(email);
+      return null;
+    } catch (err) {
+      return messageForError(err);
     }
   };
 
@@ -103,20 +112,19 @@ export function LoginCodeStep({ email, returnTo }: { email: string; returnTo: st
         <div className="flex flex-col gap-2">
           <CodeInput label={t("fields.code")} value={code} onChange={(v) => { setCode(v); setError(null); }}
                      onComplete={(v) => void verify(v)} invalid={Boolean(error)} disabled={busy} autoFocus />
-          <FieldError>{error}</FieldError>
+          <FieldError>
+            {error && (
+              <CodeErrorMessage error={error} onSend={sendAgain}
+                                onSent={(refused) => { setCode(""); setError(refused ? { kind: "text", message: refused } : null); }} />
+            )}
+          </FieldError>
         </div>
         <Button type="submit" size="lg" className="w-full" loading={busy} loadingLabel={t("busy.loggingIn")}>
           {t("company.submit")}
         </Button>
       </form>
-      <ResendLine onResend={async () => {
-        try {
-          await auth.loginCodeSend(email);
-          return null;
-        } catch (err) {
-          return messageForError(err);
-        }
-      }} />
+      {/* Resending clears the refusal and empties the boxes (C15). */}
+      <ResendLine kind="code" onResend={sendAgain} onSent={() => { setCode(""); setError(null); }} />
     </>
   );
 }
@@ -126,12 +134,18 @@ export function LoginForm({
   initialEmail = "",
   showForgot = true,
   onCodeSent,
+  onRefusal,
 }: {
   returnTo?: string;
   initialEmail?: string;
   showForgot?: boolean;
   /** "Email me a login code" under the Email field (C10); absent where a code is not allowed (C6). */
   onCodeSent?: (email: string) => void;
+  /**
+   * Where a refusal goes when the screen shows it above the provider buttons (C10). Without it the form shows it
+   * itself, as its first line — the same place when nothing stands above the form.
+   */
+  onRefusal?: (message: string | null) => void;
 }) {
   const auth = useAuthService();
   const [sendingCode, setSendingCode] = React.useState(false);
@@ -140,7 +154,8 @@ export function LoginForm({
   const [email, setEmail] = React.useState(initialEmail);
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState<{ email?: string; password?: string }>({});
-  const [refusal, setRefusal] = React.useState<string | null>(null);
+  const [ownRefusal, setOwnRefusal] = React.useState<string | null>(null);
+  const setRefusal = onRefusal ?? setOwnRefusal;
   const [busy, setBusy] = React.useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -172,6 +187,7 @@ export function LoginForm({
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+      {!onRefusal && ownRefusal && <AuthAlert>{ownRefusal}</AuthAlert>}
       <div className="flex flex-col gap-2">
         <Label htmlFor="login-email">{t("fields.email")}</Label>
         <Input
@@ -188,10 +204,11 @@ export function LoginForm({
           autoFocus={!initialEmail}
         />
         <FieldError>{errors.email}</FieldError>
-        {onCodeSent && (
+        {/* While the field shows an error the error takes the link's place (C9); it comes back once the field is fixed. */}
+        {onCodeSent && !errors.email && (
           <button
             type="button"
-            className="-mt-0.5 mb-2 self-start text-label text-accent-text underline-offset-4 hover:underline focus-visible:underline"
+            className="mb-2 self-start text-label text-accent-text underline-offset-4 hover:underline focus-visible:underline"
             onClick={async () => {
               if (sendingCode) return;
               if (!email.trim()) return setErrors((v) => ({ ...v, email: t("fields.emailRequired") }));
@@ -227,7 +244,6 @@ export function LoginForm({
           </Link>
         ) : null}
       />
-      {refusal && <InlineAlert tone="declined">{refusal}</InlineAlert>}
       <Button type="submit" size="lg" className="w-full" loading={busy} loadingLabel={t("busy.loggingIn")}>
         {t("company.submit")}
       </Button>
@@ -253,6 +269,9 @@ export default function LoginContainer({
   const required = sso?.mode === "REQUIRED";
   const [ssoBusy, setSsoBusy] = React.useState(false);
   const [codeFor, setCodeFor] = React.useState<string | null>(null);
+  // The back arrow (C11) returns to the form with the address the code went to, not an empty field (walk of 2026-11-19).
+  const [typedEmail, setTypedEmail] = React.useState(email);
+  const [refusal, setRefusal] = React.useState<string | null>(null);
   const companyName = brand.name;
 
   const failureText =
@@ -284,7 +303,7 @@ export default function LoginContainer({
 
   if (codeFor) {
     return (
-      <AuthSplit brand={brand} back={<AuthBack onClick={() => setCodeFor(null)} />}>
+      <AuthSplit brand={brand} back={<AuthBack onClick={() => { setTypedEmail(codeFor); setCodeFor(null); }} />}>
         <LoginCodeStep email={codeFor} returnTo={returnTo} />
       </AuthSplit>
     );
@@ -297,7 +316,7 @@ export default function LoginContainer({
           title={t("company.title", { company: companyName })}
           lead={t("company.requiredLead", { company: companyName, provider: ssoLabel?.name ?? "" })}
         />
-        {failureText && <InlineAlert tone="declined">{failureText}</InlineAlert>}
+        {failureText && <AuthAlert>{failureText}</AuthAlert>}
         {companyButton(true)}
         <div className="flex flex-col gap-6">
           {foot}
@@ -331,14 +350,15 @@ export default function LoginContainer({
     <AuthSplit brand={brand} long={hasWays && providers.length > 0 && Boolean(ssoLabel)}>
       <AuthHeading title={t("company.title", { company: companyName })} />
       {noticeText && <InlineAlert tone="info">{noticeText}</InlineAlert>}
-      {failureText && <InlineAlert tone="declined">{failureText}</InlineAlert>}
+      {/* Every refusal in one place, first in the form, above the ways in (C10): the password's, or a provider's. */}
+      {(refusal ?? failureText) && <AuthAlert>{refusal ?? failureText}</AuthAlert>}
       {hasWays && (
         <div className="flex flex-col gap-3">
           {ways}
         </div>
       )}
       {hasWays && <AuthOr />}
-      <LoginForm returnTo={returnTo} initialEmail={email} onCodeSent={setCodeFor} />
+      <LoginForm returnTo={returnTo} initialEmail={typedEmail} onCodeSent={setCodeFor} onRefusal={setRefusal} />
       {foot}
     </AuthSplit>
   );

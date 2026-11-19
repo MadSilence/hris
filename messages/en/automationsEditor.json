@@ -8,7 +8,12 @@
     "turnOff": "Turn off",
     "saveChanges": "Save changes",
     "edit": "Edit",
-    "loading": "Loading the automation"
+    "loading": "Loading the automation",
+    "saveState": {
+      "saved": "All changes saved",
+      "unsaved": "Unsaved changes",
+      "saving": "Saving…"
+    }
   },
   "tools": {
     "label": "Tools",
@@ -44,7 +49,8 @@
     "noMatchHint": "Try another word.",
     "drop": "Drop a step here",
     "allSteps": "All steps",
-    "quickAdd": "Add a step here"
+    "quickAdd": "Add a step here",
+    "new": "New"
   },
   "canvas": {
     "label": "The automation's steps",
@@ -85,7 +91,12 @@
       "out": "Zoom out",
       "fit": "Fit to view",
       "value": "{value}%"
-    }
+    },
+    "addQuestion": "Add a question",
+    "skippedIfFails": "Skipped if it fails",
+    "skippedWith": "Skipped if step {number} is skipped",
+    "signMeta": "{signers} · {days, plural, one {# day} other {# days}} to sign",
+    "signersInOrder": "{first}, then {then}"
   },
   "sentence": {
     "label": "In short",
@@ -108,9 +119,10 @@
     "paths": "Add a path",
     "task": "Choose the task to wait for",
     "field": "Choose a field",
-    "documents": "Choose the documents",
+    "documents": "Choose a template",
     "survey": "Choose a survey",
-    "other": "Add the missing details"
+    "other": "Add the missing details",
+    "pathCondition": "Add a condition to {path}"
   },
   "settings": {
     "step": "Step {number}",
@@ -122,7 +134,9 @@
     "skip": "Skip for now",
     "unskip": "Don't skip",
     "remove": "Remove step",
-    "removed": "Step removed"
+    "removed": "Step removed",
+    "processTrigger": "Process is completed",
+    "changeTrigger": "Change what starts it"
   },
   "whoSeesWhat": {
     "title": "Who sees what",
@@ -155,7 +169,13 @@
     },
     "signRequested": "Signature requested",
     "signAsks": "{company} asks you to sign {document}.",
-    "signThen": "Then each signer after them gets the same when it’s their turn. Guests get it by email."
+    "signThen": "Then each signer after them gets the same when it’s their turn. Guests get it by email.",
+    "sample": {
+      "processType": "{kind, select, offboarding {Offboarding} other {Onboarding}}"
+    },
+    "signAsksBy": "{company} asks you to sign {document} by {date}.",
+    "whoGoesWhere": "Who goes where",
+    "addConditionFirst": "Add a condition to {path} to see who goes where."
   },
   "banners": {
     "live": "This automation is on. Changes apply to runs that start after you save.",
@@ -190,8 +210,8 @@
   "turnOnDialog": {
     "title": "Turn on {name}?",
     "runsForEveryone": "It runs for everyone.",
-    "runsFor": "{count, plural, one {It runs for # person.} other {It runs for # people.}}",
-    "runsForIn": "{count, plural, one {It runs for # person in {places}.} other {It runs for # people in {places}.}}",
+    "runsFor": "{count, plural, one {It runs for <b># person</b>.} other {It runs for <b># people</b>.}}",
+    "runsForIn": "{count, plural, one {It runs for <b># person</b> in {places}.} other {It runs for <b># people</b> in {places}.}}",
     "startsWithRequests": "It starts with new requests. Requests sent before today aren't affected.",
     "startsFromToday": "It starts from today. Nothing from before today is affected.",
     "hears": "{who} will get requests and notifications from it.",
@@ -210,7 +230,34 @@
     "cancel": "Cancel",
     "confirm": "Turn on",
     "failed": "We couldn't turn it on. Try again.",
-    "volumeEach": "Each time it runs it sends <b>{count, plural, one {# message} other {# messages}}</b>."
+    "volumeEach": "Each time it runs it sends <b>{count, plural, one {# message} other {# messages}}</b>.",
+    "waiting": {
+      "requests": {
+        "onlyNew": "Only new requests",
+        "also": "{count, plural, one {Also the # request already waiting} other {Also the # requests already waiting}}",
+        "hint": "Sent before today and not yet decided. They start right away."
+      },
+      "hires": {
+        "onlyNew": "Only new hires",
+        "also": "{count, plural, one {Also the # person already hired} other {Also the # people already hired}}",
+        "hint": "Hired before today, first day still ahead. They start right away."
+      },
+      "dates": {
+        "onlyNew": "Only dates still to come",
+        "also": "{count, plural, one {Also the # person whose date has already come} other {Also the # people whose date has already come}}",
+        "hint": "Their date came before today. They start right away."
+      },
+      "people": {
+        "onlyNew": "Only people who start to match",
+        "also": "{count, plural, one {Also the # person who already matches} other {Also the # people who already match}}",
+        "hint": "They match Who it runs for today. They start right away."
+      },
+      "cases": {
+        "onlyNew": "Only new cases",
+        "also": "{count, plural, one {Also the # case already waiting} other {Also the # cases already waiting}}",
+        "hint": "They already match what starts it. They start right away."
+      }
+    }
   },
   "runsGoingDialog": {
     "title": "Save changes to {name}?",
@@ -247,7 +294,10 @@
     "undo": "Undo",
     "error": "We couldn't make this change. Your automation is safe and nothing changed.",
     "draftError": "We couldn't draft it. Your text is still here.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "composerLabel": "Ask noddo AI for a change",
+    "composerPlaceholder": "Ask for a change",
+    "send": "Send"
   },
   "volumeDialog": {
     "title": "Save changes to {name}?",

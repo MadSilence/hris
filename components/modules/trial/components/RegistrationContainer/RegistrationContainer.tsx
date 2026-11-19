@@ -9,13 +9,12 @@ import { Input } from "@/components/desact/input";
 import { Icon } from "@/components/desact/icon";
 import { Avatar, AvatarFallback } from "@/components/desact/avatar";
 import { FieldError } from "@/components/desact/field-error";
-import { InlineAlert } from "@/components/desact/alert";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { FormError } from "@/components/feedback/FormError";
 import { ApiError } from "@/components/clients/exceptions";
-import { AuthBack, AuthFirstExperience, AuthHeading, AuthOr, CodeInput, ProviderButton } from "@/components/modules/auth/layout";
+import { AuthAlert, AuthBack, AuthFirstExperience, AuthHeading, AuthOr, CodeInput, ProviderButton } from "@/components/modules/auth/layout";
 import { PasswordField } from "@/components/modules/auth/components/PasswordField";
-import { ResendLine } from "@/components/modules/auth/components/ResendLine";
+import { CodeErrorMessage, ResendLine, codeErrorOf, type CodeError } from "@/components/modules/auth/components/ResendLine";
 import { PASSWORD_MIN_LENGTH } from "@/components/modules/auth/password/passwordRules";
 import { useTrialService } from "@/components/modules/trial/hooks/useTrialService";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -35,8 +34,6 @@ type Step =
   | { kind: "details"; email: string }
   | { kind: "provider"; draft: ProviderDraft };
 
-const CODE_WRONG = "AUTH00022";
-const CODE_EXPIRED = "AUTH00023";
 const DRAFT_EXPIRED = "AUTH00025";
 const PASSWORD_TOO_COMMON = "AUTH00021";
 
@@ -75,7 +72,7 @@ function EmailStep({ providers, failedProvider, onSent }: {
   return (
     <>
       <h1 className="text-auth-display text-primary">{t.rich("registration.title", { em: (c) => <em>{c}</em> })}</h1>
-      {failedProvider && <InlineAlert tone="declined">{t("registration.providerFailed", { provider: label(failedProvider) })}</InlineAlert>}
+      {failedProvider && <AuthAlert>{t("registration.providerFailed", { provider: label(failedProvider) })}</AuthAlert>}
       {providers.length > 0 && (
         <>
           <div className="flex flex-col gap-3">
@@ -109,8 +106,11 @@ function EmailStep({ providers, failedProvider, onSent }: {
       </form>
       {/* The Terms and the Privacy policy have no pages yet (GO_TO_MARKET_DESIGN.md G15–G17): plain words until they do. */}
       <p className="text-hint text-tertiary">{t.rich("registration.terms", { terms: (c) => <span>{c}</span>, privacy: (c) => <span>{c}</span> })}</p>
-      <p className="text-body text-secondary">
-        {t.rich("registration.haveAccount", { link: (c) => <a href="/login" className="text-accent-text underline-offset-4 hover:underline">{c}</a> })}
+      {/* "Already have an account?" 13/18 tertiary, 8, "Log in" 13/18 500 accent-text (B4). */}
+      <p className="flex flex-wrap items-baseline gap-x-2 text-label font-normal text-tertiary">
+        {t.rich("registration.haveAccount", {
+          link: (c) => <a href="/login" className="font-medium text-accent-text underline-offset-4 hover:underline">{c}</a>,
+        })}
       </p>
     </>
   );
@@ -120,21 +120,30 @@ function CodeStep({ email, onVerified }: { email: string; onVerified: () => void
   const t = useTranslations("auth");
   const service = useTrialService();
   const [code, setCode] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<CodeError>(null);
   const [busy, setBusy] = React.useState(false);
 
   const verify = async (value: string = code) => {
     if (busy) return;
-    if (value.length < 6) return setError(t("fields.codeRequired"));
+    if (value.length < 6) return setError({ kind: "text", message: t("fields.codeRequired") });
     setBusy(true);
     setError(null);
     try {
       await service.verifyCode(email, value);
       onVerified();
     } catch (err) {
-      if (err instanceof ApiError && (err.code === CODE_WRONG || err.code === CODE_EXPIRED)) setError(messageForError(err));
-      else setError(messageForError(err));
+      // A wrong code reads its sentence; an expired one offers "Send a new one" (C1).
+      setError(codeErrorOf(err));
       setBusy(false);
+    }
+  };
+
+  const sendAgain = async (): Promise<string | null> => {
+    try {
+      await service.sendCode(email);
+      return null;
+    } catch (err) {
+      return messageForError(err);
     }
   };
 
@@ -150,20 +159,19 @@ function CodeStep({ email, onVerified }: { email: string; onVerified: () => void
         <div className="flex flex-col gap-2">
           <CodeInput label={t("fields.code")} value={code} onChange={(v) => { setCode(v); setError(null); }}
                      onComplete={(v) => void verify(v)} invalid={Boolean(error)} disabled={busy} autoFocus />
-          <FieldError>{error}</FieldError>
+          <FieldError>
+            {error && (
+              <CodeErrorMessage error={error} onSend={sendAgain}
+                                onSent={(refused) => { setCode(""); setError(refused ? { kind: "text", message: refused } : null); }} />
+            )}
+          </FieldError>
         </div>
         <Button type="submit" size="lg" className="w-full" loading={busy} loadingLabel={t("registration.checking")}>
           {t("registration.continue")}
         </Button>
       </form>
-      <ResendLine onResend={async () => {
-        try {
-          await service.sendCode(email);
-          return null;
-        } catch (err) {
-          return messageForError(err);
-        }
-      }} />
+      {/* Resending clears the refusal and empties the boxes (C15). */}
+      <ResendLine kind="code" onResend={sendAgain} onSent={() => { setCode(""); setError(null); }} />
     </>
   );
 }
@@ -306,7 +314,7 @@ function ProviderDetailsStep({ draft, onExpired }: { draft: ProviderDraft; onExp
     <>
       <AuthHeading title={t("registration.detailsTitle")} lead={t("registration.continuingWith", { provider: providerName })} />
       <div className="flex items-center gap-3 rounded-control border border-field px-3 py-2.5">
-        <Avatar className="size-8"><AvatarFallback name={fullName || draft.email} className="text-label">{initials}</AvatarFallback></Avatar>
+        <Avatar className="size-8"><AvatarFallback name={fullName || draft.email}>{initials}</AvatarFallback></Avatar>
         <div className="flex min-w-0 flex-1 flex-col">
           {fullName && <span className="text-body font-medium text-primary [overflow-wrap:anywhere]">{fullName}</span>}
           <span className="text-hint text-tertiary [overflow-wrap:anywhere]">{draft.email}</span>
@@ -349,13 +357,23 @@ export function RegistrationContainer({ providers = [], failedProvider = null, p
   const [step, setStep] = React.useState<Step | { kind: "expired" }>(() =>
     providerDraft === "expired" ? { kind: "expired" } : providerDraft ? { kind: "provider", draft: providerDraft } : { kind: "email" });
 
+  // The address follows the step (B1 `/signup`, B2 `/signup/verify`, B2a and B3 `/signup/company`). Replaced, not
+  // pushed: the email being proved lives here, so the browser's Back leaves the registration instead of landing on a
+  // step that no longer knows its address — the back arrow is the way one step back.
+  const path = step.kind === "email" ? "/signup" : step.kind === "code" ? "/signup/verify"
+    : step.kind === "expired" ? null : "/signup/company";
+  React.useEffect(() => {
+    if (!path || !window.location.pathname.startsWith("/signup") || window.location.pathname === path) return;
+    window.history.replaceState(window.history.state, "", path);
+  }, [path]);
+
   const back =
     step.kind === "code" ? <AuthBack onClick={() => setStep({ kind: "email" })} />
       : step.kind === "details" ? <AuthBack onClick={() => setStep({ kind: "code", email: step.email })} />
         : undefined;
 
   return (
-    <AuthFirstExperience back={back} long={step.kind === "details" || step.kind === "provider"}>
+    <AuthFirstExperience flow="signup" back={back} long={step.kind === "details" || step.kind === "provider"}>
       {step.kind === "email" && (
         <EmailStep providers={providers} failedProvider={failedProvider} onSent={(email) => setStep({ kind: "code", email })} />
       )}

@@ -166,7 +166,7 @@ describe("PublicHolidaysSettingsComponent — activating and deactivating", () =
     );
 
     const user = await userEvent.setup();
-    await user.click(screen.getByRole("button", { name: /^Archived \(/ }));
+    await user.click(screen.getByRole("button", { name: /^Archived \d/ }));
     await openRowMenu("Germany");
 
     expect(screen.getByRole("menuitem", { name: "Unarchive" })).toBeInTheDocument();

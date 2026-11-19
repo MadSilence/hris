@@ -95,7 +95,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -205,7 +205,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -315,7 +315,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -430,7 +430,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 
 ## EF05-search
 
@@ -814,7 +814,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -925,7 +925,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - Documents waiting for your signature
 - Small
@@ -1043,7 +1043,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - Documents waiting for your signature
 - Small
 - Medium
@@ -1147,7 +1147,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -1254,7 +1254,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -1369,7 +1369,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -1481,7 +1481,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -1595,7 +1595,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -1795,7 +1795,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending
@@ -1905,7 +1905,7 @@ Pulled from the board HTML, one block per frame, in reading order, duplicates in
 - Search widgets
 - For me
 - Company
-- Pick a size, then drag the widget onto your home or click +
+- Pick a size, then drag a widget onto your home.
 - To sign
 - All documents
 - pending

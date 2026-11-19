@@ -120,7 +120,7 @@
       "COMPANY": "Company"
     },
     "chip": "{label} {count}",
-    "hint": "Pick a size, then drag the widget onto your home or click +",
+    "hint": "Pick a size, then drag a widget onto your home.",
     "onYourHome": "On your home",
     "found": "{count, plural, one {# widget} other {# widgets}}",
     "noResultsTitle": "No widgets match “{text}”",
@@ -163,19 +163,16 @@
     "markAsRead": "Mark as read",
     "emptyTitle": "All caught up",
     "emptyLine": "Nothing waits for your answer.",
-    "wantsTimeOff": "wants {days}",
-    "wantsToCancel": "asks to cancel {days}",
+    "wantsTimeOff": "wants {days}{hasType, select, yes { of {type}} other {}}",
+    "wantsToCancel": "asks to cancel {days}{hasType, select, yes { of {type}} other {}}",
     "alsoOut": "{name} is out on {date} too",
     "alsoOutTeam": "{name} from {team} is out on {date} too",
     "leftAfter": "{left} left after",
-    "automationWaits": "An automation waits for your answer",
+    "automationWaits": "waits for your answer",
     "taskFrom": "{hasProcess, select, yes {{process}} other {}}{hasProcess, select, yes {{hasPerson, select, yes { · } other {}}} other {}}{hasPerson, select, yes {{person}} other {}}",
-    "taskDue": "{hasDate, select, yes {Due {date}} other {No due date}}",
+    "taskDue": "{hasDate, select, yes {{isToday, select, yes {Due today} other {Due {date}}}} other {No due date}}",
     "taskOverdue": "Overdue · was due {date}",
-    "runFailed": "Automation didn’t run",
     "kinds": {
-      "timeOff": "Time off",
-      "cancellation": "Cancellation",
       "automation": "Automation approval",
       "task": "Task",
       "review": "Review",
@@ -190,21 +187,29 @@
       "taskDone": "Task done"
     },
     "runLine": "{hasPerson, select, yes {About {person}. } other {}}{reason}",
-    "rowLine": "{type} · {days} · {dates}",
-    "agreeWaits": "A page needs your yes",
+    "rowLine": "{cancel, select, yes {Cancel · } other {}}{days}{hasType, select, yes { {type}} other {}} · {dates}",
     "agreeBy": "Agree by {date}",
     "agreeOverdue": "It was due {date}",
-    "read": "Read",
-    "signWaits": "A document waits for your signature",
     "signBy": "Sign by {date}",
-    "sign": "Sign"
+    "sign": "Sign",
+    "workingDays": "{count, plural, one {{amount} working day} other {{amount} working days}}",
+    "automation": "Automation",
+    "didntRun": "didn’t run",
+    "selfReview": "your self-review",
+    "reviewDue": "{hasDate, select, yes {{count, plural, =0 {Due today} one {Due tomorrow} other {Due in # days}}} other {No due date}}",
+    "managerSeesAfter": "Your manager sees it after you send",
+    "assignedBy": "Assigned by {name}",
+    "wasUpdated": "was updated",
+    "whatChanged": "What changed: {points}",
+    "readAndAgree": "Read and agree",
+    "toSignFrom": "{hasSender, select, yes {from {sender} · to sign} other {to sign}}"
   },
   "timeOff": {
     "link": "My time off",
     "label": "Time off",
     "days": "{amount} {unit, select, hours {{count, plural, one {hour} other {hours}}} other {{count, plural, one {day} other {days}}}}",
     "mainWord": "{unit, select, hours {{count, plural, one {{name} hour} other {{name} hours}}} other {{count, plural, one {{name} day} other {{name} days}}}}",
-    "left": "{amount} {unit, select, hours {{count, plural, one {hour left} other {hours left}}} other {{count, plural, one {day left} other {days left}}}}",
+    "left": "{unit, select, hours {{count, plural, one {<b>{amount}</b> hour left} other {<b>{amount}</b> hours left}}} other {{count, plural, one {<b>{amount}</b> day left} other {<b>{amount}</b> days left}}}}",
     "noLimit": "No limit",
     "comingUp": "Coming up",
     "more": "+{count}",
@@ -237,7 +242,6 @@
     "outToday": "{count, plural, one {out today} other {out today}}",
     "away": "Away",
     "back": "back {date}",
-    "typeLine": "{type} · {back}",
     "tooltip": "{type} · {dates}",
     "upcoming": "Upcoming",
     "noLeave": "No leave scheduled",
@@ -245,7 +249,8 @@
     "emptyLine": "No one on your team is away.",
     "emptyLineEveryone": "No one is away.",
     "pending": "Pending",
-    "lane": "{name} · {type}{runsOff, select, yes {, back {back}} other {}}"
+    "lane": "{name} · {type}{runsOff, select, yes {, back {back} →} other {}}",
+    "onlyToday": "today"
   },
   "thisWeek": {
     "birthdayToday": "{name}’s birthday is today",
@@ -257,16 +262,19 @@
     "laterThisWeek": "Later this week",
     "nothingToday": "Nothing to celebrate today",
     "nothingTodayComing": "Nothing today · coming up this week",
-    "comingUp": "Coming up this week →",
+    "comingUp": "Coming up this week",
     "birthday": "birthday",
     "years": "{count, plural, one {# year} other {# years}}",
     "joins": "joins",
     "emptyTitle": "Nothing to celebrate this week",
     "emptyLine": "Birthdays, work anniversaries and new joiners will show up here.",
-    "nothingWeek": "Nothing this week",
+    "nothingWeek": "Nothing to celebrate this week.",
     "rowWhat": " · {what}",
     "listLine": "{name} · {what}",
-    "more": "+{count}"
+    "more": "+{count}",
+    "rowWhatPlain": " {what}",
+    "celebrationsCount": "{count, plural, one {# celebration} other {# celebrations}}",
+    "birthdaysCount": "{count, plural, one {# birthday} other {# birthdays}}"
   },
   "myTasks": {
     "toDo": "to do",
@@ -279,7 +287,9 @@
     "done": "Task done",
     "from": "{when} · {from}",
     "emptyTitle": "All caught up",
-    "emptyLine": "Nothing is assigned to you."
+    "emptyLine": "Nothing is assigned to you.",
+    "processOf": "{process} · {person}",
+    "doneFrom": "{hasFrom, select, yes {Done · {from}} other {Done}}"
   },
   "processes": {
     "all": "All",
@@ -296,12 +306,12 @@
     "startsOn": "{type} · starts {date}",
     "chips": {
       "onboarding": "{count} onboarding",
-      "offboarding": "{count} offboarding",
       "startsNextWeek": "{count, plural, one {# starts next week} other {# start next week}}",
       "overdue": "{count} overdue"
     },
     "emptyTitle": "Nothing in progress",
-    "emptyLine": "Onboarding and offboarding show up here once they start."
+    "emptyLine": "Onboarding and offboarding show up here once they start.",
+    "startsOnShort": "{type} · {date}"
   },
   "automations": {
     "runs": "{count, plural, one {run} other {runs}}",
@@ -342,6 +352,7 @@
     "nextDue": "Next due {date}",
     "due": "Due {date}",
     "overdue": "Overdue",
-    "sign": "Sign"
+    "sign": "Sign",
+    "from": "From {name}"
   }
 }

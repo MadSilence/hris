@@ -9,6 +9,7 @@ import { Input } from "@/components/desact/input";
 import { Label } from "@/components/desact/label";
 import { FieldError } from "@/components/desact/field-error";
 import { AuthHeading, AuthSplit } from "@/components/modules/auth/layout";
+import { useAppDataContext } from "@/components/providers/AppDataProvider/AppDataProvider";
 import {
   companyHost,
   companyOrigin,
@@ -18,19 +19,37 @@ import {
 } from "@/lib/companyAddress";
 
 /**
- * `<root>/login` — "Log in to your company" (sign-in-root A1, A2). The address is typed and followed; the page never
- * asks the backend whether a company is there (COMPANY_ADDRESSES.md § 2). A2 offers the company this browser logged in
- * to last, by its logo and name, read on the server for the remembered address only.
+ * `<root>/login` — "Log in to your company" (sign-in-root A1, A2). The address is typed, checked and followed: an address
+ * no company holds stays here with "We can’t find that company…" and a way to find it by email (the designers' login fix
+ * R3, the owner's call of 2026-11-19 — until then it was followed blindly and the address's own page drew "Log in to
+ * <whatever was typed>"). A2 offers the company this browser logged in to last, by its logo and name, read on the
+ * server for the remembered address only.
  */
 export type RememberedCompany = { subdomain: string; name: string | null; logoUrl: string | null };
 
 type Props = {
   web: WebAddressConfig;
   remembered: RememberedCompany | null;
+  /** An address a company's own page sent back because nobody holds it (`/login/unknown`): typed in, with the error. */
+  unknown?: string | null;
   navigate?: (url: string) => void;
+  /** Whether a company holds the address; null when that could not be asked. */
+  exists?: (subdomain: string) => Promise<boolean | null>;
 };
 
 const defaultNavigate = (url: string) => window.location.assign(url);
+
+function useExists(): (subdomain: string) => Promise<boolean | null> {
+  const { internalApiClient } = useAppDataContext();
+  return async (subdomain) => {
+    try {
+      const res = await internalApiClient.get<{ exists: boolean | null }>(`/public/company-address/${encodeURIComponent(subdomain)}`);
+      return res.exists;
+    } catch {
+      return null;
+    }
+  };
+}
 
 /** "Continue to" without a cookie would lose the typed address on the next visit. A year, like the remembered one. */
 const REMEMBER_TYPED_FOR_SECONDS = 365 * 24 * 60 * 60;
@@ -55,11 +74,13 @@ function CompanyTile({ company, web }: { company: RememberedCompany; web: WebAdd
   );
 }
 
-export default function CompanyAddressStep({ web, remembered, navigate = defaultNavigate }: Props) {
+export default function CompanyAddressStep({ web, remembered, unknown = null, navigate = defaultNavigate, exists: existsProp }: Props) {
   const t = useTranslations("auth");
-  const [chooseAnother, setChooseAnother] = useState(remembered === null);
-  const [typed, setTyped] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const askExists = useExists();
+  const exists = existsProp ?? askExists;
+  const [chooseAnother, setChooseAnother] = useState(remembered === null || Boolean(unknown));
+  const [typed, setTyped] = useState(unknown ?? "");
+  const [error, setError] = useState<"required" | "unknown" | null>(unknown ? "unknown" : null);
   const [busy, setBusy] = useState(false);
 
   const goTo = (subdomain: string) => {
@@ -68,15 +89,29 @@ export default function CompanyAddressStep({ web, remembered, navigate = default
     navigate(`${companyOrigin(subdomain, web)}/login`);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (busy) return;
     const address = normalizeCompanyAddress(typed);
     if (!address) {
-      setError(t("root.addressRequired"));
+      setError("required");
+      return;
+    }
+    setBusy(true);
+    // Not found stays here; found, or not known because the check itself failed, goes on as it always did.
+    if ((await exists(address)) === false) {
+      setBusy(false);
+      setError("unknown");
       return;
     }
     goTo(address);
   };
+
+  const errorText = error === "required" ? t("root.addressRequired")
+    : error === "unknown" ? t.rich("root.unknownAddress", {
+        link: (chunks) => <Link href="/login/find" className="font-medium text-accent-text underline-offset-4 hover:underline">{chunks}</Link>,
+      })
+      : null;
 
   const offered = chooseAnother ? null : remembered;
 
@@ -97,10 +132,11 @@ export default function CompanyAddressStep({ web, remembered, navigate = default
           </Button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <form onSubmit={(e) => void handleSubmit(e)} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="company-address">{t("root.address")}</Label>
-            <div className="relative">
+            {/* The ending is an add-on inside the field, Mist, its full height; the text stops where it starts (R1). */}
+            <div className="auth-address" data-invalid={Boolean(error)}>
               <Input
                 id="company-address"
                 name="companyAddress"
@@ -113,14 +149,12 @@ export default function CompanyAddressStep({ web, remembered, navigate = default
                   setError(null);
                 }}
                 aria-invalid={Boolean(error)}
-                className="h-11 pr-28"
+                aria-describedby="company-address-suffix"
                 autoFocus
               />
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-body text-tertiary">
-                .{web.rootDomain}
-              </span>
+              <span id="company-address-suffix" className="auth-address-suffix">.{web.rootDomain}</span>
             </div>
-            <FieldError>{error}</FieldError>
+            <FieldError>{errorText}</FieldError>
           </div>
           <Button size="lg" type="submit" className="w-full" loading={busy} loadingLabel={t("busy.loggingIn")}>
             {t("root.continue")}
@@ -128,7 +162,7 @@ export default function CompanyAddressStep({ web, remembered, navigate = default
         </form>
       )}
 
-      <Link href="/login/find" className="self-start text-body text-accent-text underline-offset-4 hover:underline">
+      <Link href="/login/find" className="self-start text-label text-accent-text underline-offset-4 hover:underline">
         {t("root.forgotAddress")}
       </Link>
     </AuthSplit>

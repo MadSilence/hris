@@ -89,13 +89,9 @@ Sidebar 240 (SPEC § 13.6), then the page, white, padding 32 48 (see Changes to 
          - the first two lines of text (14/20, secondary);
          - an author row: avatar 22, name, job title (tertiary), and the date on the right.
      - **The other posts as rows**, 80 high, separated by hairlines:
-       - a 48 icon tile, radius 12, Mist, holding the post type icon:
-         - `megaphone` for an announcement;
-         - `file-01` for a policy update;
-         - `calendar-03` for an event;
-         - or a thumbnail of the cover when the post has one;
+       - a 48 tile, radius 12: the cover thumbnail, or `megaphone` on Mist — posts have no type (Ulia, 18 Nov);
        - the title (15/22 600, one line, ellipsis + tooltip);
-       - under it, "{author} · {audience or type}" (12/16, tertiary);
+       - under it, "{author} · {audience}" (12/16, tertiary);
        - the date on the right (13/18, tertiary).
        - Up to 3 rows under the pinned one, or 4 when nothing is pinned.
    - **Handbook** (right):
@@ -123,15 +119,13 @@ Page padding 32 48. The content is 920 wide, left-aligned.
    - "News" (32/40 600);
    - on the right, a search field 240 × 32 (SPEC § 13.3, "Search news").
 3. **Controls row**, 24 under the title row:
-   - the segmented control **For me / Everyone**;
-   - a vertical hairline;
-   - the type filter chips (`FilterChip`, SPEC § 13.4): **All types**, Announcements, Policy updates, Events. One is picked at a time, and All types is picked by default.
+   - the segmented control **For me / Everyone** — the only control: posts have no type, so there are no type chips and no hairline (Ulia, 18 Nov).
 4. **The pinned post** (as on CH01, wider: cover 240 × 200), with a save icon button on the right of its author row.
 5. **Posts by month:**
    - a month heading (15/22 600, "This month", then "October", "September"…; the year is added when it is not this year: "December 2025");
    - under it, rows as on CH01. Each row also has:
-     - a save icon button (`bookmark-02`; filled `bookmark-check-02` when saved), shown on row hover and always when saved;
-     - a cover thumbnail in the 48 tile when the post has one, otherwise the type icon.
+     - a save icon button (`bookmark-02`; **`bookmark-02` filled with the accent** (fill and stroke #6E1630, no checkmark) when saved — Ulia, 18 Nov; the same everywhere the save button appears: CH02 rows, the pinned post, one post, CP02), shown on row hover and always when saved;
+     - a cover thumbnail in the 48 tile when the post has one, otherwise `megaphone`.
    - An emoji the author typed at the start of a title shows as part of the title ("🎉 Winter party tickets are open", see Changes to SPEC).
 6. **Loading more:** 20 posts per load. More load when the reader nears the end (a `NodRing` in the list while they load, SPEC § 12).
 
@@ -149,7 +143,7 @@ Page padding 32 48. The content is 920 wide.
 1. **Back link** "Company hub".
 2. **Title row:**
    - "Pages need your yes" (32/40 600);
-   - under it, the line "Read each page and agree to its current version. HR sees when you agreed." (14/20, secondary);
+   - under it, the line "Read each page and agree to its current version. The page owner sees when you agreed." (14/20, secondary);
    - on the right, the segmented control **Waiting · {n} / Agreed · {n}**.
 3. **Groups.** Each group heading is 15/22 600 + "{n} pages" (12/16, tertiary).
    - **This week:** due in the next 7 days, plus everything overdue.
@@ -172,7 +166,7 @@ Page padding 32 48. The content is 920 wide.
 | State | What the reader sees | Image |
 |---|---|---|
 | Loading | The title line and the ask box draw at once. Each block loads on its own: celebrations, News, Handbook and the "Pages need your yes" button. Under 300 ms a block shows nothing. From 0.3 to 2 s it shows a `NodRing` inside the block. Past 2 s it shows a `Skeleton` in the block's shape: three tiles; a cover and 3 rows; six section cards and 3 rows (SPEC § 12). CH02 and CH03 show skeleton rows. | not drawn |
-| Empty (nothing yet) | **CH01, no posts and no pages** (a new company): `EmptyState` across both columns, **company-hub** scene (M). Title "Your company hub is empty". Text "News and handbook pages will show up here." For a manager it adds the action "Write the first post" (primary) and "Add a page" (secondary). An employee gets no action. **News column only empty:** an S **announcements** scene, "No news yet". **Handbook column only empty:** an S **policies** scene, "No handbook pages yet". **CH03 Waiting empty:** the **all-caught-up** scene, "You've agreed to everything" / "New pages to agree to will show up here." Its Agreed tab, when empty: "Nothing agreed yet". **Saved list empty:** "Nothing saved yet" / "Save a post or page to find it here." | not drawn |
+| Empty (nothing yet) | **CH01, no posts and no pages** (a new company): `EmptyState` across both columns, **company-hub** scene (M). Title "Your company hub is empty". Text "News and handbook pages will show up here." For a manager it adds the action "Write the first post" (primary) and "Add a page" (secondary). An employee gets no action. **News column only empty:** an S **announcements** scene, "No news yet". **Handbook column only empty:** the **documents** scene at M **160 × 100**, centred horizontally and vertically in the column's free area (16 under the heading row down to the bottom of the News column's content). Title "No handbook pages yet" (18/26 600). Line "Pages your company adds will show up here." (14/20, secondary). For people who can manage the hub: **Add a page** (secondary 36), which opens Manage hub → Pages with a new page. Employees get no button. (Ulia, 18 Nov.) **CH03 Waiting empty:** the **all-caught-up** scene, "You've agreed to everything" / "New pages to agree to will show up here." Its Agreed tab, when empty: "Nothing agreed yet". **Saved list empty:** the **saved-s** scene at 96 (not no-results), "Nothing saved yet" / "Save a post or page to find it here." (Ulia, 19 Nov.) | not drawn |
 | No results | **Ask box:** typing finds nothing → "Nothing found for “{text}”", then "Ask noddo" as the only row (as on Home). **CH02 search or type filter:** `ListEmptyState` `filtered`, **no-match-s** scene, "No news matches this" + "Clear filters". **For me with nothing for me:** "Nothing just for you yet" + the link "See everything". | not drawn |
 | Error (could not load) | One block that fails shows `ErrorState` inside its own column: **something-broke** S, "Couldn't load the news" (or "the handbook", or "celebrations") + "Try again". The rest of the page works. If the whole page fails, `ErrorPage` 500. | not drawn |
 | No permission | Everyone has the hub. Posts and pages outside the reader's audience are simply not listed. A direct link to one opens `ErrorPage` 403: "This page is private" / "Ask an admin for access." [Go to Company hub]. | not drawn |
@@ -221,7 +215,7 @@ Page padding 32 48. The content is 920 wide.
 | Segmented | For me; Everyone |
 | Link | All news |
 | Pinned pill | Pinned |
-| Row meta | {author} · {team, office or "Everyone"}; for a policy post: {author} · Policy update; for an event: {author} · Event on {d Mon} |
+| Row meta | {author} · {team, office or "Everyone"} |
 | Date | {d Mon}; not this year: {d Mon yyyy} |
 | Handbook heading | Handbook |
 | Link | Open handbook |
@@ -230,12 +224,11 @@ Page padding 32 48. The content is 920 wide.
 | Recently updated | Recently updated / {page} / {section} · {d Mon} |
 | CH02 title | News |
 | CH02 search | Search news |
-| CH02 types | All types; Announcements; Policy updates; Events |
 | CH02 months | This month; {Month}; {Month yyyy} |
 | Save (accessible name) | Save; when saved: Saved |
 | Photo (accessible name) | Photo from the post |
 | CH03 title | Pages need your yes |
-| CH03 lead | Read each page and agree to its current version. HR sees when you agreed. |
+| CH03 lead | Read each page and agree to its current version. The page owner sees when you agreed. |
 | CH03 segmented | Waiting · {n}; Agreed · {n} |
 | CH03 groups | This week · {n} pages; Later · {n} pages (1 page) |
 | CH03 row meta | {section} · version {n} · new; {section} · version {n} · {n} things changed since you agreed (1: 1 thing changed); {section} · version {n} · you agreed to version {n} in {Month} |
@@ -247,6 +240,7 @@ Page padding 32 48. The content is 920 wide.
 | Empty hub | Your company hub is empty / News and handbook pages will show up here. / Write the first post / Add a page |
 | Empty news | No news yet |
 | Empty handbook | No handbook pages yet |
+| Empty | No handbook pages yet / Pages your company adds will show up here. / Add a page |
 | Nothing to agree | You've agreed to everything / New pages to agree to will show up here. |
 | Agreed empty | Nothing agreed yet |
 | No match | No news matches this / Clear filters |
@@ -308,3 +302,7 @@ Q-9 (who manages the hub), Q-10 (what the ask box answers from) and Q-13 ("For m
   - "Ask noddo" in the ask box finds pages and posts only; there is no assistant yet, so no answer row.
   - The *Company news* widget on Home (Q-12) is not built; its settings toggle is hidden.
 - **Images of the real screen:** not added — the walk's window was hidden.
+
+### Built from the fixes of 2026-11-19
+
+Built from `design-fixes-company-hub-1` (2026-11-19, walked the same day); `spec-updates.md` is applied above. Differences: search boxes read "Search" (Q-50); 24-hour times are written "09:00"; the agree bar on a short page sits 32 above the viewport edge (the shell's padding), not 24.

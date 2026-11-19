@@ -35,7 +35,7 @@ import type {
   SectionWriteDTO,
   WhoAgreedDTO,
 } from "@/api/modules/hub/dto";
-import type { AgreementTab, FeedScope, PostStatusFilter, PostType, SavedType } from "@/models/hub";
+import type { AgreementTab, FeedScope, PostStatusFilter, SavedType } from "@/models/hub";
 
 const query = (params: Record<string, string | null | undefined>): string => {
   const search = new URLSearchParams();
@@ -53,7 +53,7 @@ export type AgreementExportFilters = { department?: string | null; office?: stri
 export class HrisApiHubClient {
   // ── reading ──
   home = (scope: FeedScope) => hrisApiClient.get<HubHomeDTO>(`/hub/home${query({ scope })}`);
-  posts = (params: { scope: FeedScope; type: PostType | null; q: string | null; cursor: string | null }) =>
+  posts = (params: { scope: FeedScope; q: string | null; cursor: string | null }) =>
     hrisApiClient.get<PostPageDTO>(`/hub/posts${query(params)}`);
   post = (id: string) => hrisApiClient.get<PostDTO>(`/hub/posts/${id}`);
   handbook = () => hrisApiClient.get<HandbookDTO>("/hub/handbook");

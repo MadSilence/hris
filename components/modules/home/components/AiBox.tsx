@@ -281,7 +281,7 @@ export const AiBox: React.FC<{ onEditHome?: () => void; onOpenChange?: (open: bo
                               {row.group === "people" && (
                                 <Avatar className="size-6">
                                   {row.avatarUrl && <AvatarImage src={row.avatarUrl} alt="" />}
-                                  <AvatarFallback name={row.label} className="text-hint">{initialsOf(row.label)}</AvatarFallback>
+                                  <AvatarFallback name={row.label}>{initialsOf(row.label)}</AvatarFallback>
                                 </Avatar>
                               )}
                               <span className="truncate text-primary">{row.label}</span>

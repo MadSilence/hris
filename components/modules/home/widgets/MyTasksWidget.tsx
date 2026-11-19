@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
@@ -18,6 +19,7 @@ import { scheduleWrite, showUndoToast, usePendingWrites } from "@/components/mod
 import { isoDateInZone } from "@/components/modules/home/utils/zonedTime";
 import {
   BigNumber,
+  TWO_LINE_ROW,
   WidgetCard,
   WidgetEmpty,
   WidgetError,
@@ -26,6 +28,7 @@ import {
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
 import type { HomeWidgetProps } from "./catalogue";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { NOTIFICATIONS_QUERY_KEY } from "@/components/modules/notifications/utils/notificationsQueryKeys";
 
 /** A task Home can close in one tick: nothing to fill, attach or answer. Everything else opens on /tasks. */
@@ -39,6 +42,13 @@ const addDays = (iso: string, days: number) => {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 };
+
+/**
+ * Overdue: the due date has passed with the task still open (LW08 notes; K5). `dueReached` is also true on the due day
+ * itself — a task due today read "Overdue / Today" and counted as overdue (walk of 2026-11-19).
+ */
+export const isOverdueTask = (task: Pick<Task, "dueReached" | "dueDate">, today: string): boolean =>
+  task.dueReached && (task.dueDate === null || task.dueDate < today);
 
 /** Overdue first, then by due date; a task with no date after every task with one. */
 const byDue = (a: Task, b: Task) => {
@@ -67,26 +77,22 @@ export const useTickTask = () => {
   };
 };
 
-/** The round checkbox of a task (SPEC § 13.11); ticked, it fills with the accent. */
-const TaskCheck: React.FC<{ done: boolean; disabled: boolean; label: string; onTick: () => void; tabIndex?: number }> = ({
-  done,
-  disabled,
-  label,
-  onTick,
-  tabIndex,
-}) => (
+/**
+ * The round checkbox of a task (SPEC § 13.11): 18, white, a 1 px border at full opacity — nothing looks disabled (K2).
+ * Ticked, it fills with the accent. A task that cannot be closed in one tick opens its page instead.
+ */
+const TaskCheck: React.FC<{ done: boolean; label: string; onTick: () => void; tabIndex?: number }> = ({ done, label, onTick, tabIndex }) => (
   <button
     type="button"
     tabIndex={tabIndex}
     role="checkbox"
     aria-checked={done}
     aria-label={label}
-    disabled={disabled || done}
+    disabled={done}
     onClick={onTick}
     className={cn(
-      "flex size-[18px] shrink-0 items-center justify-center rounded-pill border-[1.5px] transition-colors",
-      done ? "border-accent bg-accent text-on-accent" : "border-strong hover:border-accent",
-      disabled && !done && "opacity-50",
+      "flex size-[18px] shrink-0 items-center justify-center rounded-pill border transition-colors",
+      done ? "border-accent bg-accent text-on-accent" : "border-strong bg-card hover:border-accent",
     )}
   >
     {done && <Icon icon={Tick02Icon} size="sm" className="size-3" />}
@@ -101,11 +107,13 @@ const TaskCheck: React.FC<{ done: boolean; disabled: boolean; label: string; onT
 export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const t = useTranslations("home");
   const dates = useShortDates();
+  const router = useRouter();
   const settings = useUserSettings();
   const query = useMyTasks(true);
   const pending = usePendingWrites();
   const tick = useTickTask();
   const today = isoDateInZone(new Date(), settings.data?.companyTimeZone);
+  const { userId } = useCurrentUser();
   const weekAgo = addDays(today, -6);
   const weekAhead = addDays(today, 7);
   const title = t("widgets.myTasks.title");
@@ -130,8 +138,9 @@ export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const doneToday = (task: Task) => isDone(task) && (pending.has(taskDoneKey(task.id)) || (task.completedAt ?? "").slice(0, 10) === today);
   const open = all.filter((task) => (task.status === "OPEN" || task.status === "WAITING") && !pending.has(taskDoneKey(task.id))).sort(byDue);
   const shown = [...open, ...all.filter(doneToday)];
-  const dueToday = open.filter((task) => task.dueDate !== null && task.dueDate <= today).length;
-  const overdue = open.filter((task) => task.dueReached).length;
+  // K1: today's tasks only — an overdue one is not "due today".
+  const dueToday = open.filter((task) => task.dueDate === today).length;
+  const overdue = open.filter((task) => isOverdueTask(task, today)).length;
   const doneThisWeek = all.filter((task) => isDone(task) && ((task.completedAt ?? today).slice(0, 10) >= weekAgo)).length;
 
   if (shown.length === 0) {
@@ -156,36 +165,44 @@ export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
       : task.kind === "NOMINATE_PEERS" || task.kind === "APPROVE_PEERS" || task.kind === "APPROVE_REVIEW" ? `/reviews/steps/by-task/${task.id}`
       : "/tasks";
 
-  const row = (task: Task, withDay: boolean) => {
+  const row = (task: Task, large: boolean) => {
     const done = isDone(task);
-    const from = task.processType ? t(`processes.types.${task.processType}`) : task.subject?.name ?? "";
-    const when = task.dueDate ? (task.dueDate === today ? t("card.today") : dates.date(task.dueDate, { weekday: true })) : "";
+    const overdueRow = !done && isOverdueTask(task, today);
+    const process = task.processType ? t(`processes.types.${task.processType}`) : "";
+    // Never the reader's own name (W11's rule): their own self-review read "Sun · Petr Kastahlod" (walk of 2026-11-19).
+    const person = task.subject?.id && task.subject.id === userId ? "" : task.subject?.name ?? "";
+    // Large: "Onboarding · Ana Silva" (K7); Medium: the process, or the person when there is none.
+    const from = large && process && person ? t("myTasks.processOf", { process, person }) : process || person;
+    // A6: the day by its weekday while it is this week — "Thu", "Today".
+    const when = task.dueDate ? dates.day(task.dueDate, { hideYear: true }) : "";
+    const line = done
+      ? t("myTasks.doneFrom", { hasFrom: from ? "yes" : "no", from })
+      : overdueRow || large || !when
+        ? from
+        : from
+          ? t("myTasks.from", { when, from })
+          : when;
+    const tickable = TICKABLE_KINDS.has(task.kind) && task.status !== "WAITING";
     return (
-      <li key={task.id} className="flex items-start gap-3 py-2.5">
-        <span className="pt-0.5">
-          <TaskCheck
-            done={done}
-            disabled={!TICKABLE_KINDS.has(task.kind) || task.status === "WAITING"}
-            tabIndex={preview ? -1 : undefined}
-            label={t("myTasks.markDone", { title: task.title })}
-            onTick={() => tick(task)}
-          />
-        </span>
-        <Link href={href(task)} tabIndex={preview ? -1 : undefined} className="flex min-w-0 flex-1 items-start justify-between gap-2">
+      <li key={task.id} className="flex items-center gap-2.5 py-[9px]">
+        <TaskCheck
+          done={done}
+          tabIndex={preview ? -1 : undefined}
+          label={t("myTasks.markDone", { title: task.title })}
+          onTick={() => (tickable ? tick(task) : router.push(href(task)))}
+        />
+        <Link href={href(task)} tabIndex={preview ? -1 : undefined} className="flex min-w-0 flex-1 items-center justify-between gap-2">
           <span className="min-w-0">
-            <span className={cn("block truncate text-body", done ? "text-tertiary line-through" : "font-medium text-primary")}>{task.title}</span>
-            {from && (
-              <span className="block truncate text-hint text-tertiary">
-                {withDay || !when ? from : t("myTasks.from", { when, from })}
-              </span>
-            )}
+            <span className={cn(TWO_LINE_ROW.name, done && "font-normal text-tertiary line-through")}>{task.title}</span>
+            {line && <span className={TWO_LINE_ROW.line}>{line}</span>}
           </span>
-          {!done && task.dueReached ? (
+          {overdueRow ? (
+            // K5: "Overdue" in the error text, the day under it.
             <span className="flex shrink-0 flex-col items-end">
-              <span className="text-hint font-medium text-danger-text">{t("myTasks.overdue")}</span>
-              {task.dueDate && <span className="text-hint text-tertiary">{dates.date(task.dueDate, { weekday: true })}</span>}
+              <span className="text-hint font-medium text-status-declined-text">{t("myTasks.overdue")}</span>
+              {task.dueDate && <span className="text-hint text-tertiary">{dates.day(task.dueDate, { hideYear: true })}</span>}
             </span>
-          ) : withDay && when ? (
+          ) : large && when && !done && task.dueDate !== today ? (
             <span className="shrink-0 text-hint text-tertiary">{when}</span>
           ) : null}
         </Link>

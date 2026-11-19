@@ -35,10 +35,19 @@ function Orbit() {
   );
 }
 
-export function AuthFirstExperience({ back, long = true, children }: { back?: ReactNode; long?: boolean; children: ReactNode }) {
+/**
+ * `flow` names what the base carries: `signup` is a login screen (registration), and takes the login screens' field
+ * rhythm (the designers' login fixes A1, A2); the owner's setup keeps the product's own.
+ */
+export function AuthFirstExperience({ back, long = true, flow, children }: {
+  back?: ReactNode;
+  long?: boolean;
+  flow?: "signup";
+  children: ReactNode;
+}) {
   const t = useTranslations("auth");
   return (
-    <div className="auth-first" data-long={long}>
+    <div className="auth-first" data-long={long} data-flow={flow}>
       <header className="auth-first-strip">
         <NoddoWordmark tone="white" height={24} />
         <RingGrid layout="strip" />

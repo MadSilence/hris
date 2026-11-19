@@ -8,18 +8,20 @@ import { cn } from "@/lib/cn";
 import { Icon } from "./icon";
 
 /*
- * Menus (SPEC § 13.7): radius 10, the level-2 shadow, 4 px of padding; items are 32 px, radius 8, and take the
- * accent's subtle tint on hover. A dangerous item (`variant="destructive"`) is red text, last in the menu,
- * after a separator (§ 4.6).
+ * Menus (SPEC § 13.7, and the designers' Automations fixes A11 of 2026-11-18, product-wide): radius 10, a hairline,
+ * the level-2 shadow, 4 px of padding and 2 px between rows; items are 32 px, padding 0 8, radius 8, 10 px between a
+ * 16 px Ink icon and the 14/20 text, and take the accent's subtle tint on hover. A dangerous item
+ * (`variant="destructive"`) is red, icon and text, last in the menu, after a divider line with 4 px above and below
+ * (§ 4.6).
  */
 const menuSurface =
-  "z-50 min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-popover border border-divider bg-overlay p-1 text-primary shadow-popover";
+  "z-50 flex min-w-[8rem] flex-col gap-0.5 overflow-x-hidden overflow-y-auto rounded-popover border border-divider bg-overlay p-1 text-primary shadow-popover";
 
 const menuItem = cn(
-  "relative flex h-8 cursor-default items-center gap-2 rounded-control px-2 text-body whitespace-nowrap outline-hidden select-none",
+  "relative flex h-8 shrink-0 cursor-default items-center gap-2.5 rounded-control px-2 text-body whitespace-nowrap outline-hidden select-none",
   "focus:bg-accent-subtle data-[highlighted]:bg-accent-subtle",
   "data-[disabled]:pointer-events-none data-[disabled]:text-disabled",
-  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='text-'])]:text-tertiary",
+  "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='text-'])]:text-primary",
 );
 
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -139,7 +141,7 @@ function DropdownMenuSeparator({ className, ...props }: React.ComponentProps<typ
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1 my-1 h-px bg-divider", className)}
+      className={cn("my-1 h-px shrink-0 bg-divider", className)}
       {...props}
     />
   );

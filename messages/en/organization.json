@@ -173,6 +173,8 @@
       "pendingEmail": "New email {email} waits for confirmation — the link was sent to it"
     },
     "tenure": {
+      "today": "Joined today",
+      "days": "{count, plural, one {# day} other {# days}}",
       "weeks": "{count, plural, one {# week} other {# weeks}}",
       "months": "{count, plural, one {# month} other {# months}}",
       "years": "{count, plural, one {# year} other {# years}}",

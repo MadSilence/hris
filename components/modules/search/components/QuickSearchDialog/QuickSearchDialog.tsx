@@ -219,7 +219,7 @@ const PersonHit: React.FC<{ item: SearchItem }> = ({ item }) => (
   <>
     <Avatar className="size-7 shrink-0">
       <AvatarImage src={item.avatarUrl ?? undefined} alt=""/>
-      <AvatarFallback className="text-hint font-semibold">{initials(item.title)}</AvatarFallback>
+      <AvatarFallback name={item.title}>{initials(item.title)}</AvatarFallback>
     </Avatar>
     <span className="flex min-w-0 flex-col">
       <span className="truncate">{item.title}</span>

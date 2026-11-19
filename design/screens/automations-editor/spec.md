@@ -155,3 +155,10 @@ None block.
   After Turn on the editor stays in fields with the live banner. Run history is off until the automation is saved.
   Keyboard: Enter opens a card, Alt+↑/↓ moves it, Shift+F10 opens its menu, Delete removes it.
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- CR1: read mode shows × only — nothing in the step menu works there (Q-45).
+- C1b: the fit keeps the selected card level with the window too, so an insert that refits the canvas still ends the line on the window.
+- C13, E3b: initials are 12, not 11 — the design-system guard allows the 11 px size on Home only.

@@ -105,7 +105,26 @@ const caretAtEnd = (root: HTMLElement): Range => {
  * <p>Built on `contentEditable`: the DOM is the editor's own between renders, and it is painted from `value` only when
  * the value changes from outside — the echo of the field's own typing would otherwise move the caret.
  */
-export const TokenTextField: React.FC<TokenTextFieldProps> = ({
+/** What the field lets its caller do: open the list of fields, as "Insert a field" on the label's row does (C18). */
+export type TokenTextFieldHandle = { openList: () => void };
+
+/** "Insert a field" (C18): a small link on the right of the label's row — 24 high, 13/18 500 in the accent, a 14 plus. */
+export const InsertFieldLink: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const t = useTranslations("automationsSettings");
+  return (
+    <button
+      type="button"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      className="inline-flex h-6 items-center gap-1.5 rounded-tag text-label text-accent-text outline-none hover:underline focus-visible:underline"
+    >
+      <Icon icon={Add01Icon} size="sm" className="size-3.5" />
+      {t("tokens.insert")}
+    </button>
+  );
+};
+
+export const TokenTextField = React.forwardRef<TokenTextFieldHandle, TokenTextFieldProps>(function TokenTextField({
   value,
   onChange,
   placeholders,
@@ -117,7 +136,7 @@ export const TokenTextField: React.FC<TokenTextFieldProps> = ({
   "aria-describedby": describedBy,
   invalid,
   disabled,
-}) => {
+}, handle) {
   const t = useTranslations("automationsSettings");
   const tCommon = useTranslations("common");
   const label = usePlaceholderLabel();
@@ -186,6 +205,12 @@ export const TokenTextField: React.FC<TokenTextFieldProps> = ({
     emit();
     el.focus();
   };
+
+  React.useImperativeHandle(handle, () => ({
+    openList: () => {
+      if (!disabled) openList(false);
+    },
+  }));
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const el = ref.current;
@@ -266,7 +291,8 @@ export const TokenTextField: React.FC<TokenTextFieldProps> = ({
               "w-full rounded-control border border-field bg-card px-3 text-body text-primary outline-none",
               "transition-[border-color,box-shadow] hover:border-field-hover focus:border-accent focus:shadow-focus",
               "aria-invalid:border-danger",
-              multiline ? "min-h-24 whitespace-pre-wrap break-words py-2 leading-6" : "flex h-9 items-center overflow-hidden whitespace-nowrap text-ellipsis",
+              // C7: 14/22, 10 12 inside, at least 88 high.
+              multiline ? "min-h-[88px] whitespace-pre-wrap break-words py-2.5 leading-[22px]" : "flex h-9 items-center overflow-hidden whitespace-nowrap text-ellipsis",
               disabled && "cursor-not-allowed bg-subtle text-disabled",
             )}
           />
@@ -318,7 +344,7 @@ export const TokenTextField: React.FC<TokenTextFieldProps> = ({
       )}
     </div>
   );
-};
+});
 
 /** A stored text drawn with its tokens as chips, for read mode (R3). */
 export const TokenText: React.FC<{ value: string | null | undefined; className?: string }> = ({ value, className }) => {

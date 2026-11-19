@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<!-- CM07-who-sees-it: reference picture only, never a source of values. Values are in spec.md. -->
+<head>
+<meta charset="utf-8">
+<title>Who sees this page</title>
+
+<style>
+/* noddo concept frames — values from hris/styles/noddo/SPEC.md (repo wins over the DS artifact) */
+:root{--accent:#6E1630;--on-accent:#FFFFFF;--accent-text:#6E1630;--accent-subtle:#F6F1F3;--accent-muted:#E9DCE0;--accent-ring:#B78B98;--accent-hover:#61132A}
+body{margin:0}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.s{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{width:1440px;height:900px;display:flex;font-family:Inter,sans-serif;font-size:14px;line-height:20px;color:#0B0B0C;background:#FFFFFF;overflow:hidden;position:relative;font-variant-numeric:tabular-nums}
+.side{width:240px;flex:none;background:#F7F7F8;border-right:1px solid #EAEAEC;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.logo{display:flex;align-items:center;gap:8px;padding:0 8px 16px}
+.logo b{width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:600}
+.ni{height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:#45454A;font-weight:500;border-radius:8px}
+.ni.on{background:var(--accent-muted);color:var(--accent-text)}
+.me{border-top:1px solid #EAEAEC;margin-top:8px;padding:12px 8px 0;display:flex;align-items:center;gap:8px;font-weight:500}
+.main{flex:1;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;min-width:0;position:relative}
+.row{display:flex;align-items:center;gap:8px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.col{display:flex;flex-direction:column}
+.h1{margin:0;font-family:'Inter Tight',sans-serif;font-size:24px;line-height:32px;font-weight:600;letter-spacing:-0.02em}
+.h2{margin:0;font-family:'Inter Tight',sans-serif;font-size:18px;line-height:26px;font-weight:600;letter-spacing:-0.01em}
+.ct{margin:0;font-size:15px;line-height:22px;font-weight:600}
+.lbl{font-size:13px;line-height:18px;font-weight:500}
+.hint{font-size:12px;line-height:16px;color:#6B6B70}
+.sec{color:#45454A}
+.ter{color:#6B6B70}
+.link{color:var(--accent-text);font-weight:500}
+.num{font-family:'Inter Tight',sans-serif;font-size:32px;line-height:40px;font-weight:500;letter-spacing:-0.02em}
+.mono{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:18px}
+.btn{height:36px;padding:0 14px;border-radius:8px;font:500 14px/20px Inter,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #DADADF;background:#FFFFFF;color:#0B0B0C;box-sizing:border-box;white-space:nowrap;cursor:pointer}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;line-height:18px}
+.btn.p{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.btn.g{border-color:transparent;background:transparent;color:#45454A}
+.ib{width:32px;height:32px;padding:0;border-color:transparent;background:transparent;color:#45454A}
+.fc{height:32px;padding:0 12px;border:1px solid #DADADF;border-radius:999px;background:#FFFFFF;font:500 13px/18px Inter,sans-serif;color:#0B0B0C;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;white-space:nowrap}
+.fc.on{background:#0B0B0C;border-color:#0B0B0C;color:#FFFFFF}
+.fc.add{border-style:dashed;color:#45454A}
+.search{width:240px;height:32px;border:1px solid #DADADF;border-radius:8px;padding:0 10px;box-sizing:border-box;display:flex;align-items:center;gap:8px;color:#6B6B70;font-size:13px}
+.field{height:36px;border:1px solid #DADADF;border-radius:8px;padding:0 12px;box-sizing:border-box;display:flex;align-items:center;gap:8px;background:#FFFFFF}
+.field.focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-muted)}
+.card{background:#FFFFFF;border:1px solid #EAEAEC;border-radius:16px;box-shadow:0 1px 2px rgba(11,11,12,.05);padding:16px;box-sizing:border-box}
+.pop{background:#FFFFFF;border:1px solid #EAEAEC;border-radius:10px;box-shadow:0 1px 2px rgba(11,11,12,.06),0 4px 12px rgba(11,11,12,.08)}
+.dialog{background:#FFFFFF;border-radius:20px;box-shadow:0 8px 32px rgba(11,11,12,.14);padding:24px;box-sizing:border-box}
+.scrim{position:absolute;inset:0;background:rgba(11,11,12,.4)}
+.mist{background:#F3F3F5;border-radius:10px}
+.banner{background:#F3F3F5;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;color:#0B0B0C}
+.pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;font-size:12px;line-height:16px;font-weight:600;box-sizing:border-box;white-space:nowrap}
+.pill .s{width:14px;height:14px}
+.ok{background:#E6F4EC;color:#135C3A}.ok .s{color:#1E7A4F}
+.pend{background:#FFF3DF;color:#7A4800}.pend .s{color:#985A00}
+.prog{background:#EAF0FD;color:#2342A0}.prog .s{color:#2F55C8}
+.sched{background:#E3F3F3;color:#0B5257}.sched .s{color:#0E6A70}
+.info{background:#ECF1FA;color:#2F63C4}
+.draft{border:1px dashed #9C9CA3;color:#45454A;height:24px}.draft .s{color:#6B6B70}
+.gray{background:#F3F3F5;color:#45454A}
+.tag{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:6px;font-size:12px;line-height:16px;font-weight:500;background:#F3F3F5;color:#45454A;white-space:nowrap}
+.tag i{width:6px;height:6px;border-radius:999px;background:#6B6B70}
+.av{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:16px;font-weight:600;flex:none}
+.av.sm{width:22px;height:22px;font-size:10px}
+.av.lg{width:36px;height:36px;font-size:13px}
+.a1{background:#ECE6EF;color:#441F56}.a2{background:#E4EBF2;color:#14426B}.a3{background:#EFEAE2;color:#583C0C}.a4{background:#E2EDEE;color:#0A4C51}.a5{background:#F1E4EB;color:#661642}.a6{background:#E7E8F5;color:#2A2D79}.a7{background:#EDE8E6;color:#4D2D21}
+.stack{display:flex}.stack .av{border:2px solid #FFFFFF;margin-left:-8px}.stack .av:first-child{margin-left:0}
+.tabs{display:flex;gap:24px;border-bottom:1px solid #EAEAEC}
+.tab{padding:0 0 10px;color:#6B6B70;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+.tab.on{color:#0B0B0C;border-color:var(--accent)}
+.cnt{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:12px;line-height:20px;font-weight:600;box-sizing:border-box;text-align:center}
+.cnt.n{background:#F3F3F5;color:#45454A}
+.seg{display:inline-flex;height:32px;padding:2px;background:#F3F3F5;border-radius:8px;box-sizing:border-box}
+.seg span{padding:0 12px;display:flex;align-items:center;gap:6px;border-radius:6px;font-size:13px;line-height:18px;font-weight:500;color:#45454A}
+.seg span.on{background:#FFFFFF;color:#0B0B0C;box-shadow:0 1px 2px rgba(11,11,12,.06),0 2px 6px rgba(11,11,12,.06)}
+.tgl{width:32px;height:20px;border-radius:999px;background:#DADADF;position:relative;flex:none}
+.tgl::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:999px;background:#FFFFFF}
+.tgl.on{background:var(--accent)}.tgl.on::after{left:14px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{height:36px;text-align:left;font-size:12px;line-height:16px;font-weight:500;color:#6B6B70;padding:0 12px;border-bottom:1px solid #EAEAEC}
+.tbl td{height:44px;padding:0 12px;border-bottom:1px solid #EAEAEC;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .r{text-align:right}
+.bar{height:6px;border-radius:999px;background:#F3F3F5;overflow:hidden}
+.bar b{display:block;height:100%;background:var(--accent);border-radius:999px}
+.mi{height:32px;padding:0 8px;border-radius:8px;display:flex;align-items:center;gap:10px}
+.mi.on{background:var(--accent-subtle)}
+.tree .mi{color:#45454A}
+.tree .mi.on{background:var(--accent-muted);color:var(--accent-text);font-weight:500}
+.ai{border:1px solid #EAEAEC;border-radius:16px;background:#FFFFFF;box-shadow:0 1px 2px rgba(11,11,12,.05);padding:16px;box-sizing:border-box}
+.ill{color:var(--accent)}
+.quote{border-left:2px solid #DADADF;padding-left:12px;color:#45454A}
+.divider{height:1px;background:#EAEAEC}
+/* lively layer — Home's own exceptions (home/spec.md "Changes to SPEC"): widget r28, hero numbers, accent band + ring */
+:root{--accent-strong:#531124}
+.rail{width:64px;flex:none;background:#F7F7F8;border-right:1px solid #EAEAEC;display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:4px;box-sizing:border-box;position:relative;z-index:2}
+.rail a{width:40px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#45454A}
+.rail a.on{background:var(--accent-muted);color:var(--accent-text)}
+.rail b{width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:600;margin-bottom:16px}
+.pg{flex:1;min-width:0;position:relative;overflow:hidden;background:#F7F7F8}
+.band{position:absolute;left:0;right:0;top:0;background:linear-gradient(115deg,var(--accent-strong),var(--accent));overflow:hidden}
+.band .ring{position:absolute;width:400px;height:400px;border-radius:999px;border:80px solid rgba(255,255,255,.12);right:-120px;top:-180px}
+.onband{color:var(--on-accent)}
+.w{background:#FFFFFF;border-radius:28px;box-shadow:0 1px 2px rgba(11,11,12,.05),0 8px 24px rgba(11,11,12,.06);padding:24px;box-sizing:border-box;position:relative;overflow:hidden}
+.wt{margin:0;font-family:'Inter Tight',sans-serif;font-size:20px;line-height:28px;font-weight:600;letter-spacing:-0.01em}
+.hero{font-family:'Inter Tight',sans-serif;font-weight:500;letter-spacing:-0.03em;font-variant-numeric:tabular-nums}
+.greet{font-family:'Inter Tight',sans-serif;font-size:52px;line-height:56px;font-weight:500;letter-spacing:-0.02em;margin:0}
+.soft{background:var(--accent-subtle)}
+.muted{background:var(--accent-muted)}
+.acc{background:var(--accent);color:var(--on-accent)}
+.dot{width:8px;height:8px;border-radius:999px;background:var(--accent);display:inline-block}
+.live{width:8px;height:8px;border-radius:999px;background:#1E7A4F;box-shadow:0 0 0 4px #E6F4EC;display:inline-block}
+.chip{height:32px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.16);color:var(--on-accent);display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;white-space:nowrap}
+.ringp{width:64px;height:64px;border-radius:999px;background:conic-gradient(var(--accent) 0 79%,var(--accent-muted) 79% 100%);display:flex;align-items:center;justify-content:center;flex:none}
+.kbd{margin-left:auto;font-size:12px;line-height:18px;color:#6B6B70;border:1px solid #DADADF;border-radius:6px;padding:0 6px;font-weight:400}
+.side .ni .cnt{margin-left:auto}
+.me small{display:block;font-size:12px;line-height:16px;color:#6B6B70;font-weight:400}
+.side{gap:2px;padding:16px 12px}
+.cover{border-radius:20px;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;box-sizing:border-box;flex:none}
+.t-plum{background:#ECE6EF;color:#441F56}.t-ocean{background:#E4EBF2;color:#14426B}.t-teal{background:#E2EDEE;color:#0A4C51}.t-bronze{background:#EFEAE2;color:#583C0C}.t-indigo{background:#E7E8F5;color:#2A2D79}.t-cocoa{background:#EDE8E6;color:#4D2D21}
+.ringp span{width:48px;height:48px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+
+</style>
+</head>
+<body>
+<div class="frame">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Inter+Tight:wght@500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>body{margin:0}</style>
+
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div class="logo"><b>A</b><span style="font-weight:500;flex:1">Acme</span><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color:#6B6B70"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></div>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Search<span class="kbd">⌘K</span></a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg>Inbox<span class="cnt">5</span></a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M3.5 6l1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>Tasks</a>
+    <a class="ni on"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11"/></svg>Company hub</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.3-5 6-5s5 1.5 6 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c1.6.6 2.6 2.2 3 5"/></svg>Organization</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>Calendar</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Attendance</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="2"/><rect x="15" y="15" width="6" height="6" rx="2"/><path d="M9 6h6a3 3 0 0 1 3 3v6"/></svg>Processes</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>Reviews</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18M6 17v-6M11 17V6M16 17v-9"/></svg>Reports</a>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Automations</a>
+    <div style="flex:1"></div>
+    <a class="ni"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>Settings</a>
+    <div class="me"><span class="av a1">MK</span><span style="min-width:0">Marta Kowalska<small>marta@acme.com</small></span></div>
+  </nav>
+
+  <main class="main" style="padding:24px 48px 32px;gap:0">
+    <div class="between">
+      <div class="row hint" style="gap:6px"><span class="link" style="font-size:13px">Pages</span><span>/</span><span>Policies</span></div>
+      <div class="row" style="gap:12px"><button class="btn">Preview</button><button class="btn p">Publish version 3</button></div>
+    </div>
+    <div class="row" style="gap:16px;margin-top:36px"><span class="t-plum" style="width:52px;height:52px;border-radius:16px"></span><h1 class="greet" style="font-size:36px;line-height:44px;font-weight:600">Remote work policy</h1></div>
+  </main>
+
+  <div class="scrim"></div>
+  <div class="dialog col" role="dialog" aria-label="Who sees this page" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:640px;padding:0">
+    <div class="between" style="padding:20px 24px 4px">
+      <h2 class="h2">Who sees this page</h2>
+      <button class="btn ib" aria-label="Close"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="col" style="padding:16px 24px 0;gap:22px">
+      <span class="seg" style="align-self:flex-start"><span>Everyone</span><span class="on">Filter people</span><span>Choose people</span></span>
+
+      <!-- filters: the same builder as People -->
+      <div class="col" style="gap:10px">
+        <span class="lbl">People who match all of these</span>
+        <div class="row" style="gap:8px"><span class="field" style="width:160px;height:36px;justify-content:space-between">Office<svg class="s" viewBox="0 0 24 24" aria-hidden="true" style="color:#6B6B70"><path d="m6 9 6 6 6-6"/></svg></span><span class="hint">is</span><span class="field" style="flex:1;height:36px;gap:6px"><span class="tag">Vilnius</span><span class="tag">Warsaw</span></span><button class="btn ib" aria-label="Remove filter"><svg class="s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+        <div class="row" style="gap:8px"><span class="field" style="width:160px;height:36px;justify-content:space-between">Legal entity<svg class="s" viewBox="0 0 24 24" aria-hidden="true" style="color:#6B6B70"><path d="m6 9 6 6 6-6"/></svg></span><span class="hint">is</span><span class="field" style="flex:1;height:36px;gap:6px"><span class="tag">Acme UAB</span></span><button class="btn ib" aria-label="Remove filter"><svg class="s" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+        <button class="btn g sm" style="align-self:flex-start"><svg class="s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add filter</button>
+      </div>
+
+      <div class="col" style="gap:10px">
+        <span class="lbl">Also add <span class="ter" style="font-weight:400">(optional)</span></span>
+        <div class="field" style="height:auto;min-height:40px;padding:6px 8px;flex-wrap:wrap;gap:6px">
+          <span class="row" style="height:28px;padding:0 6px 0 4px;border-radius:999px;background:#F3F3F5;gap:6px;font-size:13px"><span class="av sm a6" style="width:20px;height:20px">DM</span>Daniel Meyer<svg class="s" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;color:#6B6B70"><path d="m6 6 12 12M18 6 6 18"/></svg></span>
+          <span class="row" style="height:28px;padding:0 6px 0 4px;border-radius:999px;background:#F3F3F5;gap:6px;font-size:13px"><span class="av sm a4" style="width:20px;height:20px">TL</span>Role: Team lead<svg class="s" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;color:#6B6B70"><path d="m6 6 12 12M18 6 6 18"/></svg></span>
+          <span class="hint" style="padding-left:4px">Search people or roles</span>
+        </div>
+      </div>
+
+      <div class="row" style="gap:12px;padding:12px 14px;border-radius:12px;background:#F7F7F8">
+        <div class="stack"><span class="av sm a2">LN</span><span class="av sm a4">RB</span><span class="av sm a6">AJ</span></div>
+        <span><span class="lbl">118 people</span><span class="sec"> · new people who match join automatically</span></span>
+        <span style="flex:1"></span><a class="link" style="font-size:13px">See who</a>
+      </div>
+    </div>
+    <div class="row" style="justify-content:flex-end;gap:8px;padding:16px 24px;margin-top:22px;border-top:1px solid #EAEAEC">
+      <button class="btn">Cancel</button><button class="btn p">Apply</button>
+    </div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

@@ -95,7 +95,7 @@
 - B2-3Wrong code
 - That code doesn’t match. Try again.
 - B2-4Expired
-- This code has expired. Resend a new one.
+- This code has expired. Send a new one.
 - B2-5Resent
 - We’ve sent a new code. Check your spam folder too.
 - B2-6Too many attempts

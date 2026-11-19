@@ -91,12 +91,12 @@ export const ProfileMenu: React.FC<{ style: HomeHeaderStyle }> = ({ style }) => 
             "flex h-11 items-center gap-2 rounded-pill border pr-3.5 pl-1 text-home-pill transition-colors",
             style === "COLOUR"
               ? "band-glass on-band hover:opacity-90"
-              : "border-field bg-card text-primary hover:border-strong hover:bg-subtle",
+              : "border-divider bg-card text-primary hover:border-strong hover:bg-subtle",
           )}
         >
           <Avatar className="size-[34px]">
             {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
-            <AvatarFallback name={name} className="text-hint">{initialsOf(name)}</AvatarFallback>
+            <AvatarFallback name={name}>{initialsOf(name)}</AvatarFallback>
           </Avatar>
           {t("header.myProfile")}
         </button>

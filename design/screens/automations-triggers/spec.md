@@ -107,3 +107,9 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
   select in place); Time off's "Only when" offers the request's own fields (leave type, days…), not Department or
   Office — those are Who it runs for; Month "A weekday" adds a which-week select (First … Last).
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- C32: the company line reads "Everyone at the same moment" without the zone's name — the editor does not receive the company's time zone; the person line names the reader and this browser's zone.
+- A trigger saved with OR still opens: its conditions as one flat list, with a note that a change joins them with "and".

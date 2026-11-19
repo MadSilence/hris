@@ -55,7 +55,7 @@ describe("read mode", () => {
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     expect(screen.getByText("Only some people")).toBeInTheDocument();
     expect(screen.getByText("Vilnius")).toBeInTheDocument();
-    expect(screen.getByText(/^48.people match$/)).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.tagName === "SPAN" && /^48.people match$/.test(el.textContent ?? ""))).toBeInTheDocument();
     expect(screen.getByText("New teammates who match join automatically.")).toBeInTheDocument();
   });
 });
@@ -65,7 +65,7 @@ describe("WhoItRunsFor", () => {
     const onChange = jest.fn();
     const conditions: Segment = { filters: [{ field: "sys:office", op: "eq", value: "o-vil" }], excludeUserIds: ["u-x"] };
     render(<WhoItRunsFor conditions={conditions} readOnly={false} check={check(1)} onChange={onChange} />);
-    expect(screen.getByText(/^1.person matches$/)).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.tagName === "SPAN" && /^1.person matches$/.test(el.textContent ?? ""))).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: "Everyone" }));
     expect(onChange).toHaveBeenLastCalledWith({ filters: [], excludeUserIds: ["u-x"] });
   });

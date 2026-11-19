@@ -65,6 +65,9 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6",
           "rounded-panel bg-overlay p-6 text-primary shadow-dialog",
+          // The panel is not a control: when Radix moves focus to it (on open, or when the focused field leaves), the
+          // global focus outline drew an accent frame round the whole dialog (the designers' login fix P2).
+          "outline-none focus:outline-none focus-visible:outline-none",
           dialogWidths[size],
           className,
         )}

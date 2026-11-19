@@ -16,7 +16,7 @@
     "outsideScope": "{count, plural, one {И ещё # запуск, который вам не виден.} few {И ещё # запуска, которые вам не видны.} many {И ещё # запусков, которые вам не видны.} other {И ещё # запуска, которые вам не видны.}}",
     "loadingMore": "Загружаем ещё запуски",
     "emptyTitle": "Запусков пока нет",
-    "emptyDescription": "Она запустится, когда: {trigger}.",
+    "emptyDescription": "Она сработает, когда в следующий раз {trigger}.",
     "emptyDescriptionNoTrigger": "Она запустится, когда у неё будет триггер и её включат.",
     "noMatchTitle": "Подходящих запусков нет",
     "noMatch": "{chip, select, FAILED {Нет запусков с ошибкой для «{query}».} WAITING {Нет ждущих запусков для «{query}».} SCHEDULED {Нет запланированных запусков для «{query}».} DONE {Нет завершённых запусков для «{query}».} other {Нет запусков для «{query}».}}",
@@ -24,7 +24,14 @@
     "clearSearch": "Очистить поиск",
     "showAll": "Показать все запуски",
     "errorTitle": "Не удалось загрузить запуски",
-    "errorDescription": "Автоматизация продолжает работать."
+    "errorDescription": "Автоматизация продолжает работать.",
+    "chipName": {
+      "ALL": "Все",
+      "FAILED": "С ошибкой",
+      "WAITING": "Ждут",
+      "SCHEDULED": "Запланированы",
+      "DONE": "Готово"
+    }
   },
   "row": {
     "late": "{count, plural, one {Запущено с опозданием на # день} few {Запущено с опозданием на # дня} many {Запущено с опозданием на # дней} other {Запущено с опозданием на # дня}}",
@@ -40,7 +47,9 @@
     "timeOffDays": "{type}, {count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
     "firedOn": "{date}",
     "title": "{name}, {what}",
-    "triggerOn": "{trigger} · {date}"
+    "triggerOn": "{trigger} · {date}",
+    "fieldChanged": "{field}: {value}",
+    "fieldCleared": "{field}: очищено"
   },
   "run": {
     "header": "Запуск · начат {when} · версия {version, number}",
@@ -97,7 +106,7 @@
     "errorTitle": "Не удалось загрузить версии"
   },
   "test": {
-    "title": "Тестовый запуск · ничего не отправляется",
+    "title": "Тестовый запуск",
     "dialogTitle": "Тестовый запуск · {name}",
     "nothingSent": "Ничего не отправляется и не меняется.",
     "tryItOn": "Попробовать на",
@@ -149,15 +158,30 @@
       "notConnected": "Пропущено: этот шаг ещё не подключён",
       "noRecipient": "Пропущено: отправлять некому",
       "missingDetails": "Нужно заполнить детали, прежде чем шаг сможет выполниться",
-      "missingPlaceholders": "Нет значения для: {fields}"
+      "missingPlaceholders": "Нет значения для: {fields}",
+      "signsAlone": "Подписывает {name}",
+      "signsFirst": "Сначала подписывает {first}, затем {then}",
+      "toSign": "{what}. {days, plural, one {# день} few {# дня} many {# дней} other {# дня}} на подпись."
     },
     "sendToMe": "Отправить мне",
     "sent": "Отправлено вам",
     "noEmail": "У вас нет адреса почты, поэтому ничего не отправлено.",
     "items": "{count, plural, one {Вам отправлен # тестовый элемент} few {Вам отправлено # тестовых элемента} many {Вам отправлено # тестовых элементов} other {Вам отправлено # тестового элемента}}",
-    "itemsHint": "Удаляет уведомления и задачи; письма останутся в вашей почте.",
+    "itemsHint": "Удаляет уведомления, задачи и тестовые документы; письма остаются в вашей почте.",
     "deleteItems": "Удалить тестовые элементы",
-    "itemsDeleted": "Тестовые элементы удалены"
+    "itemsDeleted": "Тестовые элементы удалены",
+    "bar": "Тестовый запуск · ничего не отправляется",
+    "close": "Закрыть",
+    "hintNone": "{kind, select, timeOff {За последние 30 дней запросов не было.} onboarding {За последние 30 дней ни один онбординг не завершён.} offboarding {За последние 30 дней ни один офбординг не завершён.} process {За последние 30 дней ни один процесс не завершён.} other {Пока нет никого, для кого она работает.}}",
+    "happens": {
+      "NOTIFY": "{count, plural, one {{names} получает уведомление} few {{names} получают уведомление} many {{names} получают уведомление} other {{names} получают уведомление}}",
+      "SEND_EMAIL": "{count, plural, one {{names} получает письмо} few {{names} получают письмо} many {{names} получают письмо} other {{names} получают письмо}}",
+      "CREATE_TASK": "{count, plural, one {{names} получает задачу} few {{names} получают задачу} many {{names} получают задачу} other {{names} получают задачу}}",
+      "START_REVIEW": "{count, plural, one {{names} получает ревью} few {{names} получают ревью} many {{names} получают ревью} other {{names} получают ревью}}",
+      "REQUEST_APPROVAL": "{count, plural, one {{names} получает запрос на согласование} few {{names} получают запрос на согласование} many {{names} получают запрос на согласование} other {{names} получают запрос на согласование}}",
+      "SIGN_DOCUMENT": "Отправил бы на подпись"
+    },
+    "sendDocumentToMe": "Отправить документ мне"
   },
   "person": {
     "emptyTitle": "Запусков автоматизаций нет",

@@ -129,10 +129,17 @@
       "PICK": "Any city or UTC offset."
     },
     "pickZone": "Time zone",
-    "noZones": "No time zones match"
+    "noZones": "No time zones match",
+    "day": "Day",
+    "quarterHintList": "Runs on {head} and {last}.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "zoneLine": {
+      "PERSON": "{name} in {city} gets it at {time} {city} time"
+    }
   },
   "joins": {
-    "line": "It starts when someone begins to match Who it runs for: <who></who>.",
+    "line": "It starts when someone begins to match <b>Who it runs for</b>: <who></who>.",
     "change": "Change it in Who it runs for.",
     "stops": "When someone stops matching",
     "takeBack": "Take back what this automation gave",
@@ -175,7 +182,8 @@
     "range": "{from} to {to}",
     "orList": "{head} or {last}",
     "sentence": "{op} <b>{value}</b>",
-    "line": "{field} {op} {value}"
+    "line": "{field} {op} {value}",
+    "mixedNote": "These conditions were joined with “or”. A change here joins them all with “and”."
   },
   "operator": {
     "eq": "is",
@@ -207,7 +215,7 @@
     "title": "Who it runs for",
     "everyone": "Everyone",
     "some": "Only some people",
-    "match": "{count, plural, one {# person matches} other {# people match}}",
+    "match": "{count, plural, one {<b># person</b> matches} other {<b># people</b> match}}",
     "seeWho": "See who",
     "andMore": "{count, plural, one {and # more} other {and # more}}",
     "newJoin": "New teammates who match join automatically."
@@ -277,14 +285,16 @@
     "who": "Who signs",
     "whoHint": "Set on the template.",
     "timeToSign": "Time to sign",
-    "days": "{count, plural, one {# day} other {# days}} · from the template",
     "templateProblem": "This template can't be used as it is: open it in Settings and fix it.",
     "kind": {
       "PERSON": "The person",
       "MANAGER": "Their manager",
       "USER": "A named person",
       "GUEST": "A guest"
-    }
+    },
+    "templateHintIn": "The document is made for the person when the step runs, and filed in their Documents under {category}.",
+    "daysCount": "{count, plural, one {# day} other {# days}}",
+    "fromTemplate": "from the template"
   },
   "survey": {
     "name": "Survey",
@@ -323,9 +333,11 @@
       "STOP_AND_TELL": "Stop and tell someone"
     },
     "tell": "Tell",
-    "signedOption": "{number} · {title} is signed",
+    "signedOption": "{title} is signed",
     "untitledDocument": "The document",
-    "signedHint": "Signed means everyone has signed. Declined or cancelled counts as not signed: the run doesn't wait for the date."
+    "signedHint": "From step {number}. Signed means everyone has signed.",
+    "notSigned": "If it's not signed by then",
+    "declinedHint": "Declined or cancelled counts as not signed: the run doesn't wait for the date."
   },
   "assign": {
     "action": "Action",
@@ -352,14 +364,17 @@
   },
   "split": {
     "question": "Question",
-    "questionHint": "The label on the card, like “Which office are they in?”",
+    "questionHint": "Shown on the card above the paths.",
     "paths": "Paths",
     "pathName": "Name of path {n}",
     "removePath": "Remove {name}",
     "addPath": "Add a path",
     "anyoneElse": "Anyone else",
-    "anyoneElseHint": "Everyone the paths above don't take.",
-    "unnamed": "Untitled path"
+    "anyoneElseHint": "Everyone who doesn't match a path above.",
+    "unnamed": "Untitled path",
+    "questionPlaceholder": "For example: Which office are they in?",
+    "pathNeedsCondition": "Add a condition, or remove this path.",
+    "firstMatch": "Each person goes down the first path they match, from the top."
   },
   "when": {
     "label": "When",
@@ -423,7 +438,7 @@
       "tell": "Choose who is told.",
       "question": "Ask the question.",
       "paths": "Name every path and say who takes it.",
-      "documents": "Add the documents.",
+      "documents": "Choose a template.",
       "survey": "Name the survey.",
       "when": "Check when it runs.",
       "action": "When someone stops matching, the automation takes back what it gave by itself."
@@ -534,7 +549,7 @@
     "noAnswer": {
       "ASK_THEIR_MANAGER": "ask their manager",
       "STOP": "stop the run",
-      "DECLINE": "treat it as declined"
+      "DECLINE": "count as declined"
     },
     "timeout": {
       "CONTINUE": "go on",
@@ -588,5 +603,13 @@
       "TERMINATION_SCHEDULED": "a termination is scheduled",
       "LAST_WORKING_DAY_ARRIVES": "a last working day comes"
     }
+  },
+  "ifFails": {
+    "label": "If it fails",
+    "STOP_AND_TELL": "Stop and tell the owner",
+    "STOP_AND_TELLHint": "The run waits until someone fixes it.",
+    "SKIP": "Skip it and go on",
+    "SKIPHint": "The next steps run without it.",
+    "dependant": "Step {number} waits for this task. If this step is skipped, step {number} is skipped too."
   }
 }

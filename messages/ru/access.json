@@ -183,10 +183,28 @@
       "lt": "Меньше",
       "lte": "≤"
     },
+    "operatorWords": {
+      "eq": "равно",
+      "neq": "не равно",
+      "contains": "содержит",
+      "starts_with": "начинается с",
+      "in": "—",
+      "not_in": "не",
+      "has_any": "есть",
+      "not_has_any": "нет ни одного из",
+      "before": "до",
+      "after": "после",
+      "between": "между",
+      "gt": "больше",
+      "gte": "≥",
+      "lt": "меньше",
+      "lte": "≤"
+    },
     "builder": {
       "includeInactive": "Искать и среди неактивных сотрудников",
       "includeEmpty": "Включить сотрудников без значения",
       "removeFilter": "Удалить фильтр",
+      "operator": "Условие",
       "addFilter": "Добавить фильтр",
       "selectPerson": "Выберите сотрудника",
       "value": "Значение",
@@ -204,10 +222,8 @@
       "searchFields": "Поиск полей",
       "noFields": "Нет полей, по которым вы можете фильтровать",
       "noMatchingField": "Подходящих полей нет",
-      "selectedCount": "Выбрано: {count}",
       "selectValues": "Выберите значения",
-      "noOptions": "Нет вариантов",
-      "removeOption": "Убрать {label}"
+      "noOptions": "Нет вариантов"
     },
     "filter": {
       "button": "Фильтр"

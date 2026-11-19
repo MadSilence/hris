@@ -1,19 +1,16 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/desact/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import { Switch } from "@/components/desact/switch";
-import { TagChip } from "@/components/ui/TagChip";
-import { ErrorState } from "@/components/feedback/ErrorState";
 import type { HubSettings, HubSettingsWrite } from "@/models/hub";
 import { updateHubSettingsAction } from "../actions";
 import { hubQueryKeys, unwrapHub, useHubSettings } from "../hooks";
-import { HubHeading, LoadingBlock, SkeletonRows } from "../shared";
+import { HubHeading, HubLoadError, LoadingBlock, PersonAvatar, SkeletonRows } from "../shared";
 import { HubPeopleField } from "./audience";
 import { ManageFrame } from "./ManageFrame";
 
@@ -33,10 +30,11 @@ export const applySettingsWrite = (settings: HubSettings, write: HubSettingsWrit
   },
 });
 
+/** A setting row: 34 high, the label 13/18 500 over its 12/16 hint (FIXES K3). */
 const Row: React.FC<{ label: string; hint: string; children: React.ReactNode; htmlFor?: string }> = ({ label, hint, children, htmlFor }) => (
-  <div className="flex items-center justify-between gap-6 py-3">
+  <div className="flex min-h-[34px] items-center justify-between gap-6">
     <label htmlFor={htmlFor} className="flex min-w-0 flex-col">
-      <span className="text-body text-primary">{label}</span>
+      <span className="text-label text-primary">{label}</span>
       <span className="text-hint text-tertiary">{hint}</span>
     </label>
     {children}
@@ -79,39 +77,42 @@ export const SettingsContainer: React.FC = () => {
         {settings.isLoading ? (
           <LoadingBlock skeleton={<SkeletonRows count={6} height="h-12" />} />
         ) : settings.isError || !s ? (
-          <ErrorState error={settings.error} title={t("settings.error")} onRetry={() => void settings.refetch()} />
+          <HubLoadError error={settings.error} title={t("settings.error")} onRetry={() => void settings.refetch()} />
         ) : (
           <>
-            <section className="flex flex-col gap-3 pb-8">
+            {/* Headings 16 above their first row (FIXES K1). */}
+            <section className="flex flex-col gap-4 pb-8">
               <HubHeading>{t("settings.editors")}</HubHeading>
-              <HubPeopleField
-                ariaLabel={t("settings.addEditor")}
-                value={{ roleIds: editableRoleIds, userIds: peopleIds }}
-                onChange={(next) => void save({ editorRoleIds: [...next.roleIds, ...fixedRoles.map((r) => r.id)], editorUserIds: next.userIds })}
-              />
-              {fixedRoles.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
-                  {fixedRoles.map((role) => (
-                    <TagChip key={role.id} color="gray">
-                      {role.name}
-                    </TagChip>
-                  ))}
-                  <Link href="/settings/people/roles" className="text-label text-accent-text no-underline hover:underline">
-                    {t("settings.setInRoles")}
-                  </Link>
+              {/* One field, 42 high, padding 6 8, 6 between: the roles that always stay are chips without ×, then the
+                  people and roles added here (FIXES K2). */}
+              <div className="flex min-h-[42px] flex-wrap items-center gap-1.5 rounded-control border border-field bg-card px-2 py-1.5 transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-focus">
+                {fixedRoles.map((role) => (
+                  <span key={role.id} className="inline-flex h-7 items-center gap-1.5 rounded-pill bg-mist pr-1.5 pl-1 text-hub-small text-primary">
+                    <PersonAvatar person={{ name: role.name, avatarUrl: null }} size={20} />
+                    {role.name}
+                  </span>
+                ))}
+                <div className="min-w-48 flex-1 [&>div]:min-h-7 [&>div]:border-0 [&>div]:bg-transparent [&>div]:p-0 [&>div]:shadow-none">
+                  <HubPeopleField
+                    ariaLabel={t("settings.addEditor")}
+                    placeholder={t("settings.addEditor")}
+                    value={{ roleIds: editableRoleIds, userIds: peopleIds }}
+                    onChange={(next) => void save({ editorRoleIds: [...next.roleIds, ...fixedRoles.map((r) => r.id)], editorUserIds: next.userIds })}
+                  />
                 </div>
-              )}
+              </div>
               <p className="text-hint text-tertiary">{t("settings.editorsHint")}</p>
             </section>
 
-            <section className="flex flex-col border-t border-divider py-8">
+            <section className="flex flex-col gap-4 border-t border-divider py-8">
               <HubHeading>{t("settings.mustRead")}</HubHeading>
               <Row label={t("settings.remind")} hint={t("settings.remindHint")}>
                 <Select
                   value={s.reminderDaysBefore === null ? "never" : String(s.reminderDaysBefore)}
                   onValueChange={(v) => void save(v === "never" ? { clearReminder: true } : { reminderDaysBefore: Number(v) })}
                 >
-                  <SelectTrigger className="w-44" aria-label={t("settings.remind")}>
+                  {/* 160, white, the chevron Ink (FIXES K4). */}
+                  <SelectTrigger className="w-40 bg-card [&_svg]:text-primary" aria-label={t("settings.remind")}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -136,7 +137,7 @@ export const SettingsContainer: React.FC = () => {
               </Row>
             </section>
 
-            <section className="flex flex-col gap-3 border-t border-divider py-8">
+            <section className="flex flex-col gap-4 border-t border-divider pt-8">
               <div className="flex items-center justify-between">
                 <HubHeading>{t("settings.celebrations")}</HubHeading>
                 <Switch
@@ -145,26 +146,28 @@ export const SettingsContainer: React.FC = () => {
                   onCheckedChange={(v) => void save({ celebrationsEnabled: v })}
                 />
               </div>
-              {(
-                [
-                  ["celebrateBirthdays", "birthdays", t("settings.birthdays")],
-                  ["celebrateAnniversaries", "anniversaries", t("settings.anniversaries")],
-                  ["celebrateJoiners", "joiners", t("settings.joiners")],
-                ] as const
-              ).map(([write, read, label]) => (
-                <label key={write} className="flex items-center gap-2.5 text-body text-primary">
-                  <Checkbox
-                    checked={s.celebrations[read]}
-                    disabled={!s.celebrations.enabled}
-                    onCheckedChange={(v) => void save({ [write]: v === true })}
-                  />
-                  {label}
-                </label>
-              ))}
+              {/* In one row, 24 apart, 8 from the box to its word (FIXES K5). Off, the kinds are not offered at all. */}
+              {s.celebrations.enabled && (
+                <div className="flex flex-wrap items-center gap-6">
+                  {(
+                    [
+                      ["celebrateBirthdays", "birthdays", t("settings.birthdays")],
+                      ["celebrateAnniversaries", "anniversaries", t("settings.anniversaries")],
+                      ["celebrateJoiners", "joiners", t("settings.joiners")],
+                    ] as const
+                  ).map(([write, read, label]) => (
+                    <label key={write} className="flex items-center gap-2 text-body text-primary">
+                      <Checkbox checked={s.celebrations[read]} onCheckedChange={(v) => void save({ [write]: v === true })} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              )}
               <p className="text-hint text-tertiary">{t("settings.celebrationsHint")}</p>
             </section>
 
-            <p className="border-t border-divider pt-6 text-hint text-tertiary">{t("settings.autosave")}</p>
+            {/* No hairline; 24 under the last block (FIXES K6). */}
+            <p className="mt-6 text-hint text-tertiary">{t("settings.autosave")}</p>
           </>
         )}
       </div>

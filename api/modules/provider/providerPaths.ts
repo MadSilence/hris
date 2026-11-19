@@ -1,12 +1,13 @@
 import { APP_HOME, safeReturnPath } from "@/lib/companyAddress";
 
 /**
- * The page kept in `__Host-provider-back`, checked before it is followed: the login, the trial, an invitation's page,
+ * The page kept in `__Host-provider-back`, checked before it is followed: the login, the trial (`/signup`; `/trial`, its
+ * old address, from a cookie set before the move), an invitation's page,
  * or a page of the app (a Connect's). Anything else is the login.
  */
 export const backPage = (kept: string | null | undefined): string => {
   if (!kept) return "/login";
-  if (kept === "/login" || kept === "/trial" || /^\/invite\?token=[A-Za-z0-9_%-]+$/.test(kept)) return kept;
+  if (kept === "/login" || kept === "/signup" || kept === "/trial" || /^\/invite\?token=[A-Za-z0-9_%-]+$/.test(kept)) return kept;
   const page = safeReturnPath(kept);
   return page === APP_HOME ? "/login" : page;
 };

@@ -9,8 +9,8 @@ const def = (steps: StepSpec[], trigger: AutomationDefinition["trigger"] = { typ
   steps,
 });
 
-// One title line: 16 + 16 + 8 + 22 + 16.
-const H = 78;
+// One title line: the border, 16 + 16 + 8 + 22 + 16.
+const H = 80;
 
 describe("layoutTree", () => {
   it("puts the trigger on top and the trunk under it, one connector apart", () => {
@@ -39,8 +39,8 @@ describe("layoutTree", () => {
     // Two paths of one card each: 320 + 40 + 320, the trunk centred over them.
     expect(layout.bounds.width).toBe(680);
     expect(byId[stepNodeId("s1")].x).toBe(180);
-    expect(byId[stepNodeId("s2")]).toMatchObject({ x: 180, y: 252, number: "2" });
-    const childTop = 252 + H + 48 + 40;
+    expect(byId[stepNodeId("s2")]).toMatchObject({ x: 180, y: 2 * (H + 48), number: "2" });
+    const childTop = 2 * (H + 48) + H + 48 + 40;
     expect(byId[stepNodeId("s3")]).toMatchObject({ x: 0, y: childTop, number: "3A" });
     expect(byId[stepNodeId("s4")]).toMatchObject({ x: 0, y: childTop + H + 48, number: "4A" });
     expect(byId[stepNodeId("s5")]).toMatchObject({ x: 360, y: childTop, number: "3B" });
@@ -62,11 +62,13 @@ describe("layoutTree", () => {
     const layout = layoutTree(def([split]));
     const byId = Object.fromEntries(layout.nodes.map((n) => [n.id, n]));
 
-    // Warsaw holds an approval with two paths (680 wide); Anyone else is empty (320): 680 + 40 + 320.
-    expect(layout.bounds.width).toBe(1040);
-    expect(byId[stepNodeId("s1")].x).toBe(1040 / 2 - 160);
+    // Warsaw holds an approval with two paths (680 wide); Anyone else is empty (320); a split's paths stand 80 apart (S10).
+    expect(layout.bounds.width).toBe(1080);
+    expect(byId[stepNodeId("s1")].x).toBe(1080 / 2 - 160);
+    // S10: 44 to the bar, 76 to the path's first card.
+    expect(byId[stepNodeId("s3")].y).toBe(byId[stepNodeId("s1")].y + byId[stepNodeId("s1")].height + 44 + 76);
     expect(byId[stepNodeId("s3")].x).toBe(340 - 160);
-    expect(byId["empty:s1:otherwise"]).toMatchObject({ kind: "emptyBranch", x: 720, branch: { stepId: "s1", key: "otherwise" } });
+    expect(byId["empty:s1:otherwise"]).toMatchObject({ kind: "emptyBranch", x: 760, height: 96, branch: { stepId: "s1", key: "otherwise" } });
     expect(layout.spots.find((s) => s.key === "empty:s1:otherwise")?.target).toEqual({
       kind: "branchStart",
       stepId: "s1",
@@ -74,8 +76,8 @@ describe("layoutTree", () => {
     });
     const pills = layout.edges.filter((e) => e.source === stepNodeId("s1")).map((e) => e.branch);
     expect(pills).toEqual([
-      { kind: "PATH", name: "Warsaw", index: 0 },
-      { kind: "OTHERWISE", name: "Anyone else", index: 1 },
+      { kind: "PATH", name: "Warsaw", index: 0, stepId: "s1", key: "p1" },
+      { kind: "OTHERWISE", name: "Anyone else", index: 1, stepId: "s1", key: "otherwise" },
     ]);
   });
 
@@ -83,7 +85,7 @@ describe("layoutTree", () => {
     expect(layoutTree(def([], null), { offerAi: true }).nodes.map((n) => [n.kind, n.height])).toEqual([["triggerPlaceholder", 168]]);
     const picked = layoutTree(def([]));
     expect(picked.nodes.map((n) => n.kind)).toEqual(["when", "firstStepPlaceholder"]);
-    expect(picked.spots).toEqual([{ key: "firstStep", x: 160, y: H + 48 + 39, target: { kind: "trunkEnd" } }]);
+    expect(picked.spots).toEqual([{ key: "firstStep", x: 160, y: H + 48 + 40, target: { kind: "trunkEnd" } }]);
   });
 
   it("uses the heights it is given", () => {
@@ -94,10 +96,10 @@ describe("layoutTree", () => {
 
 describe("cardHeight", () => {
   it("grows by a line for a subtitle and for what is under it, and caps a title at two lines", () => {
-    expect(cardHeight({ title: "Tell HR" })).toBe(78);
-    expect(cardHeight({ title: "Tell HR", subtitle: "Before the first day" })).toBe(98);
-    expect(cardHeight({ title: "Tell HR", extraLine: true })).toBe(100);
-    expect(cardHeight({ title: "x".repeat(300) })).toBe(100);
+    expect(cardHeight({ title: "Tell HR" })).toBe(80);
+    expect(cardHeight({ title: "Tell HR", subtitle: "Before the first day" })).toBe(96);
+    expect(cardHeight({ title: "Tell HR", extraLine: true })).toBe(104);
+    expect(cardHeight({ title: "x".repeat(300) })).toBe(102);
   });
 });
 

@@ -82,7 +82,7 @@ export const StepFields: React.FC<StepFieldsProps> = ({ definition, step, catalo
     <FieldStack key={step.id}>
       <OwnFields {...props} />
       <PartDivider />
-      <CommonFields step={step} catalog={catalog} problems={problems} onStep={props.onStep} />
+      <CommonFields definition={definition} step={step} catalog={catalog} problems={problems} onStep={props.onStep} />
     </FieldStack>
   );
 };

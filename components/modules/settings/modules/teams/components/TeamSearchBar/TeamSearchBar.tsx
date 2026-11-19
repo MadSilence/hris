@@ -110,7 +110,7 @@ export function TeamSearchBar({
                 >
                   <Avatar className="h-7 w-7 flex-none">
                     {person.avatarUrl && <AvatarImage src={person.avatarUrl} alt="" />}
-                    <AvatarFallback className="text-hint">{initials(person)}</AvatarFallback>
+                    <AvatarFallback name={[person.firstName, person.lastName].filter(Boolean).join(" ") || person.email}>{initials(person)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-body text-primary">

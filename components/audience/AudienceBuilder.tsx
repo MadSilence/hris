@@ -2,11 +2,10 @@
 
 import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Add01Icon, Cancel01Icon, Delete02Icon, Tick02Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
-import { Badge } from "@/components/desact/badge";
 import {
   Select,
   SelectContent,
@@ -14,19 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/desact/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/desact/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/desact/command";
 import { useAccess } from "@/components/auth/useAccess";
 import {
   UserPickerField,
@@ -36,6 +22,7 @@ import { canAccess } from "@/models/access";
 import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
 import type { AttributeType } from "@/models/attribute/AttributeType";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { Combobox } from "@/components/ui/Combobox";
 import { Checkbox } from "@/components/desact/checkbox";
 import {
   AudienceField,
@@ -184,6 +171,7 @@ export const AudienceBuilder: React.FC<Props> = ({
 
       {rows.map((r) => {
         const field = catalog.find((f) => f.key === r.key) ?? null;
+        // CM07 O4: the field 160, the operator as a word ("is"), the value taking the rest, then remove.
         return (
           <div key={r.id} className="flex flex-wrap items-center gap-2">
             <FieldPicker
@@ -195,20 +183,29 @@ export const AudienceBuilder: React.FC<Props> = ({
 
             {field && r.op && (
               <>
-                <Select value={r.op} onValueChange={(v) => onPickOp(r.id, v as AudienceOperator)}>
-                  <SelectTrigger className="h-9 w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {field.operators.map((o) => (
-                      <SelectItem key={o} value={o}>
-                        {t(`audience.operators.${o}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {field.operators.length === 1 ? (
+                  <span className="text-hint text-tertiary">{t(`audience.operatorWords.${r.op}`)}</span>
+                ) : (
+                  <Select value={r.op} onValueChange={(v) => onPickOp(r.id, v as AudienceOperator)}>
+                    {/* The operator reads as a word in the sentence, 12/16 tertiary; it opens the full list. */}
+                    <SelectTrigger
+                      aria-label={t("audience.builder.operator")}
+                      className="h-9 w-auto gap-1 border-transparent bg-transparent px-1 text-hint text-tertiary shadow-none hover:border-transparent [&_svg]:size-3"
+                    >
+                      <SelectValue>{t(`audience.operatorWords.${r.op}`)}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.operators.map((o) => (
+                        <SelectItem key={o} value={o}>
+                          {t(`audience.operators.${o}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
 
-                <RuleValueEditor
+                <div className="min-w-48 flex-1">
+                  <RuleValueEditor
                   source={field.valueSource}
                   op={r.op}
                   attributeOptions={optionsForKey(field.key, fields)}
@@ -219,7 +216,8 @@ export const AudienceBuilder: React.FC<Props> = ({
                   onValue={(v) => patch(r.id, { value: v })}
                   onValueTo={(v) => patch(r.id, { valueTo: v })}
                   onValues={(v) => patch(r.id, { values: v })}
-                />
+                  />
+                </div>
 
                 {/* Only an exclusion has an opinion about people with no value at all. */}
                 {isNegativeOperator(r.op) && (
@@ -234,23 +232,25 @@ export const AudienceBuilder: React.FC<Props> = ({
               </>
             )}
 
+            {/* O4: removing a row is not destructive — a 32 icon button, secondary, never red. */}
             <Button
               type="button"
               variant="ghost"
-              size="icon"
+              size="icon-sm"
               onClick={() => removeRow(r.id)}
               aria-label={t("audience.builder.removeFilter")}
-              className="ml-auto h-9 w-9 text-danger-text hover:text-status-declined-text"
+              className="ml-auto text-secondary"
             >
-              <Icon icon={Delete02Icon} size="sm" />
+              <Icon icon={Cancel01Icon} size="md" />
             </Button>
           </div>
         );
       })}
 
+      {/* O5: ghost sm 32, + 16, 13/18 500 secondary, 10 under the last row. */}
       {allComplete && (
-        <div>
-          <Button type="button" variant="ghost" size="sm" onClick={addRow} className="gap-1.5 text-tertiary">
+        <div className="mt-0.5">
+          <Button type="button" variant="ghost" size="sm" onClick={addRow} className="gap-1.5 text-secondary">
             <Icon icon={Add01Icon} size="sm" />
             {t("audience.builder.addFilter")}
           </Button>
@@ -313,7 +313,7 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
   // People are searched, not enumerated — a company-wide dropdown of employees is unusable.
   if (source === "people") {
     return (
-      <div className="w-56">
+      <div className="w-full">
         {value ? (
           <PickedPersonField id={value} onValue={onValue} />
         ) : (
@@ -335,7 +335,7 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
     // countries and zones — so every one is searched (FORMS_AND_FIELDS.md § 7).
     return (
       <SearchableSelect
-        className="h-9 w-44"
+        className="h-9 w-full"
         aria-label={t("audience.builder.value")}
         options={options.map((o) => ({ value: o.id, label: o.label }))}
         value={value || null}
@@ -351,13 +351,13 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
     if (isRangeOp(op)) {
       return (
         <div className="flex items-center gap-1">
-          <DatePicker className="h-9 w-36" value={value} onChange={onValue} ariaLabel={t("audience.builder.from")} />
+          <DatePicker className="h-9 min-w-0 flex-1" value={value} onChange={onValue} ariaLabel={t("audience.builder.from")} />
           <span className="text-body text-tertiary">…</span>
-          <DatePicker className="h-9 w-36" value={valueTo} onChange={onValueTo} ariaLabel={t("audience.builder.to")} />
+          <DatePicker className="h-9 min-w-0 flex-1" value={valueTo} onChange={onValueTo} ariaLabel={t("audience.builder.to")} />
         </div>
       );
     }
-    return <DatePicker className="h-9 w-44" value={value} onChange={onValue} />;
+    return <DatePicker className="h-9 w-full" value={value} onChange={onValue} />;
   }
 
   const inputType = source === "number" ? "number" : "text";
@@ -365,16 +365,16 @@ const RuleValueEditor: React.FC<ValueEditorProps> = ({
   if (isRangeOp(op)) {
     return (
       <div className="flex items-center gap-1">
-        <Input className="h-9 w-32" type={inputType} value={value} onChange={(e) => onValue(e.target.value)} />
+        <Input className="h-9 min-w-0 flex-1" type={inputType} value={value} onChange={(e) => onValue(e.target.value)} />
         <span className="text-body text-tertiary">…</span>
-        <Input className="h-9 w-32" type={inputType} value={valueTo} onChange={(e) => onValueTo(e.target.value)} />
+        <Input className="h-9 min-w-0 flex-1" type={inputType} value={valueTo} onChange={(e) => onValueTo(e.target.value)} />
       </div>
     );
   }
 
   return (
     <Input
-      className="h-9 w-44"
+      className="h-9 w-full"
       type={inputType}
       value={value}
       onChange={(e) => onValue(e.target.value)}
@@ -388,7 +388,7 @@ const FIELD_GROUP_ORDER: AudienceField["group"][] = ["System", "Org", "Custom"];
 
 /**
  * Fifty-odd fields do not fit a plain list (WALK_QUESTIONS § 17, answering NEED_TO_DISCUSS § 19 for
- * this case): the same Command combobox the value pickers use, with a search box and the fields in
+ * this case): the shared combobox the value pickers use — the field is its own search — with the fields in
  * their groups.
  */
 const FieldPicker: React.FC<{
@@ -398,61 +398,33 @@ const FieldPicker: React.FC<{
   loading: boolean;
 }> = ({ fields, value, onChange, loading }) => {
   const t = useTranslations("access");
-  const [open, setOpen] = useState(false);
-  const picked = fields.find((f) => f.key === value) ?? null;
   // Alphabetical inside each group: the catalogue's own order is the registry's, which nobody reads by.
-  const groups = FIELD_GROUP_ORDER.map((g) => ({
-    group: g,
-    items: fields.filter((f) => f.group === g).sort((a, b) => a.label.localeCompare(b.label)),
-  })).filter((g) => g.items.length > 0);
+  const options = FIELD_GROUP_ORDER.flatMap((g) =>
+    fields
+      .filter((f) => f.group === g)
+      .sort((a, b) => a.label.localeCompare(b.label))
+      .map((f) => ({ value: f.key, label: f.label, keywords: f.key, group: t(`audience.builder.fieldGroups.${g}`) })),
+  );
 
+  // Hub A18: the field is the search — no search row inside the list.
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="secondary"
-          role="combobox"
-          aria-expanded={open}
-          aria-label={t("audience.builder.field")}
-          disabled={loading} className="w-44 justify-between font-normal"
-        >
-          <span className={picked ? "truncate" : "truncate text-tertiary"}>
-            {picked ? picked.label : loading ? t("audience.builder.loadingFields") : t("audience.builder.selectField")}
-          </span>
-          <Icon icon={UnfoldMoreIcon} size="sm" className="shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-0" align="start">
-        <Command>
-          <CommandInput placeholder={t("audience.builder.searchFields")} className="h-9" />
-          <CommandList>
-            <CommandEmpty>{fields.length === 0 ? t("audience.builder.noFields") : t("audience.builder.noMatchingField")}</CommandEmpty>
-            {groups.map(({ group, items }) => (
-              <CommandGroup key={group} heading={t(`audience.builder.fieldGroups.${group}`)}>
-                {items.map((f) => (
-                  <CommandItem
-                    key={f.key}
-                    value={`${f.label} ${f.key}`}
-                    onSelect={() => {
-                      onChange(f.key);
-                      setOpen(false);
-                    }}
-                  >
-                    <Icon icon={Tick02Icon} className={f.key === value ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0"} />
-                    {f.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <Combobox
+      options={options}
+      value={value || null}
+      onChange={(key) => {
+        if (key) onChange(key);
+      }}
+      clearable={false}
+      aria-label={t("audience.builder.field")}
+      placeholder={loading ? t("audience.builder.loadingFields") : t("audience.builder.selectField")}
+      emptyLabel={fields.length === 0 ? t("audience.builder.noFields") : undefined}
+      disabled={loading}
+      className="w-40"
+    />
   );
 };
 
-// ---- multiselect (Desact Command combobox: search + chips) --------------
+// ---- multiselect (the shared combobox: the field searches, the picks are tags inside it) ------------
 
 const MultiSelect: React.FC<{
   options: AudienceOption[];
@@ -462,62 +434,19 @@ const MultiSelect: React.FC<{
 }> = ({ options, values, onChange, loading }) => {
   const t = useTranslations("access");
   const tCommon = useTranslations("common");
-  const [open, setOpen] = useState(false);
-  const toggle = (id: string) =>
-    onChange(values.includes(id) ? values.filter((v) => v !== id) : [...values, id]);
-
-  const selectedOptions = options.filter((o) => values.includes(o.id));
-
+  // Hub A18: the field is the search. CM07 O4: the picks are tags inside the field, which takes the rest of the row.
   return (
-    <div className="flex flex-wrap items-center gap-1">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="secondary"
-            role="combobox" className="w-44 justify-between font-normal"
-          >
-            <span className="truncate text-tertiary">
-              {values.length
-                ? t("audience.builder.selectedCount", { count: values.length })
-                : loading
-                  ? tCommon("states.loading")
-                  : t("audience.builder.selectValues")}
-            </span>
-            <Icon icon={UnfoldMoreIcon} size="sm" className="shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-56 p-0" align="start">
-          <Command>
-            <CommandInput placeholder={tCommon("actions.search")} className="h-9" />
-            <CommandList>
-              <CommandEmpty>{t("audience.builder.noOptions")}</CommandEmpty>
-              <CommandGroup>
-                {options.map((o) => (
-                  <CommandItem key={o.id} value={o.label} onSelect={() => toggle(o.id)}>
-                    <Icon icon={Tick02Icon} className={ values.includes(o.id) ? "mr-2 h-4 w-4 opacity-100" : "mr-2 h-4 w-4 opacity-0" } />
-                    {o.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      {selectedOptions.map((o) => (
-        <Badge key={o.id} variant="neutral" className="gap-1 font-normal">
-          {o.label}
-          <button
-            type="button"
-            onClick={() => toggle(o.id)}
-            aria-label={t("audience.builder.removeOption", { label: o.label })}
-            className="opacity-60 hover:opacity-100"
-          >
-            <Icon icon={Cancel01Icon} size="sm" />
-          </button>
-        </Badge>
-      ))}
-    </div>
+    <Combobox
+      multiple
+      chips
+      options={options.map((o) => ({ value: o.id, label: o.label }))}
+      value={values}
+      onChange={onChange}
+      aria-label={t("audience.builder.value")}
+      placeholder={loading ? tCommon("states.loading") : t("audience.builder.selectValues")}
+      emptyLabel={options.length === 0 ? t("audience.builder.noOptions") : undefined}
+      className="w-full"
+      listClassName="min-w-56"
+    />
   );
 };

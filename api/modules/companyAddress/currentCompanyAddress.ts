@@ -51,3 +51,20 @@ export const publicAppearanceFor = cache(async (subdomain: string): Promise<Publ
     return DEFAULT_PUBLIC_COMPANY_APPEARANCE;
   }
 });
+
+/**
+ * Whether a company holds this address — "We can’t find that company" on "Log in to your company", and no login form
+ * for an address nobody holds (the designers' login fix R3, approved by the owner on 2026-11-19; until then the root
+ * followed whatever was typed, COMPANY_ADDRESSES.md § 2).
+ *
+ * Read from the public appearance: an address no company holds answers the defaults, with no name — every company has
+ * one, registration requires it. **Null when the backend could not answer**: the caller then carries on as before
+ * rather than calling a real company unknown.
+ */
+export const companyExists = cache(async (subdomain: string): Promise<boolean | null> => {
+  try {
+    return (await hrisCompanyAppearanceService.getPublicAppearance(subdomain)).name !== null;
+  } catch {
+    return null;
+  }
+});

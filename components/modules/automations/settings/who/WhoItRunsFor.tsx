@@ -31,7 +31,7 @@ export const WhoItRunsFor: React.FC<WhoItRunsForProps> = ({ conditions, readOnly
   }, [some]);
 
   const count = check ? { matching: check.matchingCount, people: check.matching } : null;
-  const countBlock = count ? <MatchCount count={count} /> : <Skeleton className="h-11 w-full rounded-popover" />;
+  const countBlock = count ? <MatchCount count={count} /> : <Skeleton className="h-16 w-full rounded-popover" />;
 
   if (readOnly) {
     return (
@@ -58,6 +58,7 @@ export const WhoItRunsFor: React.FC<WhoItRunsForProps> = ({ conditions, readOnly
           if (next === "EVERYONE") onChange({ ...(conditions ?? emptySegment()), filters: [] });
         }}
         aria-label={t("who.title")}
+        className="gap-2.5"
       >
         <label className="flex cursor-pointer items-center gap-2.5">
           <RadioGroupItem value="EVERYONE" />

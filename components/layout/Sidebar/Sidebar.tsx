@@ -61,9 +61,9 @@ type SidebarProps = {
   /** Absent when the password is not the signed-in person's to change — an impersonated session. */
   onChangePassword?: () => void;
   /**
-   * Offered while there is still something on the welcome worth doing — no photo, a field of their own
-   * left blank. Absent otherwise, because a menu item that opens a finished form is a control that cannot
-   * work.
+   * Offered while the person still has a blank field of their own they may edit (the designers' fix P3) — it opens
+   * *Finish your profile* (`/profile/finish`). Absent otherwise, because a menu item that opens a finished form is a
+   * control that cannot work.
    */
   showFinishProfile?: boolean;
   /**
@@ -166,8 +166,11 @@ const AppSidebar: FC<SidebarProps> = ({
       >
         <SidebarRail />
 
-        <SidebarHeader className="pb-1">
-          <div className="flex h-10 items-center gap-2 group-data-[state=collapsed]:justify-center">
+        {/* Folded (the designers' fix S1, D2): padding 20 top and bottom, the 32 px company mark on top and 16 under
+            it the icons; Settings and the avatar at the bottom. No expand button — hovering opens the full sidebar over
+            the page (J4), where the header's own button unfolds it. */}
+        <SidebarHeader className="pb-1 group-data-[state=collapsed]:pt-5">
+          <div className="flex h-10 items-center gap-2 group-data-[state=collapsed]:mb-2 group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:justify-center">
             <Link
               href="/dashboard"
               className="flex min-w-0 flex-1 items-center gap-2 rounded-control group-data-[state=collapsed]:flex-none"
@@ -213,8 +216,7 @@ const AppSidebar: FC<SidebarProps> = ({
           <SidebarMenu>{topItems.map(renderItem)}</SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter className="gap-3">
-          {folded && <SidebarTrigger className="mx-auto" />}
+        <SidebarFooter className="gap-3 group-data-[state=collapsed]:pb-5">
           <SidebarMenu>{bottomItems.map(renderItem)}</SidebarMenu>
 
           {/* No noddo wordmark here (the owner, 2026-11-05) — an exception to SPEC §§ 2 and 13.6, which put one above the
@@ -238,7 +240,7 @@ const AppSidebar: FC<SidebarProps> = ({
                     {profile.name ? (
                       <Avatar className="size-8">
                         <AvatarImage src={profile.avatarUrl ?? undefined} alt={profile.name} />
-                        <AvatarFallback name={profile.name} className="text-hint">
+                        <AvatarFallback name={profile.name}>
                           {initialsOf(profile.name)}
                         </AvatarFallback>
                       </Avatar>
@@ -259,7 +261,7 @@ const AppSidebar: FC<SidebarProps> = ({
                   </RowAction>
 
                   {showFinishProfile && (
-                    <RowAction icon={<Icon icon={SparklesIcon} size="sm" />} onClick={() => router.push("/welcome?again=1")}>
+                    <RowAction icon={<Icon icon={SparklesIcon} size="sm" />} onClick={() => router.push("/profile/finish")}>
                       {t("menu.finishProfile")}
                     </RowAction>
                   )}

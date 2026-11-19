@@ -13,7 +13,6 @@ import type {
   PersonRef,
   PostCard,
   PostStatusFilter,
-  PostType,
   PostWrite,
   PublishRequest,
   ReorderRequest,
@@ -39,7 +38,7 @@ export class HrisApiHubService {
     const dto = await hrisApiHubClient.home(scope);
     return { ...dto, pinned: dto.pinned ? card(dto.pinned) : null, posts: dto.posts.map(card) };
   };
-  posts = async (params: { scope: FeedScope; type: PostType | null; q: string | null; cursor: string | null }) => {
+  posts = async (params: { scope: FeedScope; q: string | null; cursor: string | null }) => {
     const dto = await hrisApiHubClient.posts(params);
     return { ...dto, items: dto.items.map(card) };
   };

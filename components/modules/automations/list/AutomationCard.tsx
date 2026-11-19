@@ -29,7 +29,7 @@ import {
   triggerLineIcon,
 } from "@/components/modules/automations/shared";
 import type { AutomationSummary } from "@/models/automations";
-import { formatShortDate, useDisplayLanguage } from "@/lib/date";
+import { formatShortDate, useCompanyDateStyle, useDisplayLanguage } from "@/lib/date";
 import { cn } from "@/lib/cn";
 import { automationsHref, isPausedOwner, menuFor, pauseFixFor, type MenuItem, type PauseFix } from "./listModel";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
@@ -82,7 +82,8 @@ export const AutomationCard: React.FC<{
       data-test="automation-card"
       data-status={automation.status}
       className={cn(
-        "group relative flex h-[212px] flex-col rounded-card border border-divider bg-card p-4 shadow-card",
+        // A column with 8 between its rows (A7): status row 32, icon and name 36, the trigger line 20, the footer last.
+        "group relative flex h-[212px] flex-col gap-2 rounded-card border border-divider bg-card p-4 shadow-card",
         "transition-shadow duration-(--duration-hover) hover:shadow-raised focus-within:shadow-raised",
       )}
     >
@@ -118,20 +119,20 @@ export const AutomationCard: React.FC<{
         ) : null}
       </div>
 
-      <div className="mt-3 flex items-start gap-3">
-        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-control bg-mist text-tertiary">
+      <div className="flex items-start gap-3">
+        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-control bg-mist text-secondary">
           <AutomationIcon icon={automation.icon} trigger={trigger} size={20} />
         </span>
         <Tooltip>
           <TooltipTrigger asChild>
-            <h3 className="line-clamp-2 min-w-0 pt-1.5 text-card-title break-words text-primary">{automation.name}</h3>
+            <h3 className="line-clamp-2 min-w-0 pt-1.75 text-card-title break-words text-primary">{automation.name}</h3>
           </TooltipTrigger>
           <TooltipContent>{automation.name}</TooltipContent>
         </Tooltip>
       </div>
 
       {startsWhen ? (
-        <p className="mt-2 flex min-w-0 items-center gap-2 text-body text-secondary">
+        <p className="flex min-w-0 items-center gap-2 text-body text-secondary">
           <Icon icon={triggerLineIcon(trigger)} size="sm" className="shrink-0 text-tertiary" />
           <span className="truncate">{startsWhen}</span>
         </p>
@@ -146,7 +147,8 @@ export const AutomationCard: React.FC<{
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="relative z-10 h-7"
+                // E1 (the paused card): the fix is the small button's own 32, 13/18, padding 0 12 — it was squeezed to 28.
+                className="relative z-10"
                 onClick={() => onAction(fix, automation)}
               >
                 <Icon icon={PAUSE_FIX_ICONS[fix]} size="sm" />
@@ -186,12 +188,14 @@ const CardFooter: React.FC<{ automation: AutomationSummary; canManage: boolean; 
 }) => {
   const t = useTranslations("automationsList");
   const language = useDisplayLanguage();
+  const dateStyle = useCompanyDateStyle();
   const when = useWhen();
 
   let text: React.ReactNode;
   if (automation.status === "ARCHIVED") {
     text = t("card.archived", {
-      date: formatShortDate(automation.archivedAt, { language }),
+      // Always with its year — "Archived 18 Nov 2026" (A15): a `today` in another year makes the short date keep it.
+      date: formatShortDate(automation.archivedAt, { language, dateStyle, today: new Date(0) }),
       hasName: automation.archivedBy?.name ? "yes" : "no",
       name: automation.archivedBy?.name ?? "",
       runs: automation.runs,
@@ -203,8 +207,10 @@ const CardFooter: React.FC<{ automation: AutomationSummary; canManage: boolean; 
   } else if (automation.lastRun?.failed) {
     return (
       <p className="flex min-w-0 items-center gap-1.5 text-hint text-status-declined-text">
-        <Icon icon={CancelCircleIcon} size="sm" className="shrink-0" />
+        {/* E1 (the failed card): the icon in the declined fill, "Last run failed on 4 Nov · See why". */}
+        <Icon icon={CancelCircleIcon} size="sm" className="shrink-0 text-status-declined-fill" />
         <span className="truncate">{t("card.lastRunFailed", { date: formatShortDate(automation.lastRun.at, { language }) })}</span>
+        {canManage ? <span aria-hidden>·</span> : null}
         {canManage ? (
           <button
             type="button"
@@ -217,7 +223,12 @@ const CardFooter: React.FC<{ automation: AutomationSummary; canManage: boolean; 
       </p>
     );
   } else if (automation.lastRun?.at) {
-    text = t("card.lastRun", { when: when(automation.lastRun.at), runs: automation.runs, waiting: automation.waiting });
+    // "Last run today, 09:00 CET" — the time with its zone, in the company's format (A14).
+    text = t("card.lastRun", {
+      when: when(automation.lastRun.at, false, new Date(), true),
+      runs: automation.runs,
+      waiting: automation.waiting,
+    });
   } else {
     text = t("card.notRunYet", { waiting: automation.waiting });
   }

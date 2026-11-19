@@ -13,6 +13,7 @@
     "continue": "Продолжить",
     "add": "Добавить",
     "remove": "Убрать",
+    "removeNamed": "Убрать {label}",
     "create": "Создать",
     "done": "Готово",
     "apply": "Применить",
@@ -69,6 +70,7 @@
     "none": "Нет",
     "all": "Все",
     "today": "Сегодня",
+    "todayLower": "сегодня",
     "unknown": "Неизвестно",
     "notSet": "Не указано",
     "entries": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
@@ -82,6 +84,11 @@
   },
   "people": {
     "count": "{count, plural, one {# человек} few {# человека} many {# человек} other {# человека}}"
+  },
+  "relative": {
+    "minutesAgo": "{count} мин назад",
+    "hoursAgo": "{count} ч назад",
+    "yesterday": "Вчера"
   },
   "time": {
     "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
@@ -133,7 +140,7 @@
     "noResultsHint": "Попробуйте другой запрос."
   },
   "toggles": {
-    "archived": "В архиве ({count})",
+    "archived": "В архиве",
     "drafts": "Черновики ({count})"
   },
   "brand": {
@@ -162,7 +169,7 @@
     "minute": "Минута"
   },
   "searchableSelect": {
-    "empty": "Ничего не найдено."
+    "empty": "Ничего не найдено"
   },
   "searchField": {
     "placeholder": "Поиск…",

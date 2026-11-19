@@ -6,14 +6,13 @@ import { Button } from "@/components/desact/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { NodRing } from "@/components/desact/nod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import type { AudienceResolved, HubAudience, HubAudienceMode } from "@/models/hub";
 import { useAudienceResolve } from "../../hooks";
-import { PersonAvatar, useCompanyName } from "../../shared";
+import { HubDialogClose, HubSegmented, PersonAvatar, useCompanyName } from "../../shared";
 import { canApplyAudience, normalizeAudience, sameAudience } from "./audienceDraft";
 import { HubPeopleField } from "./HubPeopleField";
 
@@ -26,7 +25,7 @@ const SeeWho: React.FC<{ audience: HubAudience }> = ({ audience }) => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="link" size="sm">
+        <Button type="button" variant="link" size="sm" className="text-hub-small font-medium text-accent">
           {t("audience.seeWho")}
         </Button>
       </PopoverTrigger>
@@ -63,7 +62,8 @@ export const AudienceSummary: React.FC<{ audience: HubAudience; resolved: Audien
   const company = useCompanyName();
   const total = resolved?.total ?? 0;
   return (
-    <div className="flex min-h-12 items-center gap-3 rounded-tint bg-mist px-3.5 py-3">
+    // #F7F7F8, 50 high; avatars 26 with a 2 px white border, 18 apart; "{n} people" 13/18 500 (FIXES O7).
+    <div className="flex min-h-[50px] items-center gap-3 rounded-tint bg-subtle px-3.5 py-2">
       {loading && !resolved ? (
         <NodRing size="sm" />
       ) : total === 0 ? (
@@ -74,15 +74,15 @@ export const AudienceSummary: React.FC<{ audience: HubAudience; resolved: Audien
         <>
           <span className="flex -space-x-2">
             {(resolved?.people ?? []).slice(0, 3).map((p) => (
-              <PersonAvatar key={p.id} person={p} size={28} className="ring-2 ring-mist" />
+              <PersonAvatar key={p.id} person={p} size={26} className="ring-2 ring-card" />
             ))}
           </span>
           <span role="status" className="min-w-0 flex-1 text-body text-primary">
             {audience.mode === "EVERYONE" ? (
-              t("audience.everyoneCount", { company, count: total })
+              <span className="text-label">{t("audience.everyoneCount", { company, count: total })}</span>
             ) : (
               <>
-                <span className="font-semibold">{t("audience.people", { count: total })}</span>
+                <span className="text-label">{t("audience.people", { count: total })}</span>
                 {audience.mode === "FILTER" && audience.filters.length > 0 && <span className="text-secondary">{t("audience.joinLater")}</span>}
               </>
             )}
@@ -96,7 +96,7 @@ export const AudienceSummary: React.FC<{ audience: HubAudience; resolved: Audien
 
 /**
  * CM07, Who sees it: Everyone, Filter people (the People filter builder, plus "Also add" people and roles), or
- * Choose people. The live count comes from `/hub/audience/resolve`; Apply is disabled while it reaches nobody.
+ * Choose people. The live count comes from `/hub/audience/resolve`; Apply is hidden while it reaches nobody.
  * Closing with changes asks first.
  */
 export const AudienceDialog: React.FC<{
@@ -126,13 +126,16 @@ export const AudienceDialog: React.FC<{
   return (
     <>
       <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : close())}>
-        <DialogContent className="flex max-h-[85vh] flex-col gap-0 p-0 sm:max-w-[640px]">
-          <DialogHeader className="px-6 pt-5 pb-1">
+        <DialogContent hideClose className="flex max-h-[85vh] flex-col gap-0 p-0 sm:max-w-[640px]">
+          {/* 56 high, the title centred on the 32 close, the close secondary (FIXES O1). */}
+          <DialogHeader className="flex-row items-center justify-between gap-4 py-3 pr-6 pl-6">
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription className="sr-only">{title}</DialogDescription>
+            <HubDialogClose onClick={close} />
           </DialogHeader>
-          <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-4">
-            <SegmentedControl<HubAudienceMode>
+          {/* 22 between the parts, padding 16 24 0, 22 to the footer's hairline (O2). */}
+          <div className="flex flex-1 flex-col gap-5.5 overflow-y-auto px-6 pt-4 pb-5.5">
+            <HubSegmented<HubAudienceMode>
               aria-label={title}
               value={draft.mode}
               onChange={(mode) => setDraft((d) => ({ ...d, mode }))}
@@ -143,28 +146,34 @@ export const AudienceDialog: React.FC<{
               ]}
             />
             {draft.mode === "FILTER" && (
-              <div className="flex flex-col gap-2">
-                <p className="text-label text-secondary">{t("audience.matchAll")}</p>
+              <div className="flex flex-col gap-2.5">
+                <p className="text-label text-primary">{t("audience.matchAll")}</p>
                 <AudienceBuilder
                   fields={fields.data}
                   isLoadingFields={fields.isLoading}
                   value={draft.filters}
                   onChange={(filters) => setDraft((d) => ({ ...d, filters }))}
                 />
-                <label className="mt-3 text-label text-secondary" htmlFor="hub-also-add">
+                {/* "Also add" 13/18 500 Ink + " (optional)" 400 tertiary; the field 42, padding 6 8 (O6). */}
+                <label className="mt-3 text-label text-primary" htmlFor="hub-also-add">
                   {t("audience.alsoAdd")}
+                  <span className="font-normal text-tertiary">{t("audience.optional")}</span>
                 </label>
-                <HubPeopleField
-                  id="hub-also-add"
-                  ariaLabel={t("audience.searchPeopleRoles")}
-                  value={draft}
-                  onChange={(people) => setDraft((d) => ({ ...d, ...people }))}
-                />
+                <div className="[&>div]:min-h-[42px] [&>div]:px-2 [&>div]:py-1.5">
+                  <HubPeopleField
+                    id="hub-also-add"
+                    ariaLabel={t("audience.searchPeopleRoles")}
+                    placeholder={t("audience.searchPeopleRoles")}
+                    value={draft}
+                    onChange={(people) => setDraft((d) => ({ ...d, ...people }))}
+                  />
+                </div>
               </div>
             )}
             {draft.mode === "PEOPLE" && (
               <HubPeopleField
                 ariaLabel={t("audience.searchPeopleRoles")}
+                placeholder={t("audience.searchPeopleRoles")}
                 value={draft}
                 onChange={(people) => setDraft((d) => ({ ...d, ...people }))}
               />
@@ -175,16 +184,18 @@ export const AudienceDialog: React.FC<{
             <Button type="button" variant="secondary" onClick={close}>
               {t("actions.cancel")}
             </Button>
-            <Button
-              type="button"
-              disabled={!applicable}
-              onClick={() => {
-                onApply(audience, resolved.data);
-                onOpenChange(false);
-              }}
-            >
-              {t("actions.apply")}
-            </Button>
+            {/* Nothing is shown disabled: while the audience reaches nobody (the summary says so), there is no Apply. */}
+            {applicable && (
+              <Button
+                type="button"
+                onClick={() => {
+                  onApply(audience, resolved.data);
+                  onOpenChange(false);
+                }}
+              >
+                {t("actions.apply")}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

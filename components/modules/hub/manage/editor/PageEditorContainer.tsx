@@ -1,27 +1,25 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { Alert02Icon, ArrowDown01Icon, ArrowLeft01Icon, PencilEdit02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowDown01Icon, PencilEdit02Icon, Tick02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { InlineAlert } from "@/components/desact/alert";
 import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
-import { NodRing } from "@/components/desact/nod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import { Skeleton } from "@/components/desact/skeleton";
 import { Switch } from "@/components/desact/switch";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { dateToISO } from "@/lib/date";
 import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
 import { cn } from "@/lib/cn";
 import type { DraftWrite, HubAudience, PageEdit, PublishRequest } from "@/models/hub";
 import { publishHubPageAction, saveHubPageDraftAction, updateHubPagePropsAction } from "../../actions";
 import { PageBodyEditor } from "../../document";
-import { HubActionError, hubQueryKeys, unwrapHub, useInvalidateHub, usePageEdit, usePageTree } from "../../hooks";
-import { HubReadError, hubIcon, useAudienceLabel, useHubDates } from "../../shared";
+import { HubActionError, hubQueryKeys, unwrapHub, useAudienceResolve, useInvalidateHub, usePageEdit, usePageTree } from "../../hooks";
+import { BackLink, HubReadError, hubIcon, LoadingBlock, PersonAvatar, useAudienceLabel, useHubDates } from "../../shared";
 import { AudienceDialog, HubPeopleField } from "../audience";
 import { IconColorPicker } from "../IconColorPicker";
 import { PublishPageDialog } from "./PublishPageDialog";
@@ -116,8 +114,13 @@ const useAutosave = (id: string, initialVersion: number, onSaved: (savedAt: stri
   return { state, schedule, flush };
 };
 
-const PropertyRow: React.FC<{ label: string; children: React.ReactNode; htmlFor?: string }> = ({ label, children, htmlFor }) => (
-  <div className="grid min-h-9 grid-cols-[150px_minmax(0,1fr)] items-center gap-2">
+const PropertyRow: React.FC<{ label: string; children: React.ReactNode; htmlFor?: string; className?: string }> = ({
+  label,
+  children,
+  htmlFor,
+  className,
+}) => (
+  <div className={cn("grid min-h-9 grid-cols-[150px_minmax(0,1fr)] items-center gap-2", className)}>
     <label htmlFor={htmlFor} className="text-hint text-tertiary">
       {label}
     </label>
@@ -189,16 +192,30 @@ const Editor: React.FC<{ page: PageEdit }> = ({ page }) => {
   const sections = tree.data?.sections ?? [];
   const nextVersion = everPublished ? versionNo + 1 : 1;
   const tile = TAG_CLASSES[toTagColor(draft.color)];
+  const sectionColor = sections.find((s) => s.id === props.sectionId)?.color ?? null;
+  const [sectionOpen, setSectionOpen] = React.useState(false);
+  const [ownerOpen, setOwnerOpen] = React.useState(false);
+  // A newly picked owner arrives as an id; the name comes from the audience resolver, as one person.
+  const ownerResolve = useAudienceResolve(
+    { mode: "PEOPLE", filters: [], userIds: props.owner ? [props.owner.id] : [], roleIds: [] },
+    "",
+    Boolean(props.owner && !props.owner.name),
+  );
+  const owner = props.owner?.name ? props.owner : (ownerResolve.data?.people.find((p) => p.id === props.owner?.id) ?? props.owner);
 
   return (
-    <div className="flex flex-col xl:px-4">
-      {/* The editor bar. */}
-      <div className="sticky top-0 z-20 -mx-2 flex items-center gap-3 bg-page px-2 py-2">
-        <Link href="/hub/manage/pages" className="inline-flex items-center gap-1 text-label text-secondary no-underline hover:text-primary">
-          <Icon icon={ArrowLeft01Icon} size="sm" />
-          {t("manage.tabs.pages")}
-        </Link>
-        {props.sectionName && <span className="truncate text-label text-tertiary">/ {props.sectionName}</span>}
+    // Page padding 24 48 32; the editor bar 36 high at the top; the column left-aligned, 720 (FIXES M1, M2).
+    <div className="-mt-2 flex flex-col xl:px-4">
+      <div className="sticky top-0 z-20 flex h-9 items-center gap-1.5 bg-page">
+        <BackLink href="/hub/manage/pages" label={t("manage.tabs.pages")} />
+        {props.sectionName && (
+          <>
+            <span aria-hidden className="text-hint text-tertiary">
+              /
+            </span>
+            <span className="truncate text-hint text-tertiary">{props.sectionName}</span>
+          </>
+        )}
         <span className="ml-auto flex items-center gap-3">
           {autosave.state === "saving" ? (
             <span className="text-hint text-tertiary">{t("editor.saving")}</span>
@@ -207,25 +224,29 @@ const Editor: React.FC<{ page: PageEdit }> = ({ page }) => {
               <Icon icon={Alert02Icon} size="sm" />
               {t("editor.notSaved")}
             </span>
-          ) : autosave.state === "saved" && savedAt ? (
+          ) : savedAt ? (
             <span className="text-hint text-tertiary">{t("editor.savedAt", { time: dates.time(savedAt) })}</span>
           ) : null}
           {unpublished && everPublished && (
             <span className="inline-flex h-6 items-center gap-1 rounded-pill bg-status-inactive-bg px-2 text-hint font-semibold text-status-inactive-text">
-              <Icon icon={PencilEdit02Icon} size="sm" />
+              <Icon icon={PencilEdit02Icon} size="sm" className="size-3.5" />
               {t("editor.unpublishedChanges")}
             </span>
           )}
           <Button type="button" variant="secondary" onClick={() => void openPreview()}>
             {t("editor.preview")}
           </Button>
-          <Button type="button" disabled={autosave.state === "conflict"} onClick={() => setPublishOpen(true)}>
-            {everPublished ? t("editor.publishVersion", { version: nextVersion }) : t("editor.publish")}
-          </Button>
+          {/* Nothing to publish, no Publish: it appears once the draft differs from what readers see (FIXES Q3). A
+              conflict offers Reload in its alert instead. */}
+          {unpublished && autosave.state !== "conflict" && (
+            <Button type="button" onClick={() => setPublishOpen(true)}>
+              {everPublished ? t("editor.publishVersion", { version: nextVersion }) : t("editor.publish")}
+            </Button>
+          )}
         </span>
       </div>
 
-      <div className="mx-auto mt-6 flex w-full max-w-[720px] flex-col">
+      <div className="mt-6 flex w-full max-w-[720px] flex-col">
         {autosave.state === "conflict" && (
           <InlineAlert
             tone="declined"
@@ -242,8 +263,9 @@ const Editor: React.FC<{ page: PageEdit }> = ({ page }) => {
         <div className="flex items-start gap-4">
           <Popover>
             <PopoverTrigger asChild>
+              {/* The page's tag tint, the icon 28 in the tag's dark colour (FIXES M4). */}
               <button type="button" aria-label={t("editor.changeIcon")} className={cn("flex size-[52px] shrink-0 items-center justify-center rounded-card", tile.chip)}>
-                <Icon icon={hubIcon(draft.icon)} size="lg" />
+                <Icon icon={hubIcon(draft.icon)} size="lg" className="size-7" />
               </button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-auto p-4">
@@ -266,46 +288,77 @@ const Editor: React.FC<{ page: PageEdit }> = ({ page }) => {
           />
         </div>
 
-        <div className="mt-6 flex flex-col gap-1">
+        {/* Title row → properties 28; the rows 2 apart (FIXES M5). */}
+        <div className="mt-7 flex flex-col gap-0.5">
           <PropertyRow label={t("editor.section")}>
-            <Select
-              value={props.sectionId ?? undefined}
-              onValueChange={(sectionId) => {
-                const name = sections.find((s) => s.id === sectionId)?.name ?? null;
-                setProps((p) => ({ ...p, sectionId, sectionName: name }));
-                void saveProps({ sectionId });
-              }}
-            >
-              <SelectTrigger aria-label={t("editor.section")} className="h-8 w-auto min-w-48 border-transparent bg-transparent hover:bg-mist">
-                {/* The name comes with the page: the list of sections loads after the Select first renders, and the
-                    trigger stayed blank (walk of 2026-11-12). */}
-                <SelectValue placeholder={t("editor.chooseSection")}>{props.sectionName ?? undefined}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
+            {/* Plain inline: the colour square 18, the name, the chevron — no box; a click opens the list (FIXES M6). The
+                name comes with the page, so it shows before the list of sections loads (walk of 2026-11-12). */}
+            <Popover open={sectionOpen} onOpenChange={setSectionOpen}>
+              <PopoverTrigger asChild>
+                <button type="button" aria-label={t("editor.section")} className="flex h-8 w-fit max-w-full items-center gap-1.5 rounded-control text-body text-primary">
+                  {props.sectionName ? (
+                    <>
+                      <span aria-hidden className={cn("size-[18px] shrink-0 rounded-tag", TAG_CLASSES[toTagColor(sectionColor)].chip)} />
+                      <span className="truncate">{props.sectionName}</span>
+                    </>
+                  ) : (
+                    <span className="truncate text-tertiary">{t("editor.chooseSection")}</span>
+                  )}
+                  <Icon icon={ArrowDown01Icon} size="sm" className="shrink-0 text-tertiary" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="flex max-h-80 w-64 flex-col overflow-y-auto p-1">
                 {sections.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden className={cn("size-3 rounded-glyph", TAG_CLASSES[toTagColor(s.color)].bar)} />
-                      {s.name}
-                    </span>
-                  </SelectItem>
+                  <button
+                    key={s.id}
+                    type="button"
+                    className="flex items-center gap-2 rounded-control px-2 py-1.5 text-left text-body text-primary hover:bg-subtle"
+                    onClick={() => {
+                      setSectionOpen(false);
+                      if (s.id === props.sectionId) return;
+                      setProps((p) => ({ ...p, sectionId: s.id, sectionName: s.name }));
+                      void saveProps({ sectionId: s.id });
+                    }}
+                  >
+                    <span aria-hidden className={cn("size-[18px] shrink-0 rounded-tag", TAG_CLASSES[toTagColor(s.color)].chip)} />
+                    <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                    {s.id === props.sectionId && <Icon icon={Tick02Icon} size="sm" className="shrink-0 text-accent" />}
+                  </button>
                 ))}
-              </SelectContent>
-            </Select>
+              </PopoverContent>
+            </Popover>
           </PropertyRow>
           <PropertyRow label={t("editor.owner")}>
-            <HubPeopleField
-              single
-              withRoles={false}
-              ariaLabel={t("editor.owner")}
-              value={{ userIds: props.owner ? [props.owner.id] : [], roleIds: [] }}
-              onChange={(next) => {
-                const ownerUserId = next.userIds[next.userIds.length - 1] ?? null;
-                if (!ownerUserId) return;
-                setProps((p) => ({ ...p, owner: p.owner && p.owner.id === ownerUserId ? p.owner : { id: ownerUserId, name: "", jobTitle: null, avatarUrl: null } }));
-                void saveProps({ ownerUserId });
-              }}
-            />
+            {/* Plain inline: the avatar 22 and the full name; a click opens the person picker (FIXES M7). */}
+            <Popover open={ownerOpen} onOpenChange={setOwnerOpen}>
+              <PopoverTrigger asChild>
+                <button type="button" aria-label={t("editor.owner")} className="flex h-8 w-fit max-w-full items-center gap-2 rounded-control text-body text-primary">
+                  {owner ? (
+                    <>
+                      <PersonAvatar person={owner} />
+                      <span className="truncate">{owner.name}</span>
+                    </>
+                  ) : (
+                    <span className="truncate text-tertiary">{t("editor.chooseOwner")}</span>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80 p-2">
+                <HubPeopleField
+                  single
+                  withRoles={false}
+                  ariaLabel={t("editor.owner")}
+                  value={{ userIds: props.owner ? [props.owner.id] : [], roleIds: [] }}
+                  onChange={(next) => {
+                    const ownerUserId = next.userIds[next.userIds.length - 1] ?? null;
+                    if (!ownerUserId) return;
+                    setOwnerOpen(false);
+                    setProps((p) => ({ ...p, owner: p.owner && p.owner.id === ownerUserId ? p.owner : { id: ownerUserId, name: "", jobTitle: null, avatarUrl: null } }));
+                    void saveProps({ ownerUserId });
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
           </PropertyRow>
           <PropertyRow label={t("editor.whoSees")}>
             <button
@@ -318,21 +371,30 @@ const Editor: React.FC<{ page: PageEdit }> = ({ page }) => {
               <Icon icon={ArrowDown01Icon} size="sm" className="shrink-0 text-tertiary" />
             </button>
           </PropertyRow>
-          <PropertyRow label={t("editor.mustRead")} htmlFor="hub-must-read">
-            <label className="flex items-center gap-2 text-body text-secondary">
+          {/* 40 high; 10 from the toggle to its words, Ink (FIXES M8). */}
+          <PropertyRow label={t("editor.mustRead")} htmlFor="hub-must-read" className="min-h-10">
+            <label className="flex items-center gap-2.5 text-body text-primary">
               <Switch id="hub-must-read" checked={draft.mustRead} onCheckedChange={(mustRead) => change({ mustRead })} />
               {t("editor.mustReadHint")}
             </label>
           </PropertyRow>
           {draft.mustRead && (
-            <div className="ml-[158px] flex items-center gap-3 rounded-card bg-mist px-4 py-3.5">
-              <span className="text-label text-secondary">{t("editor.agreeBy")}</span>
-              <div className="w-[180px]">
-                <DatePicker value={draft.agreeBy ?? ""} onChange={(v) => change({ agreeBy: v || null })} ariaLabel={t("editor.agreeBy")} clearable />
+            // #F7F7F8, 60 high, radius 16, padding 14 16; the date 180 × 32 at the block's right end; no past day (M9, N4).
+            <div className="ml-[158px] flex h-[60px] items-center gap-3 rounded-card bg-subtle px-4 py-3.5">
+              <span className="text-label text-primary">{t("editor.agreeBy")}</span>
+              <div className="ml-auto w-[180px]">
+                <DatePicker
+                  value={draft.agreeBy ?? ""}
+                  onChange={(v) => change({ agreeBy: v || null })}
+                  min={dateToISO(new Date())}
+                  ariaLabel={t("editor.agreeBy")}
+                  clearable
+                  className="h-8 text-hub-small"
+                />
               </div>
             </div>
           )}
-          <p className="ml-[158px] text-hint text-tertiary">{t("editor.mustReadOffHint")}</p>
+          <p className="mt-2.5 ml-[158px] text-hint text-tertiary">{t("editor.mustReadOffHint")}</p>
         </div>
 
         <hr className="my-6 border-divider" />
@@ -369,18 +431,34 @@ export const PageEditorContainer: React.FC<{ id: string }> = ({ id }) => {
   const t = useTranslations("hub");
   const page = usePageEdit(id);
   if (page.isLoading) {
+    // The bar draws at once; the column waits with a ring, then a skeleton (FIXES U3).
     return (
-      <div className="mx-auto mt-16 flex w-full max-w-[720px] flex-col gap-4">
-        <div className="flex justify-center">
-          <NodRing />
+      <div className="-mt-2 flex flex-col xl:px-4">
+        <div className="flex h-9 items-center">
+          <BackLink href="/hub/manage/pages" label={t("manage.tabs.pages")} />
         </div>
-        <Skeleton className="h-11 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
+        <LoadingBlock
+          className="mt-6 w-full max-w-[720px]"
+          skeleton={
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-11 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+          }
+        />
       </div>
     );
   }
   if (page.isError || !page.data) {
-    return <HubReadError error={page.error} back={{ href: "/hub/manage/pages", label: t("manage.tabs.pages") }} onRetry={() => void page.refetch()} />;
+    return (
+      <HubReadError
+        error={page.error}
+        title={t("editor.loadError")}
+        back={{ href: "/hub/manage/pages", label: t("manage.tabs.pages") }}
+        onRetry={() => void page.refetch()}
+      />
+    );
   }
   return <Editor key={page.data.id} page={page.data} />;
 };

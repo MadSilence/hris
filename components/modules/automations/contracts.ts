@@ -48,6 +48,8 @@ export type TriggerFieldsProps = {
   readOnly: boolean;
   problems: AutomationProblem[];
   onChange: (definition: AutomationDefinition) => void;
+  /** "Someone joins a group" names Who it runs for and opens its window from a button (the designers' fixes C27). */
+  onOpenWho?: () => void;
 };
 
 /**

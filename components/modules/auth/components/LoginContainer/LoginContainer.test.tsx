@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import LoginContainer, { type SharedProvider } from "./LoginContainer";
 import { useLoginAction } from "@/components/modules/auth/hooks/useLoginAction";
 import { partialMock } from "@/test/types";
+import { ApiError } from "@/components/clients/exceptions";
 
 jest.mock("@/components/modules/auth/hooks/useLoginAction");
 jest.mock("@/components/modules/auth/hooks/useAuthService");
@@ -118,5 +119,65 @@ describe("LoginContainer (sign-in-company-login)", () => {
 
     expect(loginCodeSend).toHaveBeenCalledWith("anna@acme.com");
     expect(await screen.findByRole("heading", { name: "Check your email" })).toBeInTheDocument();
+  });
+
+  it("C9: while the Email field shows an error, its error takes the code link's place", async () => {
+    loginAction(jest.fn());
+    const user = userEvent.setup();
+    render(<LoginContainer {...base} />);
+
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+    expect(screen.getByText("Enter your email.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Email me a login code" })).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Email"), "a");
+    expect(screen.getByRole("button", { name: "Email me a login code" })).toBeInTheDocument();
+  });
+
+  it("C10: a refusal is the first thing in the form, above the provider buttons", async () => {
+    loginAction(jest.fn().mockRejectedValue(new ApiError("Invalid email or password", { status: 401, code: "AUTH00001" })));
+    const user = userEvent.setup();
+    render(<LoginContainer {...base} providers={["GOOGLE"]} />);
+
+    await user.type(screen.getByLabelText("Email"), "nobody@example.com");
+    await user.type(screen.getByLabelText("Password"), "wrong");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("That email and password don’t match. Check them, or check the company address.");
+    const google = screen.getByRole("link", { name: "Continue with Google" });
+    expect(alert.compareDocumentPosition(google) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("C13, C15: resending a login code clears the error, empties the boxes and says a new code went", async () => {
+    const loginCodeVerify = jest.fn().mockRejectedValue(new Error("nope"));
+    jest.mocked(useAuthService).mockReturnValue(partialMock<ReturnType<typeof useAuthService>>({ loginCodeSend, loginCodeVerify }));
+    loginAction(jest.fn());
+    const user = userEvent.setup();
+    render(<LoginContainer {...base} />);
+
+    await user.type(screen.getByLabelText("Email"), "anna@acme.com");
+    await user.click(screen.getByRole("button", { name: "Email me a login code" }));
+    expect(await screen.findByText(/Didn’t get it\?/)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Code 1"), "123456");
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "resend" }));
+    expect(await screen.findByText("We’ve sent a new code. Check your spam folder too.")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Code 1")).toHaveValue("");
+  });
+
+  it("C11: the back arrow returns to the form with the address the code went to", async () => {
+    loginAction(jest.fn());
+    const user = userEvent.setup();
+    render(<LoginContainer {...base} />);
+
+    await user.type(screen.getByLabelText("Email"), "anna@acme.com");
+    await user.click(screen.getByRole("button", { name: "Email me a login code" }));
+    await user.click(await screen.findByRole("button", { name: "Back" }));
+
+    expect(screen.getByLabelText("Email")).toHaveValue("anna@acme.com");
   });
 });

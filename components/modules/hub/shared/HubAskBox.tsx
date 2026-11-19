@@ -109,7 +109,7 @@ export const HubAskBox: React.FC<{ placeholder: string; pagesOnly?: boolean; cla
             setOpen(true);
           }}
           onKeyDown={onKeyDown}
-          className="min-w-0 flex-1 bg-transparent text-body text-primary outline-none placeholder:text-tertiary"
+          className="min-w-0 flex-1 bg-transparent text-hub-ask text-primary outline-none placeholder:text-tertiary"
         />
         <button
           type="button"

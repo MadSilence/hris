@@ -165,40 +165,52 @@ export function SkipButton({ onClick, disabled }: { onClick: () => void; disable
   );
 }
 
-/** The company as the welcome shows it: its logo on a white tile, or its initial when it has none. */
+/** The company as the welcome shows it: its logo on a white tile, or its initial when it has none, and its name beside it. */
 export type FirstRunCompany = { name: string; logoUrl: string | null };
 
 function CompanyLogo({ company }: { company: FirstRunCompany }) {
   return (
-    <span className="fr-logo" title={company.name}>
-      {company.logoUrl ? (
-        // A backend-hosted upload of unknown size; next/image would need a remote pattern for the API origin.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={company.logoUrl} alt={company.name} />
-      ) : (
-        <span aria-label={company.name}>{(company.name.trim()[0] ?? "").toUpperCase()}</span>
-      )}
-    </span>
+    <div className="fr-brand">
+      <span className="fr-logo" title={company.name}>
+        {company.logoUrl ? (
+          // A backend-hosted upload of unknown size; next/image would need a remote pattern for the API origin.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={company.logoUrl} alt={company.name} />
+        ) : (
+          <span aria-label={company.name}>{(company.name.trim()[0] ?? "").toUpperCase()}</span>
+        )}
+      </span>
+      {company.name && <b className="fr-brand-name" aria-hidden="true">{company.name}</b>}
+    </div>
   );
 }
 
-/** Two rows of rings along the bottom, the lower cut in half by the edge; resting accent-muted, strong ones nod. */
-function WelcomeRings({ cols, r, stroke, step }: { cols: number; r: number; stroke: number; step: number }) {
-  const hot: Record<string, string> = { "3,0": "rn6x4x4-0", "9,1": "rn6x4x4-1", "14,0": "rn6x4x4-2", "19,1": "rn6x4x4-3" };
-  const width = cols * step;
-  const height = step * 2;
+/*
+ * The board's two ring rows (first-run-welcome W0-Desktop, the designers' fix W2): a fixed drawing, centred and never
+ * stretched — 9 rings a row, r 22, stroke 7, 106 apart (SVG 900 × 167) on a computer; 7 a row, r 12, stroke 5 on a
+ * phone. Resting accent-muted, the three strong ones in the accent, nodding on the 24 s loop.
+ */
+const RING_GRIDS = {
+  desktop: { cols: 9, r: 22, stroke: 7, step: 106.125, width: 900, height: 167, hot: { "3,0": "rn6x3x3-0", "7,0": "rn6x3x3-1", "5,1": "rn6x3x3-2" } },
+  phone: { cols: 7, r: 12, stroke: 5, step: 52, width: 341, height: 91, hot: { "2,0": "rn6x3x3-0", "5,0": "rn6x3x3-1", "4,1": "rn6x3x3-2" } },
+} as const;
+
+function WelcomeRings({ size }: { size: keyof typeof RING_GRIDS }) {
+  const { cols, r, stroke, step, width, height, hot } = RING_GRIDS[size];
+  const hotRings: Record<string, string> = hot;
+  const pad = r + stroke / 2;
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
       {Array.from({ length: 2 }, (_, row) =>
         Array.from({ length: cols }, (_, col) => {
-          const name = hot[`${col},${row}`];
+          const name = hotRings[`${col},${row}`];
           return (
             <circle
               key={`${col},${row}`}
               className={name ? "hot" : undefined}
               style={name ? { animationName: name } : undefined}
-              cx={step / 2 + col * step}
-              cy={step / 2 + row * step}
+              cx={pad + col * step}
+              cy={pad + row * step}
               r={r}
               strokeWidth={stroke}
             />
@@ -210,32 +222,35 @@ function WelcomeRings({ cols, r, stroke, step }: { cols: number; r: number; stro
 }
 
 /**
- * The welcome's page and the phone's photo page (first-run-welcome § Where it lives): white, the company's logo on top,
- * one centred column, the rings along the bottom in the company's colour.
+ * The welcome's page, *Finish your profile* and the phone's photo page (first-run-welcome § Where it lives): white,
+ * the company's logo tile and name on top, one centred column, the two ring rows along the bottom in the company's
+ * colour. The lower row is cut by the window's edge alone: the rings hang 36 px (24 on a phone) below the page and
+ * nothing clips them, so pulling the page up shows them whole (W2). `intro` is W0: centred, and the column is not held
+ * to 400, so "Glad you're here" stays on one line (W1).
  */
 export function WelcomeFrame({
   company,
   back,
   wide = false,
+  intro = false,
   children,
 }: {
   company: FirstRunCompany;
   back?: React.ReactNode;
   wide?: boolean;
+  intro?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="fr-welcome">
-      <div className="fr-welcome-top">
-        {back && <span className="fr-welcome-back">{back}</span>}
-        <CompanyLogo company={company} />
-      </div>
+      {back && <span className="fr-welcome-back">{back}</span>}
+      <CompanyLogo company={company} />
       <main className="fr-welcome-mid">
-        <div className="fr-welcome-col" data-wide={wide}>{children}</div>
+        <div className="fr-welcome-col" data-wide={wide} data-intro={intro}>{children}</div>
       </main>
       <div className="fr-welcome-rings">
-        <span className="hidden md:block"><WelcomeRings cols={24} r={22} stroke={7} step={64} /></span>
-        <span className="md:hidden"><WelcomeRings cols={10} r={12} stroke={5} step={38} /></span>
+        <span className="hidden md:block"><WelcomeRings size="desktop" /></span>
+        <span className="md:hidden"><WelcomeRings size="phone" /></span>
       </div>
     </div>
   );

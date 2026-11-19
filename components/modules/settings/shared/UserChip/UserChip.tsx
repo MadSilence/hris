@@ -46,7 +46,7 @@ export default function UserChip({
     <>
       <Avatar className="h-6 w-6 shrink-0">
         {avatarUrl ? <AvatarImage src={avatarUrl} alt={name}/> : null}
-        <AvatarFallback className="text-hint">{initials}</AvatarFallback>
+        <AvatarFallback name={name || [firstName, lastName].filter(Boolean).join(" ") || email}>{initials}</AvatarFallback>
       </Avatar>
       <span className="truncate text-body font-medium text-primary">{name}</span>
     </>

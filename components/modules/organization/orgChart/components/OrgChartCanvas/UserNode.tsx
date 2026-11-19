@@ -64,7 +64,7 @@ export function UserNode({ data }: NodeProps<UserFlowNode>) {
       <div className="flex flex-none items-center gap-2.5">
         <Avatar className="h-10 w-10 flex-none">
           {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={name} /> : null}
-          <AvatarFallback className="text-hint">{initials(user)}</AvatarFallback>
+          <AvatarFallback name={[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}>{initials(user)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="truncate text-body font-semibold leading-snug text-primary" title={name}>

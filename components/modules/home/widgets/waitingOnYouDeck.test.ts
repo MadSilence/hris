@@ -2,7 +2,7 @@ import type { TimeOffRequest } from "@/models/timeOff";
 import type { Task } from "@/models/lifecycle";
 import type { AgreementRow } from "@/models/hub";
 import { partialMock } from "@/test/types";
-import { buildDeck, cardKey, skipCard, writeKey } from "./waitingOnYouDeck";
+import { buildDeck, cardKey, markRead, readKey, skipCard, writeKey } from "./waitingOnYouDeck";
 
 const request = (id: string, createdAt: string, status = "PENDING") =>
   partialMock<TimeOffRequest>({ id, createdAt, status: status as TimeOffRequest["status"], userId: "u" });
@@ -56,6 +56,14 @@ describe("Waiting on you, the deck", () => {
     const deck = deckOf({ agreements: [agreement] });
     expect(deck.filter((c) => c.group === "DO").map((c) => c.key)).toEqual(["task:t-soon", "agree:p1", "task:review", "task:t-later"]);
     expect(deck.find((c) => c.kind === "AGREE")).toMatchObject({ key: cardKey.agreement("p1"), agreement });
+  });
+
+  it("a failed run marked as read leaves the deck for good, and skipping keeps the mark", () => {
+    const read = markRead([cardKey.run("run1")], cardKey.run("run1"));
+    expect(read).toEqual([readKey(cardKey.run("run1"))]);
+    const deck = deckOf({ skipped: read });
+    expect(deck.map((c) => c.key)).not.toContain("run:run1");
+    expect(skipCard(read, "time-off:early", deck)).toEqual([readKey(cardKey.run("run1")), "time-off:early"]);
   });
 
   it("skipping sends the card last and forgets keys that are no longer in the deck", () => {

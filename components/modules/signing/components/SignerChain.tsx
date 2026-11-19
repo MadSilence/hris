@@ -45,7 +45,7 @@ export function SignerChain({ signers, youId }: { signers: EnvelopeSignerDTO[]; 
               return (
                 <li key={s.id} className="flex items-center gap-2">
                   <Avatar className="size-[22px]">
-                    <AvatarFallback>
+                    <AvatarFallback name={s.isGuest ? null : s.name}>
                       {s.isGuest ? <Icon icon={UserIcon} size="sm" /> : initials(s.name)}
                     </AvatarFallback>
                   </Avatar>

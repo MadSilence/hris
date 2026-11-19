@@ -19,7 +19,7 @@ How to read it — as `SCREENS_BRIEF.md`: **What exists**, **Decided** (draw to 
   - the trial ended: "Your trial has ended. Everything is here and can be exported, but nothing can be changed until
     the company goes live." · **Go live**
   - asked / running / failed: one sentence each · **Open**
-  - for somebody who may not go live: the same sentence and "Ask your account owner to go live", no button.
+  - for somebody who may not go live: the same sentence, no button ("Ask your account owner to go live." was dropped — the designers' fixes, 18 Nov).
 - **The *Sample* mark** — a chip beside a sample person's name in the People table and on the profile; on the
   profile, a line under the header: "This is a sample person. Sample people are deleted when the company goes live —
   add your real people after that." The People toolbar gets a **Hide samples** chip in a demo.

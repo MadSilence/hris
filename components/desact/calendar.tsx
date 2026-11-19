@@ -96,8 +96,11 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: R
               )
             : "[&:has([aria-selected])]:rounded-control",
         ),
+        // No colour of its own: react-day-picker joins the modifiers' classes without merging them, and a base
+        // `text-primary` outranked every one of them in the stylesheet — past days a picker refuses, the days of the
+        // next month and today all read Ink (walk of 2026-11-19). A plain day takes Ink from the page.
         day: cn(
-          "relative z-10 inline-flex size-8 items-center justify-center rounded-control text-body text-primary",
+          "relative z-10 inline-flex size-8 items-center justify-center rounded-control text-body",
           "transition-colors duration-(--duration-hover) hover:bg-mist aria-selected:hover:bg-transparent",
           "focus-visible:outline-offset-[-2px]",
           isRange && "[&.day-preview-end]:size-7 [&.day-preview-end]:rounded-pill [&.day-preview-end]:bg-accent-muted [&.day-preview-end]:font-semibold [&.day-preview-end]:text-accent-text",

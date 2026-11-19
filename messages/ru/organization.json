@@ -173,6 +173,8 @@
       "pendingEmail": "Новый адрес {email} ждёт подтверждения — ссылка отправлена на него"
     },
     "tenure": {
+      "today": "С сегодняшнего дня",
+      "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
       "weeks": "{count, plural, one {# неделя} few {# недели} many {# недель} other {# недели}}",
       "months": "{count, plural, one {# месяц} few {# месяца} many {# месяцев} other {# месяца}}",
       "years": "{count, plural, one {# год} few {# года} many {# лет} other {# года}}",

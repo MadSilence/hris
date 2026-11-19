@@ -20,7 +20,7 @@ jest.mock("@/components/modules/automations/hooks", () => ({
   useAutomationRuns: () => runs,
   useAutomation: () => ({ data: { definition: { trigger: { type: "EVENT", event: "TIME_OFF_REQUESTED" } } } }),
 }));
-jest.mock("./seams", () => ({ useAutomationWords: () => ({ triggerTitle: () => "Time off over 10 days is requested" }) }));
+jest.mock("./seams", () => ({ useAutomationWords: () => ({ triggerPhrase: () => "time off over 10 days is requested" }) }));
 
 const counts = (all: number): RunCounts => ({
   all,
@@ -66,8 +66,8 @@ describe("the run history", () => {
     const onOpenRun = jest.fn();
     show(onOpenRun);
 
-    expect(screen.getByRole("button", { name: /All 312/ })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: /Failed 2/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /All\s*312/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /Failed\s*2/ })).toBeInTheDocument();
     expect(screen.getByText("Ran 2 days late")).toBeInTheDocument();
     expect(screen.getByText("Plus 12 runs you can't see.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Tom Becker/ })).toHaveAttribute("aria-current", "true");
@@ -80,13 +80,13 @@ describe("the run history", () => {
     runs = loaded([], 0);
     show();
     expect(screen.getByText("No runs yet")).toBeInTheDocument();
-    expect(screen.getByText("It runs when: Time off over 10 days is requested.")).toBeInTheDocument();
+    expect(screen.getByText("It runs the next time time off over 10 days is requested.")).toBeInTheDocument();
   });
 
   it("says a chip matched nothing, and offers the way back", () => {
     runs = loaded([], 312);
     show();
-    fireEvent.click(screen.getByRole("button", { name: /Waiting 3/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Waiting\s*3/ }));
     expect(screen.getByText("No runs match")).toBeInTheDocument();
     expect(screen.getByText("No waiting runs.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Show all runs" })).toBeInTheDocument();

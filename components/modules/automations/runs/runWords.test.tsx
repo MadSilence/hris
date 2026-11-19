@@ -105,3 +105,25 @@ describe("what changed in a version", () => {
     expect(versionChanges("{not json").map(word())).toEqual(["Saved with no changes to the steps"]);
   });
 });
+
+describe("what a field-change run is about (E3b, H5)", () => {
+  const run = (about: Record<string, unknown>) => partialMock<AutomationRun>({ about, triggerType: "FIELD_CHANGED" });
+
+  it("names the field and its new value", () => {
+    const w = words();
+    expect(w.about(run({ kind: "FIELD_CHANGED", field: "lastName", value: "Novak", date: "2026-11-18" }))).toBe("Last name: Novak");
+    expect(w.about(run({ kind: "FIELD_CHANGED", field: "attr:a1", fieldName: "T-shirt size", value: "M" }))).toBe("T-shirt size: M");
+    expect(w.about(run({ kind: "FIELD_CHANGED", field: "status", value: "ACTIVE" }))).toBe("Status: Active");
+    expect(w.about(run({ kind: "FIELD_CHANGED", field: "office", value: null }))).toBe("Office cleared");
+  });
+});
+
+describe("a step skipped as its author chose (S8)", () => {
+  it("says it failed and the run went on, and why a wait on it was skipped", () => {
+    const w = words();
+    expect(w.reason("SKIPPED_ON_FAILURE: NO_ASSIGNEE: nobody")).toBe(
+      "It failed and was skipped, as the step is set to: the run went on without it.",
+    );
+    expect(w.reason("DEPENDS_ON_SKIPPED")).toBe("It was skipped: the step it waits for was skipped.");
+  });
+});

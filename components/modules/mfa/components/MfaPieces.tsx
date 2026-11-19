@@ -108,7 +108,8 @@ export const TotpEnrolment: React.FC<{
         </button>
       )}
       <div>
-        <CodeField id="mfa-enrol-code" value={code} onChange={setCode} disabled={busy} />
+        {/* Focus lands on the first thing to type, never on the dialog itself (P2). */}
+        <CodeField id="mfa-enrol-code" value={code} onChange={setCode} disabled={busy} autoFocus />
         <FieldError>{tried && code.trim().length < 6 ? tCommon("validation.enterCode") : null}</FieldError>
       </div>
       <FormError message={error} />

@@ -3,22 +3,22 @@ import type { EventCondition } from "@/models/automations";
 /**
  * The "Only when" of a time-off or process trigger, in the shape the builder edits, and its mapping to the backend's
  * `EventCondition` tree (hris-api `EventConditions`: `ALL | ANY | NOT | MATCH`, ops `eq neq gt gte lt lte in`, `in`
- * a comma-separated list). The builder draws one group with its And / Or and, inside it, groups one level deep
- * (dashed) — "a and (b or c)". A `NOT` over one comparison is read as the opposite comparison; deeper nesting than the
- * builder draws is flattened into its group. Pure: no React.
+ * a comma-separated list).
+ *
+ * <p>**A flat list joined by AND**, like every other condition list in automations (owner, 2026-11-18): the builder
+ * writes `ALL` over `MATCH` leaves and nothing else. The backend's tree is unchanged and still reads anything; a tree
+ * stored before — with `ANY`, a group or a `NOT` — is read as its comparisons in one list (a `NOT` over one comparison
+ * as the opposite comparison), and {@link isFlatAnd} says whether that reading is the same condition. It is written back
+ * only when the list is edited. Pure: no React.
  */
 export type EventOp = "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in";
-export type Joiner = "AND" | "OR";
 
 export type EventLeaf = { kind: "leaf"; id: number; field: string; op: EventOp | null; value: string };
-export type EventGroup = { kind: "group"; id: number; joiner: Joiner; items: EventItem[] };
-export type EventItem = EventLeaf | EventGroup;
 
 let seq = 1;
 const nextId = () => seq++;
 
 export const blankLeaf = (): EventLeaf => ({ kind: "leaf", id: nextId(), field: "", op: null, value: "" });
-export const blankGroup = (joiner: Joiner = "AND", items: EventItem[] = []): EventGroup => ({ kind: "group", id: nextId(), joiner, items });
 
 /** What a field of an event is: `TEXT`, `NUMBER`, or the values it can take ("PREBOARDING,ONBOARDING,OFFBOARDING"). */
 export const fieldKind = (type: string): { kind: "text" | "number" | "list"; values: string[] } => {
@@ -44,7 +44,7 @@ const leafOf = (c: EventCondition, negate = false): EventLeaf | null => {
   return { kind: "leaf", id: nextId(), field: c.field, op, value: c.value ?? "" };
 };
 
-/** Every comparison under a node, flattened — for nesting deeper than the builder draws. */
+/** Every comparison under a node, flattened. */
 const leavesUnder = (c: EventCondition, negate = false): EventLeaf[] => {
   if (c.kind === "MATCH") {
     const l = leafOf(c, negate);
@@ -54,41 +54,32 @@ const leavesUnder = (c: EventCondition, negate = false): EventLeaf[] => {
   return (c.children ?? []).flatMap((ch) => leavesUnder(ch, negate));
 };
 
-const itemOf = (c: EventCondition, depth: number): EventItem[] => {
-  if (c.kind === "MATCH") {
-    const l = leafOf(c);
-    return l ? [l] : [];
-  }
-  if (c.kind === "NOT") {
-    const only = c.children?.length === 1 ? c.children[0] : null;
-    const l = only ? leafOf(only, true) : null;
-    return l ? [l] : leavesUnder(c);
-  }
-  const joiner: Joiner = c.kind === "ANY" ? "OR" : "AND";
-  if (depth >= 1) return [blankGroup(joiner, (c.children ?? []).flatMap((ch) => leavesUnder(ch)))];
-  return [blankGroup(joiner, (c.children ?? []).flatMap((ch) => itemOf(ch, depth + 1)))];
+/** The builder's list for a stored tree: its comparisons, in order; none for no tree. */
+export const fromTree = (tree: EventCondition | null | undefined): EventLeaf[] => (tree && tree.kind ? leavesUnder(tree) : []);
+
+/**
+ * Whether a stored tree says what its flat list says — comparisons all joined by AND. False for a tree with an `ANY`
+ * of more than one branch, or a `NOT` over more than one comparison: the list would read it differently.
+ */
+export const isFlatAnd = (tree: EventCondition | null | undefined): boolean => {
+  if (!tree || !tree.kind) return true;
+  const ok = (c: EventCondition, negated: boolean): boolean => {
+    if (c.kind === "MATCH") return true;
+    const children = c.children ?? [];
+    if (c.kind === "NOT") return children.length === 1 && children[0].kind === "MATCH" && !negated;
+    if (c.kind === "ANY" && children.length > 1) return false;
+    return children.every((ch) => ok(ch, negated));
+  };
+  return ok(tree, false);
 };
 
-/** The builder's root group for a stored tree; an empty AND group for none. */
-export const fromTree = (tree: EventCondition | null | undefined): EventGroup => {
-  if (!tree || !tree.kind) return blankGroup("AND");
-  if (tree.kind === "ALL" || tree.kind === "ANY") {
-    return blankGroup(tree.kind === "ANY" ? "OR" : "AND", (tree.children ?? []).flatMap((ch) => itemOf(ch, 1)));
-  }
-  return blankGroup("AND", itemOf(tree, 1));
+/** The tree for the backend: every complete comparison under one `ALL`; null when none is complete — "always". */
+export const toTree = (leaves: EventLeaf[]): EventCondition | null => {
+  const children = leaves
+    .filter(leafComplete)
+    .map((l): EventCondition => ({ kind: "MATCH", field: l.field, op: l.op, value: l.value.trim() }));
+  return children.length > 0 ? { kind: "ALL", children } : null;
 };
-
-const nodeOf = (item: EventItem): EventCondition | null => {
-  if (item.kind === "leaf") {
-    return leafComplete(item) ? { kind: "MATCH", field: item.field, op: item.op, value: item.value.trim() } : null;
-  }
-  const children = item.items.map(nodeOf).filter((n): n is EventCondition => n !== null);
-  if (children.length === 0) return null;
-  return { kind: item.joiner === "OR" ? "ANY" : "ALL", children };
-};
-
-/** The tree for the backend; null when no condition is complete — "no condition" is "always". */
-export const toTree = (root: EventGroup): EventCondition | null => nodeOf(root);
 
 /** The comparisons of a tree, for words ("Days more than 10"). */
 export const comparisons = (tree: EventCondition | null | undefined): EventLeaf[] => (tree ? leavesUnder(tree) : []);

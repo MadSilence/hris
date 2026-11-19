@@ -75,6 +75,9 @@ export class HrisApiTimeOffRequestsClient {
       answeringOnBehalfOfName: dto.answeringOnBehalfOfName ?? null,
       canDecideAnyway: dto.canDecideAnyway ?? false,
       steps: dto.steps ?? [],
+      // Home's deck reads both ("wants 3 days of vacation", "3 working days"); the mapping dropped them (walk of 2026-11-19).
+      leaveTypeName: dto.leaveTypeName ?? null,
+      workingDays: dto.workingDays ?? false,
     };
   }
 

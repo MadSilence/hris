@@ -12,6 +12,9 @@ import { dialogWidths } from "./dialog";
  * consequence, the button repeats the verb. When the action destroys something, `AlertDialogAction` takes
  * `destructive` — the red fill, the only place it exists — and the dialog then has no accent button.
  * Like every dialog it fades in and does not animate out (styles/globals.css says why).
+ *
+ * One column, 16 apart — title → text, paragraph → paragraph, text → buttons — in every confirmation (the designers' G12,
+ * 2026-11-18, product-wide): the header and the content both step 16.
  */
 function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
@@ -50,7 +53,7 @@ const AlertDialogContent = React.forwardRef<
       data-slot="alert-dialog-content"
       data-motion="dialog"
       className={cn(
-        "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6",
+        "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4",
         "rounded-panel bg-overlay p-6 text-primary shadow-dialog",
         dialogWidths.sm,
         className,
@@ -62,7 +65,7 @@ const AlertDialogContent = React.forwardRef<
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 
 function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="alert-dialog-header" className={cn("flex flex-col gap-2 text-left", className)} {...props} />;
+  return <div data-slot="alert-dialog-header" className={cn("flex flex-col gap-4 text-left", className)} {...props} />;
 }
 
 function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">) {

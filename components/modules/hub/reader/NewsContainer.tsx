@@ -3,15 +3,13 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { NodRing } from "@/components/desact/nod";
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { Button } from "@/components/desact/button";
-import { FilterChip } from "@/components/ui/FilterChip";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
-import type { PostCard, PostType } from "@/models/hub";
+import type { PostCard } from "@/models/hub";
 import { useHubHome, useHubPosts } from "../hooks";
-import { BackLink, HubPage, HubTitle, LoadingBlock, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
+import { BackLink, HubLoadError, HubPage, HubState, HubTitle, LoadingBlock, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
 import { useFeedScope } from "./HomeParts";
 import { FeedScopeSwitch } from "./HubHomeContainer";
 
@@ -30,30 +28,27 @@ export const groupByMonth = (posts: PostCard[]): MonthGroup[] => {
   return groups;
 };
 
-const TYPES: (PostType | null)[] = [null, "ANNOUNCEMENT", "POLICY_UPDATE", "EVENT"];
-
 /**
- * CH02, All news: For me / Everyone, the type chips, search, the pinned post, then the posts by month — 20 at a time,
- * the next 20 as the reader nears the end.
+ * CH02, All news: For me / Everyone, search, the pinned post, then the posts by month — 20 at a time, the next 20 as
+ * the reader nears the end. Posts have no type, so there are no type chips (FIXES Q1).
  */
 export const NewsContainer: React.FC = () => {
   const t = useTranslations("hub");
   const dates = useHubDates();
   const [scope, setScope] = useFeedScope();
-  const [type, setType] = React.useState<PostType | null>(null);
   const [query, setQuery] = React.useState("");
   const q = useDebouncedValue(query.trim(), 300);
-  const posts = useHubPosts(scope, type, q);
+  const posts = useHubPosts(scope, q);
   const sentinel = React.useRef<HTMLDivElement>(null);
 
   const items = React.useMemo(() => posts.data?.pages.flatMap((p) => p.items) ?? [], [posts.data]);
   // The pinned post is the company's one message to everybody: it stays on top under "For me" as well, where the list
   // itself holds only what is written to the reader (WALK_QUESTIONS § 34 (a)). The hub's home answers it either way.
   const home = useHubHome(scope);
-  const pinned = !q && !type ? items.find((p) => p.pinned) ?? (scope === "FOR_ME" ? home.data?.pinned ?? null : null) : null;
+  const pinned = !q ? items.find((p) => p.pinned) ?? (scope === "FOR_ME" ? home.data?.pinned ?? null : null) : null;
   const rest = pinned ? items.filter((p) => p.id !== pinned.id) : items;
   const groups = groupByMonth(rest);
-  const filtered = Boolean(q) || type !== null;
+  const searched = Boolean(q);
 
   React.useEffect(() => {
     const el = sentinel.current;
@@ -74,47 +69,33 @@ export const NewsContainer: React.FC = () => {
     return new Date(first).getFullYear() === now.getFullYear() ? dates.month(first) : dates.monthYear(first);
   };
 
-  const typeLabel = (value: PostType | null) =>
-    value === null ? t("news.types.all") : value === "ANNOUNCEMENT" ? t("news.types.announcements") : value === "POLICY_UPDATE" ? t("news.types.policyUpdates") : t("news.types.events");
-
   return (
     <HubPage width="column">
       <BackLink href="/hub" label={t("home.title")} />
       <div className="mt-3 flex items-center gap-4">
         <HubTitle>{t("news.title")}</HubTitle>
-        <SearchBox className="ml-auto w-60" value={query} onChange={setQuery} aria-label={t("news.search")} />
+        {/* CH02's box is 280 × 36 (FIXES A7). */}
+        <SearchBox className="ml-auto w-[280px]" fullWidth size="md" value={query} onChange={setQuery} aria-label={t("news.search")} />
       </div>
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="mt-7 flex items-center">
         <FeedScopeSwitch value={scope} onChange={setScope} />
-        <span aria-hidden className="h-6 w-px bg-divider" />
-        {TYPES.map((value) => (
-          <FilterChip key={value ?? "all"} selected={type === value} onClick={() => setType(value)}>
-            {typeLabel(value)}
-          </FilterChip>
-        ))}
       </div>
 
-      <div className="mt-8 flex flex-col gap-8">
+      <div className="mt-9 flex flex-1 flex-col gap-8">
         {posts.isLoading ? (
           <LoadingBlock skeleton={<SkeletonRows count={6} height="h-20" />} />
         ) : posts.isError ? (
-          <ErrorState error={posts.error} title={t("news.error")} onRetry={() => void posts.refetch()} />
+          <HubLoadError error={posts.error} title={t("news.error")} onRetry={() => void posts.refetch()} />
         ) : items.length === 0 && !pinned ? (
-          filtered ? (
-            <NoResults
-              scene="no-match-s"
+          searched ? (
+            // A search, so the magnifier (FIXES U4), centred in the free area under the controls.
+            <HubState
+              scene="no-results-s"
+              size="s"
               title={t("news.noMatch")}
-              hint=""
               action={
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setQuery("");
-                    setType(null);
-                  }}
-                >
-                  {t("news.clearFilters")}
+                <Button type="button" variant="secondary" onClick={() => setQuery("")}>
+                  {t("news.clearSearch")}
                 </Button>
               }
             />
@@ -135,10 +116,15 @@ export const NewsContainer: React.FC = () => {
           )
         ) : (
           <>
-            {pinned && <PinnedPost post={pinned} wide />}
+            {/* Under the pinned post: 28, a hairline, then 28 to the first group (FIXES C3). */}
+            {pinned && (
+              <div className="-mb-1 border-b border-divider pb-7">
+                <PinnedPost post={pinned} wide />
+              </div>
+            )}
             {groups.map((group) => (
               <section key={group.key} className="flex flex-col gap-1">
-                <h2 className="text-card-title text-primary">{monthTitle(group)}</h2>
+                <h2 className="text-hint font-medium text-tertiary">{monthTitle(group)}</h2>
                 <ul className="flex flex-col">
                   {group.posts.map((post) => (
                     <NewsRow key={post.id} post={post} withSave />

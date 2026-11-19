@@ -27,7 +27,7 @@ const OnlyWhen: React.FC<TriggerPartProps & { event: AutomationEvent }> = ({ tri
     <Field label={t("event.onlyWhen")} error={errorFor(t, problems, "trigger.eventConditions")}>
       {shown || trigger.eventConditions ? (
         <EventConditionBuilder value={trigger.eventConditions} fields={fields} autoOpen={!trigger.eventConditions}
-          onChange={(eventConditions) => onTrigger({ eventConditions })} />
+          onEmpty={() => setShown(false)} onChange={(eventConditions) => onTrigger({ eventConditions })} />
       ) : (
         <AddConditionButton onClick={() => setShown(true)}>{t("conditions.add")}</AddConditionButton>
       )}
@@ -48,18 +48,30 @@ export const TimeOffFields: React.FC<TriggerPartProps> = (props) => {
   const anchor = trigger.anchor ?? "EVENT";
   return (
     <FieldStack>
-      <Field label={t("event.timeOffIs")} labelId={labelId} error={errorFor(t, problems, "trigger.event")}>
-        <SegmentedControl<TimeOffEvent>
-          aria-labelledby={labelId}
-          value={event}
-          onChange={(next) => onTrigger({ event: next })}
-          options={TIME_OFF_EVENTS.map((e) => ({ value: e, label: t(`event.timeOff.${e}`) }))}
-        />
+      {/* C24: one row — "Time off is" and a select; four options are a dropdown, not a switch. */}
+      <Field error={errorFor(t, problems, "trigger.event")}>
+        <div className="flex items-center justify-between gap-3">
+          <span id={labelId} className="text-body font-medium text-primary">
+            {t("event.timeOffIs")}
+          </span>
+          <div className="w-[216px] shrink-0">
+            <CompactPick
+              size="md"
+              options={TIME_OFF_EVENTS.map((e) => ({ value: e, label: t(`event.timeOff.${e}`) }))}
+              value={event}
+              onChange={(next) => onTrigger({ event: next as TimeOffEvent })}
+              placeholder={t("event.timeOff.TIME_OFF_REQUESTED")}
+              emptyLabel={t("common.noResults")}
+              ariaLabel={t("event.timeOffIs")}
+            />
+          </div>
+        </div>
       </Field>
       <OnlyWhen {...props} event={event} />
       <PartDivider />
       <Field label={t("event.countFrom")} labelId={anchorId} error={errorFor(t, problems, "trigger.anchor")}>
         <SegmentedControl<EventAnchor>
+          size="window"
           aria-labelledby={anchorId}
           value={anchor}
           onChange={(next) => onTrigger({ anchor: next })}

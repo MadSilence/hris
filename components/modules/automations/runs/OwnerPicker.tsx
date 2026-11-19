@@ -36,7 +36,7 @@ export const OwnerPicker: React.FC<{ busy: boolean; onPick: (userId: string) => 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" size="sm" loading={busy} disabled={busy}>
+        <Button type="button" loading={busy} disabled={busy}>
           {t("run.chooseOwner")}
         </Button>
       </PopoverTrigger>
@@ -67,7 +67,7 @@ export const OwnerPicker: React.FC<{ busy: boolean; onPick: (userId: string) => 
                 >
                   <Avatar className="size-6">
                     {person.avatarUrl ? <AvatarImage src={person.avatarUrl} alt="" /> : null}
-                    <AvatarFallback name={name} className="text-hint">
+                    <AvatarFallback name={name}>
                       {initialsOf(name)}
                     </AvatarFallback>
                   </Avatar>

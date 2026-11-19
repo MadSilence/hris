@@ -27,11 +27,11 @@ export const SentenceCard: React.FC<{ parts: SentencePart[]; selectedStepId: str
   }, [parts, expanded]);
 
   return (
-    <section aria-label={t("sentence.label")} className="rounded-card border border-divider bg-card px-6 py-5 shadow-card">
+    <section aria-label={t("sentence.label")} className="rounded-card border border-divider bg-card px-5 py-4 shadow-card">
       <p
         ref={textRef}
         data-test="sentence"
-        className={cn("font-heading text-section-title text-primary", !expanded && "line-clamp-2")}
+        className={cn("font-heading text-section-title text-secondary", !expanded && "line-clamp-2")}
       >
         {parts.map((part, i) =>
           part.chip || part.placeholder ? (

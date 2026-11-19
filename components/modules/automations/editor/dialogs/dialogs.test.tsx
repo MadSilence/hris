@@ -42,7 +42,7 @@ describe("TurnOnDialog", () => {
   it("says who it runs for, what it starts with and who hears from it (F4)", () => {
     const props = turnOn();
     const dialog = screen.getByRole("dialog", { name: "Turn on Long time off approval?" });
-    expect(within(dialog).getByText("It runs for 48 people in Poland and Lithuania.")).toBeInTheDocument();
+    expect(within(dialog).getByText((_, el) => el?.tagName === "SPAN" && /^It runs for 48.people in Poland and Lithuania\.$/.test(el.textContent ?? ""))).toBeInTheDocument();
     expect(within(dialog).getByText("It starts with new requests. Requests sent before today aren't affected.")).toBeInTheDocument();
     expect(within(dialog).getByText("Managers and HR Admin will get requests and notifications from it.")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Turn on" }));
@@ -69,7 +69,7 @@ describe("TurnOnDialog", () => {
 
   it("names the steps a run will skip, and shows a refusal inside the dialog", () => {
     turnOn({ notConnected: ["Ask to sign the handbook"], error: "We couldn't turn it on. Try again.", everyone: true });
-    expect(screen.getByText("It runs for everyone.")).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.tagName === "SPAN" && /^It runs for \d+.(people|person)\.$/.test(el.textContent ?? ""))).toBeInTheDocument();
     expect(screen.getByText("1 step isn't connected yet, so runs skip it: Ask to sign the handbook.")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("We couldn't turn it on. Try again.");
   });

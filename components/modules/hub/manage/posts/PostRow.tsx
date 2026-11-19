@@ -33,10 +33,13 @@ import {
   unpublishHubPostAction,
 } from "../../actions";
 import { unwrapHub, useInvalidateHub } from "../../hooks";
-import { PostTile, TruncatedTitle, useAudienceLabel, useHubDates } from "../../shared";
+import { PostTile, TruncatedTitle, useHubDates, useRowAudience } from "../../shared";
 
-/** A post's status as a pill: Published, Scheduled with its date and time, or Draft (dashed). */
-export const PostStatusPill: React.FC<{ post: Pick<ManagePostRow, "status" | "publishAt"> }> = ({ post }) => {
+/**
+ * A post's status as a pill: Published, Scheduled — with its date and time on CM02, the word alone on CM01 (FIXES H4) —
+ * or Draft: no fill, a dashed #9C9CA3 border, secondary text (A12).
+ */
+export const PostStatusPill: React.FC<{ post: Pick<ManagePostRow, "status" | "publishAt">; withTime?: boolean }> = ({ post, withTime = true }) => {
   const t = useTranslations("hub");
   const dates = useHubDates();
   if (post.status === "PUBLISHED") return <StatusBadge status="approved" label={t("manage.status.published")} />;
@@ -44,10 +47,14 @@ export const PostStatusPill: React.FC<{ post: Pick<ManagePostRow, "status" | "pu
     return (
       <StatusBadge
         status="scheduled"
-        label={post.publishAt ? t("manage.status.scheduledAt", { date: dates.short(post.publishAt), time: dates.time(post.publishAt) }) : t("manage.status.scheduled")}
+        label={
+          withTime && post.publishAt
+            ? t("manage.status.scheduledAt", { date: dates.short(post.publishAt), time: dates.time(post.publishAt) })
+            : t("manage.status.scheduled")
+        }
       />
     );
-  return <StatusBadge status="draft" label={t("manage.status.draft")} />;
+  return <StatusBadge status="draft" label={t("manage.status.draft")} className="border-disabled bg-transparent text-secondary" />;
 };
 
 /** The row menu's acts (CM02): immediate ones with an Undo toast; Duplicate and Delete confirm first. */
@@ -112,6 +119,8 @@ export const PostRowMenu: React.FC<{ post: ManagePostRow; onEdit: () => void }> 
 
   return (
     <>
+      {/* The trigger's icon 20 secondary in its 32 button (FIXES I4). */}
+      <span className="flex shrink-0 [&_button>svg]:size-5">
       <RowActionsMenu label={t("manage.postMenu", { title: post.title })} stopPropagation>
         <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onEdit}>
           {t("manage.menu.edit")}
@@ -149,6 +158,7 @@ export const PostRowMenu: React.FC<{ post: ManagePostRow; onEdit: () => void }> 
           </RowActionDestructive>
         )}
       </RowActionsMenu>
+      </span>
       <ConfirmActionModal
         isOpen={confirm !== null}
         title={confirm === "duplicate" ? t("manage.confirm.duplicateTitle", { title: post.title }) : t("manage.confirm.deleteTitle", { title: post.title })}
@@ -164,12 +174,13 @@ export const PostRowMenu: React.FC<{ post: ManagePostRow; onEdit: () => void }> 
 };
 
 /**
- * A post on Manage hub (CM02 88 high; CM01 as `NewsRow`): the cover or type tile, the title, "{author} · {audience}"
- * with "· pinned", the status pill, the date and the row menu. The row opens the post in CM05.
+ * A post on Manage hub (CM02; CM01 as `NewsRow`): the cover or the megaphone, the title, 4, "{author} · {audience}"
+ * with "· pinned", the status pill in a 110 column, the date in a 56 one and the row menu; padding 16 0 and a hairline
+ * under every row (FIXES A10, H2, I2, I3). The row opens the post in CM05.
  */
 export const ManagePostRowView: React.FC<{ post: ManagePostRow; onEdit: (id: string) => void; compact?: boolean }> = ({ post, onEdit, compact = false }) => {
   const t = useTranslations("hub");
-  const audience = useAudienceLabel();
+  const audience = useRowAudience();
   const dates = useHubDates();
   const today = new Date().toDateString();
   const when = post.publishedAt ?? post.createdAt;
@@ -187,18 +198,24 @@ export const ManagePostRowView: React.FC<{ post: ManagePostRow; onEdit: (id: str
       : t(post.pinned ? "manage.meta.authorPinned" : "manage.meta.author", { author: post.author?.name ?? "", audience: audience(post.audienceLabel) });
   return (
     <li
-      className={`relative flex cursor-pointer items-center gap-4 border-b border-divider last:border-b-0 hover:bg-row-hover ${compact ? "min-h-20" : "min-h-[88px]"}`}
+      className="relative flex cursor-pointer items-center gap-4 border-b border-divider py-4 hover:bg-row-hover"
       onClick={() => onEdit(post.id)}
     >
-      <PostTile coverFileId={post.coverFileId} type={post.type} size={compact ? 48 : 56} alt={t("news.photo")} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <PostTile coverFileId={post.coverFileId} size={compact ? 48 : 56} alt={t("news.photo")} className="rounded-card" />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <button type="button" className="flex min-w-0 text-left text-card-title text-primary" onClick={() => onEdit(post.id)}>
           <TruncatedTitle title={post.title || t("manage.untitled")} />
         </button>
         <span className="truncate text-hint text-tertiary">{meta}</span>
       </div>
-      <PostStatusPill post={post} />
-      {!compact && <span className="w-16 shrink-0 text-right text-label text-tertiary tabular-nums">{date}</span>}
+      {compact ? (
+        <PostStatusPill post={post} withTime={false} />
+      ) : (
+        <span className="flex w-[110px] shrink-0">
+          <PostStatusPill post={post} />
+        </span>
+      )}
+      {!compact && <span className="w-14 shrink-0 text-right text-hint text-tertiary tabular-nums">{date}</span>}
       {!compact && <PostRowMenu post={post} onEdit={() => onEdit(post.id)} />}
     </li>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { displayLocale, useDisplayLocale } from "@/lib/date";
+import { displayLocale, twelveHourClock, useDisplayLocale } from "@/lib/date";
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -328,5 +328,7 @@ const formatWhen = (iso: string, locale?: string): string => {
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    // The company's clock: 12-hour in the US, 24-hour elsewhere (lib/date.ts `formatTime`).
+    hourCycle: twelveHourClock({ language: locale }) ? "h12" : "h23",
   });
 };

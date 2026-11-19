@@ -13,12 +13,21 @@ const SIGNED_IN = true;
 const SIGNED_OUT = false;
 
 describe("routeForHost — the root", () => {
-  it.each(["/", "/login", "/pricing", "/trial", "/login/find", "/login/problem", "/about"])(
+  it.each(["/", "/login", "/pricing", "/signup", "/signup/verify", "/signup/company", "/login/find", "/login/problem",
+    "/login/unknown", "/about"])(
     "shows %s",
     (path) => {
       expect(routeForHost(root, path, "", SIGNED_OUT)).toEqual({ type: "next" });
     },
   );
+
+  it.each([
+    ["/trial", "", "/signup"],
+    ["/trial", "?provider=GOOGLE", "/signup?provider=GOOGLE"],
+    ["/trial/company", "", "/signup/company"],
+  ])("sends the trial's old address %s%s to %s", (path, search, to) => {
+    expect(routeForHost(root, path, search, SIGNED_OUT)).toEqual({ type: "redirect", to });
+  });
 
   it.each(["/dashboard", "/organization/people", "/settings/general/company", "/invite", "/login/reset",
     "/login/forgot", "/preboarding", COMPANY_LOGIN_ROUTE, LEAVE_FOR_ROOT_ROUTE])(
@@ -54,7 +63,7 @@ describe("routeForHost — a company's address", () => {
     Not a redirect: Next turns a middleware Location on its own origin into a relative one, and locally
     the root is that origin — `acme.localhost:3000/pricing` answered `Location: /pricing` in a loop.
   */
-  it.each(["/pricing", "/trial", "/login/find", "/login/problem"])("sends %s to the root through a route handler", (path) => {
+  it.each(["/pricing", "/signup", "/trial", "/login/find", "/login/problem", "/login/unknown"])("sends %s to the root through a route handler", (path) => {
     const route = routeForHost(acme, path, "?token=x", SIGNED_OUT);
 
     expect(route).toEqual({ type: "rewrite", pathname: `${LEAVE_FOR_ROOT_ROUTE}${path}` });

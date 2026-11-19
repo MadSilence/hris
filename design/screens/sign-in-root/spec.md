@@ -95,3 +95,9 @@ See "Common". A2's company tile is new (`RememberedCompany`): 56 logo tile, name
 
 ## Open questions
 - Q-14 (A2 needs the remembered company's public logo and name) — blocks nothing; without it A2 shows the address only.
+
+## Built from design-fixes-login-1
+- **An address with no company** (R3, the owner's call of 19 Nov): A1 now asks before it follows the address, and stays with the field error "We can’t find that company. Check the address, or find your company by email." ("find your company by email" → A3). This replaces "goes to that address's own 'no such company' page" under States → Error. A company address visited directly (`unknown.<root>/login` and every step under it) is sent to the root at `/login/unknown?address=unknown`: A1 with the address typed in and the same error. If the check itself cannot be made (the backend is down), A1 follows the address as before.
+- **"Log in to another one"** (R4) goes to the root the installation is configured with (`APP_ROOT_DOMAIN`, `APP_SCHEME`); nothing in the code names noddo.so. The sandbox company it was checked on lives under the production root, so its root *is* noddo.so.
+- **The address ending** (R1) sits on Mist #F7F7F8 (`--surface-subtle`) with a border-field divider, as board RA1.
+- **Terms and Privacy policy** (B3, sign-in-registration) are still plain text: the pages do not exist yet.

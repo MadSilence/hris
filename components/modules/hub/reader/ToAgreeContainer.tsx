@@ -4,14 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
-import { EmptyState } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { dateToISO, isoToDate } from "@/lib/date";
 import type { AgreementRow } from "@/models/hub";
 import { useMyAgreements } from "../hooks";
-import { BackLink, HubPage, HubTitle, hubIcon, IconTile, LoadingBlock, SkeletonRows, useHubDates } from "../shared";
+import { BackLink, HubLoadError, HubPage, HubSegmented, HubState, HubTitle, hubIcon, IconTile, LoadingBlock, SkeletonRows, useHubDates } from "../shared";
 
 /**
  * CH03's two groups: **This week** — due in the next 7 days, or already overdue — and **Later**. An empty group
@@ -40,7 +37,8 @@ const AgreementRowView: React.FC<{ row: AgreementRow; agreed?: boolean }> = ({ r
         ? t("toAgree.agreedIn", { version: row.agreedVersion, month: dates.month(row.previousAgreedAt) })
         : t("toAgree.new");
   return (
-    <li className="relative flex min-h-[84px] items-center gap-4 border-b border-divider py-3 last:border-b-0">
+    // Padding 20 0, a hairline under every row, 18 from the tile to the text (FIXES D4).
+    <li className="relative flex items-center gap-4.5 border-b border-divider py-5">
       <IconTile icon={hubIcon(row.icon)} color={row.color} size={44} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Link href={`/hub/handbook/${row.pageId}`} className="line-clamp-2 text-card-title text-primary no-underline after:absolute after:inset-0 hover:underline">
@@ -56,13 +54,14 @@ const AgreementRowView: React.FC<{ row: AgreementRow; agreed?: boolean }> = ({ r
         <span className="shrink-0 text-label text-tertiary">{t("toAgree.agreedOn", { date: dates.short(row.agreedAt) })}</span>
       ) : (
         <>
+          {/* "By 27 Nov" 14/20 secondary in a fixed 96 column, 18 before Read (FIXES D5). */}
           {row.overdue ? (
             <span className="flex shrink-0 items-center gap-2">
               <StatusBadge status="declined" label={t("toAgree.overdue")} />
-              <span className="text-label text-tertiary">{t("toAgree.was", { date: dates.short(row.dueOn) })}</span>
+              <span className="text-body text-secondary">{t("toAgree.was", { date: dates.short(row.dueOn) })}</span>
             </span>
           ) : (
-            row.dueOn && <span className="shrink-0 text-label text-tertiary">{t("toAgree.by", { date: dates.short(row.dueOn) })}</span>
+            <span className="w-24 shrink-0 text-body text-secondary">{row.dueOn ? t("toAgree.by", { date: dates.short(row.dueOn) }) : null}</span>
           )}
           <Button asChild variant="secondary" size="sm" className="relative z-10">
             <Link href={`/hub/handbook/${row.pageId}`} className="no-underline">
@@ -82,11 +81,11 @@ const Group: React.FC<{ title: string; rows: AgreementRow[] }> = ({ title, rows 
   const shown = all ? rows : rows.slice(0, 5);
   return (
     <section className="flex flex-col">
-      <h2 className="flex items-baseline gap-2">
+      <h2 className="flex items-baseline gap-2.5">
         <span className="text-card-title text-primary">{title}</span>
         <span className="text-hint text-tertiary">{t("handbook.pages", { count: rows.length })}</span>
       </h2>
-      <ul className="flex flex-col">
+      <ul className="mt-2 flex flex-col">
         {shown.map((row) => (
           <AgreementRowView key={row.pageId} row={row} />
         ))}
@@ -108,34 +107,37 @@ export const ToAgreeContainer: React.FC = () => {
   const waiting = agreements.data?.waiting ?? [];
   const agreed = [...(agreements.data?.agreed ?? [])].sort((a, b) => (b.agreedAt ?? "").localeCompare(a.agreedAt ?? ""));
   const groups = groupWaiting(waiting, isoToDate(dateToISO(new Date())));
+  // Counts only once they are known: never "· 0" over a wait or an error (FIXES U2).
+  const loaded = Boolean(agreements.data);
 
   return (
     <HubPage width="column">
       <BackLink href="/hub" label={t("home.title")} />
-      <div className="mt-3 flex items-start gap-6">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+      {/* The switch sits on the title block's bottom line, 16 from it (FIXES D1). */}
+      <div className="mt-3 flex items-end gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <HubTitle>{t("toAgree.title")}</HubTitle>
           <p className="text-body text-secondary">{t("toAgree.lead")}</p>
         </div>
-        <SegmentedControl
-          fill={false}
+        <HubSegmented
           aria-label={t("toAgree.title")}
           value={tab}
           onChange={setTab}
           options={[
-            { value: "WAITING", label: t("toAgree.waitingTab", { count: waiting.length }) },
-            { value: "AGREED", label: t("toAgree.agreedTab", { count: agreed.length }) },
+            { value: "WAITING", label: loaded ? t("toAgree.waitingTab", { count: waiting.length }) : t("toAgree.waiting") },
+            { value: "AGREED", label: loaded ? t("toAgree.agreedTab", { count: agreed.length }) : t("toAgree.agreed") },
           ]}
         />
       </div>
-      <div className="mt-8 flex flex-col gap-8">
+      <div className="mt-10 flex flex-1 flex-col gap-10">
         {agreements.isLoading ? (
           <LoadingBlock skeleton={<SkeletonRows count={5} height="h-20" />} />
         ) : agreements.isError ? (
-          <ErrorState error={agreements.error} onRetry={() => void agreements.refetch()} />
+          <HubLoadError error={agreements.error} title={t("toAgree.error")} onRetry={() => void agreements.refetch()} />
         ) : tab === "WAITING" ? (
           waiting.length === 0 ? (
-            <EmptyState scene="all-caught-up" title={t("toAgree.emptyTitle")} description={t("toAgree.emptyLine")} />
+            // Centred in the free area under the title row (FIXES D6).
+            <HubState scene="all-caught-up" size="m" titleSize="section" title={t("toAgree.emptyTitle")} line={t("toAgree.emptyLine")} />
           ) : (
             <>
               <Group title={t("toAgree.thisWeek")} rows={groups.thisWeek} />
@@ -143,7 +145,7 @@ export const ToAgreeContainer: React.FC = () => {
             </>
           )
         ) : agreed.length === 0 ? (
-          <EmptyState scene="all-caught-up" title={t("toAgree.agreedEmpty")} description="" />
+          <HubState scene="all-caught-up" size="m" titleSize="section" title={t("toAgree.agreedEmpty")} />
         ) : (
           <ul className="flex flex-col">
             {agreed.map((row) => (

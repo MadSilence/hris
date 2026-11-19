@@ -167,12 +167,13 @@ export const RunWindow: React.FC<RunWindowProps> = ({ runId, definition, canMana
           }
         />
         {canManage && data.status === "FAILED" && (
-          <div className="mt-4 flex flex-col items-start gap-2 border-t border-divider pt-4">
-            <p className="text-body text-secondary">{t("run.retryHint")}</p>
+          // V1b: one row under a divider — the hint 13/18 tertiary on the left, Retry the run on the right.
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-divider pt-3.5">
+            <p className="text-label font-normal text-tertiary">{t("run.retryHint")}</p>
             <Button
               type="button"
               variant="secondary"
-              size="sm"
+              className="shrink-0"
               loading={retry.isPending}
               disabled={busy}
               onClick={() => void act(() => retry.mutateAsync(data.id), t("run.retried"))}
@@ -263,7 +264,7 @@ const RunSteps: React.FC<RunStepsProps> = ({ run, definition, canManage, busy, o
             actions={
               canManage && state === "FAILED" ? (
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => onSkip(step)}>
+                  <Button type="button" variant="secondary" disabled={busy} onClick={() => onSkip(step)}>
                     {t("run.skipStep")}
                   </Button>
                   {OWNED.has(step.actionType) && (
@@ -290,17 +291,18 @@ const StepLine: React.FC<{
   const t = useTranslations("automationsRuns");
   const icon = STATE_ICONS[state];
   return (
-    <li className="flex items-start gap-2.5" data-state={state}>
-      <Icon icon={icon.icon} size="sm" label={t(`run.status.${state}`)} className={cn("mt-0.5 shrink-0", icon.className)} />
+    // V1b: the state icon 20, 12 from the step; the step's name 500; its reason 13/18 secondary.
+    <li className="flex items-start gap-3" data-state={state}>
+      <Icon icon={icon.icon} size="md" label={t(`run.status.${state}`)} className={cn("shrink-0", icon.className)} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start gap-2">
-          <p className={cn("min-w-0 flex-1 text-body", state === "NOT_STARTED" ? "text-secondary" : "text-primary")}>
+          <p className={cn("min-w-0 flex-1 text-body font-medium", state === "NOT_STARTED" ? "text-secondary" : "text-primary")}>
             {number && <span className="mr-1.5 text-hint font-semibold text-tertiary">{number}</span>}
             {title}
           </p>
           {time && <span className="shrink-0 text-hint text-tertiary">{time}</span>}
         </div>
-        {reason && <p className="text-hint text-tertiary">{reason}</p>}
+        {reason && <p className="text-label font-normal text-secondary">{reason}</p>}
         {actions}
       </div>
     </li>

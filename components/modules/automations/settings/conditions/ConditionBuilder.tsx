@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useAccess } from "@/components/auth/useAccess";
@@ -8,7 +9,7 @@ import { buildAudienceFields, type AudienceField, type AudienceOperator } from "
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import type { FieldDTO } from "@/models/user/fields";
 import type { ConditionBuilderProps } from "../../contracts";
-import { AddConditionButton, CompactPick, ConditionCard, ConditionGroup, ConditionJoiner, type PickOption } from "./chrome";
+import { AddConditionButton, CompactPick, ConditionCard, ConditionGroup, ConditionJoiner, PendingPick, type PickOption } from "./chrome";
 import { ConditionValue } from "./ConditionValue";
 import { ConditionSummaryList } from "./ConditionSummary";
 import { MatchCount } from "./MatchCount";
@@ -60,8 +61,10 @@ export const ConditionBuilder: React.FC<
     autoOpen?: boolean;
     /** The last condition was removed — a caller that shows "Add a condition" in its place goes back to it. */
     onEmpty?: () => void;
+    /** Inside a split's path box (S10): the operator is 84 wide so the value keeps room. */
+    narrow?: boolean;
   }
-> = ({ value, readOnly = false, onChange, count, autoOpen = false, onEmpty }) => {
+> = ({ value, readOnly = false, onChange, count, autoOpen = false, onEmpty, narrow = false }) => {
   const t = useTranslations("automationsSettings");
   const { catalog, dtos, isLoading } = useConditionFields();
   const fieldOptions = useFieldOptions(catalog);
@@ -117,7 +120,7 @@ export const ConditionBuilder: React.FC<
       <ConditionGroup>
         {rows.map((row, i) => (
           <React.Fragment key={row.id}>
-            {i > 0 && <ConditionJoiner value="AND" />}
+            {i > 0 && <ConditionJoiner />}
             <ConditionRowCard
               row={row}
               catalog={catalog}
@@ -125,6 +128,7 @@ export const ConditionBuilder: React.FC<
               fieldOptions={fieldOptions}
               loading={isLoading}
               autoOpen={openRow === row.id}
+              narrow={narrow}
               onPickField={(key) => pickField(row.id, key)}
               onPatch={(changes) => patch(row.id, changes)}
               onRemove={() => remove(row.id)}
@@ -145,13 +149,16 @@ const ConditionRowCard: React.FC<{
   fieldOptions: PickOption[];
   loading: boolean;
   autoOpen: boolean;
+  narrow: boolean;
   onPickField: (key: string) => void;
   onPatch: (changes: Partial<ConditionRow>) => void;
   onRemove: () => void;
-}> = ({ row, catalog, dtos, fieldOptions, loading, autoOpen, onPickField, onPatch, onRemove }) => {
+}> = ({ row, catalog, dtos, fieldOptions, loading, autoOpen, narrow, onPickField, onPatch, onRemove }) => {
   const t = useTranslations("automationsSettings");
+  const operatorWidth = narrow ? "w-[84px]" : "w-[108px]";
   const field = catalog.find((f) => f.key === row.key) ?? null;
   const dto = dtos.find((d) => d.id === row.key) ?? null;
+  const [fieldOpen, setFieldOpen] = React.useState(autoOpen);
   return (
     <ConditionCard
       removeLabel={t("conditions.remove")}
@@ -164,14 +171,15 @@ const ConditionRowCard: React.FC<{
           placeholder={t("conditions.pickField")}
           emptyLabel={t("common.noFieldsMatch")}
           ariaLabel={t("conditions.field")}
-          defaultOpen={autoOpen}
+          open={fieldOpen}
+          onOpenChange={setFieldOpen}
           loading={loading}
         />
       }
       second={
         field && row.op ? (
           <>
-            <div className="w-28 shrink-0">
+            <div className={cn(operatorWidth, "shrink-0")}>
               <CompactPick
                 options={field.operators.map((op) => ({ value: op, label: t(`operator.${op}`) }))}
                 value={row.op}
@@ -184,15 +192,13 @@ const ConditionRowCard: React.FC<{
             <ConditionValue field={field} dto={dto} row={row} onPatch={onPatch} />
           </>
         ) : (
-          // Dimmed until a field is picked (PRODUCT-RULES § Controls).
+          // D5: they look like any select; pressing one before a field is picked opens the field list.
           <>
-            <div className="w-28 shrink-0">
-              <CompactPick options={[]} value={null} onChange={() => undefined} placeholder={t("conditions.is")}
-                emptyLabel="" ariaLabel={t("conditions.operator")} disabled />
+            <div className={cn(operatorWidth, "shrink-0")}>
+              <PendingPick placeholder={t("conditions.is")} ariaLabel={t("conditions.operator")} onPress={() => setFieldOpen(true)} />
             </div>
-            <div className="min-w-28 flex-1">
-              <CompactPick options={[]} value={null} onChange={() => undefined} placeholder={t("conditions.pickValue")}
-                emptyLabel="" ariaLabel={t("conditions.value")} disabled />
+            <div className="min-w-0 flex-1">
+              <PendingPick placeholder={t("conditions.pickValue")} ariaLabel={t("conditions.value")} onPress={() => setFieldOpen(true)} />
             </div>
           </>
         )

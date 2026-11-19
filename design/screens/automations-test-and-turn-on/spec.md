@@ -123,3 +123,9 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
   V6 says "cases" instead of "requests"; "Delete test items" says emails stay (an email cannot be unsent). Turning on
   with unsaved changes saves them first.
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- V6: the nouns for date, person and other triggers are the code's (Q-46).
+- F6: for a made-up case with no recipient, line 1 falls back to the step's name.

@@ -2,14 +2,18 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { ArrowDown01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
 import { partsToISO, useDisplayLocale, useShortDates, useWeekStartsOn } from "@/lib/date";
 import type { ScheduleFrequency, TriggerSpec } from "@/models/automations";
 import { cn } from "@/lib/cn";
 import { CompactPick } from "../conditions/chrome";
-import { Field, FieldStack, Hint, Indented, PartDivider, TimeInput } from "../parts/parts";
+import { Field, FieldStack, Hint, Indented, TimeInput } from "../parts/parts";
 import { errorFor } from "../parts/problems";
 import type { TriggerPartProps } from "./triggerPartProps";
 
@@ -46,14 +50,29 @@ const allZones = (): string[] => {
   return intl.supportedValuesOf?.("timeZone") ?? [];
 };
 
-const dayButton = (picked: boolean) =>
-  cn(
-    "inline-flex h-8 min-w-8 items-center justify-center rounded-control border text-label tabular-nums",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-    picked ? "border-accent bg-accent text-on-accent" : "border-field bg-card text-primary hover:border-strong hover:bg-subtle",
-  );
+/** A day cell (C25, C31): 32 high, 13/20, no border; the picked day a 28 circle in the muted accent, 600. */
+const DayCell: React.FC<{ day: number; picked: boolean; onPick: () => void }> = ({ day, picked, onPick }) => (
+  <button
+    type="button"
+    aria-pressed={picked}
+    onClick={onPick}
+    className="group flex h-8 items-center justify-center rounded-control outline-none focus-visible:shadow-focus"
+  >
+    <span
+      className={cn(
+        "inline-flex size-7 items-center justify-center rounded-pill text-label leading-5 tabular-nums",
+        picked ? "bg-accent-muted font-semibold text-accent-text" : "font-normal text-primary group-hover:bg-mist",
+      )}
+    >
+      {day}
+    </span>
+  </button>
+);
 
-/** One day of the month, or the last (0): a grid of 7 columns, gap 4, 32 × 32 buttons. */
+/**
+ * One day of the month, or the last (0) — C25: one grid box, 1 px divider, radius 10, 8 inside, 2 between cells of
+ * 40 × 32; "Last day" spans four cells.
+ */
 const DayGrid: React.FC<{ value: number | null | undefined; onChange: (day: number) => void; max?: number; lastDay?: boolean; label: string }> = ({
   value,
   onChange,
@@ -63,18 +82,92 @@ const DayGrid: React.FC<{ value: number | null | undefined; onChange: (day: numb
 }) => {
   const t = useTranslations("automationsSettings");
   return (
-    <div role="group" aria-label={label} className="grid grid-cols-7 gap-1">
+    <div role="group" aria-label={label} className="grid grid-cols-7 gap-0.5 rounded-popover border border-divider p-2">
       {Array.from({ length: max }, (_, i) => i + 1).map((d) => (
-        <button key={d} type="button" aria-pressed={value === d} onClick={() => onChange(d)} className={dayButton(value === d)}>
-          {d}
-        </button>
+        <DayCell key={d} day={d} picked={value === d} onPick={() => onChange(d)} />
       ))}
       {lastDay && (
-        <button type="button" aria-pressed={value === 0} onClick={() => onChange(0)} className={cn(dayButton(value === 0), "col-span-3 px-2")}>
+        <button
+          type="button"
+          aria-pressed={value === 0}
+          onClick={() => onChange(0)}
+          className={cn(
+            "col-span-4 flex h-8 items-center justify-center rounded-control text-label leading-5 outline-none focus-visible:shadow-focus",
+            value === 0 ? "bg-accent-muted font-semibold text-accent-text" : "font-normal text-secondary hover:bg-mist",
+          )}
+        >
           {t("schedule.lastDay")}
         </button>
       )}
     </div>
+  );
+};
+
+/**
+ * The yearly date (C31): one field showing the date without a year ("1 March"), which opens a picker — the month with
+ * its arrows, no year; the day grid; the hint inside the popover.
+ */
+const YearDateField: React.FC<{ month: number; day: number; onChange: (month: number, day: number) => void; label: string }> = ({
+  month,
+  day,
+  onChange,
+  label,
+}) => {
+  const t = useTranslations("automationsSettings");
+  const short = useShortDates();
+  const monthNames = useMonthNames("long");
+  const [open, setOpen] = React.useState(false);
+  const [shown, setShown] = React.useState(month);
+  React.useEffect(() => {
+    if (open) setShown(month);
+  }, [open, month]);
+  // A leap year, so 29 February can be picked: it runs on 28 February in the others (the hint says so).
+  const text = short.long(partsToISO(2024, month - 1, Math.min(day || 1, daysIn(month))), { hideYear: true });
+  const step = (delta: number) => setShown((m) => ((m - 1 + delta + 12) % 12) + 1);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          aria-expanded={open}
+          className={cn(
+            "flex h-9 w-full items-center justify-between gap-2 rounded-control border bg-card px-3 text-body text-primary outline-none transition-[border-color,box-shadow]",
+            open ? "border-accent shadow-focus" : "border-field hover:border-field-hover focus-visible:border-accent focus-visible:shadow-focus",
+          )}
+        >
+          <span className="truncate">{text}</span>
+          <Icon icon={ArrowDown01Icon} size="sm" className="shrink-0 text-tertiary" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-[300px] rounded-tint border border-divider bg-card p-3 shadow-bar">
+        <div className="flex h-9 items-center justify-between pb-2">
+          <button type="button" aria-label={t("schedule.previousMonth")} onClick={() => step(-1)}
+            className="flex size-7 items-center justify-center rounded-control text-secondary outline-none hover:bg-mist focus-visible:shadow-focus">
+            <Icon icon={ArrowLeft01Icon} size="sm" />
+          </button>
+          <span className="text-body font-semibold text-primary">{monthNames[shown - 1]}</span>
+          <button type="button" aria-label={t("schedule.nextMonth")} onClick={() => step(1)}
+            className="flex size-7 items-center justify-center rounded-control text-secondary outline-none hover:bg-mist focus-visible:shadow-focus">
+            <Icon icon={ArrowRight01Icon} size="sm" />
+          </button>
+        </div>
+        <div role="group" aria-label={monthNames[shown - 1]} className="grid grid-cols-7 gap-0.5">
+          {Array.from({ length: daysIn(shown) }, (_, i) => i + 1).map((d) => (
+            <DayCell
+              key={d}
+              day={d}
+              picked={shown === month && d === day}
+              onPick={() => {
+                onChange(shown, d);
+                setOpen(false);
+              }}
+            />
+          ))}
+        </div>
+        <p className="px-1 pt-2 text-hint text-tertiary">{t("schedule.yearHint")}</p>
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -105,7 +198,11 @@ const WeekdayButtons: React.FC<{ value: number[]; onChange: (days: number[]) => 
               if (single) onChange([d]);
               else onChange(picked ? value.filter((x) => x !== d) : [...value, d].sort((a, b) => a - b));
             }}
-            className={cn(dayButton(picked), "flex-1")}
+            className={cn(
+              // C29: 32 high, radius 8, 13/20 500; picked in the muted accent, no border; the others outlined.
+              "inline-flex h-8 flex-1 items-center justify-center rounded-control border text-label leading-5 outline-none focus-visible:shadow-focus",
+              picked ? "border-transparent bg-accent-muted text-accent-text" : "border-field bg-transparent text-primary hover:bg-mist",
+            )}
           >
             {tA(`weekdayShort.${d}`)}
           </button>
@@ -113,6 +210,27 @@ const WeekdayButtons: React.FC<{ value: number[]; onChange: (days: number[]) => 
       })}
     </div>
   );
+};
+
+/** The city of an IANA zone: "Europe/Warsaw" → "Warsaw". */
+const cityOf = (zone: string): string => (zone.split("/").pop() ?? zone).replace(/_/g, " ");
+
+/**
+ * The second lines of the time zone list (C32): who gets it when in each person's zone — the reader themselves, in the
+ * zone of this browser — the company's zone, any zone.
+ */
+const useZoneLines = (at: string): Record<"PERSON" | "COMPANY" | "PICK", string> => {
+  const t = useTranslations("automationsSettings");
+  const { user } = useCurrentUser();
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
+  const city = cityOf(zone);
+  return {
+    PERSON: user?.firstName
+      ? t("schedule.zoneLine.PERSON", { name: user.firstName, city, time: at })
+      : t("schedule.zoneHint.PERSON"),
+    COMPANY: t("schedule.zoneHint.COMPANY"),
+    PICK: t("schedule.zoneHint.PICK"),
+  };
 };
 
 /** Month names in the page's language, January first. */
@@ -133,11 +251,12 @@ const useQuarterHint = (monthOfPeriod: number, day: number) => {
   const list = new Intl.ListFormat(locale, { type: "conjunction" });
   const shortMonths = useMonthNames("short");
   if (day === 0) return t("schedule.quarterLastHint", { months: list.format(months.map((m) => shortMonths[m])) });
+  // C30: "Runs on 1 Jan, 1 Apr, 1 Jul and 1 Oct." — no comma before "and", whatever the language's list says.
   const year = new Date().getFullYear();
   // The month's length in this year, not in a leap one: 31 in a quarter's second month is 28 February in 2026, and
   // counted against 2024's 29 it rolled over to "1 Mar" (walk of 2026-11-07).
   const dates = months.map((m) => short.date(partsToISO(year, m, Math.min(day, new Date(year, m + 1, 0).getDate()))));
-  return t("schedule.quarterHint", { dates: list.format(dates) });
+  return t("schedule.quarterHintList", { head: dates.slice(0, -1).join(", "), last: dates[dates.length - 1] });
 };
 
 /**
@@ -148,7 +267,7 @@ export const ScheduleFields: React.FC<TriggerPartProps> = ({ trigger, problems, 
   const t = useTranslations("automationsSettings");
   const everyId = React.useId();
   const frequency = trigger.frequency ?? "MONTHLY";
-  const monthNames = useMonthNames("long");
+  const zoneLines = useZoneLines(trigger.at ?? "09:00");
   const quarterHint = useQuarterHint(trigger.monthOfPeriod ?? 1, trigger.dayOfMonth ?? 1);
   const weekdayMode = trigger.weekOfMonth != null;
   const zone = trigger.timeZone ?? PERSON_ZONE;
@@ -160,6 +279,7 @@ export const ScheduleFields: React.FC<TriggerPartProps> = ({ trigger, problems, 
     <FieldStack>
       <Field label={t("schedule.every")} labelId={everyId} error={err("frequency")}>
         <SegmentedControl<ScheduleFrequency>
+          size="window"
           aria-labelledby={everyId}
           value={frequency}
           onChange={(next) => onTrigger(scheduleDefaults(next))}
@@ -176,6 +296,7 @@ export const ScheduleFields: React.FC<TriggerPartProps> = ({ trigger, problems, 
       {frequency === "MONTHLY" && (
         <Field label={t("schedule.on")} error={err("dayOfMonth") ?? err("weekOfMonth") ?? err("weekdays")}>
           <RadioGroup
+            className="gap-2.5"
             value={weekdayMode ? "WEEKDAY" : "DAY"}
             onValueChange={(v) =>
               onTrigger(
@@ -222,55 +343,46 @@ export const ScheduleFields: React.FC<TriggerPartProps> = ({ trigger, problems, 
         <>
           <Field label={t("schedule.monthOfQuarter")} error={err("monthOfPeriod")}>
             <SegmentedControl<"1" | "2" | "3">
+              size="window"
               aria-label={t("schedule.monthOfQuarter")}
               value={String(trigger.monthOfPeriod ?? 1) as "1" | "2" | "3"}
               onChange={(v) => onTrigger({ monthOfPeriod: Number(v) })}
               options={(["1", "2", "3"] as const).map((m) => ({ value: m, label: t(`schedule.quarterMonth.${m}`) }))}
             />
           </Field>
-          <Field error={err("dayOfMonth")} hint={quarterHint}>
+          <Field label={t("schedule.day")} error={err("dayOfMonth")} hint={quarterHint}>
             <DayGrid label={t("schedule.dayOfMonth")} value={trigger.dayOfMonth} onChange={(dayOfMonth) => onTrigger({ dayOfMonth })} />
           </Field>
         </>
       )}
 
       {frequency === "YEARLY" && (
-        <Field label={t("schedule.on")} error={err("monthOfPeriod") ?? err("dayOfMonth")} hint={t("schedule.yearHint")}>
-          <div className="flex flex-col gap-2">
-            <CompactPick
-              size="md"
-              options={monthNames.map((name, i) => ({ value: String(i + 1), label: name }))}
-              value={String(trigger.monthOfPeriod ?? 1)}
-              onChange={(v) => {
-                const month = Number(v);
-                onTrigger({ monthOfPeriod: month, dayOfMonth: Math.min(trigger.dayOfMonth || 1, daysIn(month)) });
-              }}
-              placeholder={monthNames[0]}
-              emptyLabel={t("common.noResults")}
-              ariaLabel={t("schedule.month")}
-            />
-            <DayGrid
-              label={t("schedule.dayOfMonth")}
-              lastDay={false}
-              max={daysIn(trigger.monthOfPeriod ?? 1)}
-              value={trigger.dayOfMonth}
-              onChange={(dayOfMonth) => onTrigger({ dayOfMonth })}
-            />
-          </div>
+        <Field label={t("schedule.on")} error={err("monthOfPeriod") ?? err("dayOfMonth")}>
+          <YearDateField
+            label={t("schedule.on")}
+            month={trigger.monthOfPeriod ?? 1}
+            day={trigger.dayOfMonth ?? 1}
+            onChange={(monthOfPeriod, dayOfMonth) => onTrigger({ monthOfPeriod, dayOfMonth })}
+          />
         </Field>
       )}
-
-      <PartDivider />
 
       <Field label={t("schedule.at")} error={err("at")}>
         <TimeInput value={trigger.at ?? "09:00"} onChange={(at) => onTrigger({ at })} aria-label={t("schedule.at")} />
       </Field>
 
-      <Field label={t("schedule.timeZone")} error={err("timeZone")} hint={t(`schedule.zoneHint.${zoneMode}`)}>
+      {/* C26: no hint under the time zone; C32: three options on two lines each, no search. */}
+      <Field label={t("schedule.timeZone")} error={err("timeZone")}>
         <div className="flex flex-col gap-2">
           <CompactPick
             size="md"
-            options={(["PERSON", "COMPANY", "PICK"] as const).map((m) => ({ value: m, label: t(`schedule.zone.${m}`) }))}
+            searchable={false}
+            options={(["PERSON", "COMPANY", "PICK"] as const).map((m) => ({
+              value: m,
+              label: t(`schedule.zone.${m}`),
+              hint: zoneLines[m],
+              separatorBefore: m === "PICK",
+            }))}
             value={zoneMode}
             onChange={(m) => onTrigger({ timeZone: m === "PICK" ? Intl.DateTimeFormat().resolvedOptions().timeZone : m })}
             placeholder={t("schedule.zone.PERSON")}

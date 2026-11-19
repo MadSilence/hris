@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { cn } from "@/lib/cn";
@@ -13,8 +12,9 @@ import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
 import type { WhosOutAudience, WhosOutPerson } from "@/models/home";
 import { useWhosOut } from "@/components/modules/home/hooks";
 import {
-  BigNumber,
   PersonFace,
+  SmallFooter,
+  TWO_LINE_ROW,
   WidgetCard,
   WidgetEmpty,
   WidgetError,
@@ -68,7 +68,49 @@ const workWeek = (iso: string, weekStartsOn: number) => {
   return [0, 1, 2, 3, 4].map((i) => addDays(first, i));
 };
 
-const typeOf = (person: WhosOutPerson, away: string) => person.policyName ?? person.leaveTypeName ?? away;
+/** The leave type, never the policy (A9): "Vacation", "Sick day"; "Away" for a type the reader may not know. */
+/**
+ * A day off that is only today reads "today" (O4) — the leave's own first and last working days, never the ones the card
+ * cut to its window: out Thursday and Friday still reads "back Mon" on Thursday (walk of 2026-11-19).
+ */
+export const isOnlyToday = (person: WhosOutPerson, today: string): boolean =>
+  person.firstDay === today && (person.lastDay === undefined ? person.endDate : person.lastDay) === today;
+
+const typeOf = (person: WhosOutPerson, away: string) => person.leaveTypeName ?? away;
+
+/**
+ * The leave goes on after the week (O6): read from its own last working day — the server cuts `endDate` to the window it
+ * was asked for, so a leave to 4 Dec read as ending on Friday, round-ended, with no "back" (walk of 2026-11-19).
+ */
+export const runsPastWeek = (person: Pick<WhosOutPerson, "endDate" | "lastDay">, friday: string): boolean =>
+  (person.lastDay ?? person.endDate) > friday;
+
+/**
+ * Lanes for the week (O8): people whose days do not overlap share a row — each person goes into the first row whose
+ * last bar ends before theirs starts, in the order they start.
+ */
+export const packLanes = <T extends { first: number; last: number }>(bars: T[]): T[][] => {
+  const rows: T[][] = [];
+  for (const bar of [...bars].sort((a, b) => a.first - b.first)) {
+    const row = rows.find((r) => r[r.length - 1].last < bar.first);
+    if (row) row.push(bar);
+    else rows.push([bar]);
+  }
+  return rows;
+};
+
+/** A face on a bar (O5): a white circle with the initials 10/600 in the bar's own ink. */
+const LaneFace: React.FC<{ name: string; avatarUrl: string | null; ink: string }> = ({ name, avatarUrl, ink }) => (
+  <Avatar className="size-[26px]">
+    {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
+    <AvatarFallback name={name} className={cn("bg-card text-avatar-xs", ink)}>
+      {initialsOf(name)}
+    </AvatarFallback>
+  </Avatar>
+);
+
+const initialsOf = (name: string) =>
+  name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "?";
 
 /**
  * Who is away (`home-widgets` § 5): today as a count (Small) or a list (Medium), the week as lanes (Large). Pending
@@ -117,7 +159,11 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const data = query.data;
   const today = data.from;
   const people = data.people;
-  const back = (person: WhosOutPerson) => dates.date(addDays(person.endDate, 1), { weekday: true });
+  // O4: "back" is the person's next working day, from the server; this week's day by its weekday ("back Thu"), a later
+  // one by its date ("back 4 Jan"). A day off that is only today reads "today".
+  const back = (person: WhosOutPerson) => dates.day(person.backOn ?? addDays(person.endDate, 1), { lowercase: true, hideYear: true });
+  const returns = (person: WhosOutPerson) =>
+    isOnlyToday(person, today) ? t("whosOut.onlyToday") : t("whosOut.back", { date: back(person) });
   const empty = (
     <WidgetEmpty
       size={size}
@@ -130,14 +176,21 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   if (size === "S") {
     const outToday = people.filter((p) => p.startDate <= today && p.endDate >= today);
     return (
-      <WidgetCard title={title} size={size} aside={<span className="text-hint text-tertiary">{audience === "TEAM" ? t("whosOut.myTeam") : t("whosOut.everyone")}</span>}>
-        <BigNumber size="s" value={outToday.length} word={t("whosOut.outToday", { count: outToday.length })} />
-        <span className="flex -space-x-1.5">
-          {outToday.slice(0, 4).map((p) => {
-            const name = fullName(p.firstName, p.lastName) || t("card.unnamed");
-            return <PersonFace key={`${p.userId}-${p.startDate}`} name={name} avatarUrl={p.avatarUrl} detail={typeOf(p, away)} size={28} />;
-          })}
-        </span>
+      <WidgetCard title={title} size={size} aside={<span className="text-hint leading-5 text-tertiary">{audience === "TEAM" ? t("whosOut.myTeam") : t("whosOut.everyone")}</span>}>
+        <SmallFooter
+          value={outToday.length}
+          word={t("whosOut.outToday", { count: outToday.length })}
+          aside={
+            outToday.length > 0 && (
+              <span className="flex -space-x-2">
+                {outToday.slice(0, 3).map((p) => {
+                  const name = fullName(p.firstName, p.lastName) || t("card.unnamed");
+                  return <PersonFace key={`${p.userId}-${p.startDate}`} name={name} avatarUrl={p.avatarUrl} detail={typeOf(p, away)} size={28} />;
+                })}
+              </span>
+            )
+          }
+        />
       </WidgetCard>
     );
   }
@@ -145,7 +198,8 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   if (size === "M") {
     return (
       <WidgetCard title={title} size={size} aside={calendarLink}>
-        {scope}
+        {/* O2: the switch hugs its two words. */}
+        <div className="self-start">{scope}</div>
         {people.length === 0 ? (
           empty
         ) : (
@@ -158,15 +212,15 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
                     <Link
                       href={`/organization/people/${p.userId}/personal`}
                       tabIndex={preview ? -1 : undefined}
-                      className="-mx-2 flex items-center gap-3 rounded-control px-2 py-2.5 hover:bg-subtle"
+                      className={TWO_LINE_ROW.row}
                     >
                       <PersonFace name={name} avatarUrl={p.avatarUrl} size={28} />
+                      {/* O3: the type under the name, the return on the right; no amber in this list. */}
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-body font-medium text-primary">{name}</span>
-                        <span className={cn("block truncate text-hint", PENDING.has(p.status) ? "text-status-pending-text" : "text-tertiary")}>
-                          {t("whosOut.typeLine", { type: typeOf(p, away), back: t("whosOut.back", { date: back(p) }) })}
-                        </span>
+                        <span className={TWO_LINE_ROW.name}>{name}</span>
+                        <span className={TWO_LINE_ROW.line}>{typeOf(p, away)}</span>
                       </span>
+                      <span className="shrink-0 text-hint leading-5 text-tertiary">{returns(p)}</span>
                     </Link>
                   </li>
                 );
@@ -181,8 +235,18 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const week = workWeek(today, weekStartsOn);
   const friday = week[4];
   const weekday = (iso: string) => new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00Z`));
-  const lanes = people.filter((p) => p.endDate >= week[0] && p.startDate <= friday);
-  const upcoming = data.upcoming ?? [];
+  const lanes = packLanes(
+    people
+      .filter((p) => p.endDate >= week[0] && p.startDate <= friday)
+      .map((p) => {
+        const first = Math.max(0, week.findIndex((d) => d >= p.startDate));
+        const runsOff = runsPastWeek(p, friday);
+        const last = runsOff ? 4 : Math.max(first, week.filter((d) => d <= p.endDate).length - 1);
+        return { p, first, last, runsOff };
+      }),
+  );
+  // O7: Upcoming fills the free space only when few people are out this week.
+  const upcoming = lanes.length <= 2 ? data.upcoming ?? [] : [];
 
   return (
     <WidgetCard title={title} size={size} aside={<span className="flex items-center gap-3">{scope}{calendarLink}</span>}>
@@ -199,52 +263,51 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
       ) : (
         <WidgetScroll>
           <ul className="flex flex-col gap-2">
-            {lanes.map((p) => {
+            {lanes.map((row) => (
+              <li key={row.map(({ p }) => `${p.userId}-${p.startDate}`).join("|")} className="grid grid-cols-5 gap-1">
+                {row.map(({ p, first, last: lastIndex, runsOff }) => {
               const name = fullName(p.firstName, p.lastName) || t("card.unnamed");
-              const first = Math.max(0, week.findIndex((d) => d >= p.startDate));
-              const runsOff = p.endDate > friday;
-              const lastIndex = runsOff ? 4 : Math.max(first, week.filter((d) => d <= p.endDate).length - 1);
               const color = TAG_CLASSES[toTagColor(p.policyColor)];
               const pending = PENDING.has(p.status);
               const oneDay = first === lastIndex && !runsOff;
               return (
-                <li key={`${p.userId}-${p.startDate}`} className="grid grid-cols-5 gap-1">
-                  <Tooltip>
+                  <Tooltip key={`${p.userId}-${p.startDate}`}>
                     <TooltipTrigger asChild>
                       <Link
                         href={`/organization/people/${p.userId}/personal`}
                         tabIndex={preview ? -1 : undefined}
                         style={{ gridColumn: `${first + 1} / ${lastIndex + 2}` }}
                         className={cn(
-                          "flex h-8 min-w-0 items-center gap-2 px-[3px] text-label leading-5",
+                          "flex h-8 min-w-0 items-center gap-1.5 px-[3px] text-label leading-5",
                           runsOff ? "rounded-l-pill" : "rounded-pill",
-                          pending ? cn("border-[1.5px] border-dashed bg-card", color.border, color.text) : cn(color.chip),
+                          pending ? cn("border border-dashed bg-card", color.border, color.text) : cn(color.chip),
                           runsOff && "[mask-image:linear-gradient(to_right,black_80%,transparent)]",
                         )}
                       >
-                        <PersonFace name={name} avatarUrl={p.avatarUrl} size={26} />
+                        <LaneFace name={name} avatarUrl={p.avatarUrl} ink={color.text} />
                         <span className="truncate pr-2">
                           {oneDay
                             ? (p.firstName ?? name)
                             : t("whosOut.lane", {
                                 name: p.firstName ?? name,
-                                type: typeOf(p, away),
+                                type: typeOf(p, away).toLocaleLowerCase(locale),
                                 runsOff: runsOff ? "yes" : "no",
                                 back: back(p),
                               })}
                         </span>
-                        {runsOff && <Icon icon={ArrowRight01Icon} size="sm" className="ml-auto shrink-0" />}
                       </Link>
                     </TooltipTrigger>
                     <TooltipContent title={name}>
-                      {t("whosOut.tooltip", { type: typeOf(p, away), dates: dates.range(p.startDate, p.endDate, { weekday: true }) })}
+                      {t("whosOut.tooltip", { type: typeOf(p, away), dates: dates.range(p.startDate, p.endDate, { weekday: true, hideYear: true }) })}
                     </TooltipContent>
                   </Tooltip>
-                </li>
               );
-            })}
+                })}
+              </li>
+            ))}
           </ul>
-          {/* Free space under the lanes: the leave that starts after this week (H12). */}
+          {/* Free space under the lanes: the leave that starts after this week (H12) — only with few people out (O7). */}
+          {lanes.length <= 2 && (
           <div className="mt-4 flex flex-col gap-2 border-t border-divider pt-3">
             <p className="text-hint font-medium text-tertiary">{t("whosOut.upcoming")}</p>
             {upcoming.length === 0 ? (
@@ -258,13 +321,14 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
                       <PersonFace name={name} avatarUrl={p.avatarUrl} size={24} />
                       <span className="shrink-0 font-medium text-primary">{p.firstName ?? name}</span>
                       <span className="min-w-0 truncate text-tertiary">{typeOf(p, away).toLocaleLowerCase()}</span>
-                      <span className="ml-auto shrink-0 text-secondary">{dates.range(p.startDate, p.endDate, { weekday: true })}</span>
+                      <span className="ml-auto shrink-0 text-secondary">{dates.range(p.startDate, p.endDate, { weekday: true, hideYear: true })}</span>
                     </li>
                   );
                 })}
               </ul>
             )}
           </div>
+          )}
         </WidgetScroll>
       )}
     </WidgetCard>

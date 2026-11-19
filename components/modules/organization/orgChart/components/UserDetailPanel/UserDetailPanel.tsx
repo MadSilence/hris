@@ -51,7 +51,7 @@ function PersonRow({ user, onSelect }: { user: OrgChartUser; onSelect: (id: stri
     >
       <Avatar className="h-6 w-6 flex-none">
         {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
-        <AvatarFallback className="text-hint">{initials(user)}</AvatarFallback>
+        <AvatarFallback name={[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}>{initials(user)}</AvatarFallback>
       </Avatar>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-body font-medium text-primary">{fullName(user)}</span>
@@ -96,7 +96,7 @@ export function UserDetailPanel({
       <div className="flex flex-none items-start gap-3 border-b border-divider p-5">
         <Avatar className="h-12 w-12 flex-none">
           {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={name} /> : null}
-          <AvatarFallback className="text-body">{initials(user)}</AvatarFallback>
+          <AvatarFallback name={[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}>{initials(user)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-body font-semibold text-primary">{name}</h2>

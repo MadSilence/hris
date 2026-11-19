@@ -9,15 +9,14 @@ import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
 import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useCanAccess } from "@/components/auth";
+import { cn } from "@/lib/cn";
 import { showActionError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import type { FeedScope, HubHome } from "@/models/hub";
 import { createHubPageAction } from "../actions";
 import { useHubHome } from "../hooks";
-import { HubAskBox, HubHeading, HubPage, HubTitle, LoadingBlock, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
+import { HubAskBox, HubHeading, HubLoadError, HubPage, HubSegmented, HubState, HubTitle, LoadingBlock, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
 import { CelebrationStrip } from "./CelebrationStrip";
 import { AgreeCallout, HandbookSectionCard, orderSectionCards, SavedPopover, SectionLinkArrow, useFeedScope } from "./HomeParts";
 
@@ -25,8 +24,7 @@ import { AgreeCallout, HandbookSectionCard, orderSectionCards, SavedPopover, Sec
 export const FeedScopeSwitch: React.FC<{ value: FeedScope; onChange: (next: FeedScope) => void }> = ({ value, onChange }) => {
   const t = useTranslations("hub");
   return (
-    <SegmentedControl
-      fill={false}
+    <HubSegmented
       aria-label={t("news.scopeLabel")}
       value={value}
       onChange={onChange}
@@ -43,8 +41,8 @@ const NewsColumn: React.FC<{ home: HubHome; scope: FeedScope; onScope: (next: Fe
   const rows = home.posts.filter((p) => p.id !== home.pinned?.id).slice(0, home.pinned ? 3 : 4);
   const nothing = !home.pinned && rows.length === 0;
   return (
-    <section aria-labelledby="hub-news" className="flex min-w-0 flex-col gap-5">
-      <div className="flex h-8 items-center gap-4">
+    <section aria-labelledby="hub-news" className="flex min-w-0 flex-col gap-4">
+      <div className="flex h-9 items-center gap-4">
         <HubHeading id="hub-news">{t("news.title")}</HubHeading>
         <span className="ml-auto" />
         <FeedScopeSwitch value={scope} onChange={onScope} />
@@ -69,7 +67,8 @@ const NewsColumn: React.FC<{ home: HubHome; scope: FeedScope; onScope: (next: Fe
       ) : (
         <>
           {home.pinned && <PinnedPost post={home.pinned} />}
-          <ul className="flex flex-col">
+          {/* A hairline above the first row too, under the pinned post (FIXES B7). */}
+          <ul className={cn("flex flex-col", home.pinned && "border-t border-divider")}>
             {rows.map((post) => (
               <NewsRow key={post.id} post={post} />
             ))}
@@ -80,24 +79,44 @@ const NewsColumn: React.FC<{ home: HubHome; scope: FeedScope; onScope: (next: Fe
   );
 };
 
-const HandbookColumn: React.FC<{ home: HubHome }> = ({ home }) => {
+const HandbookColumn: React.FC<{ home: HubHome; manager: boolean; onAddPage: () => void; adding: boolean }> = ({
+  home,
+  manager,
+  onAddPage,
+  adding,
+}) => {
   const t = useTranslations("hub");
   const dates = useHubDates();
   const cards = orderSectionCards(home.sections);
   const more = home.moreSections > 0 ? home.moreSections : Math.max(0, home.sections.length - 6);
   return (
-    <section aria-labelledby="hub-handbook" className="flex min-w-0 flex-col gap-5">
-      <div className="flex h-8 items-center gap-4">
+    <section aria-labelledby="hub-handbook" className="flex min-w-0 flex-col gap-4">
+      <div className="flex h-9 items-center gap-4">
         <HubHeading id="hub-handbook">{t("handbook.title")}</HubHeading>
         <SectionLinkArrow href="/hub/handbook" className="ml-auto">
           {t("handbook.open")}
         </SectionLinkArrow>
       </div>
       {cards.length === 0 ? (
-        <EmptyState compact scene="policies" title={t("handbook.empty")} description="" />
+        // FIXES S1–S5: documents at 160, centred in the column's free area (the grid row stretches the column to the
+        // bottom of the news); Add a page only for someone who can manage the hub.
+        <HubState
+          scene="documents"
+          size="m160"
+          titleSize="section"
+          title={t("handbook.empty")}
+          line={t("handbook.emptyLine")}
+          action={
+            manager ? (
+              <Button type="button" variant="secondary" loading={adding} onClick={onAddPage}>
+                {t("handbook.addPage")}
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {cards.map((section) => (
               <HandbookSectionCard key={section.id} section={section} />
             ))}
@@ -109,12 +128,12 @@ const HandbookColumn: React.FC<{ home: HubHome }> = ({ home }) => {
             </SectionLinkArrow>
           )}
           {home.recentlyUpdated.length > 0 && (
-            <div className="mt-1 flex flex-col gap-2 border-t border-divider pt-6">
-              <p className="text-hint text-tertiary">{t("handbook.recentlyUpdated")}</p>
-              <ul className="flex flex-col gap-2">
+            <div className="mt-1 flex flex-col border-t border-divider pt-6">
+              <p className="text-hint font-medium text-tertiary">{t("handbook.recentlyUpdated")}</p>
+              <ul className="mt-3.5 flex flex-col gap-2.5">
                 {home.recentlyUpdated.slice(0, 3).map((page) => (
                   <li key={page.id} className="flex items-center gap-2 text-body">
-                    <Icon icon={File01Icon} size="sm" className="shrink-0 text-tertiary" />
+                    <Icon icon={File01Icon} size="sm" className="shrink-0 text-disabled" />
                     <Link href={`/hub/handbook/${page.id}`} className="min-w-0 truncate text-primary underline underline-offset-2">
                       {page.title}
                     </Link>
@@ -174,7 +193,7 @@ export const HubHomeContainer: React.FC = () => {
         <span className="ml-auto flex items-center gap-2">
           <SavedPopover count={data?.savedCount ?? 0} />
           {manager && (
-            <Button asChild variant="ghost" className="gap-1.5">
+            <Button asChild variant="ghost" className="gap-2 text-secondary">
               <Link href="/hub/manage" className="no-underline">
                 <Icon icon={Settings02Icon} size="sm" />
                 {t("home.manage")}
@@ -197,7 +216,7 @@ export const HubHomeContainer: React.FC = () => {
                 <Skeleton className="h-[180px] w-full rounded-panel" />
                 <SkeletonRows count={3} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 {Array.from({ length: 6 }, (_, i) => (
                   <Skeleton key={i} className="h-14 rounded-card" />
                 ))}
@@ -206,9 +225,7 @@ export const HubHomeContainer: React.FC = () => {
           }
         />
       ) : home.isError || !data ? (
-        <div className="mt-12">
-          <ErrorState error={home.error} title={t("home.newsError")} onRetry={() => void home.refetch()} />
-        </div>
+        <HubLoadError error={home.error} title={t("home.newsError")} onRetry={() => void home.refetch()} />
       ) : emptyHub ? (
         <div className="mt-12">
           <EmptyState
@@ -232,7 +249,7 @@ export const HubHomeContainer: React.FC = () => {
       ) : (
         <div className="mt-12 grid grid-cols-1 gap-16 min-[1280px]:grid-cols-[7fr_5fr]">
           <NewsColumn home={data} scope={scope} onScope={setScope} />
-          <HandbookColumn home={data} />
+          <HandbookColumn home={data} manager={manager} adding={newPage.busy} onAddPage={() => void newPage.create()} />
         </div>
       )}
     </HubPage>

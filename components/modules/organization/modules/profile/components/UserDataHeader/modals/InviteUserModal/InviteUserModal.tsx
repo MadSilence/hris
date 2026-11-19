@@ -52,13 +52,16 @@ const tomorrowISO = () => {
  * (LIFECYCLE_PROCESSES.md § 2.3).
  */
 export function InviteUserModal({
-  open, userId, fullName, email, isResend = false, onCloseAction, onInvitedAction,
+  open, userId, fullName, email, isResend: isResendNow = false, onCloseAction, onInvitedAction,
 }: Props) {
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
   const [error, setError] = useState<string | null>(null);
   const [askPreboarding, setAskPreboarding] = useState(false);
   const hasEmail = Boolean(email);
+  // Fixed when the dialog opens: the caller learns of the invitation before the dialog closes, and the dialog must not
+  // turn into "Resend invitation · Sending…" for the moment it takes to go (walk of 2026-11-19).
+  const [isResend, setIsResend] = useState(isResendNow);
 
   const formik = useFormik<Values>({
     initialValues: { email: email ?? "", when: "now", sendOn: "", preboarding: "" },
@@ -99,6 +102,7 @@ export function InviteUserModal({
 
   useEffect(() => {
     if (open) {
+      setIsResend(isResendNow);
       formik.resetForm({ values: { email: email ?? "", when: "now", sendOn: "", preboarding: "" } });
       setError(null);
       setAskPreboarding(false);

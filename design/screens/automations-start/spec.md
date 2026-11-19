@@ -108,3 +108,9 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
 - **Differs from the design:** noddo AI is a placeholder (the owner, 2026-11-06): the field and window are built, a
   prompt is answered "noddo AI isn't connected yet…" and nothing is drafted. Only categories that have a template show.
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- Template cards' line 2: what each template does (Q-47).
+- The dialog is 960 wide and at most the window's height less 64; the template grid scrolls inside it.

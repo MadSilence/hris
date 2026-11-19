@@ -5,13 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import type { ManagePostRow, PostStatusFilter } from "@/models/hub";
 import { useManagePosts } from "../../hooks";
-import { LoadingBlock, SkeletonRows } from "../../shared";
+import { HubLoadError, HubSegmented, LoadingBlock, SkeletonRows } from "../../shared";
 import { ManageFrame } from "../ManageFrame";
 import { ManagePostRowView } from "./PostRow";
 import { PostEditorDialog } from "./PostEditorDialog";
@@ -65,6 +63,8 @@ export const PostsContainer: React.FC = () => {
   const posts = useManagePosts("ALL", q);
   const all = posts.data ?? [];
   const counts = countByStatus(all);
+  // Never "· 0" for counts that have not come: the words alone until the list is there (FIXES U1).
+  const loaded = Boolean(posts.data);
   const shown = status === "ALL" ? all : all.filter((p) => p.status === status);
 
   const emptyTab = status === "DRAFT" ? t("manage.posts.noDrafts") : status === "SCHEDULED" ? t("manage.posts.noScheduled") : t("manage.posts.noPublished");
@@ -77,18 +77,17 @@ export const PostsContainer: React.FC = () => {
         </Button>
       }
     >
-      <div className="flex max-w-[960px] flex-col gap-6">
+      <div className="flex max-w-[960px] flex-1 flex-col gap-6">
         <div className="flex flex-wrap items-center gap-4">
-          <SegmentedControl<PostStatusFilter>
-            fill={false}
+          <HubSegmented<PostStatusFilter>
             aria-label={t("manage.tabs.posts")}
             value={status}
             onChange={setStatus}
             options={[
-              { value: "ALL", label: t("manage.posts.all", { count: counts.ALL }) },
-              { value: "PUBLISHED", label: t("manage.posts.published", { count: counts.PUBLISHED }) },
-              { value: "SCHEDULED", label: t("manage.posts.scheduled", { count: counts.SCHEDULED }) },
-              { value: "DRAFT", label: t("manage.posts.drafts", { count: counts.DRAFT }) },
+              { value: "ALL", label: loaded ? t("manage.posts.all", { count: counts.ALL }) : t("manage.posts.allLabel") },
+              { value: "PUBLISHED", label: loaded ? t("manage.posts.published", { count: counts.PUBLISHED }) : t("manage.status.published") },
+              { value: "SCHEDULED", label: loaded ? t("manage.posts.scheduled", { count: counts.SCHEDULED }) : t("manage.status.scheduled") },
+              { value: "DRAFT", label: loaded ? t("manage.posts.drafts", { count: counts.DRAFT }) : t("manage.posts.draftsLabel") },
             ]}
           />
           <SearchBox className="ml-auto w-60" value={query} onChange={setQuery} aria-label={t("manage.posts.search")} />
@@ -96,7 +95,7 @@ export const PostsContainer: React.FC = () => {
         {posts.isLoading ? (
           <LoadingBlock skeleton={<SkeletonRows count={6} height="h-20" />} />
         ) : posts.isError ? (
-          <ErrorState error={posts.error} title={t("manage.posts.error")} onRetry={() => void posts.refetch()} />
+          <HubLoadError error={posts.error} title={t("manage.posts.error")} onRetry={() => void posts.refetch()} />
         ) : all.length === 0 && !q ? (
           <EmptyState scene="announcements" title={t("manage.posts.emptyTitle")} description={t("manage.posts.emptyLine")} onCreate={dialog.openNew} createLabel={t("manage.newPost")} />
         ) : shown.length === 0 ? (

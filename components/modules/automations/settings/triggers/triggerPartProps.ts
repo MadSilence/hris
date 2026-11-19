@@ -10,4 +10,6 @@ export type TriggerPartProps = {
   onTrigger: (patch: Partial<TriggerSpec>) => void;
   /** Changes the definition — the late policy lives there, not on the trigger. */
   onDefinition: (definition: AutomationDefinition) => void;
+  /** Opens the Who it runs for window (C27). */
+  onOpenWho?: () => void;
 };

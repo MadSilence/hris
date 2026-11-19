@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { emptyDefinition, newStep } from "@/components/modules/automations/model/tree";
 import type { AutomationDefinition, StepSpec } from "@/models/automations";
 import { AutomationCanvas, type AutomationCanvasProps } from "./AutomationCanvas";
@@ -13,6 +13,8 @@ jest.mock("../seams", () => ({
     stepSubtitle: () => null,
   }),
 }));
+
+jest.mock("@/components/modules/signing/hooks/useDocumentsSection", () => ({ useDocumentTemplates: () => ({ data: [] }) }));
 
 // React Flow reads node transforms through DOMMatrixReadOnly, which jsdom does not have.
 class DOMMatrixReadOnlyMock {
@@ -103,5 +105,32 @@ describe("AutomationCanvas", () => {
     expect(screen.queryByRole("button", { name: "Add a step here" })).not.toBeInTheDocument();
     fireEvent.keyDown(screen.getByRole("button", { name: /Step 2B/ }), { key: "Delete" });
     expect(props.onCardCommand).not.toHaveBeenCalled();
+  });
+
+  it("says on the cards what a failure does: Skipped if it fails, and a wait skipped with it (S8b, S8c)", () => {
+    renderCanvas({
+      definition: {
+        ...definition,
+        steps: [
+          { id: "t1", type: "CREATE_TASK", title: "Book", ifFails: "SKIP" },
+          { id: "w1", type: "WAIT_UNTIL", until: "TASK_DONE", taskStepId: "t1", maxDays: 10 },
+        ],
+      },
+    });
+    expect(screen.getByRole("button", { name: /Step 1/ })).toHaveTextContent("Skipped if it fails");
+    expect(screen.getByRole("button", { name: /Step 2/ })).toHaveTextContent("Skipped if step 1 is skipped");
+  });
+
+  it("draws a new split: Add a question, its paths' labels and a card-sized slot with Add a step (S10b)", () => {
+    const props = renderCanvas({
+      definition: { ...definition, steps: [{ ...newStep("s1", "SPLIT"), paths: [{ id: "p1", name: "Path 1", condition: null, steps: [] }] }] },
+      pathErrors: new Set(["s1:p1"]),
+    });
+    expect(screen.getByRole("button", { name: /Step 1/ })).toHaveTextContent("Add a question");
+    const slots = screen.getAllByTestId("empty-path");
+    expect(slots).toHaveLength(2);
+    expect(slots[0]).toHaveTextContent("What should happen next?");
+    fireEvent.click(within(slots[0]).getByRole("button", { name: "Add a step" }));
+    expect(props.onOpenAddStep).toHaveBeenCalledWith({ kind: "branchStart", stepId: "s1", branchKey: "p1" });
   });
 });

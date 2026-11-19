@@ -31,7 +31,8 @@ export const ListToolbar: React.FC<{
   className?: string;
 }> = ({ search, filter, archived, secondary, primary, className }) => (
   <div className={`flex items-center justify-between gap-4 ${className ?? ""}`}>
-    <div className="flex items-center gap-3">
+    {/* 8 between the search box and the first chip (the designers' Automations fixes A5, 2026-11-18). */}
+    <div className="flex items-center gap-2">
       <SearchBox value={search.value} onChange={search.onChange} />
       {filter}
     </div>

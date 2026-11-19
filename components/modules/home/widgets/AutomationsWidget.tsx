@@ -17,6 +17,7 @@ import { useRunWords } from "@/components/modules/automations/runs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import {
   BigNumber,
+  SmallFooter,
   WidgetCard,
   WidgetEmpty,
   WidgetError,
@@ -27,18 +28,17 @@ import {
 import type { HomeWidgetProps } from "./catalogue";
 
 const total = (day: AutomationRunDay) => day.done + day.failed + day.skipped;
-/** A column of the dot chart holds at most this many dots — one per run; a busier week is scaled to fit. */
-const DOTS = 8;
+/** A day's column holds 4 dots across and 24 up (U2): 96 runs; a busier day is drawn full. */
+export const DOTS_PER_DAY = 96;
 
 /**
- * How many dots a day's column draws, and how many of them are red. A dot is a run; only a week whose busiest day has
- * more runs than a column holds is scaled down (walk of 2026-11-11: one failure was drawn as four red dots).
+ * How many dots a day's column draws, and how many of them are red (the designers' widgets fixes U2): **one dot per
+ * run**, every day on its own — no day is scaled to another. A day with more runs than the column holds is drawn
+ * full, its exact numbers in the tooltip; a failure is still a red dot, on top.
  */
-export const dotsFor = (day: AutomationRunDay, busiest: number) => {
-  const count = total(day);
-  const scale = busiest > DOTS ? DOTS / busiest : 1;
-  const dots = count === 0 ? 0 : Math.max(1, Math.round(count * scale));
-  const failedDots = day.failed === 0 ? 0 : Math.min(dots, Math.max(1, Math.round(day.failed * scale)));
+export const dotsFor = (day: AutomationRunDay) => {
+  const dots = Math.min(total(day), DOTS_PER_DAY);
+  const failedDots = Math.min(dots, day.failed);
   return { dots, failedDots };
 };
 
@@ -85,41 +85,43 @@ const FailureBlock: React.FC<{ week: AutomationsWeek; preview?: boolean }> = ({ 
   );
 };
 
-/** One dot column per day, today in the accent, a failed run a red dot; hovering a day says what ran. */
+/**
+ * One column per day (U2): 36 wide, 1 apart; in it a 32 × 190 field of 5 px dots, one per run, filling from the bottom
+ * four across. Grey, today in the accent, a failed run a red dot on top; hovering a day says what ran.
+ */
 const DotChart: React.FC<{ days: AutomationRunDay[] }> = ({ days }) => {
   const t = useTranslations("home");
   const locale = useDisplayLocale();
   const dates = useShortDates();
-  const busiest = Math.max(1, ...days.map(total));
   return (
-    <div className="flex items-end justify-between gap-1">
+    <div className="flex items-end gap-px">
       {days.map((day, i) => {
         const isToday = i === days.length - 1;
         const count = total(day);
-        const { dots, failedDots } = dotsFor(day, busiest);
+        const { dots, failedDots } = dotsFor(day);
         return (
           <Tooltip key={day.date}>
             <TooltipTrigger asChild>
-              <Link href={automationsHref.activity()} className="flex flex-1 flex-col items-center gap-1.5" aria-label={t("automations.dayTooltip", { day: dates.date(day.date, { weekday: true }), count })}>
-                <span className="flex h-[88px] flex-col-reverse items-center gap-1">
+              <Link href={automationsHref.activity()} className="flex w-9 shrink-0 flex-col items-center gap-1" aria-label={t("automations.dayTooltip", { day: dates.date(day.date, { weekday: true }), count })}>
+                <span className="flex h-[190px] w-8 flex-wrap-reverse content-start gap-[3px]">
                   {Array.from({ length: dots }, (_, d) => (
                     <span
                       key={d}
                       className={cn(
-                        "size-2 rounded-pill",
-                        d >= dots - failedDots ? "bg-danger" : isToday ? "bg-accent" : "bg-accent-muted",
+                        "size-[5px] rounded-pill",
+                        d >= dots - failedDots ? "bg-danger" : isToday ? "bg-accent" : "bg-field",
                       )}
                     />
                   ))}
                 </span>
-                <span className={cn("text-hint", isToday ? "font-semibold text-accent-text" : "text-tertiary")}>
+                <span className={cn("text-hint leading-5", isToday ? "font-semibold text-accent-text" : "text-tertiary")}>
                   {isToday ? t("card.today") : weekday(day.date, locale)}
                 </span>
               </Link>
             </TooltipTrigger>
             <TooltipContent title={t("automations.dayTooltip", { day: isToday ? t("card.today") : dates.date(day.date, { weekday: true }), count })}>
               <span className="flex flex-col gap-0.5">
-                <span className="flex items-center gap-1.5"><span className="size-2 rounded-pill bg-accent" />{t("automations.ranFine")} {day.done}</span>
+                <span className="flex items-center gap-1.5"><span className={cn("size-2 rounded-pill", isToday ? "bg-accent" : "bg-field")} />{t("automations.ranFine")} {day.done}</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-pill bg-danger" />{t("automations.failedLabel")} {day.failed}</span>
                 <span className="flex items-center gap-1.5"><span className="size-2 rounded-pill bg-mist" />{t("automations.skipped")} {day.skipped}</span>
               </span>
@@ -193,13 +195,19 @@ export const AutomationsWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
     );
   }
 
+  // U1: "See all"; the runs on the left and the failed chip (24, 12/20 500) on the right of one bottom row.
   if (size === "S") {
     return (
-      <WidgetCard title={title} size={size}>
-        <BigNumber size="s" value={runs} word={t("automations.runs", { count: runs })} />
-        {week.failedTodayCount > 0 && (
-          <StatusBadge status="declined" size="sm" label={t("automations.failed", { count: week.failedTodayCount })} />
-        )}
+      <WidgetCard title={title} size={size} aside={seeAll}>
+        <SmallFooter
+          value={runs}
+          word={t("automations.runs", { count: runs })}
+          aside={
+            week.failedTodayCount > 0 && (
+              <StatusBadge status="declined" className="leading-5 font-medium" label={t("automations.failed", { count: week.failedTodayCount })} />
+            )
+          }
+        />
       </WidgetCard>
     );
   }

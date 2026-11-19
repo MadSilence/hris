@@ -57,14 +57,15 @@ export const AgreeBar: React.FC<{
   if (state === "gone") return null;
 
   return (
-    <div className="sticky bottom-6 z-20 mt-12">
+    // Always at the foot of the viewport: the reading column reaches it, and the bar sits at its end (FIXES F4).
+    <div className="sticky bottom-6 z-20 mt-auto">
       {state === "agreed" ? (
         <p role="status" className="flex h-[60px] items-center gap-2 rounded-card bg-card px-5 text-body text-secondary">
           <Icon icon={CheckmarkCircle02Icon} size="md" className="text-status-approved-icon" />
           {t("page.agreedLine", { version: versionNo, date: dates.short(agreedAt) })}
         </p>
       ) : (
-        <div className="flex items-center gap-4 rounded-card bg-card py-3 pr-3 pl-5 shadow-popover">
+        <div className="flex items-center gap-4 rounded-card border border-divider bg-card py-3 pr-3 pl-5 shadow-popover">
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-card-title font-medium text-primary">
               {overdue
@@ -75,8 +76,9 @@ export const AgreeBar: React.FC<{
             </span>
             <span className="text-hint text-tertiary">{t("page.ownerWillSee", { name: ownerFirstName })}</span>
           </div>
-          <Button type="button" loading={state === "agreeing"} loadingLabel={t("page.agreeing")} onClick={() => void agree()}>
-            {t("page.agree")}
+          {/* "I agree" hugs its words; only the agreeing state may be wider (FIXES F5). */}
+          <Button type="button" loading={state === "agreeing"} onClick={() => void agree()}>
+            {state === "agreeing" ? t("page.agreeing") : t("page.agree")}
           </Button>
         </div>
       )}

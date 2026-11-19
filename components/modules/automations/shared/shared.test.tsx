@@ -38,7 +38,12 @@ describe("AiPromptField", () => {
     const onSubmit = jest.fn();
     render(<Field onSubmit={onSubmit} />);
 
-    expect(screen.getByRole("button", { name: "Draft with AI" })).toBeDisabled();
+    // Never shown disabled (G3): with the field empty the button puts the focus in it.
+    const button = screen.getByRole("button", { name: "Draft with AI" });
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Describe what should happen")).toHaveFocus();
     fireEvent.change(screen.getByLabelText("Describe what should happen"), { target: { value: "  Tell HR  " } });
     fireEvent.click(screen.getByRole("button", { name: "Draft with AI" }));
 

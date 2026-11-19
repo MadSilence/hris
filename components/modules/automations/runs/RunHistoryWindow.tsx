@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useDisplayLocale } from "@/lib/date";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { Button } from "@/components/desact/button";
 import { NodRing } from "@/components/desact/nod";
 import { Skeleton } from "@/components/desact/skeleton";
-import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
+import { NoResults } from "@/components/feedback/EmptyState";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue/useDebouncedValue";
@@ -16,7 +17,7 @@ import type { AutomationRun, RunChip, RunCounts } from "@/models/automations";
 import { cn } from "@/lib/cn";
 import { RunStatusBadge } from "./RunStatusBadge";
 import { initialsOf, runDay, useRunWords } from "./runWords";
-import { ToolWindow } from "./ToolWindow";
+import { ToolWindow, WindowEmpty } from "./ToolWindow";
 import { useAutomationWords } from "./seams";
 
 /** The chips of a run history, in the frame's order, with the count each reads. */
@@ -35,6 +36,8 @@ const LOAD_AHEAD_PX = 160;
 export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId, selectedRunId, onOpenRun, onClose }) => {
   const t = useTranslations("automationsRuns");
   const tCommon = useTranslations("common");
+  const locale = useDisplayLocale();
+  const number = (n: number) => new Intl.NumberFormat(locale).format(n);
   const [query, setQuery] = React.useState("");
   const [chip, setChip] = React.useState<Exclude<RunChip, "NEXT_7_DAYS">>("ALL");
   const q = useDebouncedValue(query.trim(), 300);
@@ -63,8 +66,7 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
     body = <RunListSkeleton />;
   } else if (runs.error) {
     body = (
-      <EmptyState
-        compact
+      <WindowEmpty
         scene="something-broke"
         title={t("history.errorTitle")}
         description={t("history.errorDescription")}
@@ -77,13 +79,12 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
     );
   } else if (rows.length === 0 && (!filtered || nothingAtAll)) {
     body = (
-      <EmptyState
-        compact
+      <WindowEmpty
         scene="automations"
         title={t("history.emptyTitle")}
         description={
           trigger
-            ? t("history.emptyDescription", { trigger: words.triggerTitle(trigger) })
+            ? t("history.emptyDescription", { trigger: words.triggerPhrase(trigger, automation.data?.definition?.conditions ?? null) })
             : t("history.emptyDescriptionNoTrigger")
         }
       />
@@ -91,6 +92,7 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
   } else if (rows.length === 0) {
     body = (
       <NoResults
+        fill
         scene={q && chip === "ALL" ? "no-results-s" : "no-match-s"}
         title={t("history.noMatchTitle")}
         hint={q ? t("history.noMatch", { chip, query: q }) : t("history.noMatchChip", { chip })}
@@ -120,9 +122,9 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
   const showToolbar = !runs.error && !(runs.isSuccess && nothingAtAll && !filtered);
 
   return (
-    <ToolWindow title={t("history.title")} width={320} onClose={onClose}>
+    <ToolWindow title={t("history.title")} width={320} placement="left" onClose={onClose}>
       {showToolbar && (
-        <div className="flex flex-col gap-2 px-4 pb-2">
+        <div className="flex shrink-0 flex-col gap-2.5 px-5 py-3">
           <SearchBox value={query} onChange={setQuery} fullWidth />
           {runs.isLoading ? (
             <div className="flex flex-wrap gap-1.5" aria-hidden>
@@ -133,15 +135,15 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {CHIPS.map(({ chip: c, count }) => (
-                <FilterChip key={c} selected={chip === c} onClick={() => setChip(c)}>
-                  {t(`history.chip.${c}`, { count: counts?.[count] ?? 0 })}
+                <FilterChip key={c} selected={chip === c} onClick={() => setChip(c)} count={number(counts?.[count] ?? 0)}>
+                  {t(`history.chipName.${c}`)}
                 </FilterChip>
               ))}
             </div>
           )}
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2" onScroll={onScroll} data-testid="run-list">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-2" onScroll={onScroll} data-testid="run-list">
         {body}
         {runs.isFetchingNextPage && (
           <div className="flex justify-center py-3">
@@ -168,13 +170,13 @@ const RunRow: React.FC<{ run: AutomationRun; selected: boolean; onOpen: () => vo
         onClick={onOpen}
         aria-current={selected || undefined}
         className={cn(
-          "flex min-h-14 w-full items-center gap-2.5 rounded-control px-3 py-2 text-left transition-colors duration-(--duration-hover)",
+          "flex w-full items-center gap-3 rounded-control px-2 py-2.5 text-left transition-colors duration-(--duration-hover)",
           selected ? "bg-accent-subtle" : "hover:bg-row-hover",
         )}
       >
-        <Avatar className="size-7">
+        <Avatar className="size-6">
           {run.person?.avatarUrl ? <AvatarImage src={run.person.avatarUrl} alt="" /> : null}
-          <AvatarFallback name={name} className="text-hint">
+          <AvatarFallback name={name}>
             {initialsOf(name)}
           </AvatarFallback>
         </Avatar>

@@ -42,7 +42,7 @@ export const GET = async (req: NextRequest) => {
     });
     if (result.kind === "signup") {
       // B3 asks for the company; the draft waits in a cookie of the root's own, never in the address bar.
-      const res = to("/trial");
+      const res = to("/signup/company");
       res.cookies.set({ name: SIGNUP_PROVIDER_COOKIE, value: result.draft, httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 10 * 60 });
       return res;
     }

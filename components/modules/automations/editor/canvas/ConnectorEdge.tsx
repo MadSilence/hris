@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/cn";
 import { letter, type InsertTarget } from "@/components/modules/automations/model/tree";
 import type { AutomationStepType } from "@/models/automations";
-import { BAR_DROP, type BranchLabel } from "./layout";
+import { BAR_DROP, SPLIT_BAR, SPLIT_DROP, type BranchLabel } from "./layout";
 import { QuickAdd } from "./QuickAdd";
 
 export type ConnectorData = {
@@ -24,21 +24,32 @@ export type ConnectorData = {
   actions: AutomationStepType[];
   onInsert: (type: AutomationStepType, target: InsertTarget) => void;
   onAllSteps: (target: InsertTarget) => void;
+  /** S10c: this path of a split has no condition — its label is drawn in the declined colours. */
+  pathError?: boolean;
 };
 export type ConnectorFlowEdge = Edge<ConnectorData, "connector">;
 
 /** A branch's pill: Approved, Declined, a path's name (`automations-editor` → Layout 4). */
-export const BranchPill: React.FC<{ label: BranchLabel }> = ({ label }) => {
+export const BranchPill: React.FC<{ label: BranchLabel; error?: boolean }> = ({ label, error = false }) => {
   const t = useTranslations("automationsEditor");
   if (label.kind === "APPROVED") return <StatusBadge status="approved" size="sm" label={t("canvas.approved")} />;
   if (label.kind === "DECLINED") return <StatusBadge status="declined" size="sm" label={t("canvas.declined")} />;
   const text = label.name?.trim() || (label.kind === "OTHERWISE" ? t("canvas.otherwise") : t("canvas.pathUnnamed", { letter: letter(label.index) }));
+  // S10: a split's path label — 24 high, radius 6, white, the field border, 12/16 500; S10c: in the declined colours.
   return (
-    <span className="inline-flex h-5 max-w-40 items-center truncate rounded-pill border border-divider bg-card px-2 text-hint font-semibold text-secondary">
+    <span
+      className={cn(
+        "inline-block h-6 max-w-40 truncate rounded-tag border bg-card px-2 text-hint leading-[22px] font-medium",
+        error ? "border-status-declined-fill text-status-declined-text" : "border-field text-secondary",
+      )}
+    >
       {text}
     </span>
   );
 };
+
+/** A split's path (S10), not an approval's Approved / Declined: its own geometry and label. */
+const splitPath = (branch: BranchLabel | null | undefined): boolean => branch?.kind === "PATH" || branch?.kind === "OTHERWISE";
 
 /**
  * A connector (§ 13.8): 1.5 px in the strong border colour, rounded corners; into a path, the bar runs under the
@@ -48,6 +59,7 @@ export function ConnectorEdge({ id, sourceX, sourceY, targetX, targetY, data }: 
   const t = useTranslations("automationsEditor");
   const [open, setOpen] = React.useState(false);
   const intoPath = Boolean(data?.branch);
+  const split = splitPath(data?.branch);
   const [path] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -56,10 +68,11 @@ export function ConnectorEdge({ id, sourceX, sourceY, targetX, targetY, data }: 
     sourcePosition: Position.Bottom,
     targetPosition: Position.Top,
     borderRadius: 8,
-    centerY: intoPath ? sourceY + BAR_DROP : undefined,
+    centerY: intoPath ? sourceY + (split ? SPLIT_BAR : BAR_DROP) : undefined,
   });
-  const plus = intoPath ? { x: targetX, y: targetY - 18 } : { x: targetX, y: (sourceY + targetY) / 2 };
-  const pill = { x: targetX, y: sourceY + BAR_DROP + 22 };
+  // A split's label sits in the middle of its path's segment; the "+" under it, against the first card.
+  const plus = intoPath ? { x: targetX, y: targetY - (split ? 13 : 18) } : { x: targetX, y: (sourceY + targetY) / 2 };
+  const pill = split ? { x: targetX, y: sourceY + SPLIT_BAR + SPLIT_DROP / 2 } : { x: targetX, y: sourceY + BAR_DROP + 22 };
   const insert = data?.insert ?? null;
 
   return (
@@ -71,7 +84,7 @@ export function ConnectorEdge({ id, sourceX, sourceY, targetX, targetY, data }: 
             className="nodrag nopan pointer-events-none absolute"
             style={{ transform: `translate(-50%, -50%) translate(${pill.x}px, ${pill.y}px)` }}
           >
-            <BranchPill label={data.branch} />
+            <BranchPill label={data.branch} error={data.pathError} />
           </div>
         )}
         {insert && !data?.readOnly && (
@@ -84,7 +97,7 @@ export function ConnectorEdge({ id, sourceX, sourceY, targetX, targetY, data }: 
                 data-test="drop-spot"
                 className={cn(
                   "flex items-center justify-center rounded-pill border-[1.5px] border-dashed border-accent-ring bg-accent-subtle text-hint text-accent-text",
-                  data.dropActive ? "h-8 w-44" : "size-5",
+                  data.dropActive ? "h-8 w-44" : "size-6",
                 )}
               >
                 {data.dropActive && t("addStep.drop")}
@@ -95,9 +108,9 @@ export function ConnectorEdge({ id, sourceX, sourceY, targetX, targetY, data }: 
                   <button
                     type="button"
                     aria-label={t("addStep.quickAdd")}
-                    className="flex size-5 items-center justify-center rounded-pill border border-divider bg-card text-tertiary transition-colors duration-(--duration-hover) hover:border-accent hover:text-accent-text focus-visible:shadow-focus outline-none"
+                    className="flex size-6 items-center justify-center rounded-pill border border-strong bg-card text-secondary transition-colors duration-(--duration-hover) hover:border-accent hover:text-accent-text focus-visible:shadow-focus outline-none"
                   >
-                    <Icon icon={Add01Icon} size="sm" className="size-3" />
+                    <Icon icon={Add01Icon} size="sm" className="size-3.5" />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="center" className="w-64 p-2">

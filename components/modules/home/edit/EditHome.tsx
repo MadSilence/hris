@@ -135,7 +135,9 @@ const CatalogRow: React.FC<{
     );
   };
   return (
-    <li className={cn("flex items-center gap-4 py-3", !onHome && "hover:bg-mist")}>
+    // EH2 (2026-11-19): the hover fill sits around the content — 12 on every side, radius 12, #F7F7F8 — so the
+    // preview's own Mist tile stays readable on it and the "+" stays inside the fill.
+    <li className={cn("flex items-center gap-4 py-3", !onHome && "hover:-mx-3 hover:rounded-tint hover:bg-row-hover hover:px-3")}>
       <span
         onPointerDown={onHome ? undefined : onPress}
         className={cn(
@@ -522,17 +524,16 @@ export const EditHome: React.FC<{
         <span aria-hidden className="pointer-events-none absolute top-2 left-1/2 z-20 -translate-x-1/2 text-tertiary">
           <Icon icon={DragDropVerticalIcon} size="sm" className="rotate-90" />
         </span>
-        <span aria-hidden className="pointer-events-none absolute -top-2.5 -right-2.5 z-20 flex h-6 min-w-6 items-center justify-center rounded-pill bg-card px-1.5 text-hint font-semibold text-secondary shadow-popover">
-          {entry.size}
-        </span>
+        {/* EH1 (2026-11-19): no size tag on the widget — the size is changed in the panel and the size popover — and
+            the remove "−" on the top-right corner: 22, round, white, the level-2 shadow, a 12 red minus. */}
         {!widget.locked && (
           <button
             type="button"
             aria-label={t("edit.remove", { name })}
             onClick={() => remove(widget)}
-            className="absolute -top-3 -left-3 z-20 flex size-[30px] items-center justify-center rounded-pill bg-card text-danger-text shadow-popover hover:bg-subtle"
+            className="absolute -top-[9px] -right-[9px] z-20 flex size-[22px] items-center justify-center rounded-pill bg-card text-danger-text shadow-popover hover:bg-subtle"
           >
-            <Icon icon={MinusSignIcon} size="sm" />
+            <Icon icon={MinusSignIcon} size="sm" className="size-3" />
           </button>
         )}
       </WidgetCell>

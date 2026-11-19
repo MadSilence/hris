@@ -1,0 +1,49 @@
+@keyframes rn6x3x3-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x3x3-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 78.08% {transform:translateY(0)} 79.96% {transform:translateY(7px)} 81.00% {transform:translateY(-2px)} 82.04% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x3x3-2 { 0% {transform:translateY(0)} 15.58% {transform:translateY(0)} 17.46% {transform:translateY(7px)} 18.50% {transform:translateY(-2px)} 19.54% {transform:translateY(0)} 40.58% {transform:translateY(0)} 42.46% {transform:translateY(7px)} 43.50% {transform:translateY(-2px)} 44.54% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+
+/* group C — the company on the pane */
+.lx .cobig{display:flex;align-items:center;gap:16px}
+.lx .cobig .mk{width:56px;height:56px;border-radius:var(--radius-control);background:#FFFFFF;color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;font:600 28px/1 "Inter Tight",sans-serif}
+.lx .cobig .mk svg{width:36px;height:36px}
+.lx .cobig b{font:600 40px/44px "Inter Tight",sans-serif;letter-spacing:-0.03em;color:#FFFFFF;overflow-wrap:anywhere}
+.lx .cobig.long{align-items:flex-start}
+.lx .cobig.long b{font-size:26px;line-height:32px;letter-spacing:-0.02em}
+.lx.base .pane .bot.co2{gap:20px}
+.lx.base .pane .bot.co2 .pby{margin-top:0;font-size:13px;line-height:18px;gap:8px}
+.lx.base .pane .bot.co2 .pby svg{height:15px}
+/* phone */
+.lx.phone .cobig{gap:10px}
+.lx.phone .cobig .mk{width:28px;height:28px;border-radius:6px;font-size:15px}
+.lx.phone .cobig .mk svg{width:18px;height:18px}
+.lx.phone .cobig b,.lx.phone .cobig.long b{font-size:18px;line-height:28px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:290px}
+.lx.phone .cobig.long{align-items:center}
+/* the sample company's own accent — a custom HEX (#4A2C63, muted dark violet), as tokens/accent.js applyAccent() would set it */
+.cmp{--accent-base:#4A2C63;--accent-text-light:#4A2C63;--accent:#4A2C63;--accent-text:#4A2C63;--accent-hover:color-mix(in srgb,#4A2C63,#000000 12%);--accent-subtle:color-mix(in srgb,#4A2C63 6%,#FFFFFF);--focus-ring:#4A2C63}
+/* the login-code link belongs to the Email field: 6 under the field, 24 before the next label */
+.cmp .f>.hint{margin-top:-2px;margin-bottom:8px}
+/* a company's accent: the rings are tints of that accent (Wine keeps its own Wine-500 / Rose pair) */
+.lx.cmp .pane .grid circle{stroke:color-mix(in srgb,var(--accent) 78%,#FFFFFF)}
+.lx.cmp .pane .grid circle.hot{stroke:color-mix(in srgb,var(--accent) 30%,#FFFFFF)}
+/* the invitation (Sandbox E, Ulia): the company pane with a huge two-tone welcome */
+.lx.base.invt .pane{justify-content:flex-start;gap:44px}
+.lx.base.invt .pane .cobig{gap:12px}
+.lx.base.invt .pane .cobig .mk{width:40px;height:40px}
+.lx.base.invt .pane .cobig .mk svg{width:26px;height:26px}
+.lx.base.invt .pane .cobig b{font-size:20px;line-height:28px;letter-spacing:-0.01em}
+.lx.base.invt .pane .bot{margin-top:auto;gap:24px}
+.lx.base.invt .pane .big{margin:0;font:600 60px/60px "Inter Tight",sans-serif;letter-spacing:-0.04em;color:#FFFFFF;overflow-wrap:anywhere}
+.lx.base.invt .pane .big span{color:color-mix(in srgb,var(--accent) 45%,#FFFFFF)}
+/* first-experience base in a company's accent (the invitation) */
+.rx .ttl em{font-style:normal;color:var(--accent-text)}
+.lx.m2.cmp .pane .t span{color:color-mix(in srgb,var(--accent) 30%,#FFFFFF)}
+.lx.m2.cmp .ob circle[stroke="var(--rose)"]{stroke:color-mix(in srgb,var(--accent) 30%,#FFFFFF)}
+.lx.m2.cmp .pane .pby{margin-top:8px;font-size:13px;line-height:18px;gap:8px;justify-content:center !important;color:rgba(255,255,255,.7)}
+.lx.m2.cmp .pane .pby svg{height:15px}
+.lx .cosm{display:flex;align-items:center;gap:10px}
+.lx .cosm .mk{width:32px;height:32px;border-radius:var(--radius-control);background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex:none;font:600 16px/1 "Inter Tight",sans-serif}
+.lx .cosm .mk svg{width:20px;height:20px}
+.lx .cosm b{font:600 18px/26px "Inter Tight",sans-serif;letter-spacing:-0.01em;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px}
+.lx.lx.phone.strip .main .foot{position:absolute;left:0;right:0;bottom:20px;justify-content:center}
+.lx.lx.phone.strip.long .main{padding-bottom:28px}
+.lx.lx.phone.strip.long .main .foot{position:static;margin-top:32px}

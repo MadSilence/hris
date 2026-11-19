@@ -17,6 +17,7 @@ import { HubDocumentView } from "../document";
 import { unwrapHub, useHubPage, useInvalidateHub } from "../hooks";
 import {
   firstNameOf,
+  HubBreadcrumbs,
   HubPage,
   HubReadError,
   hubIcon,
@@ -43,12 +44,13 @@ export const WhatChanged: React.FC<{ points: string[]; agreedVersion: number }> 
   const [all, setAll] = React.useState(false);
   const shown = all ? points : points.slice(0, 5);
   return (
-    <section className="mt-10 flex flex-col gap-3 rounded-card bg-accent-subtle px-6 py-5">
+    // 48 under the version line, padding 22 24, radius 16; the dot 8 accent, 7 down, 10 to the text (FIXES F7).
+    <section className="mt-12 flex flex-col gap-3 rounded-card bg-accent-subtle px-6 py-5.5">
       <h2 className="text-card-title text-primary">{t("page.whatChanged", { count: points.length, version: agreedVersion })}</h2>
       <ul className="flex flex-col gap-2">
         {shown.map((point, i) => (
           <li key={i} className="flex items-start gap-2.5 text-body text-secondary">
-            <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-pill bg-accent" />
+            <span aria-hidden className="mt-[7px] size-2 shrink-0 rounded-pill bg-accent" />
             {point}
           </li>
         ))}
@@ -83,23 +85,14 @@ export const PageContainer: React.FC<{ id: string; preview?: boolean }> = ({ id,
   }, [page, keepChanges]);
 
   const breadcrumb = (
-    <nav aria-label={t("page.breadcrumb")} className="flex flex-wrap items-center gap-1.5 text-label">
-      <Link href="/hub" className="text-secondary no-underline hover:text-primary">
-        {t("home.title")}
-      </Link>
-      <span className="text-tertiary">/</span>
-      <Link href="/hub/handbook" className="text-secondary no-underline hover:text-primary">
-        {t("handbook.title")}
-      </Link>
-      {page?.sectionName && (
-        <>
-          <span className="text-tertiary">/</span>
-          <Link href={`/hub/handbook#section-${page.sectionId}`} className="text-secondary no-underline hover:text-primary">
-            {page.sectionName}
-          </Link>
-        </>
-      )}
-    </nav>
+    <HubBreadcrumbs
+      label={t("page.breadcrumb")}
+      items={[
+        { href: "/hub", label: t("home.title") },
+        { href: "/hub/handbook", label: t("handbook.title") },
+        ...(page?.sectionName ? [{ href: `/hub/handbook#section-${page.sectionId}`, label: page.sectionName }] : []),
+      ]}
+    />
   );
 
   return (
@@ -107,7 +100,7 @@ export const PageContainer: React.FC<{ id: string; preview?: boolean }> = ({ id,
       {preview && (
         <Banner className="mb-6" title={t("page.previewBanner")} />
       )}
-      <div className="flex max-w-[720px] flex-col">
+      <div className="flex max-w-[720px] flex-1 flex-col">
         {breadcrumb}
         {query.isLoading ? (
           <LoadingBlock
@@ -123,21 +116,28 @@ export const PageContainer: React.FC<{ id: string; preview?: boolean }> = ({ id,
             }
           />
         ) : query.isError || !page ? (
-          <HubReadError error={query.error} back={{ href: "/hub/handbook", label: t("errors.goToHandbook") }} onRetry={() => void query.refetch()} />
+          <HubReadError error={query.error} back={{ href: "/hub/handbook", label: t("errors.goToHandbook") }} title={t("editor.loadError")} onRetry={() => void query.refetch()} />
         ) : (
-          <article className="flex flex-col">
+          <article className="flex flex-1 flex-col">
             <div className="mt-10 flex items-start gap-4">
               <IconTile icon={hubIcon(page.icon)} color={page.color} size={52} />
-              <h1 className="min-w-0 flex-1 text-hub-doc-title text-primary">
-                {page.title}
-                <span className="ml-3 align-middle text-hint font-normal text-tertiary">
+              {/*
+                The title takes every free pixel; the read time sits after it on its first line, outside the h1 (F1). It
+                never shrinks below its own width — the right group gives way instead, its audience chip cutting with "…"
+                ("Code of conduct" broke onto two lines beside an owner's Edit page, walk of 2026-11-19; any shrink at all,
+                even a fraction of a pixel, wraps the h1). A title too long for the row wraps inside what the right group
+                needs at least: the chip's start, Edit page and Save.
+              */}
+              <div className="flex max-w-[calc(100%-260px)] min-w-0 flex-[1_0_auto] items-baseline gap-4">
+                <h1 className="min-w-0 text-hub-doc-title text-primary">{page.title}</h1>
+                <span className="shrink-0 text-hint whitespace-nowrap text-tertiary">
                   {t("page.readTime", { count: Math.max(1, page.readMinutes) })}
                 </span>
-              </h1>
-              <span className="mt-2 flex shrink-0 items-center gap-2">
+              </div>
+              <span className="mt-2 flex min-w-0 shrink-[100] items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="max-w-[200px]">
+                    <span className="flex max-w-[200px] min-w-0">
                       <TagChip color="ocean">{audience(page.audienceLabel)}</TagChip>
                     </span>
                   </TooltipTrigger>
@@ -151,12 +151,12 @@ export const PageContainer: React.FC<{ id: string; preview?: boolean }> = ({ id,
                     </Link>
                   </Button>
                 )}
-                {!preview && <SaveButton type="PAGE" id={page.id} saved={page.saved} />}
+                {!preview && <SaveButton type="PAGE" id={page.id} saved={page.saved} large />}
               </span>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-6 text-hint">
               {page.owner && (
-                <Link href={`/organization/people/${page.owner.id}/personal`} className="flex items-center gap-2 text-label text-primary no-underline hover:underline">
+                <Link href={`/organization/people/${page.owner.id}/personal`} className="flex items-center gap-2 text-body text-secondary no-underline hover:underline">
                   <PersonAvatar person={page.owner} />
                   {page.owner.name}
                 </Link>
@@ -174,12 +174,13 @@ export const PageContainer: React.FC<{ id: string; preview?: boolean }> = ({ id,
               changedBlockIds={keepChanges ? page.changedBlockIds : []}
               empty={<p className="mt-12 text-body text-tertiary">{t("page.emptyBody")}</p>}
             />
+            {showsAgreeBar(page) && page.request && !agreedNow && <div aria-hidden className="h-12 shrink-0" />}
             {showsAgreeBar(page) && page.request && !agreedNow && (
               <AgreeBar
                 versionNo={page.request.versionNo}
                 dueOn={page.request.dueOn}
                 overdue={page.request.overdue}
-                ownerFirstName={firstNameOf(page.owner?.name) || t("page.hr")}
+                ownerFirstName={firstNameOf(page.owner?.name) || t("page.owner")}
                 onAgree={async () => {
                   const result = unwrapHub(await agreeToPageAction({ pageId: page.id, revisionId: page.revisionId ?? "" }));
                   // The bar shows its own quiet line first; the meta line and the hub's counters follow.

@@ -5,3 +5,4 @@ export * from "./PhotoStep";
 export * from "./FirstRunPieces";
 export * from "./WelcomeContainer";
 export * from "./MobileAvatarUpload";
+export * from "./FinishProfileContainer";

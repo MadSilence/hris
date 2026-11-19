@@ -8,7 +8,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { useShortDates } from "@/lib/date";
 import type { AutomationDefinition, DateField } from "@/models/automations";
 import { CompactPick, type PickOption } from "../conditions/chrome";
-import { DaysInput, Field, FieldStack, Hint, Indented, MistNote, PartDivider } from "../parts/parts";
+import { DaysInput, Field, FieldStack, Hint, Indented, MistNote, WindowSection } from "../parts/parts";
 import { RelativeDays } from "../parts/RelativeDays";
 import { errorFor } from "../parts/problems";
 import { fixedRunDate } from "./fixedRunDate";
@@ -116,7 +116,7 @@ export const DateTriggerFields: React.FC<TriggerPartProps> = ({ definition, trig
         <>
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-0.5">
-              <label htmlFor={`${labelId}-year`} className="text-label">
+              <label htmlFor={`${labelId}-year`} className="text-body text-primary">
                 {t("date.everyYear")}
               </label>
               <Hint>{t("date.everyYearHint")}</Hint>
@@ -124,9 +124,7 @@ export const DateTriggerFields: React.FC<TriggerPartProps> = ({ definition, trig
             <Switch id={`${labelId}-year`} checked={trigger.everyYear === true} onCheckedChange={(everyYear) => onTrigger({ everyYear })} />
           </div>
 
-          <PartDivider />
-
-          <Field label={t("date.passed")}>
+          <WindowSection title={t("date.passed")}>
             <RadioGroup
               value={latePolicy}
               onValueChange={(v) => setLate({ latePolicy: v === "SKIP" ? "SKIP" : "RUN_LATE" })}
@@ -158,7 +156,7 @@ export const DateTriggerFields: React.FC<TriggerPartProps> = ({ definition, trig
                 <span className="text-body">{t("date.skip")}</span>
               </label>
             </RadioGroup>
-          </Field>
+          </WindowSection>
         </>
       )}
     </FieldStack>

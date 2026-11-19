@@ -208,7 +208,9 @@ export const AutomationsListContainer: React.FC<{
         scene="automations"
         title={t("empty.title")}
         description={canManage ? t("empty.description") : ""}
-        className="py-16"
+        // Centred in the page under the tabs (I1); the height is the viewport less the header, the tabs and the
+        // page's padding, since the page itself has no height to fill.
+        className="min-h-[calc(100dvh-13rem)] py-0"
         action={
           canManage ? (
             <div className="flex w-full max-w-[672px] flex-col items-center gap-4">
@@ -285,18 +287,27 @@ export const AutomationsListContainer: React.FC<{
         !showArchived && automations.length === 0 && !isFiltered(filters) ? (
           empty
         ) : showArchived && !isFiltered(filters) ? (
-          <EmptyState scene="archive" title={t("emptyArchive.title")} description={t("emptyArchive.description")} />
-        ) : (
-          <NoResults
-            scene={searchOnly ? "no-results-s" : "no-match-s"}
-            title={t("noResults.title")}
-            hint={t("noResults.hint")}
-            action={
-              <Button type="button" variant="secondary" size="sm" onClick={() => setFilters(EMPTY_FILTERS)}>
-                {t("noResults.clear")}
-              </Button>
-            }
+          <EmptyState
+            scene="archive"
+            title={t("emptyArchive.title")}
+            description={t("emptyArchive.description")}
+            className="min-h-[calc(100dvh-16rem)] py-0"
           />
+        ) : (
+          // A12: in a card of its own from the toolbar to the page's bottom padding, the content centred (I1).
+          <div className="flex min-h-[calc(100dvh-16rem)] items-center justify-center rounded-card border border-divider bg-card shadow-card">
+            <NoResults
+              variant="page"
+              scene={searchOnly ? "no-results-s" : "no-match-s"}
+              title={t("noResults.title")}
+              hint={t("noResults.hint")}
+              action={
+                <Button type="button" variant="secondary" onClick={() => setFilters(EMPTY_FILTERS)}>
+                  {t("noResults.clear")}
+                </Button>
+              }
+            />
+          </div>
         )
       ) : (
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -414,14 +425,14 @@ const StartsWhenFilter: React.FC<{
           {value ? t("toolbar.startsWhenPicked", { trigger: tShared(`trigger.${value}`) }) : t("toolbar.startsWhen")}
         </FilterChip>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-56 p-1">
-        <DropdownMenuItem className="gap-2.5 rounded-control px-2.5 py-1.5" onClick={() => onChange(null)}>
+      <DropdownMenuContent align="start" className="min-w-[210px]">
+        <DropdownMenuItem onClick={() => onChange(null)}>
           <Icon icon={Tick02Icon} size="sm" className={value === null ? "text-primary" : "invisible"} />
           {t("toolbar.startsWhenAny")}
         </DropdownMenuItem>
-        {keys.length > 0 && <DropdownMenuSeparator className="my-1 bg-mist" />}
+        {keys.length > 0 && <DropdownMenuSeparator />}
         {keys.map((key) => (
-          <DropdownMenuItem key={key} className="gap-2.5 rounded-control px-2.5 py-1.5" onClick={() => onChange(key)}>
+          <DropdownMenuItem key={key} onClick={() => onChange(key)}>
             <Icon icon={Tick02Icon} size="sm" className={value === key ? "text-primary" : "invisible"} />
             {tShared(`trigger.${key}`)}
           </DropdownMenuItem>
@@ -435,7 +446,7 @@ const StartsWhenFilter: React.FC<{
 const ListSkeleton: React.FC = () => (
   <div className="flex flex-col gap-5" aria-busy="true">
     <div className="flex items-center gap-3">
-      <Skeleton className="h-9 w-[260px] rounded-control" />
+      <Skeleton className="h-8 w-60 rounded-control" />
       {[0, 1, 2, 3].map((i) => (
         <Skeleton key={i} className="h-8 w-16 rounded-pill" />
       ))}

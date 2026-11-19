@@ -77,6 +77,7 @@
     "title": "Who should own {name}?",
     "description": "Its emails, tasks and requests will come from the new owner. They also hear when it fails or is paused.",
     "ownerNow": "Owner now",
+    "ownerNowRole": "Owner now · {role}",
     "label": "New owner",
     "hint": "Only people who can manage automations.",
     "group": "People who can manage automations",
@@ -145,6 +146,21 @@
       "Compliance": "Compliance",
       "Time off": "Time off",
       "Offboarding": "Offboarding"
+    },
+    "does": {
+      "welcome-email": "Email the new teammate",
+      "manager-first-day": "Task for their manager",
+      "onboarding-done": "Tell their manager",
+      "probation-review": "Approval from their manager",
+      "department-move": "Tell their manager and the department head",
+      "monthly-details": "Remind everyone to check their details",
+      "work-anniversary": "Tell their manager",
+      "birthday": "Tell their manager",
+      "document-expiry": "Tell them and their manager",
+      "long-leave": "Approval from their manager",
+      "calendar-by-office": "Assign the office's holiday calendar",
+      "termination-hr": "Tell HR",
+      "last-day-equipment": "Task to collect the equipment"
     },
     "templatesError": "We couldn't load the templates",
     "fromScratch": "Start from scratch"

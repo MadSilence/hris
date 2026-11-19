@@ -19,7 +19,7 @@ import { FieldError } from "@/components/desact/field-error";
 import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
 import { expandSpanToDays } from "@/components/modules/calendar/lib/dateRange";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
-import { dateToISO, useDateFormatter, useShortDates } from "@/lib/date";
+import { dateToISO, useDateFormatter, useShortDates, useTimeFormatter } from "@/lib/date";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { showSuccess } from "@/lib/errors/errorToast";
 import { formatMinutes, type AttendanceEntry, type AttendanceLogDay } from "@/models/attendance";
@@ -113,6 +113,7 @@ export const formatDuration = (minutes: number, t: AttendanceTranslator): string
 
 export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const formatDisplayDate = useDateFormatter();
+  const formatTime = useTimeFormatter();
   const shortDates = useShortDates();
   const t = useTranslations("attendance");
   const tCommon = useTranslations("common");
@@ -399,8 +400,8 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                     {inBrowser ? formatDisplayDate(entry.workDate, { style: "medium" }) : null}
                   </TableCell>
                 )}
-                <TableCell className="tabular-nums">{entry.startTime}</TableCell>
-                <TableCell className="tabular-nums">{entry.endTime}</TableCell>
+                <TableCell className="tabular-nums">{formatTime.ofDay(entry.startTime)}</TableCell>
+                <TableCell className="tabular-nums">{formatTime.ofDay(entry.endTime)}</TableCell>
                 <TableCell className="tabular-nums">{formatMinutes(entry.minutes)}</TableCell>
                 <TableCell className="truncate" title={entry.description ?? undefined}>{entry.description ?? ""}</TableCell>
                 {canLog && (
@@ -424,7 +425,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         title={t("log.deleteTitle")}
         description={removing
           ? t("log.deleteDescription", {
-            span: `${removing.startTime}–${removing.endTime}`,
+            span: `${formatTime.ofDay(removing.startTime)}–${formatTime.ofDay(removing.endTime)}`,
             hasDescription: removing.description ? "yes" : "no",
             description: removing.description ?? "",
             date: inBrowser ? formatDisplayDate(removing.workDate, { style: "medium" }) : removing.workDate,

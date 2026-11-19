@@ -29,18 +29,15 @@ export type AudienceLabel = "EVERYONE" | string;
 export type PersonRef = { id: string; name: string; jobTitle: string | null; avatarUrl: string | null };
 
 // ── reading: news ───────────────────────────────────────────────────────────────────────────────────
-export type PostType = "ANNOUNCEMENT" | "POLICY_UPDATE" | "EVENT";
 export type FeedScope = "FOR_ME" | "ALL";
 
 export type PostCard = {
   id: string;
-  type: PostType;
   title: string;
   excerpt: string | null;
   coverFileId: string | null;
   author: PersonRef | null;
   publishedAt: string | null;
-  eventOn: string | null;
   audienceLabel: AudienceLabel;
   pinned: boolean;
   saved: boolean;
@@ -50,13 +47,11 @@ export type PostPage = { items: PostCard[]; nextCursor: string | null };
 
 export type Post = {
   id: string;
-  type: PostType;
   title: string;
   body: string;
   coverFileId: string | null;
   author: PersonRef | null;
   publishedAt: string | null;
-  eventOn: string | null;
   audienceLabel: AudienceLabel;
   pinned: boolean;
   saved: boolean;
@@ -119,6 +114,8 @@ export type AgreementRow = {
   /** What the meta line says: never agreed, a newer version of an agreed page, or past its date. */
   what: "NEW" | "CHANGED" | "OVERDUE" | null;
   changesCount: number;
+  /** The waiting version's "What changed" points, for a reader who agreed to an earlier one; empty otherwise (W15). */
+  whatChanged: string[];
   agreedVersion: number | null;
   previousAgreedAt: string | null;
   dueOn: string | null;
@@ -177,7 +174,6 @@ export type PostStatus = "DRAFT" | "SCHEDULED" | "PUBLISHED";
 export type PostStatusFilter = "ALL" | PostStatus;
 
 export type PostWrite = {
-  type: PostType;
   title: string;
   body: string;
   coverFileId: string | null;
@@ -186,14 +182,12 @@ export type PostWrite = {
   /** Stored from the start, never shown in v1 (Q-12): always false. */
   showOnHome: boolean | null;
   notifyPeople: boolean | null;
-  eventOn: string | null;
 };
 
 export type ScheduleRequest = { publishAt: string };
 
 export type ManagePostRow = {
   id: string;
-  type: PostType;
   title: string;
   coverFileId: string | null;
   author: PersonRef | null;
@@ -207,7 +201,6 @@ export type ManagePostRow = {
 
 export type PostEdit = {
   id: string;
-  type: PostType;
   title: string;
   body: string;
   coverFileId: string | null;
@@ -219,7 +212,6 @@ export type PostEdit = {
   pinned: boolean;
   showOnHome: boolean;
   notifyPeople: boolean;
-  eventOn: string | null;
   /** The title of the post pinned now, for "Unpins “{title}”". */
   pinnedElsewhereTitle: string | null;
 };

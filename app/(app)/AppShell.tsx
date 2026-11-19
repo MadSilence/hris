@@ -158,7 +158,9 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       <Sidebar
         collapsed={canvas ? !canvasUnfolded : collapsed}
         onToggle={() => (canvas ? setCanvasUnfolded((current) => !current) : setCollapsed((current) => !current))}
-        peekOnHover={canvas && !canvasUnfolded}
+        // Folded anywhere, hovering opens the full sidebar over the page (the designers' fix S1, J4) — there is no
+        // expand button in the folded column; the open sidebar's own button unfolds it.
+        peekOnHover={canvas ? !canvasUnfolded : collapsed}
         topItems={top}
         bottomItems={bottom}
         profile={profile}
@@ -167,8 +169,8 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         onSignOut={handleSignOut}
         // An impersonated session's password is the subject's, and not the actor's to change.
         onChangePassword={isImpersonating ? undefined : () => setIsChangePasswordOpen(true)}
-        // Skipping the welcome is an answer and never asks again — but a missing photo stays missing,
-        // and this is the offer to come back to it rather than a second interruption.
+        // Skipping the welcome is an answer and never asks again — but a blank field of their own stays
+        // blank, and this is the offer to come back to it (`/profile/finish`) rather than a second interruption.
         showFinishProfile={Boolean(welcome?.outstanding) && !isImpersonating}
       />
 

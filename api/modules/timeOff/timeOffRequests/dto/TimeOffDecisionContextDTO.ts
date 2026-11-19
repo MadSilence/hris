@@ -22,4 +22,8 @@ export interface TimeOffDecisionContextDTO {
   canDecideAnyway: boolean;
   /** The chain step by step. Empty for the requester, who is not shown who approves their leave. */
   steps: TimeOffApprovalStepDTO[];
+  /** The request's leave type ("Paid Vacation"), never the policy's name. */
+  leaveTypeName?: string | null;
+  /** The policy counts working days. */
+  workingDays?: boolean;
 }

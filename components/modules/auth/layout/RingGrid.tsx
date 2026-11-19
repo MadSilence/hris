@@ -41,6 +41,13 @@ const INVITATION: Layout = {
 const LAYOUTS = { pane: PANE, strip: STRIP, invitation: INVITATION } as const;
 
 /**
+ * Room on every side of the grid (the designers' hub fixes Z1, 2026-11-19): a top-row ring's nod overshoots to −2,
+ * and on the very edge of a clipped SVG its stroke was cut flat. The SVG is drawn 4 larger on each side and moved
+ * back by as much, so every ring stays exactly where it was and a nod in any row or column is never cut.
+ */
+const ROOM = 4;
+
+/**
  * `hotColors`: the colours the nodding rings take in turn — a logo's colours on a Light pane (sign-in-appearance);
  * without them the stylesheet paints them in the company colour.
  */
@@ -59,10 +66,10 @@ export function RingGrid({
     hotColors?.length ? { stroke: hotColors[hotRings.indexOf(ring) % hotColors.length] } : {};
   return (
     <svg
-      className={["auth-rings block max-w-full", className].filter(Boolean).join(" ")}
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
+      className={["auth-rings -m-1 block max-w-[calc(100%+8px)] overflow-visible", className].filter(Boolean).join(" ")}
+      width={width + 2 * ROOM}
+      height={height + 2 * ROOM}
+      viewBox={`${-ROOM} ${-ROOM} ${width + 2 * ROOM} ${height + 2 * ROOM}`}
       aria-hidden="true"
     >
       {rings.map((ring) => (

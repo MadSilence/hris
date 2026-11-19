@@ -86,6 +86,40 @@ export const stepsAbove = (d: Pick<AutomationDefinition, "steps">, id: string): 
   return out;
 };
 
+// ── "If it fails" (S8–S8c) ────────────────────────────────────────────────────────────────────
+
+/**
+ * The steps "If it fails" is offered on: the ones that do something and can fail doing it. A branch point is not —
+ * skipping it would skip every step on its paths, which is not "go on" — and a wait has its own "If it's not done by
+ * then"; a survey never runs.
+ */
+const MAY_FAIL: ReadonlySet<AutomationStepType> = new Set<AutomationStepType>([
+  "NOTIFY",
+  "SEND_EMAIL",
+  "CREATE_TASK",
+  "ASSIGN",
+  "UNASSIGN",
+  "GRANT_TIME_OFF_POLICY",
+  "START_REVIEW",
+  "SIGN_DOCUMENT",
+]);
+
+export const offersIfFails = (step: Pick<StepSpec, "type">): boolean => MAY_FAIL.has(step.type);
+
+export const skipsOnFailure = (step: Pick<StepSpec, "type" | "ifFails">): boolean =>
+  offersIfFails(step) && step.ifFails === "SKIP";
+
+/** The steps skipped with this one when it is skipped (S8c): a Wait until on its task or its signature. */
+export const dependants = (d: Pick<AutomationDefinition, "steps"> | null | undefined, id: string): StepSpec[] =>
+  allSteps(d).filter((s) => s.type === "WAIT_UNTIL" && (s.until ?? "TASK_DONE") === "TASK_DONE" && s.taskStepId === id);
+
+/** The step a step depends on, when that one may be skipped on failure: "Skipped if step 1 is skipped". */
+export const dependsOnSkippable = (d: Pick<AutomationDefinition, "steps"> | null | undefined, step: StepSpec): StepSpec | null => {
+  if (step.type !== "WAIT_UNTIL" || (step.until ?? "TASK_DONE") !== "TASK_DONE" || !step.taskStepId) return null;
+  const on = findStep(d, step.taskStepId);
+  return on && skipsOnFailure(on) ? on : null;
+};
+
 // ── ids ───────────────────────────────────────────────────────────────────────────────────────
 
 /** A fresh id, unique within the definition. */

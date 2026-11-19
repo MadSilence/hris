@@ -5,6 +5,7 @@ import { Archive02Icon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import { FilterChip } from "@/components/ui/FilterChip";
+import { useDisplayLocale } from "@/lib/date";
 
 /**
  * Switches the list between two views: **only archived**, or **everything else**.
@@ -19,6 +20,9 @@ import { FilterChip } from "@/components/ui/FilterChip";
  * a caller that only knows "there are some" cannot obey the rule, and asking for the number is what
  * forces the list endpoint to be able to answer it.
  *
+ * <p>Drawn as the word and its count apart — "Archived 2", the archive icon before them, no brackets and no check; the
+ * count 13/18 400 tertiary, white at 70 % while on (the designers' Automations fixes, A13, 2026-11-18).
+ *
  * Rule: `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 5.
  */
 export const ArchivedToggle: React.FC<{
@@ -31,6 +35,7 @@ export const ArchivedToggle: React.FC<{
   // with the only way back gone (seen live on holiday calendars: "No public holiday calendars yet"
   // while three existed). The view falls back to everything else when there is nothing left to show.
   const t = useTranslations("common");
+  const locale = useDisplayLocale();
   React.useEffect(() => {
     if (count === 0 && showingArchived) onChange(false);
   }, [count, showingArchived, onChange]);
@@ -38,9 +43,12 @@ export const ArchivedToggle: React.FC<{
   if (count === 0) return null;
 
   return (
-    <FilterChip selected={showingArchived} onClick={() => onChange(!showingArchived)}>
-      {!showingArchived && <Icon icon={Archive02Icon} size="sm" />}
-      {t("toggles.archived", { count })}
+    <FilterChip noCheck selected={showingArchived} onClick={() => onChange(!showingArchived)}>
+      <Icon icon={Archive02Icon} size="sm" />
+      {t("toggles.archived")}
+      <span className={showingArchived ? "font-normal text-on-inverse/70" : "font-normal text-tertiary"}>
+        {new Intl.NumberFormat(locale).format(count)}
+      </span>
     </FilterChip>
   );
 };

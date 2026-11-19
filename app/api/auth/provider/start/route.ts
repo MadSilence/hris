@@ -18,7 +18,7 @@ export const GET = async (req: NextRequest) => {
   const purpose = params.get("purpose");
   const invite = params.get("invite");
   const back =
-    purpose === "SIGNUP" ? "/trial" : purpose === "INVITE" && invite ? `/invite?token=${encodeURIComponent(invite)}` : "/login";
+    purpose === "SIGNUP" ? "/signup" : purpose === "INVITE" && invite ? `/invite?token=${encodeURIComponent(invite)}` : "/login";
   const failed = () => NextResponse.redirect(new URL(failedPage(back, provider, false), origin), 303);
 
   if (!isSharedProvider(provider) || (purpose !== "SIGN_IN" && purpose !== "INVITE" && purpose !== "SIGNUP")) return failed();

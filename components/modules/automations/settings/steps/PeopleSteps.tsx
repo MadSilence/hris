@@ -2,16 +2,17 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Checkbox } from "@/components/desact/checkbox";
+import { Switch } from "@/components/desact/switch";
 import { Input } from "@/components/desact/input";
 import type { NoAnswer } from "@/models/automations";
 import { CompactPick } from "../conditions/chrome";
 import { PeoplePicker } from "../people/PeoplePicker";
-import { TokenTextField } from "../tokens/TokenTextField";
+import { InsertFieldLink, TokenTextField, type TokenTextFieldHandle } from "../tokens/TokenTextField";
 import { DaysInput, Field, FieldStack, MistNote } from "../parts/parts";
 import { errorFor } from "../parts/problems";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useDocumentTemplates } from "@/components/modules/signing/hooks/useDocumentsSection";
+import { useDocumentCategories } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories";
 import type { StepPartProps } from "./stepPartProps";
 
 /** Send a notification (S1): who gets it, and the message with field tokens. */
@@ -36,6 +37,7 @@ export const NotifyFields: React.FC<StepPartProps> = ({ step, catalog, problems,
 export const EmailFields: React.FC<StepPartProps> = ({ step, catalog, problems, onStep, event, placeholders }) => {
   const t = useTranslations("automationsSettings");
   const ids = { to: React.useId(), subject: React.useId(), body: React.useId() };
+  const bodyRef = React.useRef<TokenTextFieldHandle>(null);
   return (
     <FieldStack>
       <Field label={t("email.to")} labelId={ids.to} required error={errorFor(t, problems, "recipients")}>
@@ -46,8 +48,9 @@ export const EmailFields: React.FC<StepPartProps> = ({ step, catalog, problems, 
         <TokenTextField aria-labelledby={ids.subject} value={step.subject ?? ""} onChange={(subject) => onStep({ subject })}
           placeholders={placeholders} invalid={Boolean(errorFor(t, problems, "subject"))} />
       </Field>
-      <Field label={t("email.message")} labelId={ids.body} required error={errorFor(t, problems, "body")}>
-        <TokenTextField multiline insertButton aria-labelledby={ids.body} value={step.body ?? ""} onChange={(body) => onStep({ body })}
+      <Field label={t("email.message")} labelId={ids.body} required error={errorFor(t, problems, "body")}
+        labelAction={<InsertFieldLink onClick={() => bodyRef.current?.openList()} />}>
+        <TokenTextField ref={bodyRef} multiline aria-labelledby={ids.body} value={step.body ?? ""} onChange={(body) => onStep({ body })}
           placeholders={placeholders} invalid={Boolean(errorFor(t, problems, "body"))} />
       </Field>
     </FieldStack>
@@ -113,10 +116,10 @@ export const ApprovalFields: React.FC<StepPartProps> = ({ step, catalog, problem
           invalid={Boolean(errorFor(t, problems, "assignee"))} />
       </Field>
       <Field label={t("approval.noAnswer")} labelId={ids.wait} error={errorFor(t, problems, "maxDays")}>
+        {/* C14: no "then" — the number, then the select filling the rest. */}
         <div className="flex items-center gap-2">
           <DaysInput value={step.maxDays} onChange={(maxDays) => onStep({ maxDays })} aria-labelledby={ids.wait}
-            invalid={Boolean(errorFor(t, problems, "maxDays"))} />
-          <span className="shrink-0 text-body text-secondary">{t("approval.then")}</span>
+            invalid={Boolean(errorFor(t, problems, "maxDays"))} className="w-26" />
           <div className="min-w-0 flex-1">
             <CompactPick
               size="md"
@@ -130,10 +133,13 @@ export const ApprovalFields: React.FC<StepPartProps> = ({ step, catalog, problem
           </div>
         </div>
       </Field>
-      <label htmlFor={ids.remind} className="flex w-fit cursor-pointer items-center gap-2 text-body">
-        <Checkbox id={ids.remind} checked={step.remindDaily === true} onCheckedChange={(c) => onStep({ remindDaily: c === true })} />
-        {t("approval.remind")}
-      </label>
+      {/* C15: the words on the left, a toggle on the right, one row. */}
+      <div className="flex items-center justify-between gap-3">
+        <label htmlFor={ids.remind} className="cursor-pointer text-body text-primary">
+          {t("approval.remind")}
+        </label>
+        <Switch id={ids.remind} checked={step.remindDaily === true} onCheckedChange={(c) => onStep({ remindDaily: c })} />
+      </div>
     </FieldStack>
   );
 };
@@ -183,9 +189,16 @@ export const SignFields: React.FC<StepPartProps> = ({ step, problems, onStep }) 
   const chosen = templates.find((x) => x.id === step.documents?.[0]) ?? null;
   const error = errorFor(t, problems, "documents");
   const signers = [...(chosen?.signers ?? [])].sort((a, b) => (a.order ?? 1) - (b.order ?? 1));
+  const { data: categories = [] } = useDocumentCategories();
+  const category = chosen?.categoryId ? categories.find((c) => c.id === chosen.categoryId)?.name ?? null : null;
   return (
     <FieldStack>
-      <Field label={t("sign.template")} htmlFor={ids.template} required error={error} hint={t("sign.templateHint")}>
+      <Field
+        label={t("sign.template")}
+        htmlFor={ids.template}
+        error={error}
+        hint={category ? t("sign.templateHintIn", { category }) : t("sign.templateHint")}
+      >
         <SearchableSelect
           id={ids.template}
           options={usable.map((x) => ({ value: x.id, label: x.name }))}
@@ -201,11 +214,12 @@ export const SignFields: React.FC<StepPartProps> = ({ step, problems, onStep }) 
       </Field>
       {chosen && (
         <>
+          {/* A02, S9b: read only — who signs and how long they have are the template's. */}
           <Field label={t("sign.who")} hint={t("sign.whoHint")}>
-            <ol className="flex flex-col gap-1 rounded-control bg-subtle p-2">
+            <ol className="flex flex-col rounded-popover bg-subtle px-3 py-2">
               {signers.map((s, i) => (
-                <li key={s.key} className="flex h-8 items-center gap-2 text-body text-primary">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-surface text-label text-secondary">
+                <li key={s.key} className="flex min-h-8 items-center gap-2.5 text-body text-primary">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-mist text-hint font-semibold text-secondary">
                     {s.order ?? i + 1}
                   </span>
                   <span className="truncate">{s.label?.trim() ? s.label : t(`sign.kind.${s.kind}`)}</span>
@@ -214,7 +228,10 @@ export const SignFields: React.FC<StepPartProps> = ({ step, problems, onStep }) 
             </ol>
           </Field>
           <Field label={t("sign.timeToSign")}>
-            <p className="text-body text-primary">{t("sign.days", { count: chosen.envelopeExpiryDays })}</p>
+            <div className="flex h-9 items-center justify-between gap-2 rounded-popover bg-subtle px-3">
+              <span className="text-body text-primary">{t("sign.daysCount", { count: chosen.envelopeExpiryDays })}</span>
+              <span className="text-hint text-tertiary">{t("sign.fromTemplate")}</span>
+            </div>
           </Field>
           {chosen.problems.length > 0 && <p className="text-label text-status-declined-text">{t("sign.templateProblem")}</p>}
         </>

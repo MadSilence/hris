@@ -37,6 +37,19 @@ describe("HrisApiTimeOffRequestsClient", () => {
     jest.clearAllMocks();
   });
 
+  it("keeps the leave type and the working-days flag of a decision context", async () => {
+    jest.mocked(hrisApiClient.get).mockResolvedValue({
+      request: dto, requesterName: "Joana Costa", balance: null, otherLeave: [], peersAway: [], awaitingYou: true,
+      answeringAs: null, answeringOnBehalfOfName: null, canDecideAnyway: false, steps: [],
+      leaveTypeName: "Paid Vacation", workingDays: true,
+    });
+
+    const result = await hrisApiTimeOffRequestsClient.getDecisionContext("request-id");
+
+    expect(result.leaveTypeName).toBe("Paid Vacation");
+    expect(result.workingDays).toBe(true);
+  });
+
   it("creates time off request", async () => {
     const response = { id: "request-id" };
 

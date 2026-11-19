@@ -10,15 +10,13 @@ import { Icon } from "@/components/desact/icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { SearchBox } from "@/components/ui/SearchBox";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SelectionBar } from "@/components/ui/SelectionBar";
 import type { AgreedPerson, AgreementTab } from "@/models/hub";
 import { cn } from "@/lib/cn";
 import { useWhoAgreed } from "../hooks";
-import { HubPage, HubTitle, LoadingBlock, PersonAvatar, ProgressBar, SkeletonRows, TruncatedTitle, useHubDates } from "../shared";
+import { HubBreadcrumbs, HubLoadError, HubPage, HubSegmented, HubTitle, LoadingBlock, PersonAvatar, ProgressBar, SkeletonRows, TruncatedTitle, useHubDates } from "../shared";
 import { useRemind } from "./remind";
 
 const PAGE_SIZE = 50;
@@ -120,23 +118,18 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
 
   return (
     <HubPage>
-      <nav aria-label={t("page.breadcrumb")} className="flex flex-wrap items-center gap-1.5 text-label">
-        <Link href="/hub/manage" className="text-secondary no-underline hover:text-primary">
-          {t("manage.title")}
-        </Link>
-        <span className="text-tertiary">/</span>
-        <Link href="/hub/manage/pages" className="text-secondary no-underline hover:text-primary">
-          {t("manage.tabs.pages")}
-        </Link>
-        {data && (
-          <>
-            <span className="text-tertiary">/</span>
-            <span className="text-primary">{data.title}</span>
-          </>
-        )}
-      </nav>
-      <div className="mt-3 flex flex-wrap items-start gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+      {/* Every item an accent link, the page's name included (FIXES A5); 28 to the title (P1). */}
+      <HubBreadcrumbs
+        label={t("page.breadcrumb")}
+        items={[
+          { href: "/hub/manage", label: t("manage.title") },
+          { href: "/hub/manage/pages", label: t("manage.tabs.pages") },
+          ...(data ? [{ href: `/hub/manage/pages/${id}/edit`, label: data.title }] : []),
+        ]}
+      />
+      {/* h1 → line 6; Edit page and Remind on the title block's bottom line (P2). */}
+      <div className="mt-7 flex flex-wrap items-end gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <HubTitle>{t("agreed.title")}</HubTitle>
           {data && (
             <p className="text-body text-secondary">
@@ -152,7 +145,7 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
           </Link>
         </Button>
         {data && data.remindable > 0 && (
-          <Button type="button" className="gap-1.5" onClick={() => remind(id, [], data.remindable, () => void query.refetch())}>
+          <Button type="button" className="gap-2" onClick={() => remind(id, [], data.remindable, () => void query.refetch())}>
             <Icon icon={SentIcon} size="sm" />
             {t("agreed.remindPeople", { count: data.remindable })}
           </Button>
@@ -162,36 +155,42 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
       {query.isLoading ? (
         <LoadingBlock className="mt-10" skeleton={<SkeletonRows count={8} height="h-11" />} />
       ) : query.isError || !data ? (
-        <div className="mt-10">
-          <ErrorState error={query.error} onRetry={() => void query.refetch()} />
-        </div>
+        <HubLoadError
+          className="mt-10"
+          error={query.error}
+          title={t("agreed.error")}
+          line={t("agreed.errorLine")}
+          onRetry={() => void query.refetch()}
+        />
       ) : (
         <>
-          <div className="mt-10 flex flex-wrap items-end gap-16">
+          {/* The hero 52 with "of {n} agreed" 16/20, 10 apart; the other two stacked, their tops 10 under the hero's;
+              the groups 56 apart (P3, P4). */}
+          <div className="mt-10 flex flex-wrap items-start gap-14">
             <div className="flex flex-col gap-2">
-              <p className="flex items-baseline gap-2">
+              <p className="flex items-baseline gap-2.5">
                 <span className="text-hub-hero text-primary tabular-nums">{data.agreed}</span>
-                <span className="text-body text-secondary">{t("agreed.ofNeeded", { needed: data.needed })}</span>
+                <span className="text-hub-lead text-secondary">{t("agreed.ofNeeded", { needed: data.needed })}</span>
               </p>
               <ProgressBar value={data.agreed} max={data.needed} className="w-[360px]" />
             </div>
-            <p className="flex items-baseline gap-2">
+            <p className="mt-2.5 flex flex-col gap-0.5">
               <span className="text-hub-celebration text-primary tabular-nums">{data.notYet}</span>
-              <span className="text-body text-secondary">
+              <span className="text-hint text-tertiary">
                 {data.versionNo > 1 ? t("agreed.notYetPrevious", { count: data.agreedPrevious, version: data.versionNo - 1 }) : t("agreed.notYet")}
               </span>
             </p>
             {data.newHires > 0 && (
-              <p className="flex items-baseline gap-2">
+              <p className="mt-2.5 flex flex-col gap-0.5">
                 <span className="text-hub-celebration text-primary tabular-nums">{data.newHires}</span>
-                <span className="text-body text-secondary">{t("agreed.newHires")}</span>
+                <span className="text-hint text-tertiary">{t("agreed.newHires", { count: data.newHires })}</span>
               </p>
             )}
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <SegmentedControl<AgreementTab>
-              fill={false}
+          {/* 44 under the numbers; 32 high; the divider 1 × 20; 8 between, 16 before the search (P5, P6). */}
+          <div className="mt-11 flex h-8 flex-wrap items-center gap-2">
+            <HubSegmented<AgreementTab>
               aria-label={t("agreed.title")}
               value={tab}
               onChange={setTab}
@@ -200,16 +199,17 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
                 { value: "AGREED", label: t("agreed.tabAgreed", { count: data.agreed }) },
               ]}
             />
-            <span aria-hidden className="h-6 w-px bg-divider" />
+            <span aria-hidden className="h-5 w-px bg-divider" />
             <ValueFilter label={t("agreed.department")} values={departments} value={filters.department} onChange={(department) => setFilters((f) => ({ ...f, department }))} />
             <ValueFilter label={t("agreed.office")} values={offices} value={filters.office} onChange={(office) => setFilters((f) => ({ ...f, office }))} />
-            <span className="ml-auto flex items-center gap-2">
+            {/* Export: a 32 icon button, its icon 20 secondary, 4 after the search (P7). */}
+            <span className="ml-auto flex items-center gap-1 pl-2">
               <SearchBox className="w-60" value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} aria-label={t("agreed.search")} />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon">
+                  <Button asChild variant="ghost" size="icon-sm" className="text-secondary">
                     <a href={exportHref(id, tab, filters)} download aria-label={t("agreed.export")}>
-                      <Icon icon={Download04Icon} size="sm" />
+                      <Icon icon={Download04Icon} size="md" />
                     </a>
                   </Button>
                 </TooltipTrigger>
@@ -253,11 +253,13 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
                 onClearSearch={() => setFilters({ department: null, office: null, q: "" })}
               />
             ) : (
-              <table className="w-full text-body">
+              // In a card: white, a hairline, radius 16, level 0; the header 12/16 500 and 37 high, cells 0 12, rows 45 (P8).
+              <div className="overflow-hidden rounded-card border border-divider bg-card shadow-card">
+              <table className="w-full text-body [&_td]:px-3 [&_th]:px-3">
                 <thead>
-                  <tr className="h-9 border-b border-divider text-left text-hint text-tertiary">
+                  <tr className="h-[37px] border-b border-divider text-left text-hint text-tertiary [&>th]:font-medium">
                     {notYetTab && (
-                      <th className="w-10 font-normal">
+                      <th className="w-10">
                         <Checkbox
                           aria-label={t("agreed.selectAll")}
                           checked={remindable.length > 0 && remindable.every((r) => selected.has(r.userId))}
@@ -266,16 +268,16 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
                         />
                       </th>
                     )}
-                    <th className="font-normal">{t("agreed.columns.name")}</th>
-                    <th className="font-normal">{t("agreed.columns.department")}</th>
-                    <th className="font-normal">{t("agreed.columns.office")}</th>
+                    <th>{t("agreed.columns.name")}</th>
+                    <th>{t("agreed.columns.department")}</th>
+                    <th>{t("agreed.columns.office")}</th>
                     {notYetTab ? (
                       <>
-                        <th className="font-normal">{t("agreed.columns.lastAgreed")}</th>
-                        <th className="font-normal">{t("agreed.columns.reminded")}</th>
+                        <th>{t("agreed.columns.lastAgreed")}</th>
+                        <th>{t("agreed.columns.reminded")}</th>
                       </>
                     ) : (
-                      <th className="font-normal">{t("agreed.columns.agreed")}</th>
+                      <th>{t("agreed.columns.agreed")}</th>
                     )}
                   </tr>
                 </thead>
@@ -283,7 +285,7 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
                   {shown.map((row) => {
                     const recent = remindedRecently(row);
                     return (
-                      <tr key={row.userId} className="h-11 border-b border-divider hover:bg-row-hover">
+                      <tr key={row.userId} className="h-[45px] border-b border-divider last:border-b-0 hover:bg-row-hover">
                         {notYetTab && (
                           <td>
                             {recent ? (
@@ -323,6 +325,7 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
                   })}
                 </tbody>
               </table>
+              </div>
             )}
             {rows.length > PAGE_SIZE && (
               <div className="mt-4 flex items-center justify-end gap-3 text-label text-secondary">

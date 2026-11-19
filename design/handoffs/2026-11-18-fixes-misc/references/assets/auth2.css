@@ -1,0 +1,113 @@
+
+/* round 4 — the login base */
+.lx{position:relative;overflow:hidden;font-family:Inter,sans-serif;color:var(--text-primary);-webkit-font-smoothing:antialiased;background:var(--surface-card);display:flex}
+.lx *{box-sizing:border-box}
+.lx .t{font-family:"Inter Tight",sans-serif;font-weight:600;letter-spacing:-0.035em;margin:0}
+.lx .t em{font-style:normal;color:var(--accent-text)}
+.lx .sub{margin:0;font-size:15px;line-height:22px;color:var(--text-secondary)}
+.lx .sub b{font-weight:500;color:var(--text-primary);overflow-wrap:anywhere}
+.lx .formx{display:flex;flex-direction:column;gap:16px;width:100%}
+.lx .co{justify-content:flex-start}
+/* the Wine pane */
+.lx .pane{flex:none;background:var(--accent);color:#FFFFFF;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.lx .pane .co b{color:#FFFFFF}
+.lx .pane .co .mk{border-color:transparent}
+.lx .pane .t{color:#FFFFFF}
+.lx .pane .t span{color:var(--rose)}
+.lx .pane .grid{display:block}
+.lx .pane .pby{color:rgba(255,255,255,.7)}
+/* the white side */
+.lx .main{flex:1;display:flex;flex-direction:column;padding:40px 48px}
+.lx .main .mid{flex:1;display:flex;align-items:center;justify-content:center}
+.lx .main .in2{width:100%;max-width:400px;display:flex;flex-direction:column;gap:28px}
+.lx .main .foot{display:flex;justify-content:center}
+.lx .main .top{display:flex;justify-content:flex-start;min-height:36px}
+/* L1 — pane left */
+.lx.l1 .pane{width:520px;padding:48px 56px}
+.lx.l1 .pane .t{font-size:64px;line-height:64px}
+/* L2 — form left, pane right with a margin */
+.lx.l2 .main{padding:40px 72px}
+.lx.l2 .pane{width:600px;margin:12px;border-radius:var(--radius-panel);padding:56px;align-items:flex-start}
+.lx.l2 .pane .t{font-size:48px;line-height:50px}
+/* L3 — half and half, the grid as a field */
+.lx.l3 .pane{width:50%;padding:48px 56px}
+.lx.l3 .pane .field{position:absolute;left:0;right:0;top:128px;display:flex;justify-content:center}
+.lx.l3 .pane .t{font-size:72px;line-height:70px;position:relative}
+.lx.l3 .pane .co,.lx.l3 .pane .pby{position:relative}
+/* phone */
+.lx.phone{flex-direction:column}
+.lx.phone .pane{width:auto !important;margin:0 !important;border-radius:0 !important;padding:20px 20px 24px !important;gap:20px}
+.lx.phone .pane .t{font-size:36px !important;line-height:38px !important}
+.lx.phone .main{padding:24px 20px 28px}
+.lx.phone .main .mid{align-items:flex-start}
+.lx .back{color:var(--text-secondary);display:flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:var(--radius-control)}
+/* the rings nod, quietly: singles and pairs on their own 6-12 s cycles (the nod's easing, SPEC § 9) */
+@keyframes ringnod{0%,82%,100%{transform:translateY(0)}88%{transform:translateY(7px)}92%{transform:translateY(-2px)}96%{transform:translateY(0)}}
+.lx .grid .hot{transform-box:fill-box;animation:ringnod 6s cubic-bezier(.5,0,.3,1) infinite}
+@media (prefers-reduced-motion:reduce){.lx .grid .hot{animation:none !important}}
+.btn.onw{background:var(--surface-card);border-color:var(--surface-card);color:var(--accent-text)}
+@keyframes rn6x4x4-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x4x4-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x4x4-2 { 0% {transform:translateY(0)} 15.58% {transform:translateY(0)} 17.46% {transform:translateY(7px)} 18.50% {transform:translateY(-2px)} 19.54% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 78.08% {transform:translateY(0)} 79.96% {transform:translateY(7px)} 81.00% {transform:translateY(-2px)} 82.04% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn6x4x4-3 { 0% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 40.58% {transform:translateY(0)} 42.46% {transform:translateY(7px)} 43.50% {transform:translateY(-2px)} 44.54% {transform:translateY(0)} 90.58% {transform:translateY(0)} 92.46% {transform:translateY(7px)} 93.50% {transform:translateY(-2px)} 94.54% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn7x2x2-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn7x2x2-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 28.08% {transform:translateY(0)} 29.96% {transform:translateY(7px)} 31.00% {transform:translateY(-2px)} 32.04% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 65.58% {transform:translateY(0)} 67.46% {transform:translateY(7px)} 68.50% {transform:translateY(-2px)} 69.54% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn7x1x2-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 27.50% {transform:translateY(0)} 29.38% {transform:translateY(7px)} 30.42% {transform:translateY(-2px)} 31.46% {transform:translateY(0)} 52.50% {transform:translateY(0)} 54.37% {transform:translateY(7px)} 55.42% {transform:translateY(-2px)} 56.46% {transform:translateY(0)} 65.00% {transform:translateY(0)} 66.88% {transform:translateY(7px)} 67.92% {transform:translateY(-2px)} 68.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
+@keyframes rn7x1x2-1 { 0% {transform:translateY(0)} 15.00% {transform:translateY(0)} 16.88% {transform:translateY(7px)} 17.92% {transform:translateY(-2px)} 18.96% {transform:translateY(0)} 28.08% {transform:translateY(0)} 29.96% {transform:translateY(7px)} 31.00% {transform:translateY(-2px)} 32.04% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 65.58% {transform:translateY(0)} 67.46% {transform:translateY(7px)} 68.50% {transform:translateY(-2px)} 69.54% {transform:translateY(0)} 90.00% {transform:translateY(0)} 91.88% {transform:translateY(7px)} 92.92% {transform:translateY(-2px)} 93.96% {transform:translateY(0)} 100% {transform:translateY(0)} }
+
+/* the new auth base (L1) — shared by every redrawn group */
+.lx.base .pane{width:520px;padding:56px;justify-content:space-between}
+.lx.base .pane .t{font-size:56px;line-height:58px}
+.lx.base .pane .bot{display:flex;flex-direction:column;gap:20px}
+.lx.base .pane .wm svg{height:28px;width:auto;display:block}
+.lx.base .pane .pby{margin-top:28px}
+.rx{width:100%;max-width:400px;display:flex;flex-direction:column;gap:28px;align-items:flex-start}
+.lx.base .pane .topb{display:flex;flex-direction:column;gap:40px;align-items:flex-start}
+.lx.phone.base .pane .topb{gap:16px}
+.lx .wmc svg{height:24px;width:auto;display:block}
+.lx.base .pane .wm.big svg{height:44px}
+.lx.base .pane .slog{margin:0;font:600 24px/30px "Inter Tight",sans-serif;letter-spacing:-0.02em;color:#FFFFFF}
+.lx.base .pane .slog span{color:var(--rose)}
+.lx.phone.base .pane .wm.big svg{height:28px}
+.lx.phone.base .pane .slog{font-size:18px;line-height:24px}
+.rx .form>.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%}
+.lx.phone .rx .form>.row2{grid-template-columns:minmax(0,1fr)}
+.rx .hd{text-align:left}
+.rx .ttl{font-size:32px;line-height:40px;letter-spacing:-0.03em}
+.rx .lead{font-size:15px;line-height:22px}
+.rx .mini,.rx .links{justify-content:flex-start}
+.rx .hint{justify-content:flex-start !important;text-align:left !important}
+.rx>.hint{width:100%}
+.rx>.tile{width:100%;align-self:stretch}
+.rx .bigic{margin-bottom:-8px}
+.rx .alert{width:100%}
+.rx .ferr{justify-content:flex-start !important}
+.rx .qrw{align-items:flex-start}
+.rx .key{text-align:left}
+.rx .key .link{justify-content:flex-start !important}
+.lx.phone.base .pane .t{font-size:32px !important;line-height:36px !important}
+.lx.phone.base .pane .wm svg{height:22px}
+.lx.phone.base .pane .bot{gap:12px}
+.lx.phone .rx .ttl{font-size:28px;line-height:36px}
+.rcrops{display:flex;gap:24px;padding:24px;background:var(--surface-canvas);align-items:flex-start;box-sizing:border-box;font-family:Inter,sans-serif}
+.rcrop{display:flex;flex-direction:column;gap:8px}
+.rcrop .cap{font-size:12px;line-height:16px;color:var(--text-tertiary)}
+.rcrop .cap b{color:var(--text-primary);font-weight:600;margin-right:4px}
+.rcrop>.box{width:496px;background:var(--surface-card);border:1px solid var(--border-divider);border-radius:12px;padding:40px 48px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:14px;line-height:20px;color:var(--text-primary)}
+/* phone: a slim Wine strip — the noddo wordmark + one row of rings (Ulia, Sandbox option B) */
+.lx.phone.strip{flex-direction:column !important}
+.lx.lx.phone.strip .pane{padding:18px 20px 8px !important;gap:14px !important;align-items:flex-start;text-align:left;justify-content:flex-start}
+.lx.phone.strip .pane .line{margin:0;font:600 20px/26px "Inter Tight",sans-serif;letter-spacing:-0.02em;color:#FFFFFF}
+.lx.phone.strip .pane .line span{color:var(--rose)}
+.lx.lx.phone.strip .main{padding:64px 20px 64px;position:relative}
+.lx.lx.phone.strip .main .top{position:absolute;left:20px;top:20px;min-height:36px;margin:0;align-items:center}
+.lx.lx.phone.strip .main .mid{align-items:stretch}
+.lx.lx.phone.strip .main .mid>.rx{margin:auto 0;width:100%}
+/* the icon above a heading hangs over the block: the heading, not the icon, is what gets centred */
+.lx.lx.phone.strip .rx>.bigic:first-child{margin-top:-68px}
+/* a form as tall as the screen or taller starts at the top */
+.lx.lx.phone.strip.long .main{padding-top:40px}
+.lx.lx.phone.strip.long.hasback .main{padding-top:72px}
+.lx.lx.phone.strip.long .main .mid>.rx{margin:0}
+.lx.lx.phone.strip.long .rx>.bigic:first-child{margin-top:0}
+.lx.phone.strip .wmrow svg{height:24px;width:auto;display:block}

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Delete draft automation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Inter+Tight:wght@600&amp;display=swap">
+<style>
+body{margin:0}
+:root{--accent:#6E1630;--on-accent:#FFFFFF;--accent-text:#6E1630;--accent-subtle:#F6F1F3;--accent-muted:#E9DCE0;--accent-ring:#B78B98}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.s{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{width:1440px;height:900px;display:flex;font-family:Inter,sans-serif;font-size:14px;line-height:20px;color:#0B0B0C;background:#FFFFFF;overflow:hidden;position:relative}
+.side{width:240px;flex:none;background:#F7F7F8;border-right:1px solid #EAEAEC;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.ni{height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:#45454A;font-weight:500;border-radius:8px}
+.ni.on{background:var(--accent-muted);color:var(--accent-text)}
+.main{flex:1;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;min-width:0;position:relative}
+.h1{margin:0;font-family:'Inter Tight',sans-serif;font-size:24px;line-height:32px;font-weight:600;letter-spacing:-0.02em}
+.btn{height:36px;padding:0 14px;border-radius:8px;font:500 14px/20px Inter,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #DADADF;background:#FFFFFF;color:#0B0B0C;box-sizing:border-box;white-space:nowrap}
+.p{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.ib{width:32px;height:32px;padding:0;border-color:transparent;background:transparent;color:#45454A}
+.fc{height:32px;padding:0 12px;border:1px solid #DADADF;border-radius:999px;background:#FFFFFF;font:500 13px/18px Inter,sans-serif;color:#0B0B0C;display:inline-flex;align-items:center;gap:6px}
+.fc.on{background:#0B0B0C;border-color:#0B0B0C;color:#FFFFFF}
+.search{width:240px;height:32px;border:1px solid #DADADF;border-radius:8px;padding:0 10px;box-sizing:border-box;display:flex;align-items:center;gap:8px;color:#6B6B70;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:#FFFFFF;border:1px solid #EAEAEC;border-radius:16px;box-shadow:0 1px 2px rgba(11,11,12,.05);padding:16px;display:flex;flex-direction:column;gap:8px;min-height:152px;box-sizing:border-box}
+.hov{box-shadow:0 1px 2px rgba(11,11,12,.06),0 2px 6px rgba(11,11,12,.06)}
+.top{display:flex;align-items:center;justify-content:space-between;height:32px}
+.nm{font-size:15px;line-height:22px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ttl{display:flex;align-items:flex-start;gap:12px}
+.ic{width:36px;height:36px;border-radius:8px;background:#F3F3F5;color:#45454A;display:flex;align-items:center;justify-content:center;flex:none}
+.trg{display:flex;align-items:center;gap:8px;color:#45454A}
+.foot{margin-top:auto;padding-top:12px;border-top:1px solid #EAEAEC;font-size:12px;line-height:16px;color:#6B6B70;display:flex;align-items:center;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;font-size:12px;line-height:16px;font-weight:600;box-sizing:border-box}
+.ok{background:#E6F4EC;color:#135C3A}.ok svg{color:#1E7A4F}
+.inact{background:#F3F3F5;color:#45454A}.inact svg{color:#6B6B70}
+.draft{border:1px dashed #9C9CA3;color:#45454A;height:22px}.draft svg{color:#6B6B70}
+.pop{background:#FFFFFF;border:1px solid #EAEAEC;border-radius:10px;box-shadow:0 1px 2px rgba(11,11,12,.06),0 4px 12px rgba(11,11,12,.08)}
+.mi{height:32px;padding:0 8px;border-radius:8px;display:flex;align-items:center;gap:10px}
+.scrim{position:absolute;inset:0;background:rgba(11,11,12,.4);display:flex;align-items:center;justify-content:center;z-index:5}
+.dlg{background:#FFFFFF;border-radius:20px;box-shadow:0 8px 32px rgba(11,11,12,.14);padding:24px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px}
+.h2{margin:0;font-family:'Inter Tight',sans-serif;font-size:18px;line-height:26px;font-weight:600;letter-spacing:-0.01em}
+.redf{border-color:#C42B1C;background:#C42B1C;color:#FFFFFF}
+.card{height:212px;min-height:0;position:relative}.card .foot{padding-right:36px;min-height:24px}</style>
+</helmet>
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div style="display:flex;align-items:center;gap:8px;padding:0 8px 16px"><div style="width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:600">A</div><span style="font-weight:500">Acme</span></div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg>Inbox</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.3-5 6-5s5 1.5 6 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c1.6.6 2.6 2.2 3 5"/></svg>People</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>Time off</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Documents</div>
+    <div class="ni on"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Automations</div>
+    <div style="flex:1"></div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/><circle cx="12" cy="12" r="3"/></svg>Settings</div>
+    <div style="border-top:1px solid #EAEAEC;margin-top:8px;padding:12px 8px 0;display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:999px;background:#ECE6EF;color:#441F56;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500">UT</div><div style="display:flex;flex-direction:column"><span style="font-weight:500">Ulia Tykoon</span><span style="font-size:12px;line-height:16px;color:#6B6B70">HR Admin</span></div></div>
+  </nav>
+
+  <main class="main">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:4px"><h1 class="h1">Automations</h1><span style="color:#6B6B70">Routine HR work that runs by itself.</span></div>
+      <button class="btn p">Add automation</button>
+    </div>
+    <div role="tablist" style="display:flex;gap:24px;border-bottom:1px solid #EAEAEC"><span style="padding:0 0 10px;font-weight:500;color:#0B0B0C;box-shadow:inset 0 -2px 0 #6E1630">Automations</span><span style="padding:0 0 10px;font-weight:500;color:#6B6B70">Activity</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="search"><svg class="s" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</div>
+      <button class="fc on"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>All</button>
+      <button class="fc">Active</button><button class="fc">Paused</button><button class="fc">Drafts</button>
+      <button class="fc">Starts when<svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+      <span style="flex:1"></span>
+      <button class="fc" aria-pressed="false"><svg class="s" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="2"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg>Archived<span style="color:#6B6B70">2</span></button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="top"><span class="pill ok"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Active</span><button class="btn ib" aria-label="More actions"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.3-5 6-5s5 1.5 6 5M18 8v6M15 11h6"/></svg></span><span class="nm" style="padding-top:7px">New hire: first week</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>7&nbsp;days before start date</span>
+        <span class="foot">Last run today, 09:00 CET · 312&nbsp;runs</span><span class="owner" aria-label="Owner: Ulia Tykoon" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#ECE6EF;color:#441F56">UT</span>
+      </div>
+      <div class="card hov">
+        <div class="top"><span class="pill ok"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Active</span><button class="btn ib" aria-label="More actions" style="background:#F3F3F5"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18M9 15l2 2 4-4"/></svg></span><span class="nm" style="padding-top:7px">Long time off approval</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Time off is requested</span>
+        <span class="foot">Last run yesterday, 16:20 CET · 41&nbsp;runs · 3&nbsp;waiting</span><span class="owner" aria-label="Owner: Jonas Petrauskas" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#B9C7D6;color:#FFFFFF"><svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true" style="display:block"><rect width="40" height="40" fill="#B9C7D6"/><path d="M6 40c1.5-8 7-12 14-12s12.5 4 14 12z" fill="#2A2D79"/><circle cx="20" cy="17" r="7.5" fill="#E8C4A8"/><path d="M12.5 15.5c0-5 3.4-8 7.5-8s7.5 3 7.5 8c-1.6-2.4-4.3-3.6-7.5-3.6s-5.9 1.2-7.5 3.6z" fill="#4D2D21"/></svg></span>
+      </div>
+      <div class="card">
+        <div class="top"><span class="pill inact"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>Paused</span><button class="btn ib" aria-label="More actions"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="nm" style="padding-top:7px">Probation review reminder</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>14&nbsp;days before probation ends</span>
+        <span class="foot" style="flex-direction:column;align-items:flex-start;gap:8px"><span style="color:#45454A">Marta Nowak left the company, so it can't run.</span><button class="btn" style="height:32px;padding:0 12px;font-size:13px;line-height:18px"><svg class="s" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-3.5 3.8-5 7-5s6 1.5 7 5"/></svg>Make me the owner</button></span><span class="owner" aria-label="Owner: Marta Nowak" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#E9DCE0;color:#6E1630">MN</span>
+      </div>
+      <div class="card">
+        <div class="top"><span class="pill ok"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Active</span><button class="btn ib" aria-label="More actions"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></span><span class="nm" style="padding-top:7px">Expiring vacation days</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Every year on 1&nbsp;Mar</span>
+        <span class="foot">Last run 1&nbsp;Mar 2026 · 186&nbsp;runs</span><span class="owner" aria-label="Owner: Ulia Tykoon" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#ECE6EF;color:#441F56">UT</span>
+      </div>
+      <div class="card">
+        <div class="top"><span class="pill ok"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Active</span><button class="btn ib" aria-label="More actions"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8 17c1.5-2 2.5-2 3.5 0s2 2 3.5 0"/></svg></span><span class="nm">Handbook and privacy policy to sign for new teammates in the Warsaw, Vilnius and Berlin offices</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>A teammate is added</span>
+        <span class="foot">Last run 2&nbsp;Nov 2026 · 27&nbsp;runs</span><span class="owner" aria-label="Owner: Aistė Jonaitė" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#E6F4EC;color:#135C3A">AJ</span>
+      </div>
+      <div class="card">
+        <div class="top"><span class="pill ok"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></svg>Active</span><button class="btn ib" aria-label="More actions"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span><span class="nm" style="padding-top:7px">Equipment return for leavers</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>A last working day is set</span>
+        <span class="foot" style="color:#A12215"><svg class="s" style="color:#C42B1C" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>Last run failed on 4&nbsp;Nov · <a href="#" style="color:#A12215;text-decoration:underline">See why</a></span><span class="owner" aria-label="Owner: Paweł Nowak" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#F1E4EB;color:#661642">PN</span>
+      </div>
+      <div class="card">
+        <div class="top"><span class="pill draft"><svg class="s" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Draft</span><button class="btn ib" aria-label="More actions"><svg class="s" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>
+        <div class="ttl"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M14 4a2 2 0 0 0-4 0v10.5a4 4 0 1 0 4 0z"/><path d="M12 11v6"/></svg></span><span class="nm" style="padding-top:7px">Sick day notice for team leads</span></div>
+        <span class="trg"><svg class="s" style="color:#6B6B70" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>A sick day is added</span>
+        <span class="foot">Edited 2&nbsp;days ago · not turned on yet</span><span class="owner" aria-label="Owner: Ulia Tykoon" style="position:absolute;right:16px;bottom:17px;width:24px;height:24px;border-radius:999px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:600;background:#ECE6EF;color:#441F56">UT</span>
+      </div>
+    </div>
+
+
+  </main>
+<div class="scrim"><section class="dlg" role="dialog" aria-label="Delete automation" style="width:400px">
+<h2 class="h2">Delete Sick day notice for team leads?</h2>
+<span style="color:#45454A">It was never turned on, so nothing ran. You can't undo this.</span>
+<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button class="btn">Cancel</button><button class="btn redf">Delete automation</button></div>
+</section></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

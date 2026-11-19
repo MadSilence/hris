@@ -1,7 +1,7 @@
 "use client";
 
 import { useMessages, useTranslations } from "next-intl";
-import { dateToISO, useDisplayLocale, useShortDates } from "@/lib/date";
+import { dateToISO, useShortDates, useTimeFormatter } from "@/lib/date";
 import type { AutomationRun, AutomationRunStatus } from "@/models/automations";
 import type { Messages } from "@/i18n/messages";
 
@@ -50,6 +50,35 @@ export const initialsOf = (name: string | null | undefined): string =>
 export const runDay = (run: AutomationRun): string | null =>
   run.status === "SCHEDULED" && run.nextDate ? run.nextDate : run.finishedAt ?? run.createdAt;
 
+const USER_STATUSES = { PROSPECTIVE: "prospective", ACTIVE: "active", ARCHIVED: "archived" } as const;
+const DATE_FIELDS = new Set(["hireDate", "probationEnd"]);
+
+/**
+ * A field-change run's second line (E3b, H5): "Last name: Novak" — the field by its name, the value as a reader says
+ * it (the backend names a reference); null for any other run.
+ */
+export const useFieldChangeLine = () => {
+  const tr = useTranslations("automationsRuns");
+  const tc = useTranslations("common");
+  const fieldNames = useMessages().automations.changeableField as Record<string, string>;
+  const dates = useShortDates();
+  return (run: Pick<AutomationRun, "about">): string | null => {
+    const a = run.about ?? {};
+    const field = str(a.field);
+    if (!field) return null;
+    const label = fieldNames[field] ?? str(a.fieldName) ?? field;
+    const raw = str(a.value);
+    let value = raw;
+    if (raw && DATE_FIELDS.has(field)) {
+      const date = toInstant(raw);
+      value = date ? dates.date(date) : raw;
+    } else if (raw && field === "status" && raw in USER_STATUSES) {
+      value = tc(`userStatus.${USER_STATUSES[raw as keyof typeof USER_STATUSES]}`);
+    }
+    return value ? tr("row.fieldChanged", { field: label, value }) : tr("row.fieldCleared", { field: label });
+  };
+};
+
 /**
  * The words of runs, shared by Run history, the run window, Activity and the profile.
  *
@@ -68,16 +97,14 @@ export const useRunWords = () => {
   const tr = useTranslations("automationsRuns");
   const reasons = useMessages().automations.reason as Record<string, string>;
   const dates = useShortDates();
-  const locale = useDisplayLocale();
+  const formatTime = useTimeFormatter();
+  const fieldChange = useFieldChangeLine();
 
+  /** In the company's clock — 12-hour for a company in the US on an English page, 24-hour otherwise. */
   const time = (value: string | Date | null | undefined, withZone = false): string => {
     const date = value instanceof Date ? value : toInstant(value);
     if (!date) return "";
-    return new Intl.DateTimeFormat(locale, {
-      hour: "2-digit",
-      minute: "2-digit",
-      ...(withZone ? { timeZoneName: "short" as const } : {}),
-    }).format(date);
+    return formatTime(date, { withZone });
   };
 
   const relative = (date: Date): "today" | "yesterday" | null => {
@@ -129,6 +156,8 @@ export const useRunWords = () => {
       return days != null ? tr("row.timeOffDays", { type, count: days }) : type;
     }
     if (kind === "PROCESS") return str(a.name) ?? str(a.processType) ?? "";
+    const changed = fieldChange(run);
+    if (changed) return changed;
     const anchor = str(a.anchorDate);
     // The trigger and its date, as the Activity spec's "Built" says ("Probation ends · 25 Nov"); "Counted from 7 Nov"
     // read as if a step were meant (walk of 2026-11-07).

@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar"
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError } from "@/components/clients/exceptions";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { useDateFormatter, useDisplayLocale } from "@/lib/date";
+import { useDateFormatter, useDisplayLocale, useTimeFormatter } from "@/lib/date";
 import { formatMinutes, type AttendanceLogDay, type AttendanceTotals } from "@/models/attendance";
 import { useAttendanceCapabilities, useAttendanceLog } from "@/components/modules/attendance/hooks";
 import { formatAmounts } from "@/components/modules/attendance/lib";
@@ -59,6 +59,7 @@ const COLUMNS = 6;
  */
 export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
   const formatDisplayDate = useDateFormatter();
+  const formatTime = useTimeFormatter();
   const locale = useDisplayLocale();
   const t = useTranslations("attendance");
   const tCommon = useTranslations("common");
@@ -90,7 +91,7 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
             <>
               <Avatar className="h-10 w-10">
                 {person.avatarUrl ? <AvatarImage src={person.avatarUrl} alt={name}/> : null}
-                <AvatarFallback>{initials}</AvatarFallback>
+                <AvatarFallback name={name}>{initials}</AvatarFallback>
               </Avatar>
               <h1 className="text-page-title">{name}</h1>
             </>
@@ -189,8 +190,8 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                           {day.entries.map((entry, index) => (
                             <TableRow key={entry.id} className="hover:bg-transparent">
                               {index === 0 ? dateCell : <TableCell/>}
-                              <TableCell className="tabular-nums">{entry.startTime}</TableCell>
-                              <TableCell className="tabular-nums">{entry.endTime}</TableCell>
+                              <TableCell className="tabular-nums">{formatTime.ofDay(entry.startTime)}</TableCell>
+                              <TableCell className="tabular-nums">{formatTime.ofDay(entry.endTime)}</TableCell>
                               <TableCell className="text-right tabular-nums">{formatMinutes(entry.minutes)}</TableCell>
                               <TableCell className="truncate" title={entry.description ?? undefined}>{entry.description ?? ""}</TableCell>
                               {index === 0 ? noteCell : <TableCell/>}

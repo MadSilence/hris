@@ -110,15 +110,25 @@ export const NoResults: React.FC<{
   scene?: Extract<Scene, "no-results-s" | "no-match-s">;
   /** See {@link EmptyState}'s `fill`. */
   fill?: boolean;
+  /**
+   * `page` — a page's own no-results, drawn in a card of its own under the toolbar (the designers' Automations fixes
+   * A12, 2026-11-18): the title in the section style, the line in secondary grey. `panel`, the default, is the small
+   * block of a list inside a page, a panel or a dropdown.
+   */
+  variant?: "panel" | "page";
   className?: string;
-}> = ({ hint, title, action, onClearSearch, scene = "no-results-s", fill, className }) => {
+}> = ({ hint, title, action, onClearSearch, scene = "no-results-s", fill, variant = "panel", className }) => {
   const t = useTranslations("common");
   return (
   <div className={cn("flex w-full flex-col items-center justify-center gap-3 px-6 py-8 text-center", fill && "h-full", className)}>
     <Illustration scene={scene} size="s" />
     <div className="flex flex-col gap-1">
-      <p className="text-body font-medium text-primary">{title ?? t("states.noResults")}</p>
-      <p className="mx-auto max-w-sm text-body text-tertiary">{hint ?? t("emptyState.noResultsHint")}</p>
+      <p className={variant === "page" ? "text-section-title text-primary" : "text-body font-medium text-primary"}>
+        {title ?? t("states.noResults")}
+      </p>
+      <p className={cn("mx-auto max-w-sm text-body", variant === "page" ? "text-secondary" : "text-tertiary")}>
+        {hint ?? t("emptyState.noResultsHint")}
+      </p>
     </div>
     {action ?? (onClearSearch && <ClearSearchButton onClick={onClearSearch} />)}
   </div>

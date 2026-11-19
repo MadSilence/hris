@@ -1,5 +1,5 @@
 /*
- * The 59 ring illustrations of the noddo design system (SPEC § 10), generated from the package's
+ * The 61 ring illustrations of the noddo design system (SPEC § 10), generated from the package's
  * `assets/illustrations/*.svg` by `generate.mjs` beside this file — regenerate rather than edit by hand. The
  * provenance manifests the files carry are left out of the bundle; the package keeps them.
  *
@@ -287,7 +287,7 @@ export const SCENES = {
     <>
       <circle data-role="ink" cx="108" cy="68" r="42" style={{ fill: "none", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
       <path data-role="ink" d="M139 99 L170 128" style={{ fill: "none", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle data-role="ring" cx="108" cy="68" r="16" strokeDasharray="6 10" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle data-role="ring" cx="108" cy="68" r="12" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
     </>
   ),
   "no-results": (
@@ -449,6 +449,22 @@ export const SCENES = {
       <circle data-role="ring" cx="170" cy="68" r="18" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
       <path data-role="ring" d="M146 126 A24 24 0 0 1 194 126" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
       <path data-role="support" d="M106 46 H134 M106 62 H126" style={{ fill: "none", stroke: "var(--illustration-support)" }} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+    </>
+  ),
+  "saved-s": (
+    <>
+      <path data-role="ink" d="M86 20 H146 A10 10 0 0 1 156 30 V131 Q156 139 149.5 134.5 L121.0 111 Q116.0 108 111.0 111 L82.5 134.5 Q76 139 76 131 V30 A10 10 0 0 1 86 20 Z" style={{ fill: "var(--illustration-knockout)", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle data-role="knockout" cx="160" cy="20" r="23" style={{ fill: "var(--illustration-knockout)", stroke: "none" }}/>
+      <circle data-role="ring" cx="160" cy="20" r="14" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round"/>
+    </>
+  ),
+  "saved": (
+    <>
+      <path data-role="baseline" d="M30 136 H210" style={{ fill: "none", stroke: "var(--illustration-baseline)" }} strokeWidth="3" strokeLinecap="round"/>
+      <path data-role="ink" d="M94 26 H142 A8 8 0 0 1 150 34 V119 Q150 127 143.5 122.5 L123.0 105 Q118.0 102 113.0 105 L92.5 122.5 Q86 127 86 119 V34 A8 8 0 0 1 94 26 Z" style={{ fill: "var(--illustration-knockout)", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <path data-role="support" d="M102 52 H130 M102 66 H122" style={{ fill: "none", stroke: "var(--illustration-support)" }} strokeWidth="4" strokeLinecap="round"/>
+      <circle data-role="knockout" cx="153" cy="25" r="18" style={{ fill: "var(--illustration-knockout)", stroke: "none" }}/>
+      <circle data-role="ring" cx="153" cy="25" r="11" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round"/>
     </>
   ),
   "sick-day": (
@@ -625,6 +641,8 @@ export const SCENE_LABELS: Record<Scene, string> = {
   "review-cycle": "Review cycle: people on a turning loop, one is the ring",
   "reviews-and-one-on-ones-s": "Reviews, simplified for S size: two people facing each other, one is the ring",
   "reviews-and-one-on-ones": "Reviews: two ring people facing each other",
+  "saved-s": "Saved illustration",
+  "saved": "Saved: an empty bookmark with a ring",
   "sick-day": "Sick day: a ring head resting on a pillow under a blanket",
   "signing": "Signing: a page with a signature line and a pen",
   "something-broke": "Something went wrong: a ring broken into two arcs",

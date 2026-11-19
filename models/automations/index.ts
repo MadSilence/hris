@@ -192,7 +192,11 @@ export type StepSpec = {
   otherwise?: SplitPath | null;
   documents?: string[] | null;
   survey?: string | null;
+  /** "If it fails" (S8): stop and tell the owner (null, the default) or skip the step and go on. */
+  ifFails?: IfFails | null;
 };
+
+export type IfFails = "STOP_AND_TELL" | "SKIP";
 
 export type AutomationDefinition = {
   trigger: TriggerSpec | null;
@@ -308,6 +312,8 @@ export type StepExample = {
   dueDate: string | null;
   assigns: string | null;
   missingPlaceholders: string[];
+  /** A split's "Who goes where" (S10): a real person and the key of the path they would take. */
+  routes?: { person: PersonCard; path: string }[];
 };
 export type AutomationCheck = {
   matchingCount: number;
@@ -344,6 +350,7 @@ export type TestRunOutcome =
   | "WOULD_CREATE"
   | "WOULD_ASSIGN"
   | "WOULD_WAIT"
+  | "WOULD_SEND_FOR_SIGNATURE"
   | "DECIDED"
   | "PATH"
   | "SKIPPED_PATH"

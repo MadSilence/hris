@@ -23,11 +23,11 @@ export const StepMenu: React.FC<StepMenuProps> = ({ skipped, open, onOpenChange,
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="ghost" size="icon-sm" aria-label={t("settings.menu")} className="text-tertiary hover:text-secondary">
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={t("settings.menu")}>
           <Icon icon={MoreHorizontalIcon} size="sm" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-44 p-1">
+      <DropdownMenuContent align="end" className="min-w-[200px] p-1">
         <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={onDuplicate}>
           {t("settings.duplicate")}
         </RowAction>
@@ -42,37 +42,65 @@ export const StepMenu: React.FC<StepMenuProps> = ({ skipped, open, onOpenChange,
   );
 };
 
-/**
- * The step settings window (Layout 7): on the right, 340, radius 16, level 2. The header names the step and its type;
- * ⋯ and × on the right; the body is the settings part's fields.
- */
-export const StepSettingsWindow: React.FC<{
-  /** "Step 2A · Ask for approval", or "What starts it". */
-  eyebrow: string;
-  title: string;
-  icon?: IconSvgElement;
-  /** Absent for the trigger and in read mode. */
-  menu?: StepMenuProps | null;
-  onClose: () => void;
-  children: React.ReactNode;
-}> = ({ eyebrow, title, icon = FlashIcon, menu, onClose, children }) => {
+/** The trigger's menu ⋯: what starts it can be changed from there, like a step's type is chosen in Add a step. */
+export const TriggerMenu: React.FC<{ onChange: () => void }> = ({ onChange }) => {
   const t = useTranslations("automationsEditor");
   return (
-    <section aria-label={eyebrow} data-test="step-settings" className="flex flex-col rounded-card border border-divider bg-card shadow-popover">
-      <header className="flex items-start gap-1 border-b border-divider px-5 pt-4 pb-3">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={t("settings.menu")}>
+          <Icon icon={MoreHorizontalIcon} size="sm" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[200px] p-1">
+        <RowAction icon={<Icon icon={FlashIcon} size="sm" />} onClick={onChange}>
+          {t("settings.changeTrigger")}
+        </RowAction>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+/**
+ * The step settings window (Layout 7, the designers' fixes C1–C4): on the right, 340, radius 16, 1.5 px of the accent
+ * ring, level 3. The header is "Step N" with the type's icon over the step's type ("What starts it" over the trigger's
+ * name); ⋯ and × on the right; the body is the settings part's fields.
+ */
+export const StepSettingsWindow: React.FC<{
+  /** "Step 2A", or "What starts it". */
+  eyebrow: string;
+  /** The step's type ("Send a notification"), or the trigger's name. */
+  title: string;
+  icon?: IconSvgElement;
+  /** Absent in read mode. */
+  menu?: StepMenuProps | null;
+  /** The trigger's ⋯, in place of a step's. */
+  triggerMenu?: { onChange: () => void } | null;
+  onClose: () => void;
+  children: React.ReactNode;
+}> = ({ eyebrow, title, icon = FlashIcon, menu, triggerMenu, onClose, children }) => {
+  const t = useTranslations("automationsEditor");
+  return (
+    <section
+      aria-label={eyebrow}
+      data-test="step-settings"
+      className="flex shrink-0 flex-col rounded-card border-[1.5px] border-accent-ring bg-card shadow-dialog"
+    >
+      <header className="flex items-start gap-1 border-b border-divider pt-4 pr-3 pb-3 pl-5">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="flex items-center gap-1.5 text-hint text-tertiary">
+          <p className="flex items-center gap-2 text-hint font-medium text-tertiary">
             <Icon icon={icon} size="sm" className="shrink-0" />
             <span className="truncate">{eyebrow}</span>
           </p>
           <h2 className="line-clamp-2 text-card-title text-primary">{title}</h2>
         </div>
         {menu && <StepMenu {...menu} />}
+        {!menu && triggerMenu && <TriggerMenu {...triggerMenu} />}
         <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("settings.close")}>
           <Icon icon={Cancel01Icon} size="sm" />
         </Button>
       </header>
-      <div className="flex flex-col gap-4 px-5 py-4">{children}</div>
+      <div className="flex flex-col gap-4 px-5 pt-4 pb-5">{children}</div>
     </section>
   );
 };

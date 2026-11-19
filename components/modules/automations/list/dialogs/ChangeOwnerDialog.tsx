@@ -19,6 +19,9 @@ import { useOwnerCandidates, type OwnerCandidate } from "./useOwnerCandidates";
 /**
  * Change owner (O1 → O2): the owner now, then a single-person picker of people who may manage automations.
  * "Change owner" stays off until somebody is picked; once picked, a note says what happens to runs going.
+ *
+ * G11: 560 wide, one column 16 apart; the owner now on mist with their role ("Owner now · HR Admin"); the picker's rows
+ * 56 high with "{job title} · {office}" under the name.
  */
 export const ChangeOwnerDialog: React.FC<{
   automation: AutomationSummary | null;
@@ -34,6 +37,10 @@ export const ChangeOwnerDialog: React.FC<{
   const [open, setOpen] = React.useState(false);
   const debounced = useDebouncedValue(query, 250);
   const candidates = useOwnerCandidates(debounced, Boolean(automation) && open);
+  // The owner's role comes from the same list, asked once with no search: an owner who may no longer manage
+  // automations is not on it, and their line says only "Owner now".
+  const everyone = useOwnerCandidates("", Boolean(automation?.owner?.id));
+  const ownerRole = (everyone.data ?? []).find((person) => person.id === automation?.owner?.id)?.role ?? null;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listId = React.useId();
 
@@ -62,7 +69,7 @@ export const ChangeOwnerDialog: React.FC<{
         if (!next && !busy) onCancel();
       }}
     >
-      <DialogContent size="sm" className="bg-card" hideClose>
+      <DialogContent size="md" className="gap-4 bg-card" hideClose>
         <DialogHeader className="pr-0">
           <DialogTitle className="break-words">{t("changeOwner.title", { name: automation?.name ?? "" })}</DialogTitle>
           <DialogDescription>{t("changeOwner.description")}</DialogDescription>
@@ -70,11 +77,13 @@ export const ChangeOwnerDialog: React.FC<{
 
         <div className="flex flex-col gap-4">
           {automation?.owner ? (
-            <div className="flex items-center gap-3 rounded-popover bg-subtle px-3 py-2.5">
+            <div className="flex items-center gap-2.5 rounded-popover bg-mist px-3 py-2.5">
               <PersonAvatar name={automation.owner.name} size={28} />
               <div className="min-w-0">
                 <p className="truncate text-body font-medium text-primary">{automation.owner.name}</p>
-                <p className="text-hint text-tertiary">{t("changeOwner.ownerNow")}</p>
+                <p className="text-hint text-tertiary">
+                  {ownerRole ? t("changeOwner.ownerNowRole", { role: ownerRole }) : t("changeOwner.ownerNow")}
+                </p>
               </div>
             </div>
           ) : null}
@@ -143,8 +152,8 @@ export const ChangeOwnerDialog: React.FC<{
                   if (event.target instanceof Node && inputRef.current?.parentElement?.contains(event.target)) event.preventDefault();
                 }}
               >
-                <p className="px-2.5 pt-1.5 pb-1 text-hint text-tertiary">{t("changeOwner.group")}</p>
-                <ul id={`${listId}-list`} role="listbox" className="max-h-72 overflow-y-auto">
+                <p className="px-2 pt-2 pb-1 text-hint font-medium text-tertiary">{t("changeOwner.group")}</p>
+                <ul id={`${listId}-list`} role="listbox" className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
                   {candidates.isLoading ? (
                     <li className="flex justify-center py-4">
                       <NodRing size="sm" />
@@ -156,10 +165,14 @@ export const ChangeOwnerDialog: React.FC<{
                       <li key={person.id} role="option" aria-selected={picked?.id === person.id}>
                         <button
                           type="button"
-                          className="flex w-full items-center gap-3 rounded-control px-2.5 py-2 text-left hover:bg-subtle"
+                          className="flex min-h-14 w-full items-center gap-2.5 rounded-control px-2 py-2 text-left hover:bg-accent-subtle focus-visible:bg-accent-subtle focus-visible:outline-none"
                           onClick={() => pick(person)}
                         >
-                          <PersonAvatar name={person.name} avatarUrl={person.avatarUrl} size={28} />
+                          <PersonAvatar
+                            name={person.name}
+                            avatarUrl={person.avatarUrl}
+                            size={28}
+                          />
                           <span className="min-w-0">
                             <span className="block truncate text-body text-primary">{person.name}</span>
                             {person.detail ? <span className="block truncate text-hint text-tertiary">{person.detail}</span> : null}

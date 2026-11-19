@@ -49,9 +49,11 @@ export const buildPublishRequest = (input: {
 };
 
 /**
- * Publish (`PublishPageDialog`, CM06, 560): "Publish version {n}?", the What changed points the editor writes
- * (v1 has no assistant, so no "Drafted by AI" label — Q-11), and for a must-read page people already agreed to the
- * choice between asking everyone again and a small fix. A failure keeps the dialog open: the draft is saved.
+ * Publish (`PublishPageDialog`, CM06, 560): "Publish version {n}?" — "Publish a small fix?" once the fix is picked
+ * (FIXES N3) — the What changed points the editor writes (v1 has no assistant, so an empty field and no "Drafted by AI"
+ * label — Q-11, the owner 2026-11-19, FIXES N2), and for a must-read page people already agreed to the choice between
+ * asking everyone again and a small fix. The first version has no body at all (N1). Past days are not offered for
+ * Agree by (N4). A failure keeps the dialog open: the draft is saved.
  */
 export const PublishPageDialog: React.FC<{
   open: boolean;
@@ -95,14 +97,17 @@ export const PublishPageDialog: React.FC<{
   };
 
   const label = fix ? t("editor.publishFix") : t("editor.publishVersion", { version: nextVersion });
+  const asksAgreeBy = mustRead && !showChoice && !draftAgreeBy;
+  const hasBody = showChoice || asksAgreeBy || (!firstPublish && !fix) || failed;
 
   return (
     <Dialog open={open} onOpenChange={(next) => !busy && onOpenChange(next)}>
       <DialogContent className="flex max-h-[85vh] flex-col">
         <DialogHeader>
-          <DialogTitle>{t("editor.publishTitle", { version: nextVersion })}</DialogTitle>
+          <DialogTitle>{fix ? t("editor.publishFixTitle") : t("editor.publishTitle", { version: nextVersion })}</DialogTitle>
           <DialogDescription className={firstPublish ? undefined : "sr-only"}>{t("editor.publishLead")}</DialogDescription>
         </DialogHeader>
+        {hasBody && (
         <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
           {showChoice && (
             <RadioGroup value={choice} onValueChange={(v) => setChoice(v as PublishChoice)} className="flex flex-col gap-3" aria-label={t("editor.publishTitle", { version: nextVersion })}>
@@ -128,7 +133,7 @@ export const PublishPageDialog: React.FC<{
               </label>
             </RadioGroup>
           )}
-          {mustRead && !showChoice && !draftAgreeBy && (
+          {asksAgreeBy && (
             <div className="flex w-[180px] flex-col gap-1">
               <span className="text-label text-secondary">{t("editor.agreeBy")}</span>
               <DatePicker value={agreeBy} onChange={setAgreeBy} min={dateToISO(new Date())} ariaLabel={t("editor.agreeBy")} />
@@ -137,7 +142,6 @@ export const PublishPageDialog: React.FC<{
           {!firstPublish && !fix && (
             <div className="flex flex-col gap-2">
               <p className="text-label text-secondary">{t("editor.whatChanged")}</p>
-              <p className="text-hint text-tertiary">{t("editor.whatChangedHint")}</p>
               <ul className="flex flex-col gap-2">
                 {points.map((point, i) => (
                   <li key={i} className="flex items-center gap-2">
@@ -177,6 +181,7 @@ export const PublishPageDialog: React.FC<{
             />
           )}
         </div>
+        )}
         <DialogFooter>
           <Button type="button" variant="secondary" disabled={busy} onClick={() => onOpenChange(false)}>
             {t("actions.cancel")}

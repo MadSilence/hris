@@ -38,6 +38,8 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 - **Small:** "{n} requests" as a big number + up to 3 stacked avatars.
 - **Medium:** "{n} need your answer" (count in accent), up to 3 rows (avatar, name, "3 days vacation · 12–14 Nov"), then "Review {n} requests" (primary, full width).
 - **Large:** a **deck of cards**. Under the title is the counter "1 of {n}" + one dash per card (the current one accent; max 9 dashes, then the counter alone). Under it the front card sits slightly tilted (−0.5°). Behind it are as many cards as there are items left, **2 at most** (3 left → 2 behind, 2 left → 1, 1 left → none). The back card is pink (`accent-subtle` + rose tint), the middle one is white with a hairline. **New:** `DecisionDeck`.
+- **Card header on two lines** (widgets fixes W6, 2026-11-19): line 1 the person (a 20 avatar + the name) or the object, 14/18 600 Ink; line 2 what it is about, 13/18 `text-tertiary`; the time on the right, 12/20 ("15h ago"). Card gap 4. Time off: "Lena Novak" / "wants 3 days of vacation"; task: "Set up Ana's laptop" / "Onboarding · Ana Silva"; review: "Q4 review" / "your self-review" (never the reader's own name); sign: "Remote work policy" / "from {sender's name} · to sign" (never "HR"); page to agree: the page's name with its icon tile / "was updated"; failed run: "Automation" / "didn't run".
+- **Card words** (W7, W10–W15): time off "Thu 19 → Sat 21 Nov", chips "3 working days" (when the policy counts working days) · "12.5 days left after"; task "Due today" / "Due Fri, 20 Nov", line "Assigned by {name}", a plain task **Mark done** (check icon), Start only for a review; review "Due in 3 days" + chip "Your manager sees it after you send"; sign "Sign by Fri, 27 Nov"; page to agree "Agree by Fri, 27 Nov", line "What changed: {points}" when the page has them, button **Read and agree** — it only opens the page; nobody agrees from Home; a failed run **Mark as read** (secondary) + **Fix it** (primary).
 - **One card:** at the top left a 36 tile with the kind's icon (time off `calendar-03`, expense `invoice-01`, attendance `clock-01`, document `file-01`, review `star`, task `task-done-01`, missing data `user-edit-01`, policy `book-open-01`, announcement `megaphone-01`, failed automation `cancel-circle` on red soft). Next to it: a 20 avatar + the person's name (600) and what they want ("wants 3 days of vacation"), with the time ago on the right. Then the main line (Inter Tight 22/28 500: "Thu 12 → Sat 14 Nov", "€84.20"). Then one of these:
   - a **warning line** with an avatar ("Rūta from Design is out on 12 Nov too", Pending text);
   - **fact chips** (Mist pills 24, 12 px: "3 working days", "12.5 days left after", "✓ Receipt attached" with a Pine tick);
@@ -58,7 +60,7 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 | Do · policy | Travel policy was updated | Read and confirm | "What changed: hotel limits, per diem" | I’ve read it |
 | Read · answered | Your time off was approved by Jonas | Fri, 4 Dec | status Approved | Mark as read |
 | Read · announcement | Inga from HR posted an announcement | Office closed on 24 Dec | "Enjoy the long weekend." | Mark as read |
-| Read · failed automation (HR) | Automation didn’t run | Time off approval | "The approver has left the company." (Error text) | Mark as read · Fix it |
+| Read · failed automation (HR) | Automation didn’t run | Time off approval | "The approver has left the company." (Error text) | Mark as read · Fix it — Mark as read takes that run out of this person's deck for good |
 
 - Rules: no "Open" and no "Later" buttons. Clicking the card opens its page, and Skip is "later". A hover over any avatar or name shows a light tooltip with the full name and job title.
 - **Approve, in motion (LW01c, 6 s loop on the board).** Hover: the button darkens (`accent-hover`, 100 ms) and the ring dips. Press: `accent-strong`. Then "Approving…" with the ring nodding (`NodRing`, 1.1 s loop); the width does not change. On success it nods once (600 ms). The card leaves to the **right**, tilting, and fades (240 ms). The deck moves forward (300 ms). The counter becomes "2 of 3" and one card fewer is behind. Toast "Time off approved" + Undo (5 s). Reduced motion: no nod, the card just fades (SPEC § 11).
@@ -69,6 +71,7 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 **Who sees it:** everyone with a time-off policy. Without a policy it shows the empty state "No time-off policy yet" / "You're not added to one yet." (**time-off-s**). **Data:** balances by type and the person's requests. **Sizes:** S, M, L.
 
 - **Small:** a "Time off" label + the "My time off" link; "14.5 vacation days"; "Request time off" (primary, full width).
+- **Words** (widgets fixes A9): every type is named by its **leave type** ("Vacation", "Sick leave", "Personal"), lower case inside a sentence ("vacation days") — never the policy's name ("Standard annual leave").
 - **Medium:** the big number (52) + "vacation days"; a hairline, then the other types as a quiet list ("Personal 2 days left", "Sick leave No limit"); the nearest request as a one-line pill (dates + status; pending = dashed `accent` edge + Pending status with no fill); "+N" counter if there are more; "Request time off".
 - **Large:** the big number 72 and the other types on the left; on the right "Coming up", up to 3 one-line pills (approved on `bg-subtle`, pending dashed), then "+N more"; "Request time off" at the bottom right.
 - "+N" opens a small menu (popover, level 2) with the other requests. A click on a request opens its page. The last line is "All in My time off".
@@ -80,7 +83,7 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 
 - **Small:** a calendar leaf in the top right (month 11 px accent, day 15) + "24 days to vacation".
 - **Medium:** title + status (Approved, or "Holiday" for a public holiday). A quiet date line with a `calendar-03` icon: "Fri 4 – Mon 7 Dec · 2 days" (also across months: "Wed 31 Dec – Thu 15 Jan"). Then 96 big number + "days to your vacation".
-- The line names the type in lower case ("days to your vacation / personal day / parental leave") or the holiday ("days to Christmas"). If the name is too long: "days to your time off". One day before: "Tomorrow". On the day: "Enjoy your time off", with no number.
+- The line names the **leave type** (not the policy, A9) in lower case ("days to your vacation / personal day / parental leave"; Small "days to vacation") or the holiday ("days to Christmas"). If the name is too long: "days to your time off". One day before: "Tomorrow". On the day: "Enjoy your time off", with no number.
 - Empty: "No time off booked" / "Plan your next break." + "Request time off" (**calendar**). Click → the request (or the holiday calendar).
 
 ## 4. My time (LW04)
@@ -98,10 +101,11 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 **Who sees it:** everyone. People without a team see Everyone by default. **Data:** time off and public holidays, approved and pending. The type shows only if the company allows it; otherwise "Away". Sick days never show a reason. **Sizes:** S, M, L.
 
 - **Small:** "3 out today" + avatars; "My team" in the top right (it follows the last choice made in M / L).
-- **Medium:** a `SegmentedControl` "My team | Everyone" + the "Calendar" link; a list of who is out today: avatar, name, type, "back Thu".
+- **Medium:** a `SegmentedControl` "My team | Everyone" + the "Calendar" link; a list of who is out today: avatar, name, the leave type under it ("Vacation"), and on the right "back Thu" — or "today" for a day off that is only today.
+- **"back" is the person's next working day** (widgets fixes O4): past weekends, their own work schedule and their public holidays — out until Friday is "back Mon". This week by its weekday ("back Thu"), later by its date ("back 4 Jan"). Types are the leave type, never the policy (A9).
 - **Large:** the switch; days Mon–Fri as columns (today in accent); one bar per leave, with the type tag colour. Approved = solid soft fill. Pending = 1.5 dashed edge in the type colour on white. Leave that goes past Friday runs off the right edge (no round end, fades out, →) and says "back 4 Jan". A one-day bar is avatar + first name + … .
 - Hover any bar: tooltip "Tomas Petrauskas / Sick day · Tue, 10 Nov".
-- With few people, the free space shows "Upcoming" (name · type · dates, as many as fit); with nothing upcoming, "No leave scheduled". With many people (Everyone), the people scroll inside the card under the fixed row of days.
+- **Upcoming appears only when few people are out** this week (widgets fixes O7): name · type · dates, as many as fit; with nothing upcoming, "No leave scheduled". With the rows filling the card there is no Upcoming block. People whose days do not overlap share a row (O8). With many people (Everyone), the people scroll inside the card under the fixed row of days.
 - Empty: "Everyone is in today" / "No one on your team is away." (**people-s**). Click a person → their profile; "Calendar" → the team calendar.
 
 ## 6. This week (LW06)
@@ -115,6 +119,7 @@ Each widget has a board with its sizes (S / M / L), its states and its edge case
 - **Nobody today:** no confetti. S: "Nothing today · coming up this week" + 2 rows. M: "Nothing to celebrate today" (14/20 `text-secondary`), divider, "Later this week". L: "Nothing to celebrate today" + "Coming up this week →" pointing at the right column.
 - **Nothing this week:** S has one quiet line; M and L show "Nothing to celebrate this week" / "Birthdays, work anniversaries and new joiners will show up here." (**celebrations**).
 - Words: "{Name}’s birthday is today", "{Name} joins today", "{Name}: {n} years at the company today"; rows: "birthday", "{n} years" (1 year), "joins". Never "joined". The birthday year is never shown. Days in lists are in the accent.
+- **Days in lists** (widgets fixes A6): the weekday alone while it is this week — "Thu" in Small and Medium, "Thu 12" in Large; today "Today". A new joiner is welcomed over the whole calendar week, from the company's first day of the week.
 - Many this week: rows scroll inside with a fade; the card never grows. Long names wrap to 3 lines, then …; rows cut with … + tooltip.
 
 ## 7. To sign (LW07)
@@ -275,3 +280,11 @@ Home fixes, round 1"). Where this spec's text above disagrees, these win:
   13/20; the counter Inter 12/16 600.
 - **In Edit home** widgets keep their colours and buttons: nothing is greyed, the content takes no pointer.
 - Not done: H6 for **Small** (a 160-high card has no room for the illustration, line and button) — asked back.
+
+### Built from `design-fixes-misc-1` (2026-11-18)
+
+This week (T1–T3) and the Light top (L1–L2) as `hris/design/handoffs/2026-11-18-fixes-misc/FIXES-misc.md` says; the confetti's two accent tints are new tokens `--confetti-2` and `--confetti-light`. Not walked live yet (`(claude)/testing/DESIGN_FIXES_SMOKE_TESTS.md`).
+
+### Built from the fixes of 2026-11-19
+
+Built from `design-fixes-home-widgets-1` (2026-11-19, walked where the seed had data — the rest is owed in `(claude)/testing/DESIGN_FIXES_SMOKE_TESTS.md`). Differences: a task's due time, a review's question count and a document's pages and minutes are not shown — the API has none of them yet; the Automations chart's grey dot is `field` #DADADF (no token for #D3D3D8); This week Small switches to faces at three today, as the board.

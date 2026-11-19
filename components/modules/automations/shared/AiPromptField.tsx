@@ -12,7 +12,8 @@ import { cn } from "@/lib/cn";
 
 /**
  * The noddo AI prompt (`automations-start` → AiPromptField): a textarea with a hint and "Draft with AI" inside its
- * lower edge. Empty, the button is off; sending, the field is read only and the button says "Drafting…" with the nod
+ * lower edge. The button is always the accent (G3, nothing is shown disabled): with the field empty it puts the focus in
+ * the field; sending, the field is read only and the button says "Drafting…" with the nod
  * ring; an error sits under it. It grows to six lines, then scrolls. ⌘/Ctrl + Enter sends.
  *
  * The grey example is the one exception to "no example in a placeholder" (Q-6). On the empty list the label is hidden
@@ -30,9 +31,14 @@ export const AiPromptField: React.FC<AiPromptFieldProps & { className?: string; 
 }) => {
   const t = useTranslations("automationsList");
   const id = React.useId();
-  const canSend = value.trim().length > 0 && !busy;
+  const fieldRef = React.useRef<HTMLTextAreaElement>(null);
   const send = () => {
-    if (canSend) onSubmit(value.trim());
+    if (busy) return;
+    if (value.trim().length === 0) {
+      fieldRef.current?.focus();
+      return;
+    }
+    onSubmit(value.trim());
   };
 
   return (
@@ -48,6 +54,7 @@ export const AiPromptField: React.FC<AiPromptFieldProps & { className?: string; 
         )}
       >
         <textarea
+          ref={fieldRef}
           id={id}
           value={value}
           autoFocus={autoFocus}
@@ -71,7 +78,7 @@ export const AiPromptField: React.FC<AiPromptFieldProps & { className?: string; 
           ) : (
             <span className="text-hint text-tertiary">{variant === "dialog" ? t("ai.hintDialog") : t("ai.hintPage")}</span>
           )}
-          <Button type="button" size="sm" onClick={send} disabled={!canSend && !busy} loading={busy}>
+          <Button type="button" size="sm" onClick={send} loading={busy}>
             {!busy && <Icon icon={SparklesIcon} size="sm" />}
             {busy ? t("ai.busy") : t("ai.submit")}
           </Button>

@@ -53,11 +53,6 @@ Notion § 14.10 covers the photo from a phone while the welcome is on a computer
 Recommended: as drawn.
 **Blocks:** nothing
 
-## Q-21 — Email senders · sign-in-emails · from designers · 2026-11-13
-Drawn: noddo's own emails (M1, M6, M18) from "noddo <no-reply@noddo.so>"; company emails from "Acme <no-reply@acme.noddo.so>" with the company's logo as the avatar.
-Recommended: as drawn if deliverability allows per-company senders; otherwise "Acme via noddo <no-reply@noddo.so>".
-**Blocks:** nothing
-
 ## Q-25 — Logo file formats and size · sign-in-appearance · from designers · 2026-11-13
 Drawn: "PNG, JPEG or SVG, at least 256 × 256 px", refused above 5 MB.
 Recommended: the limits the code already uses for the logo; tell us and we fix the words.
@@ -138,3 +133,68 @@ and a person publishes.
 The brief for the Templates round follows this; the drawn screens already fit it ("who signs" and "time to sign" come
 from the template).
 **Blocks:** the Templates round's drawing only
+
+## Q-45 — The ⋯ in read mode · automations-editor · from code · 2026-11-19
+`design-fixes-automations-1` CR1 asks for ⋯ beside × in read mode too. Nothing in the step menu works there (Duplicate, Skip for now and Remove step all change the automation), so read mode shows × only.
+Recommended: no ⋯ in read mode; or tell us what it should hold.
+**Blocks:** nothing
+
+## Q-46 — Turn on's waiting-items words for the other triggers · automations-test-and-turn-on · from code · 2026-11-19
+V6's noun and hint now follow the trigger. Time off and Someone is hired are yours; for a date, a person and other events the code says "Only new dates / people / cases", "Also the {n} … already waiting" with a hint in the same pattern.
+Recommended: check the words in the catalogue (`automationsEditor.json`, `turnOnDialog.waiting.*`) and send fixes.
+**Blocks:** nothing
+
+## Q-47 — Template card line 2 doesn't match what some templates do · automations-start · from code · 2026-11-19
+`Main` draws "Tell HR" on Onboarding completed, "Tell their team" on Work anniversary and Birthday, "Task for HR" on A document about to expire, "Email" on the monthly reminder. The templates tell the manager, the manager, the person and their manager, and send a notification. The code writes what they do.
+Recommended: redraw `Main` from the code's lines.
+**Blocks:** nothing
+
+## Q-49 — Answers to the hub and Home widgets packages · company-hub*, home-widgets · from code · 2026-11-19
+The owner's answers to what the two packages left to the product (`(claude)/DECISIONS.md` § "The designers' Company hub and Home widgets fixes, round 1"):
+- **My time (LW04) stays out of the product** — the answer of 18 Nov stands; drop it from the defaults and from Edit home's "can't be removed" note.
+- **What changed (N2) is written by the editor** until the assistant exists: an empty field, no "Drafted by AI" label.
+- **No new Waiting on you kinds now**: no expenses module; "time off approved" is news for the inbox; an announcement is not an action; "missing data" waits on a decision about which fields people own.
+- **Post types are gone**, as you asked.
+**Blocks:** nothing
+
+## Q-50 — Per-screen search placeholders · company-hub* · from code · 2026-11-19
+A7 asks for "Search news", "Search posts", "Search pages", "Search people". A settled rule (`rules/ACTIONS_AND_MENUS.md` § 4) says every search box reads "Search", and the boxes say that today.
+Recommended: keep "Search" everywhere; or change the rule for the whole product, not per screen.
+**Blocks:** nothing
+
+## Q-51 — "With us" under a week · people profile · from code · 2026-11-19
+Z2: the profile spec has no wording for a stay under a week. Built: "Joined today", then "{n} days", then whole weeks.
+Recommended: confirm or send the words.
+**Blocks:** nothing
+
+## Q-52 — Avatar tints are the tag tokens · system · from code · 2026-11-19
+Widgets A1 lists berry #FBE7ED and sand #F5EBDD; the package's tag tokens are berry #F1E4EB and bronze #EFEAE2, and the avatars use the tokens.
+Recommended: the tokens; change them in the package if the HEX in the file is the intent.
+**Blocks:** nothing
+
+## Q-53 — Your sandbox runs the last commit, not the working tree · all · from code · 2026-11-19
+The Light-top greeting (widgets H1) and "Split adds nothing" were fixed in the code before your checks, but not yet committed; a sandbox built from the last commit shows the old bugs.
+Recommended: before the next round's live check, ask Petya which build the sandbox runs.
+**Blocks:** nothing
+
+## Q-54 — Answers to the login package · sign-in-* · from code · 2026-11-19
+Built and walked: A, C9–C15, R1–R4, B1, B4, B5, P1–P3, D7, E1. **Not built:** B3 — the Terms and Privacy pages don't exist yet, so the words stay text until they do. **No bot check for now** (S2–S3, the owner); the limits instead (S1), refused with the existing words:
+
+| Form | Per email | Per IP |
+|---|---|---|
+| Trial: send a code | 5 an hour | 30 an hour |
+| Trial: check a code | 5 tries a code | 60 an hour |
+| Find your company | 1 email per 15 min, silently | 5 per 30 min |
+| Login code: send | 5 an hour | 30 an hour |
+| Login code: check | 5 tries a code | 120 an hour |
+| Forgot password | 5 an hour | 30 an hour |
+| Password | restricted after 10 wrong, locked after 20 | 10 wrong per 30 min for unknown addresses |
+| Second step | 5 tries a challenge, then a pause | — |
+
+**Where to run what you couldn't:** a trial opens on a sandbox only when Petya turns registration on there; invitations, a first login and the welcome run on a second company, **`live-sandbox`** — live, not a demo — where you log in with your usual password at your address with `+1` before the @; you are System Owner in both. B2: Google and Microsoft aren't configured on any sandbox yet; on production they will show. E2 (no "via") needs the sending domain signed — Petya's side.
+**Blocks:** nothing
+
+## Q-55 — The code box in focus: ring or no ring · sign-in-company-login, sign-in-registration · from code · 2026-11-19
+C12 says "a 1 px accent border"; `CodeInput` in sign-in-registration § Values adds the 3 px muted-accent ring every field has in focus. Built with the ring.
+Recommended: keep the ring — the code boxes are fields and every field has it; drop it in the spec if the plain border is the intent.
+**Blocks:** nothing

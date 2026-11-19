@@ -19,6 +19,9 @@ jest.mock("@/components/modules/settings/modules/time/publicHolidays/hooks/usePu
 jest.mock("@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies", () =>
   jest.requireActual("@/test/automationSettingsMocks").timeOffPolicies);
 
+jest.mock("@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/useDocumentCategories", () => ({
+  useDocumentCategories: () => ({ data: [{ id: "cat-contracts", name: "Contracts" }] }),
+}));
 jest.mock("@/components/modules/signing/hooks/useDocumentsSection", () => ({
   useDocumentTemplates: () => ({
     isLoading: false,
@@ -91,7 +94,8 @@ describe("StepFields", () => {
     fireEvent.change(screen.getByLabelText("What happens then"), { target: { value: "DECLINE" } });
     expect(seen.step.ifNoAnswer).toBe("DECLINE");
     expect(screen.getByRole("option", { name: "Count as declined" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Remind them every day" }));
+    // C15: a toggle on the right.
+    fireEvent.click(screen.getByRole("switch", { name: "Remind them every day" }));
     expect(seen.step.remindDaily).toBe(true);
   });
 
@@ -166,7 +170,8 @@ describe("StepFields", () => {
     expect(seen.step.title).toBe("Employment contract");
     expect(screen.getByText("The person")).toBeInTheDocument();
     expect(screen.getByText("Their manager")).toBeInTheDocument();
-    expect(screen.getByText("30 days · from the template")).toBeInTheDocument();
+    expect(screen.getByText("30 days")).toBeInTheDocument();
+    expect(screen.getByText("from the template")).toBeInTheDocument();
     expect(screen.queryByText(/Not connected yet/)).not.toBeInTheDocument();
   });
 
@@ -183,8 +188,35 @@ describe("StepFields", () => {
     expect(seen.step.question).toBe("Which office are they in?");
     fireEvent.click(screen.getByRole("button", { name: "Add a path" }));
     expect(seen.step.paths).toHaveLength(2);
-    expect(seen.step.paths?.[1]).toMatchObject({ id: "p2", name: "", steps: [] });
+    // S10b: a new path is named "Path 2", ready to be renamed.
+    expect(seen.step.paths?.[1]).toMatchObject({ id: "p2", name: "Path 2", steps: [] });
     expect(screen.getByText("Anyone else")).toBeInTheDocument();
+    expect(screen.getByText("Each person goes down the first path they match, from the top.")).toBeInTheDocument();
+  });
+
+  it("Split by a condition: a path without a condition says what to add while the check holds a turn-on (S10c)", () => {
+    renderStep(
+      { id: "s1", type: "SPLIT", question: "Which office?", paths: [{ id: "p1", name: "Vilnius", condition: null, steps: [] }],
+        otherwise: { id: "otherwise", name: "", steps: [] } },
+      { problems: [{ stepId: "s1", field: "paths", code: "AU00001", message: "say who takes the path Vilnius" }] },
+    );
+    expect(screen.getByText("Add a condition, or remove this path.")).toBeInTheDocument();
+  });
+
+  it("If it fails: stop and tell the owner by default; Skip names the Wait until that is skipped with it (S8–S8c)", () => {
+    const task: StepSpec = { id: "t1", type: "CREATE_TASK", title: "Book the review" };
+    const wait: StepSpec = { id: "w1", type: "WAIT_UNTIL", until: "TASK_DONE", taskStepId: "t1", maxDays: 10 };
+    const seen = renderStep(task, { definition: definitionFixture({ steps: [task, wait] }) });
+    expect(screen.getByRole("radio", { name: /Stop and tell the owner/ })).toBeChecked();
+    expect(screen.queryByText(/Step 2 waits for this task/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: /Skip it and go on/ }));
+    expect(seen.step.ifFails).toBe("SKIP");
+    expect(screen.getByText("Step 2 waits for this task. If this step is skipped, step 2 is skipped too.")).toBeInTheDocument();
+  });
+
+  it("If it fails: not offered on a wait or a split", () => {
+    renderStep({ id: "w1", type: "WAIT_UNTIL", until: "FIELD_FILLED", field: "hireDate", maxDays: 10 });
+    expect(screen.queryByText("If it fails")).not.toBeInTheDocument();
   });
 
   it("When: Later opens a day after the step before at 09:00, and Right away keeps it", () => {

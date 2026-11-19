@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import {
+  Alert02Icon,
   BeachIcon,
   Calendar03Icon,
   CheckListIcon,
@@ -11,6 +12,7 @@ import {
   GitBranchIcon,
   HourglassIcon,
   Mail01Icon,
+  NextIcon,
   NoteEditIcon,
   Notification03Icon,
   SignatureIcon,
@@ -19,6 +21,7 @@ import {
   UserSwitchIcon,
 } from "@hugeicons/core-free-icons";
 import type { AutomationCatalog, AutomationDefinition, StepSpec } from "@/models/automations";
+import { offersIfFails } from "../../model/tree";
 import { TokenText } from "../tokens/TokenTextField";
 import { MistNote } from "../parts/parts";
 import { useAutomationWords } from "../words/useAutomationWords";
@@ -26,7 +29,7 @@ import { ReadRows, type ReadRow } from "./ReadRows";
 
 const upperFirst = (s: string) => (s ? s[0].toLocaleUpperCase() + s.slice(1) : s);
 
-/** A step in read mode (R3): its own values as icon rows, then when it runs and for whom. */
+/** A step in read mode (R3): its own values as icon rows, then when it runs, for whom, and what a failure does. */
 export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: StepSpec; catalog: AutomationCatalog }> = ({ step }) => {
   const t = useTranslations("automationsSettings");
   const tA = useTranslations("automations");
@@ -109,6 +112,11 @@ export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: St
       ? { icon: FilterIcon, value: only, caption: t("onlyIf.label") }
       : { icon: FilterIcon, value: t("read.forEveryone"), caption: t("read.noConditions") },
   );
+  // S8: what a failure does, on the steps that offer the choice.
+  if (offersIfFails(step)) {
+    const skip = step.ifFails === "SKIP";
+    rows.push({ icon: skip ? NextIcon : Alert02Icon, value: t(skip ? "ifFails.SKIP" : "ifFails.STOP_AND_TELL"), caption: t("ifFails.label") });
+  }
 
   return (
     <div className="flex flex-col gap-4">

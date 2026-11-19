@@ -120,7 +120,7 @@
       "COMPANY": "Компания"
     },
     "chip": "{label} {count}",
-    "hint": "Выберите размер и перетащите виджет на главную или нажмите +",
+    "hint": "Выберите размер и перетащите виджет на главную.",
     "onYourHome": "Уже на главной",
     "found": "{count, plural, one {# виджет} few {# виджета} many {# виджетов} other {# виджета}}",
     "noResultsTitle": "Нет виджетов по запросу «{text}»",
@@ -163,21 +163,18 @@
     "markAsRead": "Прочитано",
     "emptyTitle": "Всё разобрано",
     "emptyLine": "Ничего не ждёт вашего ответа.",
-    "wantsTimeOff": "просит {days}",
-    "wantsToCancel": "просит отменить {days}",
+    "wantsTimeOff": "просит {days}{hasType, select, yes { · {type}} other {}}",
+    "wantsToCancel": "просит отменить {days}{hasType, select, yes { · {type}} other {}}",
     "alsoOut": "{name} тоже отсутствует {date}",
     "alsoOutTeam": "{name} из «{team}» тоже отсутствует {date}",
     "leftAfter": "останется {left}",
-    "automationWaits": "Автоматизация ждёт вашего ответа",
+    "automationWaits": "ждёт вашего ответа",
     "taskFrom": "{hasProcess, select, yes {{process}} other {}}{hasProcess, select, yes {{hasPerson, select, yes { · } other {}}} other {}}{hasPerson, select, yes {{person}} other {}}",
-    "taskDue": "{hasDate, select, yes {Срок: {date}} other {Без срока}}",
+    "taskDue": "{hasDate, select, yes {{isToday, select, yes {Срок сегодня} other {Срок: {date}}}} other {Без срока}}",
     "taskOverdue": "Просрочено · срок был {date}",
-    "runFailed": "Автоматизация не сработала",
     "runLine": "{hasPerson, select, yes {О сотруднике {person}. } other {}}{reason}",
-    "rowLine": "{type} · {days} · {dates}",
+    "rowLine": "{cancel, select, yes {Отмена · } other {}}{days}{hasType, select, yes { · {type}} other {}} · {dates}",
     "kinds": {
-      "timeOff": "Отпуск",
-      "cancellation": "Отмена отпуска",
       "automation": "Одобрение автоматизации",
       "task": "Задача",
       "review": "Ревью",
@@ -191,20 +188,28 @@
       "automationApproved": "Ответ отправлен",
       "taskDone": "Задача выполнена"
     },
-    "agreeWaits": "Страница ждёт вашего согласия",
     "agreeBy": "Согласиться до {date}",
     "agreeOverdue": "Срок был {date}",
-    "read": "Читать",
-    "signWaits": "Документ ждёт вашей подписи",
     "signBy": "Подписать до {date}",
-    "sign": "Подписать"
+    "sign": "Подписать",
+    "workingDays": "{count, plural, one {{amount} рабочий день} few {{amount} рабочих дня} many {{amount} рабочих дней} other {{amount} рабочего дня}}",
+    "automation": "Автоматизация",
+    "didntRun": "не сработала",
+    "selfReview": "ваша самооценка",
+    "reviewDue": "{hasDate, select, yes {{count, plural, =0 {Срок сегодня} one {Срок через # день} few {Срок через # дня} many {Срок через # дней} other {Срок через # дня}}} other {Без срока}}",
+    "managerSeesAfter": "Руководитель увидит после отправки",
+    "assignedBy": "Назначил(а) {name}",
+    "wasUpdated": "обновлена",
+    "whatChanged": "Что изменилось: {points}",
+    "readAndAgree": "Прочитать и согласиться",
+    "toSignFrom": "{hasSender, select, yes {от {sender} · на подпись} other {на подпись}}"
   },
   "timeOff": {
     "link": "Мои отсутствия",
     "label": "Отсутствия",
     "days": "{amount} {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
     "mainWord": "{unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}} · {name}",
-    "left": "{amount} {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
+    "left": "<b>{amount}</b> {unit, select, hours {{count, plural, one {час} few {часа} many {часов} other {часа}}} other {{count, plural, one {день} few {дня} many {дней} other {дня}}}}",
     "noLimit": "Без ограничений",
     "comingUp": "Впереди",
     "more": "+{count}",
@@ -237,7 +242,6 @@
     "outToday": "{count, plural, one {отсутствует сегодня} few {отсутствуют сегодня} many {отсутствуют сегодня} other {отсутствуют сегодня}}",
     "away": "Отсутствует",
     "back": "вернётся {date}",
-    "typeLine": "{type} · {back}",
     "tooltip": "{type} · {dates}",
     "upcoming": "Впереди",
     "noLeave": "Отсутствий не запланировано",
@@ -245,7 +249,8 @@
     "emptyLine": "Никто из вашей команды не отсутствует.",
     "emptyLineEveryone": "Никто не отсутствует.",
     "pending": "Ждёт решения",
-    "lane": "{name} · {type}{runsOff, select, yes {, вернётся {back}} other {}}"
+    "lane": "{name} · {type}{runsOff, select, yes {, вернётся {back} →} other {}}",
+    "onlyToday": "сегодня"
   },
   "thisWeek": {
     "birthdayToday": "У {name} сегодня день рождения",
@@ -257,16 +262,19 @@
     "laterThisWeek": "Позже на этой неделе",
     "nothingToday": "Сегодня праздников нет",
     "nothingTodayComing": "Сегодня ничего · впереди на неделе",
-    "comingUp": "Впереди на неделе →",
+    "comingUp": "Впереди на неделе",
     "birthday": "день рождения",
     "years": "{count, plural, one {# год} few {# года} many {# лет} other {# года}}",
     "joins": "выходит",
     "emptyTitle": "На этой неделе праздников нет",
     "emptyLine": "Здесь появятся дни рождения, годовщины работы и новые сотрудники.",
-    "nothingWeek": "На этой неделе ничего",
+    "nothingWeek": "На этой неделе праздников нет.",
     "rowWhat": " · {what}",
     "listLine": "{name} · {what}",
-    "more": "+{count}"
+    "more": "+{count}",
+    "rowWhatPlain": " {what}",
+    "celebrationsCount": "{count, plural, one {# праздник} few {# праздника} many {# праздников} other {# праздника}}",
+    "birthdaysCount": "{count, plural, one {# день рождения} few {# дня рождения} many {# дней рождения} other {# дня рождения}}"
   },
   "myTasks": {
     "toDo": "к выполнению",
@@ -279,7 +287,9 @@
     "done": "Задача выполнена",
     "from": "{when} · {from}",
     "emptyTitle": "Всё сделано",
-    "emptyLine": "Вам ничего не назначено."
+    "emptyLine": "Вам ничего не назначено.",
+    "processOf": "{process} · {person}",
+    "doneFrom": "{hasFrom, select, yes {Готово · {from}} other {Готово}}"
   },
   "processes": {
     "all": "Все",
@@ -296,12 +306,12 @@
     "startsOn": "{type} · с {date}",
     "chips": {
       "onboarding": "Онбординг: {count}",
-      "offboarding": "Оффбординг: {count}",
       "startsNextWeek": "{count, plural, one {# начнётся на следующей неделе} few {# начнутся на следующей неделе} many {# начнутся на следующей неделе} other {# начнутся на следующей неделе}}",
       "overdue": "Просрочено: {count}"
     },
     "emptyTitle": "Ничего не в работе",
-    "emptyLine": "Онбординг и оффбординг появятся здесь, когда начнутся."
+    "emptyLine": "Онбординг и оффбординг появятся здесь, когда начнутся.",
+    "startsOnShort": "{type} · {date}"
   },
   "automations": {
     "runs": "{count, plural, one {запуск} few {запуска} many {запусков} other {запуска}}",
@@ -342,6 +352,7 @@
     "nextDue": "Ближайший срок {date}",
     "due": "Срок {date}",
     "overdue": "Просрочено",
-    "sign": "Подписать"
+    "sign": "Подписать",
+    "from": "От {name}"
   }
 }

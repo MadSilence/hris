@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { ArrowDown01Icon, Clock01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Cancel01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/desact/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { FieldError } from "@/components/desact/field-error";
@@ -12,20 +12,21 @@ import { Icon } from "@/components/desact/icon";
 import { Input } from "@/components/desact/input";
 import { NodRing } from "@/components/desact/nod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/desact/select";
 import { Switch } from "@/components/desact/switch";
 import { ConfirmCancelModal } from "@/components/ui/ConfirmCancelModal";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { TimePicker } from "@/components/ui/TimePicker";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
+import type { FieldDTO, FilterDTO } from "@/models/user/fields";
 import { useCanAccess } from "@/components/auth";
 import { FormError } from "@/components/feedback/FormError";
 import { dateToISO } from "@/lib/date";
-import type { AudienceResolved, PostType } from "@/models/hub";
+import type { AudienceResolved, HubAudience } from "@/models/hub";
 import { saveHubPostAction } from "../../actions";
 import { PostEditor } from "../../document";
 import { unwrapHub, useAudienceResolve, useHubHome, useInvalidateHub, usePostEdit } from "../../hooks";
-import { useCompanyName, useHubDates } from "../../shared";
+import { HubDialogClose, useCompanyName, useHubDates } from "../../shared";
 import { AudienceDialog } from "../audience";
 import { CoverField } from "./CoverField";
 import {
@@ -42,31 +43,91 @@ import {
 
 type Then = "DRAFT" | "PUBLISH" | "SCHEDULE";
 
-/** The audience's line under "Who sees it": "Everyone at {company} · {n} people", or "{n} people · …". */
-const AudienceField: React.FC<{ draft: PostDraft; onOpen: () => void }> = ({ draft, onOpen }) => {
+/** One audience filter as a chip's words: "{field}: {values}" — option labels where the field has options. */
+export const filterChipLabel = (filter: FilterDTO, fields: FieldDTO[] | undefined): string => {
+  const field = fields?.find((f) => f.id === filter.field);
+  const label = field?.label ?? filter.field;
+  const optionLabel = (value: string) => {
+    const option = field?.options?.find((o) => o.id === value || o.value === value);
+    return option?.label ?? option?.value ?? value;
+  };
+  const values = filter.values?.length ? filter.values : filter.value ? [filter.value] : [];
+  return values.length ? `${label}: ${values.map(optionLabel).join(", ")}` : label;
+};
+
+/** A selected filter chip with its ×: 32 high, 13/18 500, Ink (SPEC § 13.4) — the words open the builder. */
+const AudienceChip: React.FC<{ label: string; onOpen: () => void; onRemove: () => void }> = ({ label, onOpen, onRemove }) => {
   const t = useTranslations("hub");
-  const company = useCompanyName();
-  const resolved = useAudienceResolve(draft.audience);
-  const total = resolved.data?.total;
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-label text-secondary">{t("post.whoSees")}</span>
+    <span className="inline-flex h-8 max-w-full items-center gap-1 rounded-pill border border-inverse bg-inverse pr-1.5 pl-3 text-label text-on-inverse">
+      <button type="button" onClick={onOpen} className="min-w-0 truncate">
+        {label}
+      </button>
       <button
         type="button"
-        onClick={onOpen}
-        className="flex h-9 w-full items-center gap-2 rounded-control border border-field bg-card px-3 text-left text-body hover:border-strong"
+        aria-label={t("post.removeFilter", { filter: label })}
+        onClick={onRemove}
+        className="inline-flex size-5 shrink-0 items-center justify-center rounded-pill hover:bg-inverse/80"
       >
-        <Icon icon={UserGroupIcon} size="sm" className="shrink-0 text-tertiary" />
-        <span className="min-w-0 flex-1 truncate text-primary">
-          {draft.audience.mode === "EVERYONE"
-            ? t("audience.everyoneCount", { company, count: total ?? 0 })
-            : t("audience.people", { count: total ?? 0 })}
-        </span>
-        {resolved.isFetching && <NodRing size="sm" />}
-        <Icon icon={ArrowDown01Icon} size="sm" className="shrink-0 text-tertiary" />
+        <Icon icon={Cancel01Icon} size="sm" className="size-3.5" />
       </button>
-      {draft.audience.mode === "FILTER" && draft.audience.filters.length > 0 && (
-        <span className="text-hint text-tertiary">{t("audience.joinLaterHint")}</span>
+    </span>
+  );
+};
+
+/** The audience without one filter; the last one gone, it is everyone again. */
+const withoutFilter = (audience: HubAudience, index: number): HubAudience => {
+  const filters = audience.filters.filter((_, i) => i !== index);
+  return filters.length === 0 && audience.userIds.length === 0 && audience.roleIds.length === 0
+    ? { ...audience, mode: "EVERYONE", filters: [] }
+    : { ...audience, filters };
+};
+
+/**
+ * "Who sees it" (CM05 item 4, FIXES L7): the audience as filter chips with ×, then the dashed "Add filter", 8 under
+ * the label; under them "Everyone at {company} · {n} people", or "{n} people · new people who match join
+ * automatically". "Add filter" opens the CM07 builder.
+ */
+const AudienceField: React.FC<{ draft: PostDraft; onOpen: () => void; onChange: (audience: HubAudience) => void }> = ({ draft, onOpen, onChange }) => {
+  const t = useTranslations("hub");
+  const company = useCompanyName();
+  const fields = useUserFields();
+  const resolved = useAudienceResolve(draft.audience);
+  const total = resolved.data?.total ?? 0;
+  const audience = draft.audience;
+  const filtered = audience.mode === "FILTER" && audience.filters.length > 0;
+  return (
+    <div className="flex flex-col">
+      <span className="text-label text-primary">{t("post.whoSees")}</span>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {audience.mode === "FILTER" &&
+          audience.filters.map((filter, i) => (
+            <AudienceChip key={i} label={filterChipLabel(filter, fields.data)} onOpen={onOpen} onRemove={() => onChange(withoutFilter(audience, i))} />
+          ))}
+        {audience.mode === "PEOPLE" && (
+          <AudienceChip
+            label={t("audience.people", { count: audience.userIds.length + audience.roleIds.length })}
+            onOpen={onOpen}
+            onRemove={() => onChange({ mode: "EVERYONE", filters: [], userIds: [], roleIds: [] })}
+          />
+        )}
+        <button
+          type="button"
+          onClick={onOpen}
+          className="inline-flex h-8 items-center gap-1.5 rounded-pill border border-dashed border-field px-3 text-label text-secondary transition-colors hover:border-strong hover:text-primary"
+        >
+          <Icon icon={Add01Icon} size="sm" className="size-3.5" />
+          {t("post.addFilter")}
+        </button>
+        {resolved.isFetching && <NodRing size="sm" />}
+      </div>
+      {/* No count until it is known: "· 0 people" stood there while the first answer was on its way (U1's rule, walk of 2026-11-19). */}
+      {resolved.data && (
+        <span className="mt-2 text-hint text-tertiary">
+          {audience.mode === "EVERYONE"
+            ? t("audience.everyoneCount", { company, count: total })
+            : `${t("audience.people", { count: total })}${filtered ? t("audience.joinLater") : ""}`}
+        </span>
       )}
     </div>
   );
@@ -232,9 +293,6 @@ export const PostForm: React.FC<{
     }
   };
 
-  const typeLabel = (type: PostType) =>
-    type === "ANNOUNCEMENT" ? t("post.types.announcement") : type === "POLICY_UPDATE" ? t("post.types.policyUpdate") : t("post.types.event");
-
   return (
     <>
       <form
@@ -250,14 +308,17 @@ export const PostForm: React.FC<{
           }
         }}
       >
-        <DialogHeader className="px-6 pt-5 pb-4">
+        {/* Header 68: padding 20 24 16, the title centred to the 32 close (FIXES L1). */}
+        <DialogHeader className="flex-row items-center justify-between gap-4 pt-5 pr-6 pb-4 pl-6">
           <DialogTitle>{postId ? t("post.editTitle") : t("post.newTitle")}</DialogTitle>
           <DialogDescription className="sr-only">{postId ? t("post.editTitle") : t("post.newTitle")}</DialogDescription>
+          <HubDialogClose onClick={tryClose} />
         </DialogHeader>
-        <div className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto px-6 pb-6">
+        {/* Padding 0 24; 20 from the last field to the footer's hairline (FIXES L3). */}
+        <div className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto px-6 pb-5">
           <CoverField value={draft.coverFileId} onChange={(id) => set("coverFileId", id)} />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="hub-post-title" className="text-label text-secondary">
+            <label htmlFor="hub-post-title" className="text-label text-primary">
               {t("post.title")}
             </label>
             <Input
@@ -274,41 +335,19 @@ export const PostForm: React.FC<{
             <FieldError>{errors.title ? t("post.titleRequired") : null}</FieldError>
           </div>
           <div className="flex flex-col gap-1.5">
-            <span id="hub-post-text" className="text-label text-secondary">
+            <span id="hub-post-text" className="text-label text-primary">
               {t("post.text")}
             </span>
             <PostEditor body={draft.body} onChange={(body) => set("body", body)} labelledBy="hub-post-text" />
           </div>
           <div className="flex flex-col gap-6 sm:flex-row">
             <div className="flex min-w-0 flex-1 flex-col gap-4">
-              <AudienceField draft={draft} onOpen={() => setAudienceOpen(true)} />
-              <div className="flex gap-3">
-                <label className="flex flex-1 flex-col gap-1.5 text-label text-secondary">
-                  {t("post.type")}
-                  <Select value={draft.type} onValueChange={(v) => set("type", v as PostType)}>
-                    <SelectTrigger aria-label={t("post.type")}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(["ANNOUNCEMENT", "POLICY_UPDATE", "EVENT"] as PostType[]).map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {typeLabel(type)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </label>
-                {draft.type === "EVENT" && (
-                  <label className="flex flex-1 flex-col gap-1.5 text-label text-secondary">
-                    {t("post.eventOn")}
-                    <DatePicker value={draft.eventOn ?? ""} onChange={(v) => set("eventOn", v || null)} ariaLabel={t("post.eventOn")} clearable />
-                  </label>
-                )}
-              </div>
+              <AudienceField draft={draft} onOpen={() => setAudienceOpen(true)} onChange={(audience) => set("audience", audience)} />
             </div>
-            <div className="flex w-full flex-col gap-4 sm:w-[280px]">
+            {/* The toggles: label 13/18 500, the hint 4 under, 12 between the rows (FIXES L8, Q2). */}
+            <div className="flex w-full flex-col gap-3 sm:w-[280px]">
               <div className={canPin ? "flex flex-col gap-1" : "hidden"}>
-                <label className="flex items-center justify-between gap-3 text-body text-primary">
+                <label className="flex items-center justify-between gap-3 text-label text-primary">
                   {t("post.pin")}
                   <Switch checked={draft.pinned} onCheckedChange={(v) => set("pinned", v)} aria-label={t("post.pin")} />
                 </label>
@@ -317,7 +356,7 @@ export const PostForm: React.FC<{
                 )}
               </div>
               <div className="flex flex-col gap-1">
-                <label className="flex items-center justify-between gap-3 text-body text-primary">
+                <label className="flex items-center justify-between gap-3 text-label text-primary">
                   {t("post.notify")}
                   <Switch checked={draft.notifyPeople} onCheckedChange={(v) => set("notifyPeople", v)} aria-label={t("post.notify")} />
                 </label>

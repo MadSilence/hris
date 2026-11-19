@@ -258,14 +258,14 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
       <DropdownMenuContent align="end" className="w-40 rounded-control p-1">
         <DropdownMenuItem
           onSelect={() => setIsChooseTemplateModalOpen(true)}
-          className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer"
+          className="cursor-pointer"
         >
           <Icon icon={CloudDownloadIcon} size="sm" className="text-tertiary" />
           {t("publicHolidays.list.fromTemplate")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={handleCreateManually}
-          className="gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer"
+          className="cursor-pointer"
         >
           <Icon icon={FileAddIcon} size="sm" className="text-tertiary" />
           {t("publicHolidays.list.manually")}

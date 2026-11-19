@@ -7,6 +7,10 @@ import {
   newStep,
   newStepId,
   numbers,
+  dependants,
+  dependsOnSkippable,
+  offersIfFails,
+  skipsOnFailure,
   removeStep,
   stepsAbove,
   updateStep,
@@ -69,5 +73,25 @@ describe("the step tree", () => {
     expect(moved.steps[1].approved?.map((s) => s.id)).toEqual(["c", "b"]);
     expect(newStepId(d)).not.toMatch(/^(a|ok|b|c|d)$/);
     expect(stepsAbove(d, "c").map((s) => s.id)).toEqual(["b", "ok", "a"]);
+  });
+});
+
+describe("If it fails (S8–S8c)", () => {
+  const task: StepSpec = { id: "t", type: "CREATE_TASK", title: "Book", ifFails: "SKIP" };
+  const wait: StepSpec = { id: "w", type: "WAIT_UNTIL", until: "TASK_DONE", taskStepId: "t", maxDays: 10 };
+  const d: AutomationDefinition = { ...emptyDefinition(), steps: [task, wait, notify("n")] };
+
+  it("is offered on a step that does something, not on a wait or a branch point", () => {
+    expect(offersIfFails(task)).toBe(true);
+    expect(offersIfFails(wait)).toBe(false);
+    expect(offersIfFails(newStep("s", "SPLIT"))).toBe(false);
+    expect(skipsOnFailure({ ...wait, ifFails: "SKIP" })).toBe(false);
+  });
+
+  it("a Wait until on a step that may be skipped depends on it", () => {
+    expect(dependants(d, "t").map((s) => s.id)).toEqual(["w"]);
+    expect(dependsOnSkippable(d, wait)?.id).toBe("t");
+    expect(dependsOnSkippable({ ...d, steps: [{ ...task, ifFails: null }, wait] }, wait)).toBeNull();
+    expect(dependsOnSkippable(d, notify("n"))).toBeNull();
   });
 });

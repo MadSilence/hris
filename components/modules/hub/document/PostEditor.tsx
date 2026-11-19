@@ -24,7 +24,7 @@ const ToolButton: React.FC<{ icon: IconSvgElement; label: string; active?: boole
         aria-pressed={active}
         onMouseDown={(e) => e.preventDefault()}
         onClick={onClick}
-        className={cn(active && "bg-mist")}
+        className={cn("text-secondary", active && "bg-mist")}
       >
         <Icon icon={icon} size="sm" />
       </Button>
@@ -52,7 +52,7 @@ export const PostEditor: React.FC<{ body: string; onChange: (body: string) => vo
     body,
     placeholder: "",
     onChange,
-    className: "hub-prose min-h-[120px] max-h-[360px] overflow-y-auto px-3.5 py-2.5 outline-none",
+    className: "hub-prose min-h-[120px] max-h-[360px] overflow-y-auto px-4 py-3.5 outline-none",
   });
   const [linkOpen, setLinkOpen] = React.useState(false);
   const [pageOpen, setPageOpen] = React.useState(false);
@@ -68,11 +68,12 @@ export const PostEditor: React.FC<{ body: string; onChange: (body: string) => vo
 
   return (
     <div
-      className="flex flex-col rounded-control border border-field bg-card transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-focus"
+      // Radius 10; the toolbar padding 4, its tools secondary; the text padding 14 16 (FIXES L6).
+      className="flex flex-col rounded-popover border border-field bg-card transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-focus"
       aria-labelledby={labelledBy}
       role="group"
     >
-      <div className="flex items-center gap-0.5 border-b border-divider px-1.5 py-1">
+      <div className="flex items-center gap-0.5 border-b border-divider p-1">
         <ToolButton icon={TextBoldIcon} label={t("editor.bold")} active={editor?.isActive("bold")} onClick={() => editor?.chain().focus().toggleBold().run()} />
         <ToolButton
           icon={Heading02Icon}
@@ -98,7 +99,7 @@ export const PostEditor: React.FC<{ body: string; onChange: (body: string) => vo
         </Popover>
         <Popover open={pageOpen} onOpenChange={setPageOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" className="gap-1.5" onMouseDown={(e) => e.preventDefault()}>
+            <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-secondary" onMouseDown={(e) => e.preventDefault()}>
               <Icon icon={File01Icon} size="sm" />
               {t("editor.linkPage")}
             </Button>

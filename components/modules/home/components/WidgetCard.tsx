@@ -116,6 +116,31 @@ export const BigNumber: React.FC<{
   </p>
 );
 
+/**
+ * The Small card's one bottom row (the designers' widgets fixes A2): the number (44/44) and its word on the left, the
+ * faces or a status chip on the right of the same row, at the card's bottom.
+ */
+export const SmallFooter: React.FC<{ value: React.ReactNode; word?: React.ReactNode; aside?: React.ReactNode }> = ({
+  value,
+  word,
+  aside,
+}) => (
+  <div className="mt-auto flex min-w-0 items-end justify-between gap-3">
+    <BigNumber size="s" value={value} word={word} className="min-w-0" />
+    {aside && <span className="flex shrink-0 items-center pb-2">{aside}</span>}
+  </div>
+);
+
+/**
+ * A row with two lines (widgets A4): name 14/18 500, the line under it 12/18, padding 9 0, gap 10, a hairline between
+ * rows from the list's `divide-y`. The hover fill reaches 8 past each side without moving the content.
+ */
+export const TWO_LINE_ROW = {
+  row: "-mx-2 flex min-w-0 items-center gap-2.5 rounded-control px-2 py-[9px] hover:bg-subtle",
+  name: "block truncate text-body leading-[18px] font-medium text-primary",
+  line: "block truncate text-hint leading-[18px] text-tertiary",
+} as const;
+
 /** A list that scrolls inside the card, with a fade at its bottom edge and a thin thumb (PRODUCT-RULES 12). */
 export const WidgetScroll: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
   <div className={cn("widget-fade min-h-0 flex-1 overflow-y-auto pb-4 [scrollbar-width:thin]", className)}>{children}</div>
@@ -166,7 +191,7 @@ export const WidgetEmpty: React.FC<{
   size: HomeWidgetSize;
 }> = ({ scene, title, line, action, size }) => (
   <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
-    {size !== "S" && <Illustration scene={scene} size="s" />}
+    {size !== "S" && <Illustration scene={scene} size="s" keepSmall />}
     <p className="text-card-title text-primary">{title}</p>
     {size !== "S" && <p className="text-label font-normal text-secondary">{line}</p>}
     {action}
@@ -178,7 +203,7 @@ export const WidgetError: React.FC<{ message: string; onRetry: () => void; size:
   const t = useTranslations("home");
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center" role="alert">
-      {size !== "S" && <Illustration scene="something-broke" size="s" />}
+      {size !== "S" && <Illustration scene="something-broke" size="s" keepSmall />}
       <p className="text-card-title text-primary">{message}</p>
       {size !== "S" && <p className="text-body text-secondary">{t("card.checkConnection")}</p>}
       <Button type="button" variant="secondary" size="sm" onClick={onRetry}>
@@ -205,7 +230,7 @@ export const PersonFace: React.FC<{
   name: string;
   avatarUrl?: string | null;
   detail?: string | null;
-  size?: 20 | 22 | 24 | 26 | 28 | 32 | 36 | 64;
+  size?: 20 | 22 | 24 | 26 | 28 | 32 | 36 | 44 | 48 | 64;
   className?: string;
 }> = ({ name, avatarUrl, detail, size = 28, className }) => (
   <Tooltip>
@@ -220,12 +245,15 @@ export const PersonFace: React.FC<{
           size === 28 && "size-7",
           size === 32 && "size-8",
           size === 36 && "size-9",
+          size === 44 && "size-11",
+          size === 48 && "size-12",
           size === 64 && "size-16",
           className,
         )}
       >
         {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-        <AvatarFallback name={name} className={size >= 36 ? "text-label" : size === 28 ? "text-home-micro leading-5" : "text-hint"}>
+        {/* One rule for initials (widgets A1): the tint by the name, 600 at a third of the size — `AvatarFallback`'s own. */}
+        <AvatarFallback name={name}>
           {initialsOf(name)}
         </AvatarFallback>
       </Avatar>

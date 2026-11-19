@@ -460,6 +460,8 @@ export const automationWords = (d: WordsDeps) => {
     triggerTitle,
     triggerSubtitle,
     triggerLine,
+    /** The trigger as a phrase inside a sentence: "an onboarding is completed" (Run history's empty line). */
+    triggerPhrase,
     stepKind,
     stepTitle,
     stepSubtitle,

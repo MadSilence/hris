@@ -58,6 +58,7 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
   const t = useTranslations("home");
   const tTimeOff = useTranslations("timeOff");
   const dates = useShortDates();
+  const locale = useDisplayLocale();
   const { userId } = useCurrentUser();
   const settings = useUserSettings();
   const requests = useTimeOffRequestsByUser({ userId: userId ?? "" });
@@ -90,7 +91,8 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
         kind: "LEAVE",
         start: r.startDate,
         end: r.endDate,
-        name: policyMap.get(r.policyId)?.name ?? null,
+        // The leave type's name, never the policy's (A9): "days to your vacation".
+        name: policyMap.get(r.policyId)?.leaveTypeName ?? policyMap.get(r.policyId)?.name ?? null,
         amount: r.requestedAmount,
         href: `/time-off/requests/${r.id}`,
       })),
@@ -121,11 +123,15 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
   }
 
   const until = daysBetween(today, next.start);
+  // Small says "days to vacation", Medium "days to your vacation" (N1); a name too long reads "your time off".
+  const type = next.name ? next.name.toLocaleLowerCase(locale) : "";
   const what =
     next.kind === "HOLIDAY"
       ? next.name ?? t("nextTimeOff.yourTimeOff")
-      : next.name && next.name.length <= MAX_TYPE_NAME
-        ? t("nextTimeOff.yourType", { type: next.name.toLocaleLowerCase() })
+      : type && type.length <= MAX_TYPE_NAME
+        ? size === "S"
+          ? type
+          : t("nextTimeOff.yourType", { type })
         : t("nextTimeOff.yourTimeOff");
   const countdown =
     next.start <= today ? (
@@ -137,7 +143,7 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
         size={size === "S" ? "s" : "xxl"}
         value={until}
         word={t("nextTimeOff.daysTo", { count: until, what })}
-        wordClassName={size === "S" ? "text-label font-normal" : undefined}
+        wordClassName={size === "S" ? "text-label font-normal" : "font-semibold text-primary"}
         className={size === "S" ? "flex-wrap whitespace-normal" : "flex-col items-start gap-0"}
       />
     );
@@ -152,16 +158,27 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
     );
   }
 
-  const span = dates.range(next.start, next.end, { weekday: true });
+  // Leave keeps its weekdays ("Fri 4 – Mon 7 Dec · 2 days"); a holiday is its days and their count ("24–26 Dec · 3 days", N5).
+  const holiday = next.kind === "HOLIDAY";
+  const span = dates.range(next.start, next.end, { weekday: !holiday, hideYear: true });
+  const amount = holiday ? daysBetween(next.start, next.end) + 1 : next.amount;
+  // N2: 24 high, 12/20 500, padding 0 8 0 6; a holiday is Scheduled teal with the calendar icon.
+  const chip = "pr-2 pl-1.5 leading-5 font-medium";
   return (
     <WidgetCard
       title={title}
       size={size}
-      aside={next.kind === "HOLIDAY" ? <StatusBadge status="info" size="sm" label={t("nextTimeOff.holiday")} /> : <StatusBadge status="approved" size="sm" label={t("nextTimeOff.approved")} />}
+      aside={
+        holiday ? (
+          <StatusBadge status="scheduled" className={chip} label={t("nextTimeOff.holiday")} />
+        ) : (
+          <StatusBadge status="approved" className={chip} label={t("nextTimeOff.approved")} />
+        )
+      }
     >
-      <p className="flex items-center gap-1.5 text-label text-secondary">
-        <Icon icon={Calendar03Icon} size="sm" className="text-tertiary" />
-        {next.amount !== null ? t("nextTimeOff.span", { dates: span, days: tTimeOff("amount.days", dayAmountArgs(next.amount)) }) : span}
+      <p className="flex items-center gap-1.5 text-label leading-5 font-normal text-secondary">
+        <Icon icon={Calendar03Icon} size="sm" className="size-3.5 text-tertiary" />
+        {amount !== null ? t("nextTimeOff.span", { dates: span, days: tTimeOff("amount.days", dayAmountArgs(amount)) }) : span}
       </p>
       <Link href={next.href} tabIndex={preview ? -1 : undefined} className="mt-auto block min-w-0">
         {countdown}

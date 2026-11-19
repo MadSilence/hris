@@ -51,15 +51,15 @@ import type {
   StepSpec,
   TriggerSpec,
 } from "@/models/automations";
-import { AutomationCanvas, type CanvasInsets } from "./canvas/AutomationCanvas";
-import { AiWindow } from "./ai/AiWindow";
+import { AutomationCanvas, type CanvasInsets, type WindowSpan } from "./canvas/AutomationCanvas";
+import { AiComposer, AiWindow } from "./ai/AiWindow";
 import { noddoAiDraft, type AiTurn } from "./ai/noddoAiDraft";
 import { NameAndIconDialog, type NameAndIcon } from "./dialogs/NameAndIconDialog";
 import { RunsGoingDialog } from "./dialogs/RunsGoingDialog";
-import { TurnOnDialog } from "./dialogs/TurnOnDialog";
+import { TurnOnDialog, type WaitingKind } from "./dialogs/TurnOnDialog";
 import { UnsavedChangesDialog } from "./dialogs/UnsavedChangesDialog";
 import { CanvasBanner } from "./frame/CanvasBanner";
-import { EditorHeader } from "./frame/EditorHeader";
+import { EditorHeader, type SaveState } from "./frame/EditorHeader";
 import { SentenceCard } from "./frame/SentenceCard";
 import { ToolBlock, ToolWindowFrame, type BlockTool, type ToolId } from "./frame/ToolBlock";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
@@ -67,6 +67,7 @@ import {
   RunHistoryWindow,
   RunWindow,
   StepFields,
+  TestRunBar,
   TestRunWindow,
   TriggerFields,
   TriggerList,
@@ -93,9 +94,26 @@ import {
   type EditorDraft,
   type HeaderButton,
 } from "./state/editorLogic";
-import { AddStepWindow } from "./windows/AddStepWindow";
+import { AddStepHint, AddStepWindow } from "./windows/AddStepWindow";
 import { StepSettingsWindow } from "./windows/StepSettingsWindow";
 import { WhoSeesWhat } from "./windows/WhoSeesWhat";
+
+/** V6: what already waits as an automation is turned on, in its trigger's words. */
+const waitingKindOf = (definition: AutomationDefinition): WaitingKind => {
+  const trigger = definition.trigger;
+  if (!trigger) return "cases";
+  if (countsRequests(definition)) return "requests";
+  switch (trigger.type) {
+    case "PERSON_HIRED":
+      return "hires";
+    case "DATE_OFFSET":
+      return "dates";
+    case "JOINS_SEGMENT":
+      return "people";
+    default:
+      return "cases";
+  }
+};
 
 export type AutomationEditorInitial = {
   automation: Automation | null;
@@ -116,9 +134,21 @@ type Selection = { kind: "step"; id: string } | { kind: "trigger" } | null;
 type Intent = "turnOn" | "leave" | null;
 type SaveOutcome = "saved" | "dialog" | "held" | "failed";
 
-const TOOL_W: Record<ToolId, number> = { ai: 400, add: 320, who: 320, runs: 320, versions: 320, trigger: 320, test: 400 };
+const TOOL_W: Record<ToolId, number> = {
+  ai: 400,
+  add: 320,
+  who: 320,
+  runs: 320,
+  versions: 320,
+  trigger: 320,
+  test: 0,
+};
 const EDGE = 16;
-const BLOCK_W = 48;
+const BLOCK_W = 52;
+/** The sentence sits 24 under the canvas's top (B3). */
+const SENTENCE_TOP = 24;
+/** F1's bar over the canvas while the test run is open: 52 high, and 12 under it. */
+const TEST_BAR_ROOM = 52 + 12;
 const RIGHT_W = 340;
 const ZOOM_ROOM = 76;
 
@@ -150,6 +180,8 @@ export const AutomationEditor: React.FC<{
    *  the same while the fields under it change (`automations-triggers` spec). */
   const triggerName = (trigger: TriggerSpec): string => {
     const key = choiceOf(trigger);
+    // The process trigger's window reads "Process is completed" (T6); the list keeps "A process is completed".
+    if (key === "PROCESS_COMPLETED") return t("settings.processTrigger");
     return key ? tShared(`trigger.${key}`) : words.triggerTitle(trigger);
   };
   const router = useRouter();
@@ -168,7 +200,10 @@ export const AutomationEditor: React.FC<{
   const definition = draft.definition;
   const setDefinition = React.useCallback(
     (next: AutomationDefinition | ((d: AutomationDefinition) => AutomationDefinition)) =>
-      setDraft((d) => ({ ...d, definition: typeof next === "function" ? next(d.definition) : next })),
+      setDraft((d) => ({
+        ...d,
+        definition: typeof next === "function" ? next(d.definition) : next,
+      })),
     [],
   );
 
@@ -177,18 +212,23 @@ export const AutomationEditor: React.FC<{
   const displayName = draft.name.trim() || tShared("unnamed");
 
   // ── the windows ──────────────────────────────────────────────────────────────────────────
-  const [selection, setSelection] = React.useState<Selection>(initial.selectedStepId ? { kind: "step", id: initial.selectedStepId } : null);
+  const [selection, setSelection] = React.useState<Selection>(
+    initial.selectedStepId ? { kind: "step", id: initial.selectedStepId } : null,
+  );
   const [tool, setTool] = React.useState<ToolId | null>(initial.tool);
   const [runId, setRunId] = React.useState<string | null>(initial.runId);
   const [run, setRun] = React.useState<AutomationRun | null>(null);
   const [version, setVersion] = React.useState<AutomationVersion | null>(null);
   const [testExpanded, setTestExpanded] = React.useState(false);
+  /** F1: the test run opens in the right window, where step settings open. */
+  const [testOpen, setTestOpen] = React.useState(initial.tool === "test");
   const [paletteDrag, setPaletteDrag] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState<string | null>(null);
 
   /** Read mode of the automation itself (R3, R4); looking at an old version is read only on top of it. */
-  const readModeOwn = !canManage || system || status === "ARCHIVED" || (opensReadOnly(status) && !editing);
+  const readModeOwn =
+    !canManage || system || status === "ARCHIVED" || (opensReadOnly(status) && !editing);
   const readMode = readModeOwn || version !== null;
   const shown = version?.definition ?? definition;
 
@@ -223,33 +263,66 @@ export const AutomationEditor: React.FC<{
 
   /** F3: shown once a Turn on (or a save of a live automation) was held for them; they clear as they are fixed. */
   const [problemsFor, setProblemsFor] = React.useState<"turnOn" | "save" | null>(null);
-  const problems = React.useMemo(() => (problemsFor && check ? check.problems : []), [problemsFor, check]);
+  const problems = React.useMemo(
+    () => (problemsFor && check ? check.problems : []),
+    [problemsFor, check],
+  );
   const byStep = React.useMemo(() => problemsByStep(definition, problems), [definition, problems]);
+  /** S10c: the split paths with no condition while a split's paths are a problem, as `<stepId>:<pathKey>`. */
+  const pathErrors = React.useMemo(() => {
+    const out = new Set<string>();
+    byStep.forEach((list, stepId) => {
+      const step = findStep(definition, stepId);
+      if (step?.type !== "SPLIT" || !list.some((p) => p.field === "paths")) return;
+      (step.paths ?? []).forEach((p) => {
+        if (!p.condition?.filters?.length) out.add(`${step.id}:${p.id}`);
+      });
+    });
+    return out;
+  }, [byStep, definition]);
   const needs = React.useMemo(() => {
     const out = new Map<string | null, string>();
-    byStep.forEach((list, stepId) => out.set(stepId, t(`needs.${needsKey(list[0], findStep(definition, stepId))}`)));
+    byStep.forEach((list, stepId) => {
+      const step = findStep(definition, stepId);
+      // S10c: "Add a condition to Vilnius" — the first path that has none, by its name.
+      const index = (step?.paths ?? []).findIndex((p) => pathErrors.has(`${stepId}:${p.id}`));
+      if (step && index >= 0) {
+        const path = step.paths![index];
+        out.set(stepId, t("needs.pathCondition", { path: path.name.trim() || tShared("pathDefault", { n: index + 1 }) }));
+        return;
+      }
+      out.set(stepId, t(`needs.${needsKey(list[0], step)}`));
+    });
     return out;
-  }, [byStep, definition, t]);
+  }, [byStep, definition, t, tShared, pathErrors]);
   React.useEffect(() => {
     if (problemsFor && check && check.problems.length === 0) setProblemsFor(null);
   }, [problemsFor, check]);
 
   const edited = React.useMemo(
-    () => (!readMode && (status === "ACTIVE" || status === "PAUSED") ? editedStepIds(baseline.definition, definition) : new Set<string>()),
+    () =>
+      !readMode && (status === "ACTIVE" || status === "PAUSED")
+        ? editedStepIds(baseline.definition, definition)
+        : new Set<string>(),
     [readMode, status, baseline.definition, definition],
   );
-  const runStates = React.useMemo(() => (runId ? runCardStates(run, shown) : null), [runId, run, shown]);
+  const runStates = React.useMemo(
+    () => (runId ? runCardStates(run, shown) : null),
+    [runId, run, shown],
+  );
 
   // ── selecting and the windows ────────────────────────────────────────────────────────────
   const selectStep = React.useCallback((stepId: string) => {
     setSelection({ kind: "step", id: stepId });
     setRunId(null);
     setRun(null);
+    setTestOpen(false);
   }, []);
   const selectTrigger = React.useCallback(() => {
     setSelection({ kind: "trigger" });
     setRunId(null);
     setRun(null);
+    setTestOpen(false);
     if (!readMode) setTool("trigger");
   }, [readMode]);
   const deselect = React.useCallback(() => {
@@ -262,27 +335,42 @@ export const AutomationEditor: React.FC<{
   const openAi = React.useCallback(() => setTool("ai"), []);
 
   // ── editing the steps ────────────────────────────────────────────────────────────────────
-  const titleOf = React.useCallback((step: StepSpec) => words.stepTitle(step) || words.stepKind(step), [words]);
+  const titleOf = React.useCallback(
+    (step: StepSpec) => words.stepTitle(step) || words.stepKind(step),
+    [words],
+  );
 
   const insert = React.useCallback(
     (type: AutomationStepType, target: InsertTarget) => {
-      const step = newStep(newStepId(definition), type);
+      const made = newStep(newStepId(definition), type);
+      // S10b: a new split comes with Path 1 — named, so the name is there to change — and Anyone else.
+      const step: StepSpec =
+        made.type === "SPLIT"
+          ? { ...made, paths: (made.paths ?? []).map((p, i) => ({ ...p, name: p.name || tShared("pathDefault", { n: i + 1 }) })) }
+          : made;
       setDefinition(insertStep(definition, step, target));
       selectStep(step.id);
       setPaletteDrag(false);
     },
-    [definition, setDefinition, selectStep],
+    [definition, setDefinition, selectStep, tShared],
   );
   const addFromList = (type: AutomationStepType) => {
     const target: InsertTarget =
-      selection?.kind === "step" ? { kind: "after", stepId: selection.id } : selection?.kind === "trigger" ? { kind: "trunkStart" } : { kind: "trunkEnd" };
+      selection?.kind === "step"
+        ? { kind: "after", stepId: selection.id }
+        : selection?.kind === "trigger"
+          ? { kind: "trunkStart" }
+          : { kind: "trunkEnd" };
     insert(type, target);
   };
 
   const announceMove = React.useCallback(
     (d: AutomationDefinition, stepId: string) => {
       const step = findStep(d, stepId);
-      if (step) setAnnouncement(t("canvas.moved", { title: titleOf(step), number: numbers(d)[stepId] ?? "" }));
+      if (step)
+        setAnnouncement(
+          t("canvas.moved", { title: titleOf(step), number: numbers(d)[stepId] ?? "" }),
+        );
     },
     [t, titleOf],
   );
@@ -400,7 +488,6 @@ export const AutomationEditor: React.FC<{
   };
 
   const showProblems = (found: AutomationCheck["problems"], purpose: "turnOn" | "save") => {
-
     setProblemsFor(purpose);
     const first = problemsByStep(definition, found).keys().next().value;
     if (first === null) selectTrigger();
@@ -412,11 +499,19 @@ export const AutomationEditor: React.FC<{
     if (!automation) return;
     const result = await saveM.mutateAsync({
       id: automation.id,
-      request: { definition, inFlight, expectedVersionNo: automation.versionNo, confirmVolume: volumeConfirmed.current },
+      request: {
+        definition,
+        inFlight,
+        expectedVersionNo: automation.versionNo,
+        confirmVolume: volumeConfirmed.current,
+      },
     });
     let saved = result.automation;
     if (!sameMeta(draft, baseline)) {
-      saved = await renameM.mutateAsync({ id: automation.id, request: { name: draft.name, description: draft.description || null, icon: draft.icon } });
+      saved = await renameM.mutateAsync({
+        id: automation.id,
+        request: { name: draft.name, description: draft.description || null, icon: draft.icon },
+      });
     }
     setAutomation(saved);
     setBaseline(draft);
@@ -434,7 +529,12 @@ export const AutomationEditor: React.FC<{
         setBusy({ saveDraft: true });
         const saved = await draftM.mutateAsync({
           id,
-          request: { name: draft.name, description: draft.description || null, icon: draft.icon, definition },
+          request: {
+            name: draft.name,
+            description: draft.description || null,
+            icon: draft.icon,
+            definition,
+          },
         });
         setAutomation(saved);
         setBaseline(draft);
@@ -444,7 +544,10 @@ export const AutomationEditor: React.FC<{
       setBusy({ saveChanges: true });
       if (!definitionChanged) {
         // Only the name or the description: saved at once, with runs going or not (N6).
-        const saved = await renameM.mutateAsync({ id, request: { name: draft.name, description: draft.description || null, icon: draft.icon } });
+        const saved = await renameM.mutateAsync({
+          id,
+          request: { name: draft.name, description: draft.description || null, icon: draft.icon },
+        });
         setAutomation(saved);
         setBaseline(draft);
         toast.success(t("toasts.changesSaved"));
@@ -526,14 +629,25 @@ export const AutomationEditor: React.FC<{
         if (status === "DRAFT") {
           await draftM.mutateAsync({
             id: automation.id,
-            request: { name: draft.name, description: draft.description || null, icon: draft.icon, definition },
+            request: {
+              name: draft.name,
+              description: draft.description || null,
+              icon: draft.icon,
+              definition,
+            },
           });
         } else {
-          await saveM.mutateAsync({ id: automation.id, request: { definition, inFlight: "KEEP", expectedVersionNo: automation.versionNo } });
+          await saveM.mutateAsync({
+            id: automation.id,
+            request: { definition, inFlight: "KEEP", expectedVersionNo: automation.versionNo },
+          });
         }
         setBaseline(draft);
       }
-      const result = await turnOnM.mutateAsync({ id: automation.id, request: { backfill, confirmVolume } });
+      const result = await turnOnM.mutateAsync({
+        id: automation.id,
+        request: { backfill, confirmVolume },
+      });
       setAutomation(result.automation);
       // Turned on from the editor, it stays in fields: the live banner says what saving now means (F5).
       setEditing(true);
@@ -562,7 +676,10 @@ export const AutomationEditor: React.FC<{
       showUndoToast({
         message: t("toasts.turnedOff"),
         onUndo: async () => {
-          const back = await turnOnM.mutateAsync({ id, request: { backfill: "NONE", confirmVolume: true } });
+          const back = await turnOnM.mutateAsync({
+            id,
+            request: { backfill: "NONE", confirmVolume: true },
+          });
           setAutomation(back.automation);
         },
       });
@@ -576,13 +693,22 @@ export const AutomationEditor: React.FC<{
   const openTestRun = () => {
     setTurnOnCheck(null);
     setTestExpanded(false);
-    setTool("test");
+    setSelection(null);
+    setRunId(null);
+    setRun(null);
+    setTestOpen(true);
+    setTool((current) => (current === "test" ? null : current));
+  };
+  const closeTestRun = () => {
+    setTestExpanded(false);
+    setTestOpen(false);
   };
 
   const onHeaderButton = (button: HeaderButton) => {
     switch (button) {
       case "testRun":
-        openTestRun();
+        if (testOpen) closeTestRun();
+        else openTestRun();
         break;
       case "saveDraft":
       case "saveChanges":
@@ -603,7 +729,12 @@ export const AutomationEditor: React.FC<{
   // The first save goes through Name and icon (I1); a rename from the header changes the draft until it is saved.
   const onNameSave = async (value: NameAndIcon) => {
     const firstSave = nameDialog?.firstSave ?? false;
-    const nextDraft: EditorDraft = { ...draft, name: value.name, description: value.description, icon: value.icon };
+    const nextDraft: EditorDraft = {
+      ...draft,
+      name: value.name,
+      description: value.description,
+      icon: value.icon,
+    };
     setNameError(null);
     if (!firstSave || id) {
       setDraft(nextDraft);
@@ -685,9 +816,13 @@ export const AutomationEditor: React.FC<{
           aiUndo.current.set(turnId, before);
           setDefinition(reply.definition);
         }
-        setAiTurns((turns) => turns.map((turn) => (turn.id === turnId ? { ...turn, reply } : turn)));
+        setAiTurns((turns) =>
+          turns.map((turn) => (turn.id === turnId ? { ...turn, reply } : turn)),
+        );
       } catch {
-        setAiTurns((turns) => turns.map((turn) => (turn.id === turnId ? { ...turn, reply: { kind: "error" } } : turn)));
+        setAiTurns((turns) =>
+          turns.map((turn) => (turn.id === turnId ? { ...turn, reply: { kind: "error" } } : turn)),
+        );
       } finally {
         setAiBusy(false);
       }
@@ -699,7 +834,9 @@ export const AutomationEditor: React.FC<{
   const undoAi = (turnId: number) => {
     const before = aiUndo.current.get(turnId);
     if (before) setDefinition(before);
-    setAiTurns((turns) => turns.map((turn) => (turn.id === turnId ? { ...turn, undone: true } : turn)));
+    setAiTurns((turns) =>
+      turns.map((turn) => (turn.id === turnId ? { ...turn, undone: true } : turn)),
+    );
   };
   const askedOnLoad = React.useRef(false);
   React.useEffect(() => {
@@ -716,7 +853,34 @@ export const AutomationEditor: React.FC<{
 
   // ── where the windows are, so the canvas fits into what is left ──────────────────────────
   const selectedStep = selection?.kind === "step" ? findStep(shown, selection.id) : null;
-  const rightOpen = runId !== null || selectedStep !== null || (selection?.kind === "trigger" && shown.trigger !== null);
+  const rightOpen =
+    (testOpen && !testExpanded) ||
+    runId !== null ||
+    selectedStep !== null ||
+    (selection?.kind === "trigger" && shown.trigger !== null);
+  // C1b: where the settings window stands, so the line from the selected card ends on its edge and the canvas can bring
+  // the card within its height.
+  const settingsRef = React.useRef<HTMLDivElement>(null);
+  const [settingsHeight, setSettingsHeight] = React.useState(0);
+  const settingsShown =
+    !testOpen &&
+    runId === null &&
+    (selectedStep !== null || (selection?.kind === "trigger" && shown.trigger !== null));
+  React.useEffect(() => {
+    const el = settingsRef.current;
+    if (!el || !settingsShown) {
+      setSettingsHeight(0);
+      return;
+    }
+    const observer = new ResizeObserver(() => setSettingsHeight(el.offsetHeight));
+    observer.observe(el);
+    setSettingsHeight(el.offsetHeight);
+    return () => observer.disconnect();
+  }, [settingsShown, selection]);
+  const windowSpan: WindowSpan | null =
+    settingsShown && settingsHeight > 0
+      ? { right: RIGHT_W + EDGE, top: EDGE, bottom: EDGE + settingsHeight }
+      : null;
   const topRef = React.useRef<HTMLDivElement>(null);
   const [topHeight, setTopHeight] = React.useState(0);
   React.useEffect(() => {
@@ -727,16 +891,18 @@ export const AutomationEditor: React.FC<{
     setTopHeight(el.offsetHeight);
     return () => observer.disconnect();
   }, []);
-  const leftInset = EDGE + BLOCK_W + (tool && !(tool === "test" && testExpanded) ? TOOL_W[tool] : 0) + EDGE;
+  const leftInset =
+    EDGE + BLOCK_W + (tool && !(tool === "test" && testExpanded) ? TOOL_W[tool] : 0) + EDGE;
+  const topOffset = SENTENCE_TOP + (testOpen ? TEST_BAR_ROOM : 0);
   const insets: CanvasInsets = {
     left: leftInset,
     right: rightOpen ? RIGHT_W + 2 * EDGE : 0,
-    top: topHeight + 2 * EDGE,
+    top: topOffset + topHeight + EDGE,
     bottom: ZOOM_ROOM,
   };
   // The top block grows with a banner (F3, the live one): the canvas moves down with it, or the When card slides under
   // the sentence (walk of 2026-11-07).
-  const fitKey = `${tool ?? ""}|${testExpanded}|${rightOpen}|${version?.versionNo ?? ""}|${topHeight}`;
+  const fitKey = `${tool ?? ""}|${testOpen}|${testExpanded}|${rightOpen}|${version?.versionNo ?? ""}|${topHeight}`;
 
   // ── the header ───────────────────────────────────────────────────────────────────────────
   const buttons = headerButtons({ status, readMode: readModeOwn, canManage, system });
@@ -748,7 +914,8 @@ export const AutomationEditor: React.FC<{
   // ── F3's banner ──────────────────────────────────────────────────────────────────────────
   const problemOrder = React.useMemo(() => [...byStep.keys()], [byStep]);
   const showNext = () => {
-    const current = selection?.kind === "trigger" ? null : selection?.kind === "step" ? selection.id : undefined;
+    const current =
+      selection?.kind === "trigger" ? null : selection?.kind === "step" ? selection.id : undefined;
     const next = nextProblem(problemOrder, current);
     if (next === null) selectTrigger();
     else if (next) selectStep(next);
@@ -759,19 +926,45 @@ export const AutomationEditor: React.FC<{
     switch (tool) {
       case "ai":
         return (
-          <ToolWindowFrame title={t("tools.ai.title")} width={400} onClose={() => setTool(null)}>
-            <AiWindow turns={aiTurns} value={aiValue} busy={aiBusy} onChange={setAiValue} onSubmit={(p) => void askAi(p)} onUndo={undoAi} />
+          <ToolWindowFrame
+            title={t("tools.ai.title")}
+            width={400}
+            onClose={() => setTool(null)}
+            footer={
+              <AiComposer
+                value={aiValue}
+                busy={aiBusy}
+                onChange={setAiValue}
+                onSubmit={(p) => void askAi(p)}
+              />
+            }
+          >
+            <AiWindow turns={aiTurns} onSubmit={(p) => void askAi(p)} onUndo={undoAi} />
           </ToolWindowFrame>
         );
       case "add":
         return (
-          <ToolWindowFrame title={t("tools.add.title")} width={320} onClose={() => setTool(null)}>
-            <AddStepWindow actions={catalog.actions} onAdd={addFromList} onDragChange={setPaletteDrag} />
+          <ToolWindowFrame
+            title={t("tools.add.title")}
+            width={320}
+            onClose={() => setTool(null)}
+            footer={<AddStepHint />}
+            bodyClassName="p-0"
+          >
+            <AddStepWindow
+              actions={catalog.actions}
+              onAdd={addFromList}
+              onDragChange={setPaletteDrag}
+            />
           </ToolWindowFrame>
         );
       case "trigger":
         return (
-          <ToolWindowFrame title={t("tools.trigger.title")} width={320} onClose={() => setTool(null)}>
+          <ToolWindowFrame
+            title={t("tools.trigger.title")}
+            width={320}
+            onClose={() => setTool(null)}
+          >
             <TriggerList
               catalog={catalog}
               current={definition.trigger}
@@ -785,7 +978,12 @@ export const AutomationEditor: React.FC<{
         );
       case "who":
         return (
-          <ToolWindowFrame title={t("tools.who.title")} width={320} onClose={() => setTool(null)}>
+          <ToolWindowFrame
+            title={t("tools.who.title")}
+            width={320}
+            onClose={() => setTool(null)}
+            bodyClassName="p-5"
+          >
             <WhoItRunsFor
               conditions={shown.conditions}
               readOnly={readMode}
@@ -818,22 +1016,6 @@ export const AutomationEditor: React.FC<{
             onClose={() => setTool(null)}
           />
         );
-      case "test":
-        // One instance, windowed or expanded into its dialog (a portal): two instances, one per place, lost the pick
-        // and the result on expanding (walk of 2026-11-07).
-        return (
-          <TestRunWindow
-            automationId={id}
-            name={displayName}
-            definition={definition}
-            expanded={testExpanded}
-            onExpand={setTestExpanded}
-            onClose={() => {
-              setTestExpanded(false);
-              setTool(null);
-            }}
-          />
-        );
       default:
         return null;
     }
@@ -841,7 +1023,31 @@ export const AutomationEditor: React.FC<{
 
   // ── the right window ─────────────────────────────────────────────────────────────────────
   const stepNumbers = React.useMemo(() => numbers(shown), [shown]);
+  /** Who sees what: a process trigger's own fields filled with a sample (the bug "[Process]" of 2026-11-18). */
+  const exampleSamples = React.useMemo((): Record<string, string> => {
+    const trigger = shown.trigger;
+    if (trigger?.type !== "EVENT" || trigger.event !== "PROCESS_COMPLETED") return {};
+    const kind = trigger.process === "ANY_OFFBOARDING" ? "offboarding" : "onboarding";
+    const template =
+      catalog.processTemplates.find((p) => p.value === trigger.process)?.label ?? null;
+    const type = t("whoSeesWhat.sample.processType", { kind });
+    return { processName: template ?? type, processType: type };
+  }, [shown.trigger, catalog.processTemplates, t]);
+  // One instance, windowed or expanded into its dialog (a portal): two instances, one per place, lost the pick and the
+  // result on expanding (walk of 2026-11-07).
+  const testWindow = testOpen ? (
+    <TestRunWindow
+      automationId={id}
+      name={displayName}
+      definition={definition}
+      expanded={testExpanded}
+      onExpand={setTestExpanded}
+      onClose={closeTestRun}
+    />
+  ) : null;
   const rightWindow = (): React.ReactNode => {
+    // Expanded, the same instance stays here and draws its dialog in a portal — moving it would remount it.
+    if (testOpen) return testWindow;
     if (runId) {
       return (
         <RunWindow
@@ -861,54 +1067,65 @@ export const AutomationEditor: React.FC<{
       const example = check?.examples.find((e) => e.stepId === selectedStep.id) ?? null;
       return (
         <>
-          <StepSettingsWindow
-            eyebrow={t("settings.stepWithType", { number: stepNumbers[selectedStep.id] ?? "", type })}
-            title={titleOf(selectedStep)}
-            icon={STEP_TYPE_ICONS[selectedStep.type]}
-            menu={
-              readMode
-                ? null
-                : {
-                    skipped: Boolean(selectedStep.skipped),
-                    open: menuOpen,
-                    onOpenChange: setMenuOpen,
-                    onDuplicate: () => duplicate(selectedStep.id),
-                    onToggleSkip: () => toggleSkip(selectedStep.id),
-                    onRemove: () => remove(selectedStep.id),
-                  }
-            }
-            onClose={deselect}
-          >
-            <StepFields
-              definition={shown}
-              step={selectedStep}
-              catalog={catalog}
-              readOnly={readMode}
-              problems={problems.filter((p) => p.stepId === selectedStep.id)}
-              onChange={(step) => setDefinition((d) => updateStep(d, step.id, () => step))}
-            />
-          </StepSettingsWindow>
+          <div ref={settingsRef} className="flex shrink-0 flex-col">
+            <StepSettingsWindow
+              eyebrow={t("settings.step", { number: stepNumbers[selectedStep.id] ?? "" })}
+              title={type}
+              icon={STEP_TYPE_ICONS[selectedStep.type]}
+              menu={
+                readMode
+                  ? null
+                  : {
+                      skipped: Boolean(selectedStep.skipped),
+                      open: menuOpen,
+                      onOpenChange: setMenuOpen,
+                      onDuplicate: () => duplicate(selectedStep.id),
+                      onToggleSkip: () => toggleSkip(selectedStep.id),
+                      onRemove: () => remove(selectedStep.id),
+                    }
+              }
+              onClose={deselect}
+            >
+              <StepFields
+                definition={shown}
+                step={selectedStep}
+                catalog={catalog}
+                readOnly={readMode}
+                problems={problems.filter((p) => p.stepId === selectedStep.id)}
+                onChange={(step) => setDefinition((d) => updateStep(d, step.id, () => step))}
+              />
+            </StepSettingsWindow>
+          </div>
           <WhoSeesWhat
             step={selectedStep}
             example={example}
             loading={checking}
             companyName={company?.name ?? ""}
             timeOff={countsRequests(shown)}
+            samples={exampleSamples}
           />
         </>
       );
     }
     if (selection?.kind === "trigger" && shown.trigger) {
       return (
-        <StepSettingsWindow eyebrow={t("settings.trigger")} title={triggerName(shown.trigger)} onClose={deselect}>
-          <TriggerFields
-            definition={shown}
-            catalog={catalog}
-            readOnly={readMode}
-            problems={problems.filter((p) => !p.stepId)}
-            onChange={setDefinition}
-          />
-        </StepSettingsWindow>
+        <div ref={settingsRef} className="flex shrink-0 flex-col">
+          <StepSettingsWindow
+            eyebrow={t("settings.trigger")}
+            title={triggerName(shown.trigger)}
+            triggerMenu={readMode ? null : { onChange: () => setTool("trigger") }}
+            onClose={deselect}
+          >
+            <TriggerFields
+              definition={shown}
+              catalog={catalog}
+              readOnly={readMode}
+              problems={problems.filter((p) => !p.stepId)}
+              onChange={setDefinition}
+              onOpenWho={() => setTool("who")}
+            />
+          </StepSettingsWindow>
+        </div>
       );
     }
     return null;
@@ -916,6 +1133,22 @@ export const AutomationEditor: React.FC<{
 
   const left = leftWindow();
   const right = rightWindow();
+  // B7: whether what is on screen is saved — in edit mode only; a new automation says nothing until something is in it.
+  const saving =
+    Boolean(busy.saveDraft || busy.saveChanges) ||
+    createM.isPending ||
+    draftM.isPending ||
+    saveM.isPending ||
+    renameM.isPending;
+  const saveState: SaveState | null = readMode
+    ? null
+    : saving
+      ? "saving"
+      : dirty
+        ? "unsaved"
+        : id
+          ? "saved"
+          : null;
   const live = !readMode && version === null && (status === "ACTIVE" || status === "PAUSED");
   const problemCount = byStep.size;
 
@@ -930,6 +1163,8 @@ export const AutomationEditor: React.FC<{
         disabled={disabled}
         busy={busy}
         canRename={!readMode}
+        saveState={saveState}
+        testRunOpen={testOpen}
         onRename={() => {
           setNameError(null);
           setNameDialog({ firstSave: !id });
@@ -946,10 +1181,12 @@ export const AutomationEditor: React.FC<{
           selectedStepId={selection?.kind === "step" ? selection.id : null}
           triggerSelected={selection?.kind === "trigger"}
           needs={needs}
+          pathErrors={pathErrors}
           edited={edited}
           runStates={runStates}
           offerAi={!id && !readMode}
           insets={insets}
+          windowSpan={windowSpan}
           fitKey={fitKey}
           paletteDrag={paletteDrag}
           announcement={announcement}
@@ -967,14 +1204,30 @@ export const AutomationEditor: React.FC<{
         {/* The tool block and its window, top left. */}
         <div className="pointer-events-none absolute top-4 bottom-4 left-4 z-10 flex items-start">
           <div className="pointer-events-auto">
-            <ToolBlock open={tool} readOnly={readMode} disabled={{ runs: !id }} onToggle={toggleTool} />
+            <ToolBlock
+              open={tool}
+              readOnly={readMode}
+              disabled={{ runs: !id }}
+              onToggle={toggleTool}
+            />
           </div>
           {left && <div className="pointer-events-auto flex h-full min-h-0 flex-col">{left}</div>}
+          {testOpen && (
+            <div className="pointer-events-auto ml-4">
+              <TestRunBar onClose={closeTestRun} />
+            </div>
+          )}
         </div>
 
         {/* Banners and the sentence, top centre, in the part the windows leave free. */}
-        <div className="pointer-events-none absolute top-4 z-10 flex justify-center px-4" style={{ left: insets.left - EDGE, right: insets.right }}>
-          <div ref={topRef} className="pointer-events-auto flex w-full max-w-[720px] flex-col gap-3">
+        <div
+          className="pointer-events-none absolute z-10 flex justify-center px-4"
+          style={{ top: topOffset, left: insets.left - EDGE, right: insets.right }}
+        >
+          <div
+            ref={topRef}
+            className="pointer-events-auto flex w-full max-w-[720px] flex-col gap-3"
+          >
             {system && <CanvasBanner icon={ShieldCheckIcon}>{t("banners.system")}</CanvasBanner>}
             {version && (
               <CanvasBanner
@@ -985,7 +1238,10 @@ export const AutomationEditor: React.FC<{
                   </Button>
                 }
               >
-                {t("banners.version", { number: version.versionNo, date: formatDate(version.createdAt) })}
+                {t("banners.version", {
+                  number: version.versionNo,
+                  date: formatDate(version.createdAt),
+                })}
               </CanvasBanner>
             )}
             {problemCount > 0 && (
@@ -997,17 +1253,25 @@ export const AutomationEditor: React.FC<{
                   </Button>
                 }
               >
-                {problemsFor === "save" ? t("banners.needsDetailsToSave", { count: problemCount }) : t("banners.needsDetails", { count: problemCount })}
+                {problemsFor === "save"
+                  ? t("banners.needsDetailsToSave", { count: problemCount })
+                  : t("banners.needsDetails", { count: problemCount })}
               </CanvasBanner>
             )}
             {live && problemCount === 0 && <CanvasBanner>{t("banners.live")}</CanvasBanner>}
-            <SentenceCard parts={words.sentence(shown)} selectedStepId={selection?.kind === "step" ? selection.id : null} />
+            <SentenceCard
+              parts={words.sentence(shown)}
+              selectedStepId={selection?.kind === "step" ? selection.id : null}
+            />
           </div>
         </div>
 
         {/* The step settings and Who sees what, or a run's window, on the right above the zoom. */}
         {right && (
-          <div className="absolute top-4 right-4 bottom-[76px] z-10 flex w-[340px] flex-col gap-3 overflow-y-auto" data-test="right-windows">
+          <div
+            className="absolute top-4 right-4 bottom-[76px] z-10 flex w-[340px] flex-col gap-3 overflow-y-auto"
+            data-test="right-windows"
+          >
             {right}
           </div>
         )}
@@ -1016,7 +1280,11 @@ export const AutomationEditor: React.FC<{
       <NameAndIconDialog
         open={nameDialog !== null}
         firstSave={nameDialog?.firstSave ?? false}
-        initial={{ name: draft.name || (definition.trigger ? words.triggerTitle(definition.trigger) : ""), description: draft.description, icon: draft.icon }}
+        initial={{
+          name: draft.name || (definition.trigger ? words.triggerTitle(definition.trigger) : ""),
+          description: draft.description,
+          icon: draft.icon,
+        }}
         suggested={!draft.name && Boolean(definition.trigger)}
         status={status}
         trigger={definition.trigger}
@@ -1077,6 +1345,7 @@ export const AutomationEditor: React.FC<{
           check={{ ...turnOnCheck, audiences: audienceWords(turnOnCheck.audiences) }}
           everyone={(definition.conditions?.filters ?? []).length === 0}
           requests={countsRequests(definition)}
+          waitingKind={waitingKindOf(definition)}
           notConnected={notConnectedSteps(definition).map(titleOf)}
           turning={Boolean(busy.turnOn)}
           error={turnOnError}

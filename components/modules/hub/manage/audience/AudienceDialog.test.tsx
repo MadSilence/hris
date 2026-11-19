@@ -30,10 +30,10 @@ const renderDialog = (value: HubAudience = filtered) => {
 };
 
 describe("AudienceDialog (CM07)", () => {
-  it("disables Apply and says so while the audience reaches nobody", () => {
+  it("hides Apply and says so while the audience reaches nobody", () => {
     resolved = { data: { total: 0, people: [], label: "0" }, isFetching: false };
     renderDialog();
-    expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Apply" })).not.toBeInTheDocument();
     expect(screen.getByText("No one matches these filters")).toBeInTheDocument();
   });
 

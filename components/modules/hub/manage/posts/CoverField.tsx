@@ -78,12 +78,16 @@ export const CoverField: React.FC<{ value: string | null; onChange: (fileId: str
           void upload(e.dataTransfer.files?.[0]);
         }}
         className={cn(
-          "flex h-24 w-full items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-field text-body text-secondary transition-colors hover:border-strong hover:bg-subtle",
+          "flex h-24 w-full items-center justify-center gap-2.5 rounded-card border-[1.5px] border-dashed border-field text-body text-tertiary transition-colors hover:border-strong hover:bg-subtle",
           over && "border-accent bg-accent-subtle",
         )}
       >
         {busy ? <NodRing size="sm" /> : <Icon icon={Image01Icon} size="md" className="text-tertiary" />}
-        {t("post.addCover")}
+        {/* "Add a cover image" 14/20 tertiary, then " (optional)" 12/16 (FIXES L4). */}
+        <span>
+          {t("post.addCover")}
+          <span className="text-hint">{t("post.optional")}</span>
+        </span>
       </button>
       {picker}
     </>

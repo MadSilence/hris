@@ -353,7 +353,12 @@ export const NotificationsInbox: FC = () => {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card border border-dashed border-divider px-4 py-16 text-center">
-          {query.trim() ? <Illustration scene="no-results-s" size="s" /> : <Illustration scene="all-caught-up" />}
+          {/* A search that missed is the magnifier; a search narrowed by a status or a category too, the funnel (I2). */}
+          {query.trim() ? (
+            <Illustration scene={status !== "all" || category !== ALL_CATEGORIES ? "no-match-s" : "no-results-s"} size="s" />
+          ) : (
+            <Illustration scene="all-caught-up" />
+          )}
           <p className="text-body text-tertiary">{emptyText}</p>
         </div>
       ) : (

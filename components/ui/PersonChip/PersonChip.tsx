@@ -66,7 +66,7 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
       <div ref={ref} title={title} className={cn("flex flex-col items-center gap-1 rounded-popover p-2 shadow-raised", shared)} {...rest}>
         <Avatar className="size-9 flex-none">
           {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-          <AvatarFallback name={name} className="text-hint">{initials}</AvatarFallback>
+          <AvatarFallback name={name}>{initials}</AvatarFallback>
         </Avatar>
         <span className="w-full text-center">
           <span className="line-clamp-2 text-hint font-medium text-primary">{name}</span>
@@ -82,7 +82,7 @@ export const PersonChip = React.forwardRef<HTMLDivElement, Props>(function Perso
     <div ref={ref} title={title} className={cn("flex items-center gap-2 rounded-control px-2 py-1.5", shared)} {...rest}>
       <Avatar className="size-[22px] flex-none">
         {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-        <AvatarFallback name={name} className="text-hint">{initials}</AvatarFallback>
+        <AvatarFallback name={name}>{initials}</AvatarFallback>
       </Avatar>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-hint font-medium text-primary">{name}</span>

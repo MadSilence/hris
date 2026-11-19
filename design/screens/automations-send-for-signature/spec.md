@@ -79,3 +79,9 @@ Q-38 (who sends a document an automation sends), Q-39 (Wait ends on declined / c
 - **Differs from the design:** the step card's meta line ("The person, then their manager · 30 days to sign") is not
   drawn; the step shows the template's name only. A01's "New" mark is not drawn. "Open the template" waits for the
   Templates screens.
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- "Send the document to me" makes the real document for the case's person and sends it only to the tester, filed in the tester's own Documents as "[Test] …"; *Delete test items* closes it and removes the file and the notification.
+- "Then {name}, her manager…" under the example stays generic ("each signer after them").

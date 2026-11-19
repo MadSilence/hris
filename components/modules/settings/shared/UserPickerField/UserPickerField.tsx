@@ -118,7 +118,7 @@ export function UserPickerField({
             <span className="flex min-w-0 items-center gap-2">
               <Avatar className="h-5 w-5 shrink-0">
                 {value.avatarUrl ? <AvatarImage src={value.avatarUrl} alt="" /> : null}
-                <AvatarFallback className="text-hint">{initials(value)}</AvatarFallback>
+                <AvatarFallback name={[value.firstName, value.lastName].filter(Boolean).join(" ") || value.email}>{initials(value)}</AvatarFallback>
               </Avatar>
               <span className="truncate text-primary">{fullName(value)}</span>
             </span>
@@ -174,7 +174,7 @@ export function UserPickerField({
                 >
                   <Avatar className="h-6 w-6 shrink-0">
                     {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt="" /> : null}
-                    <AvatarFallback className="text-hint">{initials(u)}</AvatarFallback>
+                    <AvatarFallback name={[u.firstName, u.lastName].filter(Boolean).join(" ") || u.email}>{initials(u)}</AvatarFallback>
                   </Avatar>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-body font-medium text-primary">{fullName(u)}</span>

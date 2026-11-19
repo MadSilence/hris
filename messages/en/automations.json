@@ -214,7 +214,10 @@
     "SKIPPED_BY_HAND": "It was skipped by hand.",
     "NO_DATE": "It was skipped: the person has no date to count it from.",
     "NOT_CONNECTED": "This step isn't connected yet, so it was skipped.",
-    "UNKNOWN": "Something went wrong."
+    "UNKNOWN": "Something went wrong.",
+    "SKIPPED_ON_FAILURE": "It failed and was skipped, as the step is set to: the run went on without it.",
+    "DEPENDS_ON_SKIPPED": "It was skipped: the step it waits for was skipped."
   },
-  "unnamed": "Untitled automation"
+  "unnamed": "Untitled automation",
+  "pathDefault": "Path {n}"
 }

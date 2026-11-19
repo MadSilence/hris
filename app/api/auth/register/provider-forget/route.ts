@@ -8,7 +8,7 @@ import { SIGNUP_PROVIDER_COOKIE } from "@/config/security/sessionCookieNames";
  * next time (`prompt=select_account`), so another account can be picked there.
  */
 export const GET = async (req: NextRequest) => {
-  const res = NextResponse.redirect(new URL("/trial", requestOrigin(req.headers, publicConfig.web)), 303);
+  const res = NextResponse.redirect(new URL("/signup", requestOrigin(req.headers, publicConfig.web)), 303);
   res.cookies.set({ name: SIGNUP_PROVIDER_COOKIE, value: "", httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
   return res;
 };

@@ -22,7 +22,7 @@ Anyone can make Home their own. They can add the widgets they need, drop the one
    - "Widgets" (section title) + close (×). Close is the same as Cancel.
    - Search (36).
    - Category chips: All · For me · My team · Company, each with a count (`FilterChip`, single choice). The chips hide while searching.
-   - The hint "Pick a size, then drag the widget onto your home or click +".
+   - The hint "Pick a size, then drag a widget onto your home.".
    - A list of widget rows divided by hairlines. Each row has a preview 156 × 132 (Mist, radius 12, the widget drawn in its picked size with the person's real data), then the name, a description of up to 2 lines then …, and the size switch with only the sizes the widget has ("Small only" when there is one). On the right is "+" (secondary icon button 32), or "On your home" in grey when it is already on the page.
    - **New:** `WidgetCatalogRow`.
 
@@ -75,7 +75,7 @@ Anyone can make Home their own. They can add the widgets they need, drop the one
 |---|---|
 | Edit bar | Edit home / Try things out. Nothing changes until you press Save. / Cancel / Save / Saving… |
 | Edit bar line 2 | Header / Colour / Light / Reset to default |
-| Panel | Widgets / Search widgets / All / For me / My team / Company / Pick a size, then drag the widget onto your home or click + |
+| Panel | Widgets / Search widgets / All / For me / My team / Company / Pick a size, then drag a widget onto your home. |
 | Panel row | {Widget name} / {description} / Small / Medium / Large / Small only / On your home |
 | Search heading | 1 widget / {n} widgets |
 | No results | No widgets match “{text}” / Try another word. / Clear search |
@@ -160,3 +160,7 @@ Built from `design-fixes-round-1` (FIXES.md Part 4.2, E1–E21). Where the text 
 - **Toasts (E16):** Cancel, Discard and Save dismiss the session's toasts.
 - **Widgets (E18)** look exactly as on Home; they take no pointer.
 - Opening scrolls the editor to its top (E1).
+
+### Built from the fixes of 2026-11-19
+
+Built from `design-fixes-company-hub-1/edit-home` (EH1, EH2; 2026-11-19, walked).

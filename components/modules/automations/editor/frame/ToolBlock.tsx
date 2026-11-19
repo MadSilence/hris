@@ -38,8 +38,8 @@ export const ToolBlock: React.FC<{
       aria-orientation="vertical"
       aria-label={t("tools.label")}
       className={cn(
-        "flex w-12 flex-col gap-1 rounded-card bg-card p-1 shadow-raised",
-        open !== null && "rounded-r-none shadow-popover",
+        "flex w-[52px] flex-col gap-2 rounded-card border border-divider bg-card p-1.5 shadow-raised",
+        open !== null && "rounded-r-none shadow-dialog",
       )}
     >
       {tools.map((tool) => {
@@ -74,8 +74,9 @@ export const ToolBlock: React.FC<{
 };
 
 /**
- * The tool window (Layout 6): joined to the block like an ear — no corner where they meet — full height, 320 (noddo
- * AI 400). The runs part's windows bring their own frame; this one is for the editor's own tools.
+ * The tool window (Layout 6, the designers' fixes E1–E2): joined to the block like an ear — no corner where they meet —
+ * full height, 320 (noddo AI 400), a hairline and level 3. The header is 53 high with × at its right. `footer` is pinned
+ * to the window's bottom (Add a step's hint, noddo AI's composer). The runs part's windows bring the same frame.
  */
 export const ToolWindowFrame: React.FC<{
   title: string;
@@ -83,24 +84,31 @@ export const ToolWindowFrame: React.FC<{
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
-}> = ({ title, width, onClose, children, footer }) => {
+  /** The body's own padding; Add a step and noddo AI lay out their own. */
+  bodyClassName?: string;
+}> = ({ title, width, onClose, children, footer, bodyClassName = "px-5 py-4" }) => {
   const t = useTranslations("automationsEditor");
   return (
     <section
       aria-label={title}
       className={cn(
-        "flex h-full min-h-0 flex-col overflow-hidden rounded-card rounded-tl-none bg-card shadow-popover",
+        "flex h-full min-h-0 flex-col overflow-hidden rounded-card rounded-tl-none border border-divider bg-card shadow-dialog",
         width === 320 ? "w-[320px]" : "w-[400px]",
       )}
     >
-      <header className="flex items-center gap-2 border-b border-divider px-5 py-3">
-        <h2 className="min-w-0 flex-1 truncate text-card-title text-primary">{title}</h2>
-        <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("tools.close")}>
-          <Icon icon={Cancel01Icon} size="sm" />
-        </Button>
-      </header>
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+      <ToolWindowHeader title={title} onClose={onClose} closeLabel={t("tools.close")} />
+      <div className={cn("min-h-0 flex-1 overflow-y-auto", bodyClassName)}>{children}</div>
       {footer}
     </section>
   );
 };
+
+/** E2: 53 high, padding 0 8 0 16, the title 15/22 600, × 32 with a 20 icon, a hairline under it. */
+export const ToolWindowHeader: React.FC<{ title: React.ReactNode; onClose: () => void; closeLabel: string }> = ({ title, onClose, closeLabel }) => (
+  <header className="flex h-[53px] shrink-0 items-center gap-2 border-b border-divider pr-2 pl-4">
+    <h2 className="min-w-0 flex-1 truncate text-card-title text-primary">{title}</h2>
+    <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label={closeLabel}>
+      <Icon icon={Cancel01Icon} />
+    </Button>
+  </header>
+);

@@ -35,7 +35,12 @@ export function SecondStepContainer({ brand, returnTo }: { brand: AuthBrand; ret
   const [timedOut, setTimedOut] = React.useState(false);
   const [codesLeft, setCodesLeft] = React.useState<number | null>(null);
 
+  // Asked once: after a backup code logs in, the challenge is spent, and asking again (a new client once the session
+  // cookie is set) answered "gone" and put "Your login timed out" over D3 (walk of 2026-11-19).
+  const described = React.useRef(false);
   React.useEffect(() => {
+    if (described.current) return;
+    described.current = true;
     auth.describeMfaChallenge()
       .then((v) => setRememberDays(v.rememberDays))
       .catch((e: unknown) => {
@@ -70,7 +75,7 @@ export function SecondStepContainer({ brand, returnTo }: { brand: AuthBrand; ret
     }
   };
 
-  if (timedOut) {
+  if (timedOut && codesLeft === null) {
     return (
       <AuthSplit brand={brand}>
         <AuthHeading icon={Clock01Icon} title={t("secondStep.timedOut.title")} lead={t("secondStep.timedOut.body")} />
@@ -145,9 +150,11 @@ export function SecondStepContainer({ brand, returnTo }: { brand: AuthBrand; ret
         </Button>
       </form>
       {!useBackup && (
-        <Button type="button" variant="link" className="self-start" onClick={() => { setUseBackup(true); setCode(""); setFieldError(null); }}>
+        // A link 13/18 500 accent-text, 28 under the form — the step's own gap (the designers' login fix D7).
+        <button type="button" className="self-start text-label text-accent-text underline-offset-4 hover:underline"
+                onClick={() => { setUseBackup(true); setCode(""); setFieldError(null); }}>
           {t("secondStep.useBackup")}
-        </Button>
+        </button>
       )}
     </AuthSplit>
   );

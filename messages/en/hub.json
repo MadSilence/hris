@@ -53,22 +53,14 @@
     "photo": "Photo from the post",
     "someone": "Someone",
     "meta": "{author} · {audience}",
-    "metaPolicy": "{author} · Policy update",
-    "metaEvent": "{author} · Event on {date}",
     "search": "Search news",
     "thisMonth": "This month",
-    "types": {
-      "all": "All types",
-      "announcements": "Announcements",
-      "policyUpdates": "Policy updates",
-      "events": "Events"
-    },
     "empty": "No news yet",
     "error": "Couldn't load the news",
     "noMatch": "No news matches this",
-    "clearFilters": "Clear filters",
     "forMeEmptyTitle": "Nothing just for you yet",
-    "forMeEmptyAction": "See everything"
+    "forMeEmptyAction": "See everything",
+    "clearSearch": "Clear search"
   },
   "handbook": {
     "title": "Handbook",
@@ -89,7 +81,7 @@
   },
   "toAgree": {
     "title": "Pages need your yes",
-    "lead": "Read each page and agree to its current version. HR sees when you agreed.",
+    "lead": "Read each page and agree to its current version. The page owner sees when you agreed.",
     "waitingTab": "Waiting · {count}",
     "agreedTab": "Agreed · {count}",
     "thisWeek": "This week",
@@ -107,7 +99,10 @@
     "showMore": "Show {count} more",
     "emptyTitle": "You've agreed to everything",
     "emptyLine": "New pages to agree to will show up here.",
-    "agreedEmpty": "Nothing agreed yet"
+    "agreedEmpty": "Nothing agreed yet",
+    "waiting": "Waiting",
+    "agreed": "Agreed",
+    "error": "Couldn't load pages"
   },
   "page": {
     "breadcrumb": "Breadcrumb",
@@ -121,14 +116,14 @@
     "agreeTo": "Agree to version {version}",
     "agreeOverdue": "Agree to version {version} — it was due {date}",
     "ownerWillSee": "{name} will see that you agreed and when",
-    "hr": "HR",
     "agree": "I agree",
     "agreeing": "Agreeing…",
     "agreedLine": "You agreed to version {version} on {date}",
     "agreeFailed": "Couldn't save your answer. Try again.",
     "retry": "Retry",
     "emptyBody": "This page has no text yet",
-    "previewBanner": "Preview — not published"
+    "previewBanner": "Preview — not published",
+    "owner": "The page owner"
   },
   "save": {
     "save": "Save",
@@ -149,12 +144,13 @@
     "filterPeople": "Filter people",
     "choosePeople": "Choose people",
     "matchAll": "People who match all of these",
-    "alsoAdd": "Also add (optional)",
+    "alsoAdd": "Also add",
     "searchPeopleRoles": "Search people or roles",
     "seeWho": "See who",
     "noOne": "No one matches these filters",
     "discardTitle": "Discard changes?",
-    "discardLine": "The changes to who sees it will be lost."
+    "discardLine": "The changes to who sees it will be lost.",
+    "optional": " (optional)"
   },
   "editor": {
     "bold": "Bold",
@@ -205,7 +201,6 @@
     "publishTitle": "Publish version {version}?",
     "publishLead": "Readers will see this page as it is now.",
     "whatChanged": "What changed",
-    "whatChangedHint": "Readers who agreed to an earlier version see these points. Leave them empty to show nothing.",
     "pointLabel": "Point {n}",
     "addPoint": "Add a point",
     "removePoint": "Remove point",
@@ -216,25 +211,21 @@
     "publishFailed": "Couldn't publish. Your draft is saved.",
     "published": "Version {version} published",
     "conflict": "This page was edited elsewhere. Reload it to see the latest draft.",
-    "reload": "Reload"
+    "reload": "Reload",
+    "publishFixTitle": "Publish a small fix?",
+    "loadError": "Couldn't load this page",
+    "chooseOwner": "Choose an owner"
   },
   "post": {
     "newTitle": "New post",
     "editTitle": "Edit post",
-    "addCover": "Add a cover image (optional)",
+    "addCover": "Add a cover image",
     "replace": "Replace",
     "remove": "Remove",
     "title": "Title",
     "titleRequired": "Add a title",
     "text": "Text",
     "whoSees": "Who sees it",
-    "type": "Type",
-    "types": {
-      "announcement": "Announcement",
-      "policyUpdate": "Policy update",
-      "event": "Event"
-    },
-    "eventOn": "Event on",
     "pin": "Pin to the top",
     "unpins": "Unpins “{title}”",
     "notify": "Notify people",
@@ -255,7 +246,10 @@
     "savedChanges": "Changes saved",
     "view": "View",
     "discardTitle": "Discard this post?",
-    "discardLine": "What you wrote will be lost."
+    "discardLine": "What you wrote will be lost.",
+    "optional": " (optional)",
+    "addFilter": "Add filter",
+    "removeFilter": "Remove {filter}"
   },
   "manage": {
     "title": "Manage hub",
@@ -392,7 +386,9 @@
       "noDrafts": "No drafts",
       "noScheduled": "No scheduled posts",
       "noPublished": "Nothing published yet",
-      "error": "Couldn't load posts"
+      "error": "Couldn't load posts",
+      "allLabel": "All",
+      "draftsLabel": "Drafts"
     },
     "pages": {
       "line": "{sections, plural, one {# section} other {# sections}} · {pages, plural, one {# page} other {# pages}} · drag to reorder or move into another section",
@@ -414,7 +410,9 @@
       "emptyTitle": "No pages yet",
       "emptyLine": "Start with a section, then add pages.",
       "error": "Couldn't load pages"
-    }
+    },
+    "overviewError": "We couldn't load the overview",
+    "overviewErrorLine": "Your posts and pages are safe."
   },
   "agreed": {
     "title": "Who agreed",
@@ -424,7 +422,7 @@
     "ofNeeded": "of {needed} agreed",
     "notYet": "not yet",
     "notYetPrevious": "not yet · {count} agreed to version {version}",
-    "newHires": "new hires · get it as an onboarding task",
+    "newHires": "{count, plural, one {new hire} other {new hires}} · get it as an onboarding task",
     "tabNotYet": "Not yet · {count}",
     "tabAgreed": "Agreed · {count}",
     "department": "Department",
@@ -445,13 +443,14 @@
     "everyoneAgreed": "Everyone has agreed",
     "range": "{from}–{to} of {total}",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "error": "We couldn't load who agreed",
+    "errorLine": "Every yes is saved."
   },
   "settings": {
     "editors": "Who can post and edit pages",
     "addEditor": "Add a person or a role",
     "editorsHint": "Team leads can post only to their own team. Everyone else reads.",
-    "setInRoles": "Set in Roles",
     "mustRead": "Must-read pages",
     "remind": "Remind people before the deadline",
     "remindHint": "By email and in the inbox",

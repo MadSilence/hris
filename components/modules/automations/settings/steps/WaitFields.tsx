@@ -59,9 +59,10 @@ export const useTaskStepsAbove = (definition: StepPartProps["definition"], step:
       value: s.id,
       label:
         s.type === "SIGN_DOCUMENT"
-          ? t("wait.signedOption", { number: n[s.id] ?? "", title: s.title?.trim() || t("wait.untitledDocument") })
+          ? t("wait.signedOption", { title: s.title?.trim() || t("wait.untitledDocument") })
           : t("wait.taskOption", { number: n[s.id] ?? "", title: tokensAsWords(s.title, label) || t("wait.untitledTask") }),
       signing: s.type === "SIGN_DOCUMENT",
+      number: n[s.id] ?? "",
     }));
 };
 
@@ -73,10 +74,12 @@ export const WaitFields: React.FC<StepPartProps> = ({ definition, step, catalog,
   const t = useTranslations("automationsSettings");
   const fieldLabel = useFillableLabel(catalog);
   const tasks = useTaskStepsAbove(definition, step);
-  const ids = { wait: React.useId(), tell: React.useId() };
+  const ids = { wait: React.useId(), tell: React.useId(), until: React.useId() };
   // With no task above, a wait can only be for a field: shown so, and written so with the field's pick.
   const until = tasks.length === 0 ? "FIELD_FILLED" : step.until ?? "TASK_DONE";
   const timeout = step.onTimeout ?? "STOP_AND_TELL";
+  // S9c: waiting for a document from this run to be signed.
+  const signing = until === "TASK_DONE" ? tasks.find((x) => x.value === step.taskStepId && x.signing) ?? null : null;
   const fillable = [
     ...FILLABLE.map((f) => ({ value: f as string, label: fieldLabel(f) })),
     ...catalog.changeableFields
@@ -86,10 +89,12 @@ export const WaitFields: React.FC<StepPartProps> = ({ definition, step, catalog,
 
   return (
     <FieldStack>
+      {/* C16: "Wait until" over its two choices. */}
+      <Field label={t("wait.until")} labelId={ids.until}>
       <RadioGroup
         value={until}
         onValueChange={(v) => onStep({ until: v === "FIELD_FILLED" ? "FIELD_FILLED" : "TASK_DONE" })}
-        aria-label={t("wait.until")}
+        aria-labelledby={ids.until}
       >
         <label className="flex items-start gap-2.5">
           <RadioGroupItem value="TASK_DONE" disabled={tasks.length === 0} className="mt-0.5" />
@@ -105,7 +110,7 @@ export const WaitFields: React.FC<StepPartProps> = ({ definition, step, catalog,
                 placeholder={t("wait.pickTask")} emptyLabel={t("common.noResults")} ariaLabel={t("wait.task")}
                 invalid={Boolean(errorFor(t, problems, "taskStepId"))} />
             </Field>
-            {tasks.find((x) => x.value === step.taskStepId)?.signing && <Hint>{t("wait.signedHint")}</Hint>}
+            {signing && <Hint>{t("wait.signedHint", { number: signing.number })}</Hint>}
           </Indented>
         )}
         <label className="flex cursor-pointer items-center gap-2.5">
@@ -122,13 +127,18 @@ export const WaitFields: React.FC<StepPartProps> = ({ definition, step, catalog,
           </Indented>
         )}
       </RadioGroup>
+      </Field>
 
       <Field label={t("wait.atMost")} labelId={ids.wait} error={errorFor(t, problems, "maxDays")}>
         <DaysInput value={step.maxDays} onChange={(maxDays) => onStep({ maxDays })} aria-labelledby={ids.wait}
           invalid={Boolean(errorFor(t, problems, "maxDays"))} />
       </Field>
 
-      <Field label={until === "FIELD_FILLED" ? t("wait.notFilled") : t("wait.notDone")} error={errorFor(t, problems, "onTimeout")}>
+      <Field
+        label={until === "FIELD_FILLED" ? t("wait.notFilled") : signing ? t("wait.notSigned") : t("wait.notDone")}
+        error={errorFor(t, problems, "onTimeout")}
+        hint={signing ? t("wait.declinedHint") : undefined}
+      >
         <RadioGroup value={timeout} onValueChange={(v) => onStep({ onTimeout: v as OnTimeout })} aria-label={t("wait.notDone")}>
           {TIMEOUTS.map((v) => (
             <React.Fragment key={v}>

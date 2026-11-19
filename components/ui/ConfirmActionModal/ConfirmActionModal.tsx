@@ -25,6 +25,9 @@ import {
  * **The dialog stays open while the action runs and while it fails.** Closing on click throws the
  * refusal away before it can be read, which is the defect `DeleteDocumentsFolderModal` carries a
  * comment about.
+ *
+ * **One column, 16 apart** — the title, the text, the buttons (the designers' Automations fixes
+ * G12, 2026-11-18): 400 wide, padding 24, radius 20, the level-3 shadow.
  */
 export const ConfirmActionModal: React.FC<{
   isOpen: boolean;

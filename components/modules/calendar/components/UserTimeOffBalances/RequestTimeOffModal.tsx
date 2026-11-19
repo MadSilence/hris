@@ -422,7 +422,7 @@ export const RequestTimeOffModal: FC<Props> = ({
             <p className="mr-auto flex min-w-0 items-center gap-2 text-label font-normal text-secondary">
               <Avatar className="size-[22px]">
                 {firstApprover.avatarUrl ? <AvatarImage src={firstApprover.avatarUrl} alt="" /> : null}
-                <AvatarFallback name={firstApprover.name} className="text-hint">{firstApprover.name.slice(0, 1)}</AvatarFallback>
+                <AvatarFallback name={firstApprover.name}>{firstApprover.name.slice(0, 1)}</AvatarFallback>
               </Avatar>
               <span className="truncate">
                 {moreApprovers > 0
@@ -462,7 +462,7 @@ const AlsoOffRow: FC<{
   <div className="flex h-8 items-center gap-2 text-body">
     <Avatar className="size-[22px]">
       {person.avatarUrl ? <AvatarImage src={person.avatarUrl} alt="" /> : null}
-      <AvatarFallback name={person.name} className="text-hint">{person.name.slice(0, 1)}</AvatarFallback>
+      <AvatarFallback name={person.name}>{person.name.slice(0, 1)}</AvatarFallback>
     </Avatar>
     <span className="min-w-0 truncate text-primary">{person.name}</span>
     {relation && <span className="shrink-0 truncate text-hint text-tertiary">{relation}</span>}

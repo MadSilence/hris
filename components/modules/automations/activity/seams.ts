@@ -4,4 +4,4 @@
  * file instead of reaching into another part's folder.
  */
 export { ConditionBuilder } from "@/components/modules/automations/settings";
-export { RunStatusBadge, RunWindow } from "@/components/modules/automations/runs";
+export { RunStatusBadge, RunWindow, useFieldChangeLine } from "@/components/modules/automations/runs";

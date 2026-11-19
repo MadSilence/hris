@@ -66,6 +66,12 @@ jest.mock("./seams", () => ({
   ),
   WhoItRunsFor: () => <div>who it runs for</div>,
   RunHistoryWindow: () => <div>run history</div>,
+  TokenText: ({ value }: { value: string }) => <span>{value}</span>,
+  TestRunBar: ({ onClose }: { onClose: () => void }) => (
+    <button type="button" onClick={onClose}>
+      close test run
+    </button>
+  ),
   RunWindow: () => <div>run window</div>,
   VersionsWindow: () => <div>versions</div>,
   // Counts its mounts: expanding must keep the same window, or the pick and the result are lost.
@@ -204,7 +210,7 @@ describe("AutomationEditor — turning on", () => {
     renderEditor();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("It runs for everyone.")).toBeInTheDocument();
+    expect(within(dialog).getByText((_, el) => el?.tagName === "SPAN" && /^It runs for \d+.(people|person)\.$/.test(el.textContent ?? ""))).toBeInTheDocument();
     // Who hears from it in words, not the backend's code (walk of 2026-11-07: "MANAGER will get…").
     expect(within(dialog).getByText("Their manager will get requests and notifications from it.")).toBeInTheDocument();
     expect(within(dialog).queryByText("Who should it run for?")).not.toBeInTheDocument();
@@ -280,5 +286,47 @@ describe("AutomationEditor — read mode", () => {
     renderEditor({ automation: { ...automation, status: "ACTIVE", origin: "SYSTEM" } });
     expect(screen.getByText("noddo keeps this automation. You can see it, not change it.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+  });
+});
+
+describe("AutomationEditor — Split by a condition", () => {
+  it("adds a split from the Add a step list, with Path 1 named and Anyone else (S10b)", async () => {
+    const draft = { name: automation.name, description: "", icon: null, definition };
+    render(
+      <TooltipProvider>
+        <AutomationEditor
+          initial={{ automation, draft, baseline: draft, tool: "add", selectedStepId: null, runId: null, aiPrompt: null, turnOnOnLoad: false }}
+          catalog={partialMock<AutomationCatalog>({ actions: ["NOTIFY", "SPLIT"] })}
+          canManage
+        />
+      </TooltipProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Split by a condition" }));
+    expect(screen.getByText("card s3")).toBeInTheDocument();
+    expect(screen.getByTestId("step-fields")).toHaveTextContent("fields s3");
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Close" })[0]);
+    fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Save and leave" }));
+    await waitFor(() => expect(actions.saveAutomationDraftAction).toHaveBeenCalled());
+    const saved = jest.mocked(actions.saveAutomationDraftAction).mock.calls.at(-1)![0];
+    const split = JSON.stringify(saved.request.definition);
+    expect(split).toContain('"type":"SPLIT"');
+    expect(split).toContain('"name":"Path 1"');
+  });
+
+  it("names the path without a condition on the card when a turn-on is held (S10c)", async () => {
+    const split: StepSpec = {
+      ...newStep("s1", "SPLIT"),
+      question: "Which office are they in?",
+      paths: [
+        { id: "p1", name: "Warsaw", condition: { filters: [{ field: "sys:office", op: "eq", value: "o1" }], excludeUserIds: [] }, steps: [] },
+        { id: "p2", name: "Vilnius", condition: null, steps: [] },
+      ],
+    };
+    runCheck.mockResolvedValue(check({ problems: [{ stepId: "s1", field: "paths", code: "AU00001", message: "" }] }));
+    const draft = { name: automation.name, description: "", icon: null, definition: { ...definition, steps: [split] } };
+    renderEditor({ automation: { ...automation, definition: draft.definition }, draft, baseline: draft });
+    fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
+    expect(await screen.findByText("Add a condition to Vilnius")).toBeInTheDocument();
   });
 });

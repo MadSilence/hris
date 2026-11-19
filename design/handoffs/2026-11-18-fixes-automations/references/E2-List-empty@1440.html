@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Automations empty</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Inter+Tight:wght@600&amp;display=swap">
+<style>
+body{margin:0}
+:root{--accent:#6E1630;--on-accent:#FFFFFF;--accent-text:#6E1630;--accent-subtle:#F6F1F3;--accent-muted:#E9DCE0;--accent-ring:#B78B98}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.es svg.big{flex:none}
+.s{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{width:1440px;height:900px;display:flex;font-family:Inter,sans-serif;font-size:14px;line-height:20px;color:#0B0B0C;background:#FFFFFF;overflow:hidden}
+.side{width:240px;flex:none;background:#F7F7F8;border-right:1px solid #EAEAEC;padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+.ni{height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;color:#45454A;font-weight:500;border-radius:8px}
+.ni.on{background:var(--accent-muted);color:var(--accent-text)}
+.main{flex:1;padding:32px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px}
+.h1{margin:0;font-family:'Inter Tight',sans-serif;font-size:24px;line-height:32px;font-weight:600;letter-spacing:-0.02em}
+.btn{height:36px;padding:0 14px;border-radius:8px;font:500 14px/20px Inter,sans-serif;display:inline-flex;align-items:center;gap:8px;border:1px solid #DADADF;background:#FFFFFF;color:#0B0B0C}
+.p{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.es{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center}
+.h2{margin:0;font-family:'Inter Tight',sans-serif;font-size:18px;line-height:26px;font-weight:600;letter-spacing:-0.01em}
+</style>
+</helmet>
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div style="display:flex;align-items:center;gap:8px;padding:0 8px 16px"><div style="width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:600">A</div><span style="font-weight:500">Acme</span></div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg>Inbox</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.3-5 6-5s5 1.5 6 5"/></svg>People</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>Time off</div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Documents</div>
+    <div class="ni on"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Automations</div>
+    <div style="flex:1"></div>
+    <div class="ni"><svg class="i" viewBox="0 0 24 24"><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/><circle cx="12" cy="12" r="3"/></svg>Settings</div>
+    <div style="border-top:1px solid #EAEAEC;margin-top:8px;padding:12px 8px 0;display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:999px;background:#ECE6EF;color:#441F56;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500">UT</div><div style="display:flex;flex-direction:column"><span style="font-weight:500">Ulia Tykoon</span><span style="font-size:12px;line-height:16px;color:#6B6B70">HR Admin</span></div></div>
+  </nav>
+  <main class="main">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:4px"><h1 class="h1">Automations</h1><span style="color:#6B6B70">Routine HR work that runs by itself.</span></div>
+    </div>
+    <div role="tablist" style="display:flex;gap:24px;border-bottom:1px solid #EAEAEC"><span style="padding:0 0 10px;font-weight:500;color:#0B0B0C;box-shadow:inset 0 -2px 0 #6E1630">Automations</span><span style="padding:0 0 10px;font-weight:500;color:#6B6B70">Activity</span></div>
+    <div class="es">
+      <svg width="160" height="100" viewBox="0 0 240 150" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M40 132h160" stroke="#B4B4BA" stroke-width="3"/><path d="M126 28 90 84h30l-8 46 42-60h-30z" stroke="#0B0B0C" stroke-width="4"/><circle cx="172" cy="52" r="18" stroke="#6E1630" stroke-width="5"/><path d="M56 62h22M52 78h16" stroke="#B4B4BA" stroke-width="3"/></svg>
+      <h2 class="h2">No automations yet</h2>
+      <span style="color:#45454A">Tell noddo what should happen.<br>We'll draft the steps.</span>
+      <div style="width:640px;margin-top:12px;border:1px solid var(--accent);box-shadow:0 0 0 3px var(--accent-muted);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;text-align:left;background:#FFFFFF">
+        <label for="ai" style="position:absolute;width:1px;height:1px;overflow:hidden">Describe what should happen</label>
+        <textarea id="ai" style="border:0;outline:0;resize:none;height:44px;font:400 14px/20px Inter,sans-serif;color:#6B6B70;padding:0">When someone's probation ends in 14&nbsp;days, remind their manager to book a review</textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;line-height:16px;color:#6B6B70">You check every step before it turns on.</span>
+          <button class="btn p" style="height:32px;padding:0 12px;font-size:13px;line-height:18px"><svg class="s" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>Draft with AI</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;color:#6B6B70">
+        <button class="btn" style="height:32px;padding:0 14px;border-radius:999px;font-size:13px;line-height:18px"><svg class="s" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Pick a template</button>
+        <button class="btn" style="height:32px;padding:0 14px;border-radius:999px;font-size:13px;line-height:18px"><svg class="s" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Start from scratch</button>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

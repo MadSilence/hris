@@ -38,7 +38,7 @@ export function TeamPersonPanel({ person, teamNames, onBack }: Props) {
       <div className="flex items-start gap-4">
         <Avatar className="h-12 w-12 flex-none">
           {person.avatarUrl && <AvatarImage src={person.avatarUrl} alt="" />}
-          <AvatarFallback>{personInitials(person)}</AvatarFallback>
+          <AvatarFallback name={[person.firstName, person.lastName].filter(Boolean).join(" ") || person.email}>{personInitials(person)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-section-title text-primary">

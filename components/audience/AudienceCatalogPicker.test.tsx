@@ -45,7 +45,7 @@ describe("AudienceBuilder — catalogue-backed attribute values", () => {
     // No free-text box for the value.
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByText("Select value"));
+    fireEvent.click(screen.getByPlaceholderText("Select value"));
     fireEvent.click(screen.getByRole("option", { name: "Germany" }));
 
     expect(onChange).toHaveBeenLastCalledWith([{ field: field.id, op: "eq", value: "Germany" }]);
@@ -62,7 +62,7 @@ describe("AudienceBuilder — catalogue-backed attribute values", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Select values"));
+    fireEvent.click(screen.getByPlaceholderText("Select values"));
     fireEvent.click(screen.getByRole("option", { name: /^EUR/ }));
 
     expect(onChange).toHaveBeenLastCalledWith([{ field: field.id, op: "in", values: ["EUR"] }]);
@@ -78,7 +78,7 @@ describe("AudienceBuilder — catalogue-backed attribute values", () => {
       />,
     );
 
-    expect(screen.getByText("France")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("France")).toBeInTheDocument();
   });
 
   it("uses the attribute's own options for a select, by id", () => {
@@ -99,7 +99,7 @@ describe("AudienceBuilder — catalogue-backed attribute values", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Select values"));
+    fireEvent.click(screen.getByPlaceholderText("Select values"));
     fireEvent.click(screen.getByRole("option", { name: "Senior" }));
 
     expect(onChange).toHaveBeenLastCalledWith([{ field: field.id, op: "in", values: ["opt:b"] }]);

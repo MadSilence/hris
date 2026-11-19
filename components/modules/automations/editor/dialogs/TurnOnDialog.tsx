@@ -13,9 +13,13 @@ import { useDisplayLocale } from "@/lib/date";
 import type { AutomationCheck, BackfillChoice } from "@/models/automations";
 import { messagesNow, needsVolumeTick } from "../state/editorLogic";
 
+/** What waits for an automation as it is turned on (V6) — its noun and its hint follow what starts it. */
+export type WaitingKind = "requests" | "hires" | "dates" | "people" | "cases";
+
+// G14: rows with 20 px icons 12 apart, the icon in text-secondary (board F4, V6).
 const Line: React.FC<{ icon: IconSvgElement; children: React.ReactNode }> = ({ icon, children }) => (
   <li className="flex items-start gap-3 text-body text-primary">
-    <Icon icon={icon} size="sm" className="mt-0.5 shrink-0 text-tertiary" />
+    <Icon icon={icon} size="md" className="shrink-0 text-secondary" />
     <span>{children}</span>
   </li>
 );
@@ -32,6 +36,8 @@ export const TurnOnDialog: React.FC<{
   everyone: boolean;
   /** Time-off events wait as requests. */
   requests: boolean;
+  /** V6: what is already waiting, in the trigger's words. */
+  waitingKind?: WaitingKind;
   /** K9: the steps a run skips because they are not connected yet, by name. */
   notConnected: string[];
   turning: boolean;
@@ -39,7 +45,7 @@ export const TurnOnDialog: React.FC<{
   onCancel: () => void;
   onTestFirst: () => void;
   onConfirm: (backfill: BackfillChoice, confirmVolume: boolean) => void;
-}> = ({ open, name, check, everyone, requests, notConnected, turning, error, onCancel, onTestFirst, onConfirm }) => {
+}> = ({ open, name, check, everyone, requests, waitingKind = requests ? "requests" : "cases", notConnected, turning, error, onCancel, onTestFirst, onConfirm }) => {
   const t = useTranslations("automationsEditor");
   const locale = useDisplayLocale();
   const [backfill, setBackfill] = React.useState<BackfillChoice>("NONE");
@@ -56,15 +62,15 @@ export const TurnOnDialog: React.FC<{
   const tick = needsVolumeTick(check, backfill);
   const canTurnOn = !turning && (!tick || understood);
 
-  const runsFor = everyone
-    ? t("turnOnDialog.runsForEveryone")
-    : check.places.length > 0
-      ? t("turnOnDialog.runsForIn", { count: check.matchingCount, places: list(check.places) })
-      : t("turnOnDialog.runsFor", { count: check.matchingCount });
-
   // Right away when the waiting cases send more than one firing does; otherwise each time it runs.
   const now = messagesNow(check, backfill);
   const bold = (chunks: React.ReactNode) => <strong className="font-semibold">{chunks}</strong>;
+
+  // F4: the count in bold — "It runs for 57 people." with no filter, "It runs for 48 people in Poland and Lithuania."
+  const runsFor =
+    !everyone && check.places.length > 0
+      ? t.rich("turnOnDialog.runsForIn", { count: check.matchingCount, places: list(check.places), b: bold })
+      : t.rich("turnOnDialog.runsFor", { count: check.matchingCount, b: bold });
   const volumeAlert = tick ? (
     <InlineAlert tone="pending">
       <p>
@@ -84,7 +90,8 @@ export const TurnOnDialog: React.FC<{
       <RadioGroupItem value={value} className="mt-0.5" aria-label={label} />
       <span className="flex flex-col gap-0.5">
         <span className="text-body text-primary">{label}</span>
-        <span className="text-hint text-tertiary">{hint}</span>
+        {/* G14: the radio list's hints are 13/18. */}
+        <span className="text-label font-normal text-tertiary">{hint}</span>
       </span>
     </label>
   );
@@ -93,7 +100,8 @@ export const TurnOnDialog: React.FC<{
     <Dialog open={open} onOpenChange={(next) => !next && onCancel()}>
       <DialogContent size="md" aria-describedby={undefined}>
         <form
-          className="flex flex-col gap-6"
+          // G14: one column, 16 apart.
+          className="flex flex-col gap-4"
           onSubmit={(event) => {
             event.preventDefault();
             if (canTurnOn) onConfirm(backfill, tick && understood);
@@ -107,13 +115,11 @@ export const TurnOnDialog: React.FC<{
             <fieldset className="flex flex-col gap-3">
               <legend className="mb-3 text-label text-primary">{t("turnOnDialog.whoQuestion")}</legend>
               <RadioGroup value={backfill} onValueChange={(v) => setBackfill(v as BackfillChoice)}>
-                {option("NONE", requests ? t("turnOnDialog.onlyNewRequests") : t("turnOnDialog.onlyNewCases"), t("turnOnDialog.onlyNewHint"))}
+                {option("NONE", t(`turnOnDialog.waiting.${waitingKind}.onlyNew`), t("turnOnDialog.onlyNewHint"))}
                 {option(
                   "ALL",
-                  requests
-                    ? t("turnOnDialog.alsoWaitingRequests", { count: check.waitingCases })
-                    : t("turnOnDialog.alsoWaitingCases", { count: check.waitingCases }),
-                  t("turnOnDialog.alsoWaitingHint"),
+                  t(`turnOnDialog.waiting.${waitingKind}.also`, { count: check.waitingCases }),
+                  t(`turnOnDialog.waiting.${waitingKind}.hint`),
                 )}
               </RadioGroup>
               {volumeAlert}
@@ -131,7 +137,7 @@ export const TurnOnDialog: React.FC<{
 
           {notConnected.length > 0 && (
             <p className="flex items-start gap-3 text-body text-secondary">
-              <Icon icon={SkipForwardIcon} size="sm" className="mt-0.5 shrink-0 text-tertiary" />
+              <Icon icon={SkipForwardIcon} size="md" className="shrink-0 text-secondary" />
               {t("turnOnDialog.notConnected", { count: notConnected.length, steps: list(notConnected) })}
             </p>
           )}

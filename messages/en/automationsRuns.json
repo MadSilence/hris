@@ -16,7 +16,7 @@
     "outsideScope": "{count, plural, one {Plus # run you can't see.} other {Plus # runs you can't see.}}",
     "loadingMore": "Loading more runs",
     "emptyTitle": "No runs yet",
-    "emptyDescription": "It runs when: {trigger}.",
+    "emptyDescription": "It runs the next time {trigger}.",
     "emptyDescriptionNoTrigger": "It runs once it has a trigger and is turned on.",
     "noMatchTitle": "No runs match",
     "noMatch": "{chip, select, FAILED {No failed runs for “{query}”.} WAITING {No waiting runs for “{query}”.} SCHEDULED {No scheduled runs for “{query}”.} DONE {No done runs for “{query}”.} other {No runs for “{query}”.}}",
@@ -24,7 +24,14 @@
     "clearSearch": "Clear search",
     "showAll": "Show all runs",
     "errorTitle": "We couldn't load the runs",
-    "errorDescription": "The automation keeps running."
+    "errorDescription": "The automation keeps running.",
+    "chipName": {
+      "ALL": "All",
+      "FAILED": "Failed",
+      "WAITING": "Waiting",
+      "SCHEDULED": "Scheduled",
+      "DONE": "Done"
+    }
   },
   "row": {
     "late": "{count, plural, one {Ran # day late} other {Ran # days late}}",
@@ -40,7 +47,9 @@
     "timeOffDays": "{type}, {count, plural, one {# day} other {# days}}",
     "firedOn": "On {date}",
     "title": "{name}, {what}",
-    "triggerOn": "{trigger} · {date}"
+    "triggerOn": "{trigger} · {date}",
+    "fieldChanged": "{field}: {value}",
+    "fieldCleared": "{field} cleared"
   },
   "run": {
     "header": "Run · started {when} · version {version, number}",
@@ -97,7 +106,7 @@
     "errorTitle": "We couldn't load the versions"
   },
   "test": {
-    "title": "Test run · nothing is sent",
+    "title": "Test run",
     "dialogTitle": "Test run · {name}",
     "nothingSent": "Nothing is sent or changed.",
     "tryItOn": "Try it on",
@@ -149,15 +158,30 @@
       "notConnected": "Skipped: this step isn't connected yet",
       "noRecipient": "Skipped: there is nobody to send it to",
       "missingDetails": "Needs details before it can run",
-      "missingPlaceholders": "No value for: {fields}"
+      "missingPlaceholders": "No value for: {fields}",
+      "signsAlone": "{name} signs",
+      "signsFirst": "{first} signs first, then {then}",
+      "toSign": "{what}. {days, plural, one {# day} other {# days}} to sign."
     },
     "sendToMe": "Send it to me",
     "sent": "Sent to you",
     "noEmail": "You have no email address, so nothing was sent.",
     "items": "{count, plural, one {# test item sent to you} other {# test items sent to you}}",
-    "itemsHint": "Removes the notifications and tasks; emails stay in your inbox.",
+    "itemsHint": "Removes the notifications, tasks and test documents; emails stay in your inbox.",
     "deleteItems": "Delete test items",
-    "itemsDeleted": "Test items deleted"
+    "itemsDeleted": "Test items deleted",
+    "bar": "Test run · nothing is sent",
+    "close": "Close",
+    "hintNone": "{kind, select, timeOff {No requests in the last 30 days.} onboarding {No onboardings completed in the last 30 days.} offboarding {No offboardings completed in the last 30 days.} process {No processes completed in the last 30 days.} other {No one it runs for yet.}}",
+    "happens": {
+      "NOTIFY": "{count, plural, one {{names} gets a notification} other {{names} get a notification}}",
+      "SEND_EMAIL": "{count, plural, one {{names} gets an email} other {{names} get an email}}",
+      "CREATE_TASK": "{count, plural, one {{names} gets a task} other {{names} get a task}}",
+      "START_REVIEW": "{count, plural, one {{names} gets a review to write} other {{names} get a review to write}}",
+      "REQUEST_APPROVAL": "{count, plural, one {{names} is asked to approve} other {{names} are asked to approve}}",
+      "SIGN_DOCUMENT": "Would send for signature"
+    },
+    "sendDocumentToMe": "Send the document to me"
   },
   "person": {
     "emptyTitle": "No automation runs",

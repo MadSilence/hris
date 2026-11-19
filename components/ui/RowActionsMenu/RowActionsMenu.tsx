@@ -35,7 +35,12 @@ export const RowActionsMenu: React.FC<{
   title?: string;
   /** For a kebab inside a clickable row, where the click must not also open the row. */
   stopPropagation?: boolean;
-}> = ({ children, label, align = "end", className, disabled, title, stopPropagation }) => (
+  /**
+   * Called as the menu closes, before focus goes back to the kebab — `event.preventDefault()` keeps it where an item
+   * just put it (an inline rename's field; without it the field shows but typing goes nowhere, walk of 2026-11-19).
+   */
+  onCloseAutoFocus?: (event: Event) => void;
+}> = ({ children, label, align = "end", className, disabled, title, stopPropagation, onCloseAutoFocus }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild disabled={disabled}>
       {/*
@@ -45,7 +50,7 @@ export const RowActionsMenu: React.FC<{
       */}
       <Button type="button"
         variant="ghost"
-        size="icon-sm" className="text-tertiary hover:bg-subtle hover:text-secondary disabled:opacity-40"
+        size="icon-sm" className="text-secondary hover:bg-subtle hover:text-primary disabled:opacity-40"
         aria-label={label}
         disabled={disabled}
         title={title}
@@ -62,15 +67,17 @@ export const RowActionsMenu: React.FC<{
     */}
     <DropdownMenuContent
       align={align}
-      className={cn("min-w-40 p-1", className)}
+      className={cn("min-w-[210px]", className)}
       onClick={stopPropagation ? (e) => e.stopPropagation() : undefined}
+      onCloseAutoFocus={onCloseAutoFocus}
     >
       {children}
     </DropdownMenuContent>
   </DropdownMenu>
 );
 
-const ITEM_CLASS = "gap-2.5 rounded-control px-2.5 py-1.5 cursor-pointer";
+// The item's shape is the menu's own (`desact/dropdown-menu`, A11): no padding of its own here.
+const ITEM_CLASS = "cursor-pointer";
 
 /**
  * An ordinary item. The icon is required, because a menu whose icons stop halfway reads as a
@@ -107,7 +114,7 @@ export const RowActionDestructive: React.FC<{
   title?: string;
 }> = ({ icon, children, onClick, disabled, title }) => (
   <>
-    <DropdownMenuSeparator className="my-1 bg-mist" />
+    <DropdownMenuSeparator />
     <DropdownMenuItem
       variant="destructive"
       onClick={onClick}

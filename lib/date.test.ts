@@ -5,8 +5,12 @@ import {
   displayLocale,
   formatDisplayDate,
   formatLongDate,
+  formatAgo,
+  formatDayThisWeek,
   formatShortDate,
   formatShortRange,
+  formatTime,
+  formatTimeOfDay,
   isoToDate,
   resetDisplayPreferences,
   setDisplayPreferences,
@@ -179,9 +183,16 @@ describe("the short style (C1)", () => {
     expect(formatShortDate("2025-11-11", us)).toBe("Nov 11, 2025");
   });
 
-  it("puts no comma after a European short weekday, and one after a US one", () => {
-    expect(formatShortDate("2026-11-18", { ...en, weekday: true })).toBe("Wed 18 Nov");
+  it("puts a comma after the weekday of one date in both orders (widgets A5)", () => {
+    expect(formatShortDate("2026-11-18", { ...en, weekday: true })).toBe("Wed, 18 Nov");
     expect(formatShortDate("2026-11-18", { ...us, weekday: true })).toBe("Wed, Nov 18");
+  });
+
+  it("drops any year with hideYear (widgets A7)", () => {
+    expect(formatShortDate("2027-01-08", { ...en, hideYear: true })).toBe("8 Jan");
+    expect(formatShortDate("2027-01-08", { ...us, hideYear: true })).toBe("Jan 8");
+    expect(formatShortRange("2027-02-16", "2027-02-20", { ...en, hideYear: true })).toBe("16–20 Feb");
+    expect(formatShortRange("2026-12-28", "2027-01-03", { ...en, hideYear: true })).toBe("28 Dec – 3 Jan");
   });
 
   it("writes a span inside a month once, in the company's order", () => {
@@ -229,5 +240,79 @@ describe("the week start", () => {
     expect(weekStartsOnOf("saturday")).toBe(6);
     expect(weekStartsOnOf(undefined)).toBe(1);
     expect(weekStartsOnOf("SOMEDAY")).toBe(1);
+  });
+});
+
+describe("the company's clock (the owner, 2026-11-18)", () => {
+  const morning = new Date(Date.UTC(2026, 10, 18, 9, 5));
+  const evening = new Date(Date.UTC(2026, 10, 18, 21, 5));
+
+  it("writes 12-hour times for a company in the US and 24-hour ones for everybody else", () => {
+    expect(formatTime(morning, { language: "en", dateStyle: "US", timeZone: "UTC" })).toBe("9:05 AM");
+    expect(formatTime(evening, { language: "en", dateStyle: "US", timeZone: "UTC" })).toBe("9:05 PM");
+    expect(formatTime(morning, { language: "en", dateStyle: "EUROPEAN", timeZone: "UTC" })).toBe("09:05");
+    expect(formatTime(evening, { language: "en", dateStyle: "EUROPEAN", timeZone: "UTC" })).toBe("21:05");
+  });
+
+  it("keeps the 24-hour clock on a Russian page, as it keeps the day first", () => {
+    expect(formatTime(evening, { language: "ru", dateStyle: "US", timeZone: "UTC" })).toBe("21:05");
+  });
+
+  it("reads a wall-clock time of day the same way", () => {
+    expect(formatTimeOfDay("17:30", { language: "en", dateStyle: "US" })).toBe("5:30 PM");
+    expect(formatTimeOfDay("09:00", { language: "en", dateStyle: "EUROPEAN" })).toBe("09:00");
+    expect(formatTimeOfDay("later", { language: "en", dateStyle: "US" })).toBe("later");
+    expect(formatTimeOfDay(null)).toBe("");
+  });
+});
+
+describe("a day inside this week (widgets A6)", () => {
+  // Thursday 19 November 2026; the week starts on Monday 16.
+  const today = new Date(2026, 10, 19);
+  const en = { today, language: "en", weekStartsOn: 1 } as const;
+
+  it("names a day of this week by its weekday alone, past or coming", () => {
+    expect(formatDayThisWeek("2026-11-20", en)).toBe("Fri");
+    expect(formatDayThisWeek("2026-11-16", en)).toBe("Mon");
+    expect(formatDayThisWeek("2026-11-22", en)).toBe("Sun");
+    expect(formatDayThisWeek("2026-11-21", { ...en, withDay: true })).toBe("Sat 21");
+  });
+
+  it("says today in the caller's word", () => {
+    expect(formatDayThisWeek("2026-11-19", { ...en, todayLabel: "today" })).toBe("today");
+    expect(formatDayThisWeek("2026-11-19", en)).toBe("Thu");
+  });
+
+  it("writes the short date outside the week, without a year where asked", () => {
+    expect(formatDayThisWeek("2026-11-23", en)).toBe("23 Nov");
+    expect(formatDayThisWeek("2027-01-04", { ...en, hideYear: true })).toBe("4 Jan");
+  });
+
+  it("follows the company's first day of the week", () => {
+    // A Sunday-first week: Sunday 22 is already the next week.
+    expect(formatDayThisWeek("2026-11-22", { ...en, weekStartsOn: 0 })).toBe("22 Nov");
+    expect(formatDayThisWeek("2026-11-15", { ...en, weekStartsOn: 0 })).toBe("Sun");
+  });
+});
+
+describe("relative time (widgets A8)", () => {
+  const now = new Date("2026-11-19T12:00:00Z");
+  const labels = { minutes: (n: number) => `${n}m ago`, hours: (n: number) => `${n}h ago`, yesterday: "Yesterday" };
+
+  it("counts minutes and hours, never rounding up", () => {
+    expect(formatAgo("2026-11-19T11:59:40Z", labels, { now })).toBe("1m ago");
+    expect(formatAgo("2026-11-19T10:01:00Z", labels, { now })).toBe("1h ago");
+    expect(formatAgo("2026-11-18T21:00:00Z", labels, { now })).toBe("15h ago");
+  });
+
+  it("reads a timestamp without a zone as UTC", () => {
+    expect(formatAgo("2026-11-19T10:00:00", labels, { now })).toBe("2h ago");
+  });
+
+  it("says Yesterday, then the weekday, then the date", () => {
+    const at = (iso: string) => formatAgo(new Date(iso), labels, { now, language: "en" });
+    expect(at("2026-11-18T06:00:00")).toBe("Yesterday");
+    expect(at("2026-11-16T12:00:00")).toBe("Mon");
+    expect(at("2026-11-02T12:00:00")).toBe("2 Nov");
   });
 });

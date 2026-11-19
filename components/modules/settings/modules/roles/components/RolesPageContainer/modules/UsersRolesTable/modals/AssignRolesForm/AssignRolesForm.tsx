@@ -181,7 +181,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
       <div className="mb-8 mt-4 flex items-center gap-4">
         <Avatar className="h-16 w-16 shrink-0">
           {user?.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={fullName} /> : null}
-          <AvatarFallback className="bg-mist font-semibold text-secondary">
+          <AvatarFallback name={fullName}>
             {initials}
           </AvatarFallback>
         </Avatar>

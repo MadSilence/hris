@@ -17,8 +17,18 @@ export type HostRoute =
   | { type: "redirect"; to: string }
   | { type: "rewrite"; pathname: string };
 
-/** Pages that exist only on the root. Matched as a path or a path prefix. */
-export const ROOT_ONLY_PATHS = ["/about", "/pricing", "/products", "/solutions", "/trial", "/login/find", "/login/problem"];
+/**
+ * Pages that exist only on the root. Matched as a path or a path prefix. `/signup` is the trial (sign-in-registration);
+ * `/trial` is its old address, kept so a link already shared still lands — the root redirects it (the designers' login
+ * fix B1). `/login/unknown` is "Log in to your company" saying that an address has no company (R3).
+ */
+export const ROOT_ONLY_PATHS = [
+  "/about", "/pricing", "/products", "/solutions", "/signup", "/trial", "/login/find", "/login/problem", "/login/unknown",
+];
+
+/** The trial's old address and where it lives now. */
+const OLD_TRIAL = "/trial";
+export const SIGNUP = "/signup";
 
 /**
  * Reachable on either host: the BFF, the refusal page, and the home-screen icon — the only icon whose address
@@ -70,6 +80,7 @@ export const routeForHost = (host: HostKind, pathname: string, search: string, h
   if (matches(pathname, EITHER_PATHS)) return { type: "next" };
 
   if (host.kind === "root") {
+    if (matches(pathname, [OLD_TRIAL])) return { type: "redirect", to: `${SIGNUP}${pathname.slice(OLD_TRIAL.length)}${search}` };
     if (pathname === "/" || pathname === "/login" || matches(pathname, ROOT_ONLY_PATHS)) return { type: "next" };
     return { type: "redirect", to: "/login" };
   }

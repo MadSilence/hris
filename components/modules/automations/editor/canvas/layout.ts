@@ -20,12 +20,23 @@ export const H_GAP = 40;
 /** Where the horizontal bar of a branch runs, under the branch point. */
 export const BAR_DROP = 24;
 
-export const WHEN_H = 78;
+export const WHEN_H = 80;
 export const PLACEHOLDER_H = 96;
 /** The trigger's placeholder with "or · Describe it to noddo AI" under it. */
 export const PLACEHOLDER_WITH_AI_H = 168;
-export const FIRST_STEP_H = 78;
+export const FIRST_STEP_H = 80;
 export const EMPTY_BRANCH_H = 44;
+
+/**
+ * A split's own geometry (S10): 44 down to the bar, 76 from the bar to each path's first card, with the path's label on
+ * that segment; paths 80 apart; an empty path's first slot is a placeholder card as high as a step.
+ */
+export const SPLIT_BAR = 44;
+export const SPLIT_DROP = 76;
+export const SPLIT_GAP = 80;
+export const SPLIT_SLOT_H = 96;
+
+const isSplit = (step: StepSpec | undefined): boolean => step?.type === "SPLIT";
 
 export type NodeKind = "when" | "triggerPlaceholder" | "step" | "firstStepPlaceholder" | "emptyBranch";
 
@@ -43,7 +54,7 @@ export type LaidNode = {
   branch?: { stepId: string; key: string };
 };
 
-export type BranchLabel = { kind: Branch["kind"]; name: string | null; index: number };
+export type BranchLabel = { kind: Branch["kind"]; name: string | null; index: number; stepId: string; key: string };
 
 export type LaidEdge = {
   id: string;
@@ -65,7 +76,10 @@ export type TreeLayout = {
   bounds: { x: number; y: number; width: number; height: number };
 };
 
-/** A step card's height: the kind line and the title, and a line more for each of what it shows under it. */
+/**
+ * A step card's height (the designers' fixes B4): the border, 16 padding top and bottom, the kind line, 8, the title;
+ * the meta line right under the title; 8 and a line more for what it shows under that. 80 without meta, 96 with.
+ */
 export const cardHeight = ({
   title,
   subtitle,
@@ -78,7 +92,7 @@ export const cardHeight = ({
 }): number => {
   const titleLines = Math.min(2, Math.max(1, Math.ceil(title.length / 34)));
   const subtitleLines = subtitle ? Math.min(2, Math.ceil(subtitle.length / 46)) : 0;
-  return 16 + 16 + 8 + 22 * titleLines + (subtitleLines ? 4 + 16 * subtitleLines : 0) + (extraLine ? 6 + 16 : 0) + 16;
+  return 2 + 16 + 16 + 8 + 22 * titleLines + 16 * subtitleLines + (extraLine ? 8 + 16 : 0) + 16;
 };
 
 export const stepNodeId = (stepId: string) => `step:${stepId}`;
@@ -97,7 +111,7 @@ const lineWidth = (line: StepSpec[]): number => {
   const last = line[line.length - 1];
   if (!last || !branches(last)) return CARD_W;
   const paths = branchList(last);
-  const sum = paths.reduce((acc, b) => acc + lineWidth(b.steps), 0) + H_GAP * (paths.length - 1);
+  const sum = paths.reduce((acc, b) => acc + lineWidth(b.steps), 0) + (isSplit(last) ? SPLIT_GAP : H_GAP) * (paths.length - 1);
   return Math.max(CARD_W, sum);
 };
 
@@ -155,13 +169,16 @@ export const layoutTree = (definition: Pick<AutomationDefinition, "steps" | "tri
 
       if (branches(step)) {
         const paths = branchList(step);
-        const total = paths.reduce((acc, b) => acc + lineWidth(b.steps), 0) + H_GAP * (paths.length - 1);
+        const split = isSplit(step);
+        const gap = split ? SPLIT_GAP : H_GAP;
+        const total = paths.reduce((acc, b) => acc + lineWidth(b.steps), 0) + gap * (paths.length - 1);
         let left = cx - total / 2;
-        const childTop = node.y + node.height + V_GAP + PILL_ROOM;
+        const childTop = node.y + node.height + (split ? SPLIT_BAR + SPLIT_DROP : V_GAP + PILL_ROOM);
+        const emptyH = split ? SPLIT_SLOT_H : EMPTY_BRANCH_H;
         paths.forEach((b, index) => {
           const w = lineWidth(b.steps);
           const childCx = left + w / 2;
-          const branchLabel: BranchLabel = { kind: b.kind, name: b.name, index };
+          const branchLabel: BranchLabel = { kind: b.kind, name: b.name, index, stepId: step.id, key: b.key };
           const start: InsertTarget = { kind: "branchStart", stepId: step.id, branchKey: b.key };
           if (b.steps.length === 0) {
             const empty: LaidNode = {
@@ -170,16 +187,16 @@ export const layoutTree = (definition: Pick<AutomationDefinition, "steps" | "tri
               x: childCx - CARD_W / 2,
               y: childTop,
               width: CARD_W,
-              height: EMPTY_BRANCH_H,
+              height: emptyH,
               branch: { stepId: step.id, key: b.key },
             };
             nodes.push(empty);
             edges.push({ id: `${node.id}->${empty.id}`, source: node.id, target: empty.id, insert: null, branch: branchLabel });
-            addSpot(`empty:${step.id}:${b.key}`, childCx, childTop + EMPTY_BRANCH_H / 2, start);
+            addSpot(`empty:${step.id}:${b.key}`, childCx, childTop + emptyH / 2, start);
           } else {
             place(b.steps, childCx, childTop, node, start, branchLabel);
           }
-          left += w + H_GAP;
+          left += w + gap;
         });
         return;
       }

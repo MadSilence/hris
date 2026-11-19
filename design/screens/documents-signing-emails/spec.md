@@ -14,7 +14,7 @@ There are three emails:
 - **G16:** a guest gets the signed copy.
 
 ## Where it lives
-The backend sends them in the company's accent, from "Acme <no-reply@acme.noddo.so>", like every company email (`sign-in-emails`, Q-21).
+The backend sends them in the company's accent, from "noddo <no-reply@noddo.so>", like every email (`sign-in-emails` § Sender, 18 Nov; Q-21 closed).
 
 ## Layout
 Every email is built on the **login email template** (`sign-in-emails` spec, Layout), with the same values. The full rule set is in `handoffs/2026-11-17-documents/EMAIL-RULES.md`.

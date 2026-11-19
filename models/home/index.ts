@@ -20,6 +20,12 @@ export type WhosOutPerson = {
   policyName?: string;
   policyColor?: string;
   requestId?: string;
+  /** The leave's own first working day, not clipped to the window: a day off that is only today reads "today". */
+  firstDay?: string | null;
+  /** The leave's own last working day, not clipped to the window (Today's card cuts `endDate` to today). */
+  lastDay?: string | null;
+  /** The person's next working day after the leave — "back Mon" (widgets O4). */
+  backOn?: string | null;
 };
 
 export type WhosOut = {

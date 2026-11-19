@@ -65,4 +65,6 @@ export interface TimeOffPolicyDTO {
   color: string;
   /** The category of the policy's leave type — a VACATION policy leads a person's balances. Only the list carries it. */
   leaveTypeCategory?: LeaveTypeCategory | null;
+  /** The policy's leave type by name ("Vacation") — what Home writes, never the policy's own name (widgets A9). */
+  leaveTypeName?: string | null;
 }

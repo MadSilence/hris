@@ -183,10 +183,28 @@
       "lt": "Less than",
       "lte": "≤"
     },
+    "operatorWords": {
+      "eq": "is",
+      "neq": "is not",
+      "contains": "contains",
+      "starts_with": "starts with",
+      "in": "is",
+      "not_in": "is not",
+      "has_any": "has",
+      "not_has_any": "has none of",
+      "before": "before",
+      "after": "after",
+      "between": "between",
+      "gt": "greater than",
+      "gte": "≥",
+      "lt": "less than",
+      "lte": "≤"
+    },
     "builder": {
       "includeInactive": "Also search non-active people",
       "includeEmpty": "Include people with no value",
       "removeFilter": "Remove filter",
+      "operator": "Condition",
       "addFilter": "Add filter",
       "selectPerson": "Select a person",
       "value": "Value",
@@ -204,10 +222,8 @@
       "searchFields": "Search fields",
       "noFields": "No fields you can filter on",
       "noMatchingField": "No matching field",
-      "selectedCount": "{count} selected",
       "selectValues": "Select values",
-      "noOptions": "No options",
-      "removeOption": "Remove {label}"
+      "noOptions": "No options"
     },
     "filter": {
       "button": "Filter"

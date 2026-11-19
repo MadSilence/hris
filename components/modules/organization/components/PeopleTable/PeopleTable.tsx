@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { Checkbox } from "@/components/desact/checkbox";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/desact/table";
 import { SampleBadge } from "@/components/modules/demo";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { Badge } from "@/components/desact/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
@@ -137,7 +138,29 @@ export default function PeopleTable({
         />
       );
       // A person the company's example made, or added in a demo: deleted when it goes live (DEMO_PLAN.md 4.3).
-      return row.isSample ? <div className="flex items-center gap-2">{chip}<SampleBadge /></div> : chip;
+      if (!row.isSample) return chip;
+      // The chip is always whole, 8 after the name; the name in front of it gives way with … and its full self in a
+      // tooltip (the designers' fix PE1). The cell keeps its own right padding.
+      return (
+        <div className="flex min-w-0 items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex min-w-0">
+                <UserChip
+                  id={row.id}
+                  name={name}
+                  avatarUrl={row.avatarUrl}
+                  firstName={row.firstName}
+                  lastName={row.lastName}
+                  className="min-w-0"
+                />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{name}</TooltipContent>
+          </Tooltip>
+          <SampleBadge className="flex-none" />
+        </div>
+      );
     }
 
     const sysKey = sysKeyFromId(colId);

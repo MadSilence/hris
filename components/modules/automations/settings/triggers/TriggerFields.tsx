@@ -15,7 +15,7 @@ import type { TriggerPartProps } from "./triggerPartProps";
  * One trigger's settings (T1–T6) inside the step settings window, under "What starts it". Read mode (R3) shows icon
  * rows instead of fields. Nothing here when there is no trigger yet — the editor shows the trigger list then.
  */
-export const TriggerFields: React.FC<TriggerFieldsProps> = ({ definition, catalog, readOnly, problems, onChange }) => {
+export const TriggerFields: React.FC<TriggerFieldsProps> = ({ definition, catalog, readOnly, problems, onChange, onOpenWho }) => {
   const trigger = definition.trigger;
   if (!trigger) return null;
   if (readOnly) return <TriggerReadRows definition={definition} catalog={catalog} />;
@@ -27,6 +27,7 @@ export const TriggerFields: React.FC<TriggerFieldsProps> = ({ definition, catalo
     problems,
     onTrigger: (patch: Partial<TriggerSpec>) => onChange({ ...definition, trigger: { ...trigger, ...patch } }),
     onDefinition: onChange,
+    onOpenWho,
   };
 
   switch (trigger.type) {

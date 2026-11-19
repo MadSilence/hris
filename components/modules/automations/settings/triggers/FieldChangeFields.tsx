@@ -11,7 +11,7 @@ import { useUser } from "@/components/hooks/useUser/useUser";
 import type { ReferenceValueSource } from "@/models/user/fields";
 import type { AutomationCatalog } from "@/models/automations";
 import { CompactPick } from "../conditions/chrome";
-import { Field, FieldStack, Hint, PartDivider } from "../parts/parts";
+import { Field, FieldStack, Hint, WindowSection } from "../parts/parts";
 import { errorFor, type SettingsTranslator } from "../parts/problems";
 import type { TriggerPartProps } from "./triggerPartProps";
 
@@ -106,8 +106,7 @@ export const FieldChangeFields: React.FC<TriggerPartProps> = ({ trigger, catalog
           </Field>
         </>
       )}
-      <PartDivider />
-      <Field label={t("fieldChange.later")}>
+      <WindowSection title={t("fieldChange.later")}>
         <RadioGroup
           value={trigger.when ?? "EFFECTIVE"}
           onValueChange={(v) => onTrigger({ when: v === "RECORDED" ? "RECORDED" : "EFFECTIVE" })}
@@ -123,7 +122,7 @@ export const FieldChangeFields: React.FC<TriggerPartProps> = ({ trigger, catalog
             </label>
           ))}
         </RadioGroup>
-      </Field>
+      </WindowSection>
     </FieldStack>
   );
 };

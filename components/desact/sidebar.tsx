@@ -232,7 +232,9 @@ const menuButton = cn(
   "hover:bg-sidebar-item-hover data-[active=true]:bg-sidebar-item-active data-[active=true]:text-sidebar-item-active-text",
   "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sidebar-focus",
   "disabled:pointer-events-none disabled:text-disabled aria-disabled:pointer-events-none",
-  "group-data-[state=collapsed]:size-10 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0",
+  // Folded (the designers' fix S1, D2): each icon a 40 × 32 key, radius 8, the icon #45454A, 4 apart.
+  "group-data-[state=collapsed]:h-8 group-data-[state=collapsed]:w-10 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0",
+  "group-data-[state=collapsed]:[&>svg]:text-secondary group-data-[state=collapsed]:data-[active=true]:[&>svg]:text-sidebar-item-active-text",
   // Collapsed, the label goes — its tooltip says it; a badge's dot (aria-hidden) stays. Clipped to the 40 px square it
   // showed as "Sea", "I", "T" beside the icons (walk of 2026-11-05).
   "group-data-[state=collapsed]:[&>span:not([aria-hidden])]:hidden",

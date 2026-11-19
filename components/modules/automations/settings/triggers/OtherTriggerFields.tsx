@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { UserGroupIcon } from "@hugeicons/core-free-icons";
+import { Button } from "@/components/desact/button";
+import { Icon } from "@/components/desact/icon";
 import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
-import { Field, FieldStack, GreyLine, Hint, PartDivider } from "../parts/parts";
+import { Field, FieldStack, GreyLine, Hint, MistNote, WindowSection } from "../parts/parts";
 import { ConditionLine } from "../conditions/ConditionSummary";
 import { useConditionFields } from "../conditions/ConditionBuilder";
 import type { TriggerPartProps } from "./triggerPartProps";
@@ -27,31 +30,35 @@ export const WhoLine: React.FC<{ definition: TriggerPartProps["definition"] }> =
 };
 
 /**
- * Someone joins a group (T5): the group is Who it runs for, so it is named in grey and changed there; then what
- * happens when somebody stops matching.
+ * Someone joins a group (T5, the designers' fixes C27): the group is Who it runs for — said in a Mist note, then shown
+ * as a button that opens the Who it runs for window, where it is changed; then the section "When someone stops
+ * matching".
  */
-export const JoinsGroupFields: React.FC<TriggerPartProps> = ({ definition, trigger, onTrigger }) => {
+export const JoinsGroupFields: React.FC<TriggerPartProps> = ({ definition, trigger, onTrigger, onOpenWho }) => {
   const t = useTranslations("automationsSettings");
+  const whoId = React.useId();
   return (
     <FieldStack>
-      <div className="flex flex-col gap-1">
-        <GreyLine>
-          {t.rich("joins.line", {
-            who: () => (
-              <span className="font-medium text-primary">
-                <WhoLine definition={definition} />
-              </span>
-            ),
-          })}
-        </GreyLine>
-        <Hint>{t("joins.change")}</Hint>
-      </div>
-      <PartDivider />
-      <Field label={t("joins.stops")}>
+      <MistNote>
+        {t.rich("joins.line", {
+          b: (chunks) => <span className="font-semibold">{chunks}</span>,
+          who: () => <WhoLine definition={definition} />,
+        })}
+      </MistNote>
+      <Field label={t("who.title")} labelId={whoId} hint={t("joins.change")}>
+        <Button type="button" variant="secondary" size="sm" className="w-fit max-w-full" onClick={() => onOpenWho?.()}>
+          <Icon icon={UserGroupIcon} size="sm" />
+          <span className="truncate">
+            <WhoLine definition={definition} />
+          </span>
+        </Button>
+      </Field>
+      <WindowSection title={t("joins.stops")}>
         <RadioGroup
           value={trigger.onLeave ?? "TAKE_BACK"}
           onValueChange={(v) => onTrigger({ onLeave: v === "KEEP" ? "KEEP" : "TAKE_BACK" })}
           aria-label={t("joins.stops")}
+          className="gap-2.5"
         >
           <label className="flex cursor-pointer items-start gap-2.5">
             <RadioGroupItem value="TAKE_BACK" className="mt-0.5" />
@@ -65,7 +72,7 @@ export const JoinsGroupFields: React.FC<TriggerPartProps> = ({ definition, trigg
             <span className="text-body">{t("joins.keep")}</span>
           </label>
         </RadioGroup>
-      </Field>
+      </WindowSection>
     </FieldStack>
   );
 };

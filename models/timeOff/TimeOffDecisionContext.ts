@@ -22,4 +22,8 @@ export interface TimeOffDecisionContext {
   answeringOnBehalfOfName: string | null;
   canDecideAnyway: boolean;
   steps: TimeOffApprovalStepDTO[];
+  /** The request's leave type ("Vacation"), never the policy's name — Home writes "3 days of vacation" (widgets A9). */
+  leaveTypeName?: string | null;
+  /** The policy counts working days: "3 working days" (widgets W14). */
+  workingDays?: boolean;
 }

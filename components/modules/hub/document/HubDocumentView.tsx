@@ -41,43 +41,56 @@ const renderMarks = (text: React.ReactNode, marks: DocMark[] | undefined, key: s
     }
   }, text);
 
-const children = (node: DocNode, key: string) => (node.content ?? []).map((child, i) => renderNode(child, `${key}-${i}`));
+const children = (node: DocNode, key: string, changed = false) =>
+  (node.content ?? []).map((child, i) => renderNode(child, `${key}-${i}`, changed));
 
-const renderNode = (node: DocNode, key: string): React.ReactNode => {
+/**
+ * A changed block's text is marked inline, not boxed: accent-muted behind the words, radius 6, padding 1 4, the
+ * corners kept on every line a mark wraps onto (FIXES F7; spec CP02).
+ */
+const CHANGED_MARK = "rounded-tag bg-accent-muted px-1 py-px text-accent-text [box-decoration-break:clone] [-webkit-box-decoration-break:clone]";
+
+const renderNode = (node: DocNode, key: string, changed = false): React.ReactNode => {
   switch (node.type) {
     case "text":
-      return <React.Fragment key={key}>{renderMarks(node.text ?? "", node.marks, key)}</React.Fragment>;
+      return changed ? (
+        <mark key={key} data-changed className={CHANGED_MARK}>
+          {renderMarks(node.text ?? "", node.marks, key)}
+        </mark>
+      ) : (
+        <React.Fragment key={key}>{renderMarks(node.text ?? "", node.marks, key)}</React.Fragment>
+      );
     case "hardBreak":
       return <br key={key} />;
     case "paragraph":
       return (
         <p key={key} className="min-h-[1lh]">
-          {children(node, key)}
+          {children(node, key, changed)}
         </p>
       );
     case "heading": {
       const level = num(node.attrs?.level, 2);
       const cls = level === 3 ? "text-card-title text-primary" : "text-section-title text-primary";
       return level === 1 ? (
-        <h2 key={key} className={cls}>{children(node, key)}</h2>
+        <h2 key={key} className={cls}>{children(node, key, changed)}</h2>
       ) : level === 2 ? (
-        <h3 key={key} className={cls}>{children(node, key)}</h3>
+        <h3 key={key} className={cls}>{children(node, key, changed)}</h3>
       ) : (
-        <h4 key={key} className={cls}>{children(node, key)}</h4>
+        <h4 key={key} className={cls}>{children(node, key, changed)}</h4>
       );
     }
     case "bulletList":
-      return <ul key={key} className="flex list-disc flex-col gap-1 pl-6">{children(node, key)}</ul>;
+      return <ul key={key} className="flex list-disc flex-col gap-1 pl-6">{children(node, key, changed)}</ul>;
     case "orderedList":
       return (
         <ol key={key} start={num(node.attrs?.start, 1)} className="flex list-decimal flex-col gap-1 pl-6">
-          {children(node, key)}
+          {children(node, key, changed)}
         </ol>
       );
     case "listItem":
-      return <li key={key} className="[&>p]:min-h-0">{children(node, key)}</li>;
+      return <li key={key} className="[&>p]:min-h-0">{children(node, key, changed)}</li>;
     case "blockquote":
-      return <blockquote key={key} className="border-l-2 border-strong pl-4 text-secondary">{children(node, key)}</blockquote>;
+      return <blockquote key={key} className="border-l-2 border-strong pl-4 text-secondary">{children(node, key, changed)}</blockquote>;
     case "horizontalRule":
       return <hr key={key} className="border-divider" />;
     case "pageLink": {
@@ -109,22 +122,22 @@ const renderNode = (node: DocNode, key: string): React.ReactNode => {
       return (
         <div key={key} className="overflow-x-auto">
           <table className="w-full border-collapse text-body">
-            <tbody>{children(node, key)}</tbody>
+            <tbody>{children(node, key, changed)}</tbody>
           </table>
         </div>
       );
     case "tableRow":
-      return <tr key={key} className="border-b border-divider">{children(node, key)}</tr>;
+      return <tr key={key} className="border-b border-divider">{children(node, key, changed)}</tr>;
     case "tableHeader":
       return (
         <th key={key} colSpan={num(node.attrs?.colspan, 1)} rowSpan={num(node.attrs?.rowspan, 1)} className="bg-subtle px-3 py-2 text-left align-top text-label text-secondary [&>p]:min-h-0">
-          {children(node, key)}
+          {children(node, key, changed)}
         </th>
       );
     case "tableCell":
       return (
         <td key={key} colSpan={num(node.attrs?.colspan, 1)} rowSpan={num(node.attrs?.rowspan, 1)} className="px-3 py-2 align-top [&>p]:min-h-0">
-          {children(node, key)}
+          {children(node, key, changed)}
         </td>
       );
     default:
@@ -150,13 +163,7 @@ export const HubDocumentView: React.FC<{
     <div className={cn("flex flex-col gap-4 text-hub-reading text-secondary", className)}>
       {blocks.map((block, i) => {
         const id = typeof block.attrs?.id === "string" ? block.attrs.id : null;
-        const rendered = renderNode(block, `b${i}`);
-        if (!id || !changed.has(id)) return <React.Fragment key={id ?? `b${i}`}>{rendered}</React.Fragment>;
-        return (
-          <div key={id} data-changed className="-mx-2 rounded-tag bg-accent-muted px-2 py-0.5">
-            {rendered}
-          </div>
-        );
+        return <React.Fragment key={id ?? `b${i}`}>{renderNode(block, `b${i}`, Boolean(id && changed.has(id)))}</React.Fragment>;
       })}
     </div>
   );

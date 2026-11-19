@@ -12,8 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { useCanAccess } from "@/components/auth";
-import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { showUndoToast } from "@/lib/feedback/undoToast";
 import { showError } from "@/lib/errors/errorToast";
 import type { ActionResult } from "@/lib/errors/withActionError";
@@ -30,7 +29,7 @@ import {
   updateHubSectionAction,
 } from "../../actions";
 import { unwrapHub, useInvalidateHub, usePageTree, useSectionDeleteImpact } from "../../hooks";
-import { HUB_COLORS, LoadingBlock, SkeletonRows } from "../../shared";
+import { HUB_COLORS, HubLoadError, HubState, LoadingBlock, SkeletonRows } from "../../shared";
 import { useNewPage } from "../../reader/HubHomeContainer";
 import { AudienceDialog } from "../audience";
 import { IconColorPicker } from "../IconColorPicker";
@@ -141,7 +140,9 @@ const MoveToDialog: React.FC<{ page: TreePage; sections: TreeSection[]; onClose:
 }) => {
   const t = useTranslations("hub");
   const current = sections.find((s) => s.pages.some((p) => p.id === page.id))?.id ?? "";
-  const [target, setTarget] = React.useState(sections.find((s) => s.id !== current)?.id ?? current);
+  // The page's own section is not offered: nothing is shown disabled.
+  const others = sections.filter((s) => s.id !== current);
+  const [target, setTarget] = React.useState(others[0]?.id ?? "");
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent size="sm">
@@ -154,8 +155,8 @@ const MoveToDialog: React.FC<{ page: TreePage; sections: TreeSection[]; onClose:
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {sections.map((s) => (
-              <SelectItem key={s.id} value={s.id} disabled={s.id === current}>
+            {others.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
                 {s.name}
               </SelectItem>
             ))}
@@ -165,7 +166,7 @@ const MoveToDialog: React.FC<{ page: TreePage; sections: TreeSection[]; onClose:
           <Button type="button" variant="secondary" onClick={onClose}>
             {t("actions.cancel")}
           </Button>
-          <Button type="button" disabled={!target || target === current} onClick={() => onMove(target)}>
+          <Button type="button" disabled={!target} onClick={() => onMove(target)}>
             {t("manage.move")}
           </Button>
         </DialogFooter>
@@ -216,13 +217,24 @@ export const PagesContainer: React.FC = () => {
       setSections(before);
       return;
     }
-    if (move.kind === "move" && undoable) {
-      const name = before.find((s) => s.id === move.request.sectionId)?.name ?? "";
+    if (!undoable) return;
+    // Every drop of a page: saved at once, "Moved to {section}" with Undo (FIXES J13).
+    const name = before.find((s) => s.id === move.request.sectionId)?.name ?? "";
+    if (move.kind === "move") {
       showUndoToast({
         message: t("manage.toasts.movedTo", { section: name }),
         onUndo: async () => {
           setSections(before);
           await act(() => moveHubPageAction({ id: move.pageId, request: { sectionId: move.from.sectionId, position: move.from.position } }));
+        },
+      });
+    } else {
+      const previous = before.find((s) => s.id === move.request.sectionId);
+      showUndoToast({
+        message: t("manage.toasts.movedTo", { section: name }),
+        onUndo: async () => {
+          setSections(before);
+          if (previous) await act(() => reorderHubPagesAction({ sectionId: previous.id, ids: previous.pages.map((p) => p.id) }));
         },
       });
     }
@@ -259,7 +271,8 @@ export const PagesContainer: React.FC = () => {
         await createHubSectionAction({
           name: t("manage.pages.newSection"),
           icon: "book",
-          color: nextFreeColor(sections.map((s) => s.color), HUB_COLORS),
+          // The next free tag colour from the first one — never gray, which disappears on the Mist cards (FIXES A14).
+          color: nextFreeColor(sections.map((s) => s.color), HUB_COLORS.filter((c) => c !== "gray")),
           audience: null,
         }),
       );
@@ -304,7 +317,7 @@ export const PagesContainer: React.FC = () => {
       {tree.isLoading ? (
         <LoadingBlock skeleton={<SkeletonRows count={8} height="h-11" />} />
       ) : tree.isError || !data ? (
-        <ErrorState error={tree.error} title={t("manage.pages.error")} onRetry={() => void tree.refetch()} />
+        <HubLoadError error={tree.error} title={t("manage.pages.error")} onRetry={() => void tree.refetch()} />
       ) : sections.length === 0 ? (
         <EmptyState
           scene="policies"
@@ -322,13 +335,24 @@ export const PagesContainer: React.FC = () => {
           }
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-1 flex-col gap-4">
           <div className="flex max-w-[1000px] items-center gap-4">
             <p className="text-hint text-tertiary">{t("manage.pages.line", { sections: data.sectionCount, pages: data.pageCount })}</p>
             <SearchBox className="ml-auto w-60" value={query} onChange={setQuery} aria-label={t("manage.pages.search")} />
           </div>
           {shown.length === 0 ? (
-            <NoResults title={t("manage.nothingMatches", { text: query.trim() })} hint="" onClearSearch={() => setQuery("")} />
+            // Centred in the list's own 1000 column (FIXES J11), the title 15/22 as U4.
+            <HubState
+              scene="no-results-s"
+              size="s"
+              className="max-w-[1000px] py-12"
+              title={t("manage.nothingMatches", { text: query.trim() })}
+              action={
+                <Button type="button" variant="secondary" onClick={() => setQuery("")}>
+                  {t("news.clearSearch")}
+                </Button>
+              }
+            />
           ) : (
             <PageTree sections={shown} handlers={handlers} renamingId={renamingId} setRenamingId={setRenamingId} expandAll={Boolean(query.trim())} />
           )}

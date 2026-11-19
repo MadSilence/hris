@@ -10,8 +10,10 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
 import { dateToISO, useShortDates } from "@/lib/date";
+import { cn } from "@/lib/cn";
 import {
   BigNumber,
+  TWO_LINE_ROW,
   WidgetCard,
   WidgetEmpty,
   WidgetError,
@@ -61,11 +63,14 @@ export const ToSignWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
     );
   }
 
-  const due = (row: ToSignRow) =>
+  // "Due Fri, 20 Nov" (S1); 12/18 under the name in Medium, 13/20 beside Sign in Large (S4).
+  const due = (row: ToSignRow, large: boolean) =>
     row.dueOn && row.dueOn < today ? (
       <StatusBadge status="declined" size="sm" label={t("toSign.overdue")} />
     ) : row.dueOn ? (
-      <span className="truncate text-hint leading-[18px] text-tertiary">{t("toSign.due", { date: dates.date(row.dueOn, { weekday: true }) })}</span>
+      <span className={large ? "truncate text-label leading-5 font-normal text-tertiary" : TWO_LINE_ROW.line}>
+        {t("toSign.due", { date: dates.date(row.dueOn, { weekday: true, hideYear: true }) })}
+      </span>
     ) : null;
 
   if (size === "S") {
@@ -75,7 +80,7 @@ export const ToSignWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
         <BigNumber size="s" value={rows.length} word={t("toSign.pending")} />
         {next.dueOn && (
           <p className="truncate text-label leading-5 font-normal text-secondary">
-            {t("toSign.nextDue", { date: dates.date(next.dueOn, { weekday: true }) })}
+            {t("toSign.nextDue", { date: dates.date(next.dueOn, { weekday: true, hideYear: true }) })}
           </p>
         )}
       </WidgetCard>
@@ -84,21 +89,25 @@ export const ToSignWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
 
   return (
     <WidgetCard title={title} size={size} aside={link}>
-      <BigNumber size={size === "L" ? "s" : "m"} value={rows.length} word={t("toSign.pending")} />
+      {/* S2: 40/40 in Medium and in Large (LW07's Large frame; it was 44/40 there, walk of 2026-11-19). */}
+      <BigNumber size="m" value={rows.length} word={t("toSign.pending")} className="[&>span:first-child]:leading-10" />
       <WidgetScroll>
-        <ul className="flex flex-col divide-y divide-divider">
+        {/* S3: a hairline above every row, the first one too; rows as A4. */}
+        <ul className="flex flex-col">
           {rows.map((row) => (
-            <li key={row.envelopeId} className="flex items-center gap-3 py-2.5">
+            <li key={row.envelopeId} className={cn("flex items-center border-t border-divider py-[9px]", size === "L" ? "gap-3" : "gap-2.5")}>
               {size === "L" && (
                 <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-control bg-accent-subtle text-accent-text">
                   <Icon icon={File01Icon} size="sm" />
                 </span>
               )}
               <Link href={signHref(row.envelopeId)} tabIndex={tab} className="flex min-w-0 flex-1 flex-col hover:underline underline-offset-4">
-                <span className="truncate text-body leading-[18px] font-medium text-primary">{row.title}</span>
-                {size !== "L" && due(row)}
+                <span className={TWO_LINE_ROW.name}>{row.title}</span>
+                {size !== "L" && due(row, false)}
+                {/* S4: who sent it, by name — never "HR". */}
+                {size === "L" && row.from && <span className={TWO_LINE_ROW.line}>{t("toSign.from", { name: row.from })}</span>}
               </Link>
-              {size === "L" && <span className="shrink-0">{due(row)}</span>}
+              {size === "L" && <span className="shrink-0">{due(row, true)}</span>}
               <Button asChild variant="secondary" size="sm" tabIndex={tab}>
                 <Link href={signHref(row.envelopeId)}>{t("toSign.sign")}</Link>
               </Button>

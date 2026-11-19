@@ -137,12 +137,13 @@ describe("AudienceBuilder — the field picker", () => {
     const onChange = jest.fn();
     render(<AudienceBuilder fields={many} value={[]} onChange={onChange} />);
 
+    // The field is its own search (hub A18): typing goes into it, no search row in the list.
     fireEvent.click(screen.getByRole("combobox", { name: "Field" }));
-    fireEvent.change(screen.getByPlaceholderText("Search fields"), { target: { value: "shirt" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Field" }), { target: { value: "shirt" } });
 
-    expect(screen.queryByText("Email")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText("Shirt size"));
+    expect(screen.queryByRole("option", { name: "Email" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("option", { name: "Shirt size" }));
 
-    expect(screen.getByRole("combobox", { name: "Field" })).toHaveTextContent("Shirt size");
+    expect(screen.getByRole("combobox", { name: "Field" })).toHaveValue("Shirt size");
   });
 });

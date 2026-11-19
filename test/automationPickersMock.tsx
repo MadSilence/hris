@@ -13,7 +13,7 @@ const real = jest.requireActual<typeof import("@/components/modules/automations/
   "@/components/modules/automations/settings/conditions/chrome",
 );
 
-export const { ConditionGroup, ConditionCard, ConditionJoiner, AddConditionButton, compactTrigger } = real;
+export const { ConditionGroup, ConditionCard, ConditionJoiner, AddConditionButton, PendingPick, compactTrigger } = real;
 export type { PickOption, Joiner } from "@/components/modules/automations/settings/conditions/chrome";
 
 const NONE = "__none__";

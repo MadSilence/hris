@@ -11,27 +11,27 @@ export async function generateMetadata() {
   return { title: t("welcome.metaTitle") };
 }
 
-type Props = { searchParams: Promise<{ again?: string; provider?: string; inUse?: string }> };
+type Props = { searchParams: Promise<{ provider?: string; inUse?: string }> };
 
 /**
  * An invited person's first screen.
  *
  * <p>Guarded on the server like everything else here: somebody who has already been welcomed — or
- * skipped, which is the same answer — goes straight to the product. `?again` is how they come back
- * on their own terms, from the user menu, rather than being sent here a second time.
+ * skipped, which is the same answer — goes straight to the product. It runs once, at the first login,
+ * and nothing links back to it (the designers' fix P1); *Finish your profile* is `/profile/finish`.
  *
  * <p>`?provider=connected`, `?provider=GOOGLE` and `&inUse=1` are W1's answers, back from Connect's round trip
  * (`/api/auth/provider/finish`). The company's name and logo are read here, so the first frame already shows them.
  */
 export default async function WelcomePage({ searchParams }: Props) {
-  const { again, provider, inUse } = await searchParams;
+  const { provider, inUse } = await searchParams;
   const { setupNeeded, welcomeNeeded, impersonating } = await hrisFirstRunService.getFirstRunState();
 
   if (setupNeeded) redirect("/setup");
-  // The welcome is the person's own, even with `?again`: an actor impersonating them neither lands
-  // here nor may open it by hand, or they could finish or skip it on the person's behalf.
+  // The welcome is the person's own: an actor impersonating them neither lands here nor may open it
+  // by hand, or they could finish or skip it on the person's behalf.
   if (impersonating) redirect("/dashboard");
-  if (!welcomeNeeded && again === undefined) redirect("/dashboard");
+  if (!welcomeNeeded) redirect("/dashboard");
 
   const { brand } = await companyAuthBrand();
   const company = brand.kind === "company" ? { name: brand.name, logoUrl: brand.logoUrl ?? null } : { name: "", logoUrl: null };

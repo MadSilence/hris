@@ -8,6 +8,7 @@ import { TriggerList } from "./TriggerList";
 import { defaultTrigger } from "./triggerChoices";
 
 jest.mock("@/components/modules/automations/settings/conditions/chrome", () => jest.requireActual("@/test/automationPickersMock"));
+jest.mock("@/components/providers/CurrentUserProvider", () => ({ useCurrentUser: () => ({ user: { firstName: "Lena" } }) }));
 jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
 jest.mock("@/components/hooks/useReferenceOptions", () => jest.requireActual("@/test/automationSettingsMocks").referenceOptions);
 jest.mock("@/components/modules/organization/hooks/useUserFields", () => jest.requireActual("@/test/automationSettingsMocks").userFields);
@@ -113,7 +114,8 @@ describe("TriggerFields", () => {
 
   it("time off: the event, Only when as an EventCondition tree, and what step days count from", () => {
     const seen = renderTrigger(defaultTrigger("TIME_OFF_REQUESTED"));
-    fireEvent.click(screen.getByRole("radio", { name: "Approved" }));
+    // C24: four events are a select, not a switch.
+    fireEvent.change(screen.getByLabelText("Time off is"), { target: { value: "TIME_OFF_APPROVED" } });
     expect(seen.definition.trigger?.event).toBe("TIME_OFF_APPROVED");
     fireEvent.click(screen.getByRole("radio", { name: "Last day" }));
     expect(seen.definition.trigger?.anchor).toBe("LEAVE_END");
@@ -172,6 +174,7 @@ describe("TriggerFields", () => {
     const seen = renderTrigger(defaultTrigger("JOINS_SEGMENT"), {
       conditions: { filters: [{ field: "sys:office", op: "eq", value: "o-vil" }], excludeUserIds: [] },
     });
+    // C27: the rule is on the button that opens Who it runs for (and said in the note above it).
     expect(screen.getByText("Office is Vilnius")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: "Leave everything as it is" }));
     expect(seen.definition.trigger?.onLeave).toBe("KEEP");

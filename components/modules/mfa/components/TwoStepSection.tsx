@@ -215,12 +215,15 @@ const SetUpDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && !busy && !codes && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      {/* With the QR code on screen the paragraph under it is the description; a line above it said the same (P1). */}
+      <DialogContent className="sm:max-w-md" {...(enrolment && !codes ? { "aria-describedby": undefined } : {})}>
         <DialogHeader>
           <DialogTitle>{t("mfaSignIn.enrol.title")}</DialogTitle>
-          <DialogDescription>
-            {codes ? t("mfa.setup.on") : enrolment ? t("mfa.setup.addAccount") : noPassword ? t("mfa.setup.confirmFirst") : t("mfa.setup.enterPassword")}
-          </DialogDescription>
+          {(codes || !enrolment) && (
+            <DialogDescription>
+              {codes ? t("mfa.setup.on") : noPassword ? t("mfa.setup.confirmFirst") : t("mfa.setup.enterPassword")}
+            </DialogDescription>
+          )}
         </DialogHeader>
         {codes ? (
           <BackupCodesSheet codes={codes} onDone={onClose} />

@@ -13,7 +13,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import type { FeedScope, SectionCard, Waiting } from "@/models/hub";
 import { cn } from "@/lib/cn";
 import { useSavedItems } from "../hooks";
-import { capCount, hubIcon, IconTile, POST_TYPE_ICONS, useHubDates } from "../shared";
+import { capCount, HUB_ICONS, hubIcon, IconTile, useHubDates } from "../shared";
 
 const FEED_SCOPE_KEY = "hub.feedScope";
 
@@ -51,9 +51,9 @@ export const AgreeCallout: React.FC<{ waiting: Waiting }> = ({ waiting }) => {
     <div className="flex flex-wrap items-center gap-4">
       <Link
         href="/hub/to-agree"
-        className="inline-flex h-9 items-center gap-2 rounded-pill border border-transparent bg-accent-muted pr-3 pl-1.5 text-label text-accent-text no-underline transition-colors hover:border-accent-ring"
+        className="inline-flex h-9 items-center gap-2.5 rounded-pill border border-transparent bg-accent-muted pr-3.5 pl-1.5 text-body font-medium text-accent-text no-underline transition-colors hover:border-accent-ring"
       >
-        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-pill bg-accent px-1.5 text-hint font-semibold text-on-accent tabular-nums">
+        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-pill bg-accent px-1.5 text-hint leading-6 font-semibold text-on-accent tabular-nums">
           {capCount(waiting.count)}
         </span>
         {t("home.agreeButton")}
@@ -73,7 +73,7 @@ export const SavedPopover: React.FC<{ count: number }> = ({ count }) => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="ghost" className="gap-1.5">
+        <Button type="button" variant="ghost" className="gap-2 text-secondary">
           <Icon icon={Bookmark02Icon} size="sm" />
           {count > 0 ? t("home.savedCount", { count }) : t("home.saved")}
         </Button>
@@ -87,10 +87,11 @@ export const SavedPopover: React.FC<{ count: number }> = ({ count }) => {
         ) : saved.isError ? (
           <ErrorState compact error={saved.error} onRetry={() => void saved.refetch()} />
         ) : (saved.data ?? []).length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-            <Illustration scene="no-results-s" size="s" />
-            <p className="text-body font-medium text-primary">{t("home.savedEmptyTitle")}</p>
-            <p className="text-body text-tertiary">{t("home.savedEmptyLine")}</p>
+          // FIXES Q5/U6: the `saved-s` scene 96, 12, the title 15/22, 4, the line; padding 40 24.
+          <div className="flex flex-col items-center px-6 py-10 text-center">
+            <Illustration scene="saved-s" size="s" />
+            <p className="mt-3 text-card-title text-primary">{t("home.savedEmptyTitle")}</p>
+            <p className="mt-1 text-body text-secondary">{t("home.savedEmptyLine")}</p>
           </div>
         ) : (
           <ul className="flex max-h-[360px] flex-col overflow-y-auto">
@@ -102,7 +103,7 @@ export const SavedPopover: React.FC<{ count: number }> = ({ count }) => {
                   className="flex items-center gap-3 rounded-control px-2 py-2 no-underline hover:bg-subtle"
                 >
                   <IconTile
-                    icon={item.type === "POST" ? POST_TYPE_ICONS.ANNOUNCEMENT : hubIcon(item.icon)}
+                    icon={item.type === "POST" ? HUB_ICONS.megaphone : hubIcon(item.icon)}
                     color={item.color}
                     mist={item.type === "POST"}
                     size={32}
@@ -123,21 +124,24 @@ export const SavedPopover: React.FC<{ count: number }> = ({ count }) => {
   );
 };
 
-/** A section on CH01's grid (`HandbookSectionCard`): its tile, name, "{n} pages" and what waits for the reader. */
+/**
+ * A section on CH01's grid (`HandbookSectionCard`): its tile, name, "{n} pages" and what waits for the reader —
+ * Mist #F7F7F8, padding 10, the name 13/18, "· {n} to agree" 12/16 500 accent (FIXES B8).
+ */
 export const HandbookSectionCard: React.FC<{ section: SectionCard }> = ({ section }) => {
   const t = useTranslations("hub");
   const waits = section.toAgree > 0;
   return (
     <Link
       href={`/hub/handbook#section-${section.id}`}
-      className="flex h-14 items-center gap-3 rounded-card bg-mist px-3 no-underline transition-colors hover:bg-divider"
+      className="flex items-center gap-3 rounded-card bg-subtle p-2.5 no-underline transition-colors hover:bg-mist"
     >
       <IconTile icon={hubIcon(section.icon)} color={section.color} size={32} dot={waits} />
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-body font-medium text-primary">{section.name}</span>
+        <span className="truncate text-label text-primary">{section.name}</span>
         <span className="truncate text-hint text-tertiary">
           {t("handbook.pages", { count: section.pageCount })}
-          {waits && <span className="text-accent-text">{t("handbook.toAgreeSuffix", { count: section.toAgree })}</span>}
+          {waits && <span className="font-medium text-accent">{t("handbook.toAgreeSuffix", { count: section.toAgree })}</span>}
         </span>
       </span>
     </Link>
@@ -149,7 +153,7 @@ export const orderSectionCards = (sections: SectionCard[]): SectionCard[] =>
   [...sections.filter((s) => s.toAgree > 0), ...sections.filter((s) => s.toAgree <= 0)].slice(0, 6);
 
 export const SectionLinkArrow: React.FC<{ href: string; children: React.ReactNode; className?: string }> = ({ href, children, className }) => (
-  <Link href={href} className={cn("inline-flex items-center gap-1 text-label text-accent-text no-underline hover:underline", className)}>
+  <Link href={href} className={cn("inline-flex items-center gap-1 text-hub-small font-medium text-accent no-underline hover:underline", className)}>
     {children}
   </Link>
 );

@@ -68,25 +68,27 @@ export const AutomationPill: React.FC<{
   }
 
   return (
-    <span className="inline-flex h-8 max-w-[360px] shrink-0 items-center rounded-pill border border-accent-ring bg-accent-subtle text-body font-medium text-accent-text">
+    // H6: 32 high, padding 0 12, 6 between the parts; "Automation:" 13/18 400, the name 13/18 500, a 14 px chevron, a
+    // 1 × 14 divider and a 14 px × with no box of its own.
+    <span className="inline-flex h-8 max-w-[360px] shrink-0 items-center gap-1.5 rounded-pill border border-accent-ring bg-accent-subtle px-3 text-label text-accent-text">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button type="button" className="flex min-w-0 items-center gap-1.5 pr-2 pl-3">
+          <button type="button" className="flex min-w-0 items-center gap-1.5">
             <span className="shrink-0 font-normal text-secondary">{t("activity.automationLabel")}</span>
             <span className="truncate">{name}</span>
-            <Icon icon={ArrowDown01Icon} size="sm" className="shrink-0" />
+            <Icon icon={ArrowDown01Icon} size="sm" className="size-3.5 shrink-0" />
           </button>
         </PopoverTrigger>
         {list}
       </Popover>
-      <span aria-hidden className="h-4 w-px bg-accent-ring" />
+      <span aria-hidden className="h-3.5 w-px shrink-0 bg-accent-ring" />
       <button
         type="button"
         aria-label={t("activity.clearAutomation")}
-        className="inline-flex h-full items-center pr-3 pl-2"
+        className="inline-flex shrink-0 items-center"
         onClick={() => onChange(null)}
       >
-        <Icon icon={Cancel01Icon} size="sm" />
+        <Icon icon={Cancel01Icon} size="sm" className="size-3.5" />
       </button>
     </span>
   );

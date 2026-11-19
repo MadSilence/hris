@@ -37,7 +37,7 @@ A light company colour (Sunflower, or a light "Your own") writes Graphite #2A2A2
 | Loading | Busy buttons: "Logging in…", "Taking you to Okta…", "Sending a login code…" (the link's own line while sending). | RC9-States, RC5-States, RC10-States |
 | Empty | "Log in" with empty fields: "Enter your email." · "Enter your password."; login code asked with the email empty: "Enter your email." under Email. | RC9-States, RC10-States |
 | No results | Not applicable — the page never says whether an account exists. | — |
-| Error | "That email and password don’t match. Check them, or check the company address." · "Too many failed attempts. Try again later." (same for a lock, a restriction, an attack; no time given) · "We couldn’t log you in with Google. Use another way you’ve logged in before, or reset your password." · "We couldn’t log you in with Okta. Try again, or ask your IT team." · "Something went wrong on our side. Try again." · code: "That code doesn’t match. Try again." · "This code has expired. Resend a new one." · "We’ve sent a new code. Check your spam folder too." · "Too many attempts. Try again later." | RC9-States, RC10-States |
+| Error | "That email and password don’t match. Check them, or check the company address." · "Too many failed attempts. Try again later." (same for a lock, a restriction, an attack; no time given) · "We couldn’t log you in with Google. Use another way you’ve logged in before, or reset your password." · "We couldn’t log you in with Okta. Try again, or ask your IT team." · "Something went wrong on our side. Try again." · code: "That code doesn’t match. Try again." · "This code has expired. Send a new one." ("Send a new one" is the link: accent-text, underline on hover) · "We’ve sent a new code. Check your spam folder too." · "Too many attempts. Try again later." | RC9-States, RC10-States |
 | No permission | A person who may not use a way in simply does not see it (variants C1–C7 follow the company's settings). | — |
 | Normal | C1–C8, C10, desktop and phone; C3 with Entra. | RC*-Desktop / Phone, RC3-Entra |
 | Long content | 63-char company name (pane name 26/32 wraps; heading wraps; phone strip name ellipsis), long email. | RC2-Long, RC2-LongD |
@@ -69,3 +69,8 @@ None beyond § Common (`AuthSplit` company variant, `CodeInput`).
 
 ## Open questions
 None blocking. Backend points for C10 (lifetime, single use, link bound to the browser, second step still asked, shared rate limit, whether a code login resets the password-failure counter) are in `decisions-for-petya.md` § C10.
+
+## Built from design-fixes-login-1
+- **A code for an address that can't log in here** (C14): nothing is sent, but the screen answers as for a real code — "That code doesn’t match. Try again." for each try, "Too many attempts. Try again later." at the fifth, "This code has expired. Send a new one." after ten minutes. "Expired" never appears for an address that was never sent a code.
+- **The boxes** (C12) keep the 3 px muted-accent ring around the accent border of the box in focus, as `CodeInput` in sign-in-registration § Values.
+- **The back arrow** (C11) returns to the form with the email still typed.

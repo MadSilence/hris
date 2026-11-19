@@ -258,6 +258,10 @@
   --shadow-ai-box-open: 0 0 0 3px var(--accent-muted), 0 10px 32px rgba(11, 11, 12, 0.14);
   /* The selection bar (documents-tab, owner 2026-11-17): its shadow tinted with the company colour, a product-wide rule. */
   --shadow-selection: 0 4px 16px color-mix(in srgb, var(--accent) 16%, transparent);
+  /* The automations editor (designers' fixes, round 1): a picked segment of a window's switch (C9), and the small
+     floating bar and date popover (F1, C31). */
+  --shadow-segment: 0 1px 2px rgba(11, 11, 12, 0.08);
+  --shadow-bar: 0 1px 2px rgba(11, 11, 12, 0.06), 0 4px 12px rgba(11, 11, 12, 0.06);
 
   /* Type (SPEC § 5). The sizes repeat tokens.json's `typography`; the families are set in the base layer. */
   --font-sans: var(--font-text);
@@ -362,6 +366,21 @@
   --text-home-pill--line-height: normal;
   --text-home-pill--font-weight: 500;
 
+  /* Initials in a small avatar (the designers' Automations fixes A10, G11, H5, 2026-11-18): 10/10 600 in a 24 px
+     avatar on a card, 11/16 600 in a 28 px one in a row or a dialog. */
+  --text-avatar-xs: 10px;
+  --text-avatar-xs--line-height: 10px;
+  --text-avatar-xs--font-weight: 600;
+  --text-avatar-s: 11px;
+  --text-avatar-s--line-height: 16px;
+  --text-avatar-s--font-weight: 600;
+  /* Initials in any avatar (the designers' widgets fixes A1 and hub A9, 2026-11-19): 600, about a third of the
+     avatar — 22 → 8, 24 → 9, 28 → 10, 32 → 11, 36 → 12, 44 → 14, 48 → 15, 64 → 20. `Avatar` is a size container, so
+     `cqw` is the avatar's own width and one role serves every size. */
+  --text-initials: calc(28cqw + 2px);
+  --text-initials--line-height: 1;
+  --text-initials--font-weight: 600;
+
   /* The company hub only (company-hub specs, Changes to SPEC; CH7): its page titles, a document's title, the two
      column headings, reading text, and its big numbers. */
   --text-hub-title: 32px;
@@ -394,6 +413,24 @@
   --text-hub-hero--line-height: 52px;
   --text-hub-hero--letter-spacing: -0.02em;
   --text-hub-hero--font-weight: 500;
+  /* The designers' hub fixes, round 1 (FIXES-company-hub.md): CH02's pinned title, CP01's card name, a celebration
+     tile's title, the ask box's text, the 13/20 of search boxes and small links, CM08's "of {n} agreed". */
+  --text-hub-pinned: 24px;
+  --text-hub-pinned--line-height: 30px;
+  --text-hub-pinned--letter-spacing: -0.02em;
+  --text-hub-pinned--font-weight: 600;
+  --text-hub-card: 16px;
+  --text-hub-card--line-height: 22px;
+  --text-hub-card--font-weight: 600;
+  --text-hub-tile: 15px;
+  --text-hub-tile--line-height: 18px;
+  --text-hub-tile--font-weight: 500;
+  --text-hub-ask: 15px;
+  --text-hub-ask--line-height: 20px;
+  --text-hub-small: 13px;
+  --text-hub-small--line-height: 20px;
+  --text-hub-lead: 16px;
+  --text-hub-lead--line-height: 20px;
 
   /* Motion (SPEC § 11) */
   --ease-standard: var(--ease-standard);
@@ -435,7 +472,15 @@
   .text-home-badge-day,
   .text-home-day,
   .text-auth-title,
-  .text-auth-display {
+  .text-auth-display,
+  .text-hub-title,
+  .text-hub-doc-title,
+  .text-hub-heading,
+  .text-hub-pinned,
+  .text-hub-stat,
+  .text-hub-celebration,
+  .text-hub-cover,
+  .text-hub-hero {
     font-family: var(--font-heading);
   }
 
@@ -564,6 +609,16 @@
 }
 [data-accent="wine"] {
   --band-tint: var(--rose);
+}
+/* This week's confetti (the designers' fix T2): the accent, a second accent and a light tint of it — never grey. Wine
+   draws them as #8E1F5C and Rose; another preset takes the same roles from its own accent. */
+:root {
+  --confetti-2: color-mix(in oklch, var(--accent) 82%, var(--white));
+  --confetti-light: color-mix(in oklch, var(--accent) 32%, var(--white));
+}
+[data-accent="wine"] {
+  --confetti-2: var(--tag-berry-bar);
+  --confetti-light: var(--rose);
 }
 @utility on-band-quiet {
   color: color-mix(in srgb, var(--on-accent) 72%, transparent);
@@ -780,6 +835,9 @@
 .auth-main-foot { display: flex; justify-content: center; padding-top: 24px; }
 .auth-split[data-long="true"] .auth-main-mid { align-items: flex-start; }
 @media (min-width: 768px) {
+  /* "powered by noddo" once on a computer, at the foot of the pane (the designers' fix C2): this unlayered rule had
+     outranked the foot's `md:hidden`, so the white side said it too. */
+  .auth-main-foot { display: none; }
   .auth-main { padding: 40px 48px; }
   .auth-split[data-long="true"] .auth-main-mid { align-items: center; }
 }
@@ -792,14 +850,36 @@
   background: var(--mist); color: var(--text-secondary); }
 .auth-icon-circle[data-tone="accent"] { background: var(--accent-subtle); color: var(--accent-text); }
 
-/* The 6-box code input (B2, C10, D1, D4, F6). */
-.auth-code { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; max-width: 360px; }
+/* The 6-box code input (B2, C10, D1, D4, F6): six boxes 60 × 56, 8 apart, filling the form's 400 (the designers' login
+   fix C12); the field border, radius 8, the accent border on the one in focus; Inter Tight 24, tabular. */
+.auth-code { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; width: 100%; }
 .auth-code input {
-  height: 52px; width: 100%; text-align: center; font: 500 22px/1 var(--font-mono); color: var(--text-primary);
-  border: 1px solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface-card);
+  height: 56px; width: 100%; min-width: 0; padding: 0; text-align: center; font: 600 24px/32px var(--font-heading);
+  font-variant-numeric: tabular-nums; color: var(--text-primary);
+  border: 1px solid var(--border-field); border-radius: var(--radius-control); background: var(--surface-card);
 }
 .auth-code input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 25%, transparent); }
-.auth-code[data-invalid="true"] input { border-color: var(--status-declined-border); }
+.auth-code[data-invalid="true"] input { border-color: var(--status-declined-fill); }
+
+/* A field on the login screens (the designers' login fixes A1, A2), every field sitting in a column 8 apart: the label
+   18, 8, the field 44 with 0 14 inside; its error 8 under it, 12/16 in Error text with the icon 16, gap 6 (the field's
+   border stays the red fill). Unlayered, so it outranks the shared primitives' utilities on these screens only. */
+:is(.auth-split, .auth-first[data-flow="signup"]) .auth-step [data-slot="label"] { margin-bottom: 0; }
+:is(.auth-split, .auth-first[data-flow="signup"]) .auth-step [data-slot="field-error"] { margin-top: 0; color: var(--status-declined-text); }
+:is(.auth-split, .auth-first[data-flow="signup"]) .auth-step [data-slot="input"] { padding-left: 14px; }
+:is(.auth-split, .auth-first[data-flow="signup"]) .auth-step [data-slot="input"]:not([class*="pr-"]) { padding-right: 14px; }
+
+/* "Company address" with its ending inside the field (R1): a Mist add-on the input's own height on the right. */
+.auth-address { display: flex; height: 44px; overflow: hidden; border: 1px solid var(--border-field); border-radius: var(--radius-control);
+  background: var(--surface-card); transition: border-color var(--duration-hover), box-shadow var(--duration-hover); }
+.auth-address:hover { border-color: var(--border-field-hover); }
+.auth-address:focus-within { border-color: var(--accent); box-shadow: var(--shadow-focus); }
+.auth-address[data-invalid="true"] { border-color: var(--status-declined-fill); }
+.auth-address input { flex: 1; min-width: 0; height: 100%; border: 0; border-radius: 0; box-shadow: none !important; background: transparent; }
+/* The package's "Mist #F7F7F8" is the board's --surface-subtle (SPEC's Mist is #F3F3F5), with the board's divider. */
+.auth-address-suffix { flex: none; display: flex; align-items: center; padding: 0 14px; background: var(--surface-subtle);
+  border-left: 1px solid var(--border-field);
+  font-size: 15px; line-height: 22px; color: var(--text-tertiary); white-space: nowrap; }
 
 /* The scripted nod of the grid (24 s loop; one ring, then a pair; never more than two moving), the designers' own. */
 @keyframes rn6x4x4-0 { 0% {transform:translateY(0)} 2.50% {transform:translateY(0)} 4.38% {transform:translateY(7px)} 5.42% {transform:translateY(-2px)} 6.46% {transform:translateY(0)} 40.00% {transform:translateY(0)} 41.87% {transform:translateY(7px)} 42.92% {transform:translateY(-2px)} 43.96% {transform:translateY(0)} 77.50% {transform:translateY(0)} 79.38% {transform:translateY(7px)} 80.42% {transform:translateY(-2px)} 81.46% {transform:translateY(0)} 100% {transform:translateY(0)} }
@@ -837,7 +917,8 @@
 .auth-first-slogan { margin: 0; font: 600 44px/46px var(--font-heading); letter-spacing: -0.035em; }
 .auth-first-slogan span { color: var(--rose); }
 .auth-first-sub { margin: 14px 0 0; font-size: 15px; line-height: 22px; color: rgba(255, 255, 255, .78); }
-.auth-orbit { width: 100%; max-width: 500px; height: auto; margin: auto 0; overflow: visible; }
+/* 500 × 440 under the slogan (B5): a fixed ratio and no shrinking, so a short window or a flex pass cannot fold it away. */
+.auth-orbit { flex: none; display: block; width: 100%; max-width: 500px; aspect-ratio: 500 / 440; height: auto; margin: auto 0; overflow: visible; }
 .auth-orbit-outer, .auth-orbit-inner { fill: none; stroke: #FFFFFF; stroke-width: 1.5; stroke-dasharray: 3 6; }
 .auth-orbit-outer { stroke-opacity: .3; animation: auth-orbit-cw 20s linear infinite; }
 .auth-orbit-inner { stroke-opacity: .18; animation: auth-orbit-ccw 20s linear infinite; }
@@ -913,34 +994,48 @@
 @keyframes fr-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .fr-arrived { animation: none; } }
 
-.fr-welcome { position: relative; display: flex; flex-direction: column; min-height: 100dvh; overflow: hidden;
-  background: var(--surface-card); color: var(--text-primary); }
-.fr-welcome-top { display: flex; align-items: center; justify-content: center; position: relative; padding: 24px 20px 0; }
-.fr-welcome-back { position: absolute; left: 20px; top: 24px; }
-.fr-logo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-control);
+/* The first-run frame (first-run-welcome, the designers fixes W1–W3). No overflow:hidden on the frame or the rings:
+   the lower ring row hangs below the page and is cut by the window alone, so the page pulled up shows it whole. */
+body:has(.fr-welcome) { overflow-x: hidden; }
+.fr-welcome { position: relative; display: flex; flex-direction: column; align-items: center; min-height: 100dvh;
+  padding: 24px 20px 0; background: var(--surface-card); color: var(--text-primary); }
+.fr-welcome-back { position: absolute; left: 12px; top: 22px; }
+.fr-brand { display: flex; align-items: center; gap: 12px; min-width: 0; max-width: 100%; }
+.fr-logo { width: 36px; height: 36px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-control);
   border: 1px solid var(--border-divider); background: var(--surface-card); box-shadow: var(--shadow-1);
   font: 600 16px/1 var(--font-heading); color: var(--accent-text); }
 .fr-logo img { max-width: 26px; max-height: 26px; object-fit: contain; }
-.fr-welcome-mid { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 32px 20px 120px; }
+.fr-brand-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 600 18px/24px var(--font-heading); letter-spacing: -0.02em; color: var(--text-primary); }
+.fr-welcome-mid { flex: 1; display: flex; align-items: flex-start; justify-content: center; width: 100%; padding: 32px 0; }
 .fr-welcome-col { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 28px; }
 .fr-welcome-col[data-wide="true"] { max-width: 560px; }
-.fr-welcome-rings { position: absolute; left: 0; right: 0; bottom: -24px; pointer-events: none; }
-.fr-welcome-rings svg { display: block; width: 100%; height: auto; }
+.fr-welcome-col[data-intro="true"] { max-width: none; align-items: center; text-align: center; gap: 0; }
+.fr-welcome-rings { flex: none; margin-bottom: -24px; pointer-events: none; }
+.fr-welcome-rings svg { display: block; }
 .fr-welcome-rings circle { fill: none; stroke: var(--accent-muted); }
 .fr-welcome-rings circle.hot { stroke: var(--accent); transform-box: fill-box; animation-duration: 24s; animation-iteration-count: infinite; }
 @media (prefers-reduced-motion: reduce) { .fr-welcome-rings circle.hot { animation: none !important; } }
-.fr-greeting { margin: 0; font: 600 56px/54px var(--font-heading); letter-spacing: -0.04em; overflow-wrap: anywhere; }
+.fr-greeting { margin: 0; font-family: var(--font-heading); font-weight: 600; font-size: 56px; line-height: 54px; letter-spacing: -0.05em;
+  color: var(--text-primary); overflow-wrap: break-word; }
 .fr-greeting span { display: block; color: var(--accent-text); }
+.fr-intro-lead { margin: 20px 0 0; font-size: 15px; line-height: 22px; color: var(--text-secondary); }
+.fr-intro-start { margin-top: 28px; width: 100%; }
+.fr-head-centred { text-align: center; }
 .fr-skip { align-self: center; background: none; border: 0; padding: 4px 8px; font-size: 15px; line-height: 22px; font-weight: 500;
   color: var(--accent-text); cursor: pointer; }
 .fr-skip:hover { opacity: .8; }
 .fr-skip:disabled { cursor: default; opacity: .6; }
 @media (min-width: 768px) {
-  .fr-welcome-top { padding: 40px 48px 0; }
-  .fr-welcome-back { left: 48px; top: 44px; }
+  .fr-welcome { padding: 48px 56px 0; }
+  .fr-welcome-back { left: 48px; top: 48px; }
   .fr-logo { width: 44px; height: 44px; font-size: 20px; }
   .fr-logo img { max-width: 32px; max-height: 32px; }
-  .fr-welcome-mid { align-items: center; padding: 40px 48px 200px; }
-  .fr-welcome-rings { bottom: -36px; }
+  .fr-brand-name { font-size: 22px; line-height: 28px; }
+  .fr-welcome-mid { align-items: center; padding: 40px 0; }
+  .fr-welcome-rings { margin-bottom: -36px; }
   .fr-greeting { font-size: 112px; line-height: 104px; }
+  .fr-greeting span { white-space: nowrap; }
+  .fr-intro-lead { margin-top: 28px; font-size: 17px; line-height: 26px; }
+  .fr-intro-start { margin-top: 32px; width: auto; height: 48px; padding: 0 32px; }
 }

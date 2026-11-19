@@ -17,7 +17,7 @@ export type ReadRow = {
  * grey 16 icon, the value 14/500 and a grey line under it saying what it is.
  */
 export const ReadRows: React.FC<{ rows: ReadRow[]; className?: string }> = ({ rows, className }) => (
-  <ul className={cn("flex flex-col gap-4", className)}>
+  <ul className={cn("flex flex-col gap-[18px]", className)}>
     {rows.map((row, i) => (
       <li key={i} className="flex items-start gap-3">
         <Icon icon={row.icon} size="sm" className="mt-0.5 shrink-0 text-tertiary" />

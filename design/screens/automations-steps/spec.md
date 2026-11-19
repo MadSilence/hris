@@ -114,3 +114,10 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
   the approval's no-answer option reads "Count as declined" (QA1; the designers' word, Q-2, 2026-11-18); sign and survey steps carry
   "Not connected yet".
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
+
+### Built from `design-fixes-automations-1` (2026-11-18, walked 2026-11-19)
+
+The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
+- If it fails is offered on steps that do something; not on Wait until, Split, Ask for approval or a survey.
+- Split: inside a path box the operator is 84 wide (S10), elsewhere 108 (D4).
+- The signature step's missing detail reads "Choose a template".

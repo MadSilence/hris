@@ -46,13 +46,13 @@ export function TriggerPlaceholderNode({ data }: NodeProps<TriggerPlaceholderFlo
   return (
     <div className="flex w-[320px] flex-col items-center" style={{ height: data.height }}>
       <Handles />
-      <button type="button" className={cn(placeholderClass, "h-24")} onClick={data.onChoose} data-test="trigger-placeholder">
-        <span className="flex items-center gap-1.5 text-hint text-accent-text">
+      <button type="button" className={cn(placeholderClass, "h-24 gap-2 border")} onClick={data.onChoose} data-test="trigger-placeholder">
+        <span className="flex items-center gap-2 text-hint font-medium text-accent-text">
           <Icon icon={FlashIcon} size="sm" />
           {t("canvas.startsWhen")}
         </span>
-        <span className="mt-2 text-card-title text-primary">{t("canvas.chooseTrigger")}</span>
-        <span className="mt-1 flex items-center gap-1 text-hint text-tertiary">
+        <span className="text-card-title text-primary">{t("canvas.chooseTrigger")}</span>
+        <span className="-mt-1 flex items-center gap-1 text-hint text-tertiary">
           {t.rich("canvas.chooseTriggerHint", {
             plus: () => <Icon icon={Add01Icon} size="sm" className="size-3.5 text-tertiary" />,
           })}
@@ -61,7 +61,7 @@ export function TriggerPlaceholderNode({ data }: NodeProps<TriggerPlaceholderFlo
       {data.offerAi && (
         <>
           <span className="mt-5 text-hint text-tertiary">{t("canvas.or")}</span>
-          <Button type="button" variant="secondary" size="sm" className="nodrag mt-3" onClick={data.onAi}>
+          <Button type="button" variant="secondary" className="nodrag mt-3" onClick={data.onAi}>
             <Icon icon={SparklesIcon} size="sm" />
             {t("canvas.describeToAi")}
           </Button>
@@ -72,7 +72,8 @@ export function TriggerPlaceholderNode({ data }: NodeProps<TriggerPlaceholderFlo
 }
 
 export type AddPlaceholderData = {
-  kind: "firstStep" | "emptyBranch";
+  /** `emptyPath`: a split's path with no step yet (S10b) — a card-sized slot with a button; `emptyBranch`: an approval's. */
+  kind: "firstStep" | "emptyBranch" | "emptyPath";
   height: number;
   dropTarget?: boolean;
   readOnly: boolean;
@@ -88,6 +89,28 @@ export function AddPlaceholderNode({ data }: NodeProps<AddPlaceholderFlowNode>) 
       <div style={{ height: data.height }} className="w-[320px]">
         <Handles />
       </div>
+    );
+  }
+  if (data.kind === "emptyPath") {
+    // S10b: a dashed slot as high as a step, "What should happen next?" and a secondary "Add a step".
+    return (
+      <>
+        <Handles />
+        <div
+          style={{ height: data.height }}
+          data-test="empty-path"
+          className={cn(
+            "flex w-[320px] flex-col items-start justify-center gap-3 rounded-popover border border-dashed border-strong p-4",
+            data.dropTarget && "border-accent-ring bg-accent-subtle",
+          )}
+        >
+          <span className="text-body text-secondary">{data.dropTarget ? t("addStep.drop") : t("canvas.nextStepTitle")}</span>
+          <Button type="button" variant="secondary" size="sm" className="nodrag" onClick={data.onAdd}>
+            <Icon icon={Add01Icon} size="sm" />
+            {t("canvas.emptyPath")}
+          </Button>
+        </div>
+      </>
     );
   }
   return (

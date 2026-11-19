@@ -19,8 +19,9 @@ export const UnsavedChangesDialog: React.FC<{
   const t = useTranslations("automationsEditor");
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onKeepEditing()}>
-      <DialogContent size="sm">
-        <DialogHeader>
+      {/* G12: one column, 16 between the title, the text and the buttons — as ConfirmActionModal. */}
+      <DialogContent size="sm" className="gap-4">
+        <DialogHeader className="gap-4">
           <DialogTitle>{t("unsavedDialog.title")}</DialogTitle>
           <DialogDescription>{t("unsavedDialog.body", { name })}</DialogDescription>
         </DialogHeader>

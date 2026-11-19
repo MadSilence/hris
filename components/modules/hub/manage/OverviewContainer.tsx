@@ -8,11 +8,10 @@ import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
 import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState } from "@/components/feedback/EmptyState";
-import { ErrorState } from "@/components/feedback/ErrorState";
 import type { Overview, OverviewPage } from "@/models/hub";
 import { cn } from "@/lib/cn";
 import { useHubOverview } from "../hooks";
-import { HubHeading, LoadingBlock, ProgressBar, useHubDates } from "../shared";
+import { HubHeading, HubLoadError, LoadingBlock, ProgressBar, SkeletonRows, useHubDates } from "../shared";
 import { useNewPage } from "../reader/HubHomeContainer";
 import { ManageFrame } from "./ManageFrame";
 import { ManagePostRowView, PostEditorDialog, usePostDialog } from "./posts";
@@ -30,12 +29,13 @@ export const StatTile: React.FC<{ label: string; value: React.ReactNode; hint: s
     href={href}
     className={cn(
       "flex h-[116px] flex-col rounded-panel px-5 pt-4 pb-4 no-underline transition-colors",
-      pending ? "bg-status-pending-bg text-status-pending-text hover:brightness-95" : "bg-mist hover:bg-divider",
+      pending ? "bg-status-pending-bg text-status-pending-text hover:brightness-95" : "bg-subtle hover:bg-mist",
     )}
   >
+    {/* The number's top 32 under the label's; the hint 12/16 tertiary at the tile's foot (FIXES H1). */}
     <span className={cn("text-hint", pending ? "text-status-pending-text" : "text-tertiary")}>{label}</span>
-    <span className={cn("mt-2 text-hub-stat tabular-nums", pending ? "text-status-pending-text" : "text-primary")}>{value}</span>
-    <span className={cn("mt-auto truncate text-hint", pending ? "text-status-pending-text" : "text-secondary")}>{hint}</span>
+    <span className={cn("mt-4 text-hub-stat tabular-nums", pending ? "text-status-pending-text" : "text-primary")}>{value}</span>
+    <span className={cn("mt-auto truncate text-hint", pending ? "text-status-pending-text" : "text-tertiary")}>{hint}</span>
   </Link>
 );
 
@@ -82,13 +82,14 @@ const MustReadRow: React.FC<{ page: OverviewPage }> = ({ page }) => {
   const dates = useHubDates();
   const remind = useRemind();
   return (
-    <li className="relative flex items-center gap-4 border-b border-divider py-3 last:border-b-0">
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <div className="flex items-baseline gap-3">
+    // Padding 16 0, a hairline under every row; 8 to the bar, 8 to "Due", 16 between title and count (FIXES H5).
+    <li className="relative flex items-center gap-4 border-b border-divider py-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex items-baseline gap-4">
           <Link href={`/hub/manage/pages/${page.id}/agreed`} className="min-w-0 truncate text-card-title text-primary no-underline after:absolute after:inset-0 hover:underline">
             {page.title}
           </Link>
-          <span className="ml-auto shrink-0 text-hint text-secondary tabular-nums">{t("manage.agreedOf", { agreed: page.agreed, needed: page.needed })}</span>
+          <span className="ml-auto shrink-0 text-hint text-tertiary tabular-nums">{t("manage.agreedOf", { agreed: page.agreed, needed: page.needed })}</span>
         </div>
         <ProgressBar value={page.agreed} max={page.needed} />
         {page.pastDeadline ? (
@@ -133,15 +134,27 @@ export const OverviewContainer: React.FC = () => {
       {overview.isLoading ? (
         <LoadingBlock
           skeleton={
-            <div className="grid grid-cols-2 gap-5 xl:grid-cols-4">
-              {[0, 1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-[116px] rounded-panel" />
-              ))}
+            // The tiles and the two columns (FIXES U3).
+            <div className="flex flex-col gap-10">
+              <div className="grid grid-cols-2 gap-5 xl:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-[116px] rounded-panel" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 gap-16 min-[1280px]:grid-cols-[7fr_5fr]">
+                <SkeletonRows count={3} height="h-20" />
+                <SkeletonRows count={3} height="h-20" />
+              </div>
             </div>
           }
         />
       ) : overview.isError || !o ? (
-        <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />
+        <HubLoadError
+          error={overview.error}
+          title={t("manage.overviewError")}
+          line={t("manage.overviewErrorLine")}
+          onRetry={() => void overview.refetch()}
+        />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-5 xl:grid-cols-4">
@@ -157,10 +170,11 @@ export const OverviewContainer: React.FC = () => {
             />
           </div>
           <div className="mt-10 grid grid-cols-1 gap-16 min-[1280px]:grid-cols-[7fr_5fr]">
-            <section className="flex min-w-0 flex-col gap-4" aria-labelledby="hub-overview-posts">
-              <div className="flex items-center">
+            {/* Heading rows 36 high, the links 13/20 500 accent, the content 8 under (FIXES A8). */}
+            <section className="flex min-w-0 flex-col gap-2" aria-labelledby="hub-overview-posts">
+              <div className="flex h-9 items-center">
                 <HubHeading id="hub-overview-posts">{t("manage.postsColumn")}</HubHeading>
-                <Link href="/hub/manage/posts" className="ml-auto text-label text-accent-text no-underline hover:underline">
+                <Link href="/hub/manage/posts" className="ml-auto text-hub-small font-medium text-accent no-underline hover:underline">
                   {t("manage.allPosts")}
                 </Link>
               </div>
@@ -174,10 +188,10 @@ export const OverviewContainer: React.FC = () => {
                 </ul>
               )}
             </section>
-            <section className="flex min-w-0 flex-col gap-4" aria-labelledby="hub-overview-mustread">
-              <div className="flex items-center">
+            <section className="flex min-w-0 flex-col gap-2" aria-labelledby="hub-overview-mustread">
+              <div className="flex h-9 items-center">
                 <HubHeading id="hub-overview-mustread">{t("manage.mustReadColumn")}</HubHeading>
-                <Link href="/hub/manage/pages" className="ml-auto text-label text-accent-text no-underline hover:underline">
+                <Link href="/hub/manage/pages" className="ml-auto text-hub-small font-medium text-accent no-underline hover:underline">
                   {t("manage.allPages")}
                 </Link>
               </div>

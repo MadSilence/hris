@@ -20,7 +20,9 @@ export const HubPeopleField: React.FC<{
   withRoles?: boolean;
   /** One person (a page's owner) instead of a list. */
   single?: boolean;
-}> = ({ value, onChange, ariaLabel, id, disabled, withRoles = true, single = false }) => {
+  /** The words after the chips: "Add a person or a role" (CM04), "Search people or roles" (CM07). */
+  placeholder?: string;
+}> = ({ value, onChange, ariaLabel, id, disabled, withRoles = true, single = false, placeholder }) => {
   // The hub's own list, not `/roles`: a hub editor need not hold the Roles right (B2).
   const roles = useHubAudienceRoles(withRoles);
   const catalog = React.useMemo(
@@ -34,6 +36,8 @@ export const HubPeopleField: React.FC<{
     <PeoplePicker
       id={id}
       aria-label={ariaLabel}
+      placeholder={placeholder}
+      chip="avatar"
       disabled={disabled}
       mode={single ? "single" : "multiple"}
       catalog={catalog}

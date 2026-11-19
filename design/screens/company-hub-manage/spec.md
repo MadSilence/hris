@@ -192,7 +192,8 @@ A dialog 800 wide (SPEC § 6, § 13.7: radius 20, level 3, white). Header 20 24 
    - the hint "{n} people · {who joins later}";
    - with no filter: "Everyone at {company} · {n} people".
    - "Add filter" opens the same builder as CM07 in a popover.
-5. **Pin to the top** and **Show on Home** toggles, on the right, 280 wide.
+5. **Pin to the top** and **Show on Home** toggles, on the right, 280 wide. There is no type field: posts are one kind (Ulia, 18 Nov).
+   - After Pin to the top: **Notify people** toggle, hint "In their inbox, when the post goes out." 
    - Pinning a post unpins the one pinned before. The hint under the toggle says so when one is pinned: "Unpins “{title}”".
    - **Show on Home** (Ulia, 12 Nov): when the company has not made the **Company news** widget required for everyone, turning the toggle on opens a confirm dialog 400 (`AddRequiredWidgetDialog`, **new**, not drawn):
      - "Add Company news to everyone's Home?";
@@ -217,6 +218,7 @@ A full page in the app frame, padding 24 48 32. The column is 760 (built as 720,
      - the gray pill "Unpublished changes" with `pencil-edit-02`. It is shown only when the draft differs from the published version;
      - **Preview** (secondary);
      - **Publish version {n}** (primary). For a page never published: **Publish**.
+     - When the draft equals the published version: no Publish button and no "Unpublished changes" pill; the bar shows "Saved {HH:mm}" and Preview (rules README position 2: no disabled buttons).
 2. **Icon and title:**
    - the 52 icon tile is a button "Change icon". It opens a popover with the icon set and the eight tag colours (SPEC § 4.7);
    - the title is edited in place (36/44).
@@ -285,7 +287,7 @@ Page padding 32 48.
 4. **Controls row:**
    - segmented **Not yet · {n} / Agreed · {n}**;
    - a hairline;
-   - filter chips Department, Office, Legal entity;
+   - filter chips Department, Office, Legal entity — the Legal entity chip only when the company has more than one legal entity (Ulia, 19 Nov);
    - on the right, search "Search people" and the Export icon button (CSV).
 5. **Table** (SPEC § 13.5) with the columns:
    - Name (avatar 22 + full name);
@@ -365,7 +367,7 @@ Page padding 32 48.
 | CM03 columns | Page; Owner; Must read; Updated |
 | CM03 section | {Section} / {n} pages / {n} must-read |
 | CM03 page | {n} of {m} agreed; — |
-| CM03 more | {n} more pages |
+| CM03 more | {n} more pages; opened: Show less (Ulia, 19 Nov) |
 | CM03 accessible names | Add a page to this section; Section options; More; Drag to move |
 | Section menu | Rename; Change icon and colour; Who sees this section; Delete section |
 | Page menu | Edit; Who agreed; Move to…; Duplicate; Unpublish; Delete |
@@ -373,13 +375,13 @@ Page padding 32 48.
 | CM04 headings | Who can post and edit pages; Must-read pages; Celebrations; News |
 | CM04 rows | Add a person or a role; Team leads can post only to their own team. Everyone else reads. / Remind people before the deadline / By email and in the inbox / 1 day before; 3 days before; 1 week before; Don't remind / Tell the manager when someone misses it / The day after the deadline / New hires get must-read pages in onboarding / As a task in their first week / Birthdays; Work anniversaries; New joiners / People can still hide their own birthday in their preferences. / Show the latest news on Home / In the Company news widget / Changes save automatically. |
 | CM04 accessible names | Show celebrations; Tell the manager; New hires; Show news on Home |
-| CM05 | New post; Edit post / Add a cover image (optional); Replace; Remove / Title / Text / Bold; Heading; List; Link (accessible names) / Link a handbook page / Who sees it / Everyone at {company} · {n} people; {n} people · {who joins later, e.g. new hires in Vilnius see it too} / Add filter / Pin to the top / Unpins “{title}” / Show on Home / Save draft / Schedule / Publish / Cancel / Save changes |
+| CM05 | New post; Edit post / Add a cover image (optional); Replace; Remove / Title / Text / Bold; Heading; List; Link (accessible names) / Link a handbook page / Who sees it / Everyone at {company} · {n} people; {n} people · {who joins later, e.g. new hires in Vilnius see it too} / Add filter / Pin to the top / Unpins “{title}” / Notify people / In their inbox, when the post goes out. / Show on Home / Save draft / Schedule / Publish / Cancel / Save changes |
 | CM05 schedule | Date; Time; Schedule for {d Mon}, {HH:mm} |
 | CM05 errors | Add a title |
 | CM06 bar | Pages / {section}; Saved {HH:mm}; Saving…; Not saved; Unpublished changes; Preview; Publish version {n}; Publish |
 | CM06 properties | Change icon (accessible name); Section; Owner; Who sees it; Must read; People read it and agree to it; Agree by; Turn it off for pages that are only for reference, like guides or office info. |
 | CM06 body | Type / for headings, lists, images and links to other pages; slash menu: Heading; Text; Bulleted list; Numbered list; Image; Table; Link to a page; Divider |
-| Publish dialog | Publish version {n}? / What changed / Drafted by AI — review before sending / Add a point / Ask everyone to agree again / For a change in the rules. People see what changed and agree to version {n}. / Agree by / Small fix, keep agreements / For typos and wording. Nobody is asked again. / Cancel / Publish version {n}; Publish fix; Publishing… |
+| Publish dialog | Publish version {n}? / first version: Readers will see this page as it is now. / What changed / Drafted by AI — review before sending / Add a point / Ask everyone to agree again / For a change in the rules. People see what changed and agree to version {n}. / Agree by / Small fix, keep agreements / For typos and wording. Nobody is asked again. / Cancel / Publish version {n}; Publish fix; Publishing… |
 | Preview banner | Preview — not published |
 | CM07 | Who sees this page; Who sees this post / Everyone; Filter people; Choose people / People who match all of these / is / Remove filter (accessible name) / Add filter / Also add (optional) / Search people or roles / Role: {role} / {n} people · new people who match join automatically / Everyone at {company} · {n} people / See who / No one matches these filters / Cancel / Apply |
 | CM08 | Who agreed / {page} · version {n} · due {d Mon} / Edit page / Remind {n} people / of {m} agreed / not yet · {n} agreed to version {n} / new hires · get it as an onboarding task / Not yet · {n}; Agreed · {n} / Department; Office; Legal entity / Search people / Export (accessible name) / Name; Department; Office; Last agreed; Reminded; Agreed / Version {n} · {d Mon} / 1–50 of {n} |
@@ -388,7 +390,7 @@ Page padding 32 48.
 | Confirms | Duplicate “{title}”? / The copy is a draft. / Duplicate — Delete “{title}”? / Readers lose it, and links to it stop working. / The record of who agreed is kept. / Delete post; Delete page — Delete “{section}” and its {n} pages? / Readers lose these pages. / Delete section — Discard this post? / What you wrote will be lost. / Keep editing; Discard — Discard changes? |
 | Empty | No posts yet / Write the first one for your team. — No drafts; No scheduled posts; Nothing published yet — No pages yet / Start with a section, then add pages. — No must-read pages / Turn on Must read on a page to see who agreed. — Everyone has agreed |
 | No results | Nothing matches “{text}” / Clear search |
-| Errors | Couldn't load posts; Couldn't load pages; Couldn't load settings / Try again — Couldn't publish. Your draft is saved. |
+| Errors | Couldn't load posts; Couldn't load pages; Couldn't load settings / Try again — Couldn't publish. Your draft is saved. — We couldn't load the overview / Your posts and pages are safe. / Try again (CM01) — We couldn't load who agreed / Every yes is saved. / Try again (CM08) |
 
 ## Values
 - **Page padding** 32 48 (`company-hub` Changes to SPEC 2). CM06 and CM07's page: 24 48 32.
@@ -442,3 +444,7 @@ Q-9 (who manages the hub), Q-11 (What changed drafted by AI) and Q-12 (news on H
   the people-and-roles picker reads its roles from the hub (`/hub/audience/roles`, behind the hub's own right), not
   from Roles; *Export* on Who agreed carries the department, office and search the table shows.
 - **Images of the real screen:** not added — the walk's window was hidden.
+
+### Built from the fixes of 2026-11-19
+
+Built from `design-fixes-company-hub-1` (2026-11-19, walked). Differences: **CM07's Apply is not shown while the audience reaches no one** (the text above says disabled; nothing is shown disabled); the filter row's "is" is the operator read as a word, a trigger when the field has more than one; L7's "Add filter" opens the CM07 dialog, not a popover; What changed stays the editor's field (Q-11, Q-49).

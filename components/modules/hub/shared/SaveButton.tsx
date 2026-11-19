@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Bookmark02Icon, BookmarkCheck02Icon } from "@hugeicons/core-free-icons";
+import { Bookmark02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
@@ -15,9 +15,16 @@ import { unwrapHub, useInvalidateHub } from "../hooks";
 
 /**
  * Save / unsave a post or a page: toggles at once, with an Undo toast — "Saved" / "Removed from saved" (Home's
- * rule 11). The mark is the reader's own; the hub's counts refresh after.
+ * rule 11). The mark is the reader's own; the hub's counts refresh after. Saved is the same `bookmark-02` filled with the
+ * accent, no checkmark (FIXES A17); `large` is the 20 px secondary icon of a page or a post (F6).
  */
-export const SaveButton: React.FC<{ type: SavedType; id: string; saved: boolean; className?: string }> = ({ type, id, saved, className }) => {
+export const SaveButton: React.FC<{ type: SavedType; id: string; saved: boolean; large?: boolean; className?: string }> = ({
+  type,
+  id,
+  saved,
+  large = false,
+  className,
+}) => {
   const t = useTranslations("hub");
   const invalidate = useInvalidateHub();
   const [on, setOn] = React.useState(saved);
@@ -56,9 +63,9 @@ export const SaveButton: React.FC<{ type: SavedType; id: string; saved: boolean;
           aria-label={label}
           aria-pressed={on}
           onClick={toggle}
-          className={cn(on ? "text-accent-text" : "text-tertiary hover:text-secondary", className)}
+          className={cn(on ? "text-accent" : large ? "text-secondary hover:text-primary" : "text-tertiary hover:text-secondary", className)}
         >
-          <Icon icon={on ? BookmarkCheck02Icon : Bookmark02Icon} size="sm" />
+          <Icon icon={Bookmark02Icon} size={large ? "md" : "sm"} className={on ? "fill-current" : undefined} />
         </Button>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>

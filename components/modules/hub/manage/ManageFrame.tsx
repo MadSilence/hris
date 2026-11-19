@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/desact/button";
-import { PageGate } from "@/components/auth/PageGate";
-import { useCanAccess } from "@/components/auth";
+import { PermissionGate, useCanAccess } from "@/components/auth";
+import { Skeleton } from "@/components/desact/skeleton";
 import { ErrorPage } from "@/components/feedback/ErrorPage";
 import type { AccessAction } from "@/models/access";
 import { cn } from "@/lib/cn";
@@ -14,12 +14,25 @@ import { BackLink, HubPage, HubTitle } from "../shared";
 
 /**
  * Manage hub's gate (`HUB.CONTENT`, EDIT; Settings MANAGE). UX only — Java's `AccessEngine` decides — and its refusal
- * is the spec's: "This page is private" with the way back to the hub.
+ * is the spec's: "This page is private" with the way back to the hub. While the access is checked it shows the
+ * frame's own skeleton, never words (FIXES U3).
  */
 export const HubManageGate: React.FC<{ children: React.ReactNode; action?: AccessAction }> = ({ children, action = "EDIT" }) => (
-  <PageGate resource="HUB.CONTENT" action={action} fallback={<HubPrivatePage />}>
+  <PermissionGate resource="HUB.CONTENT" action={action} fallback={<HubPrivatePage />} loadingFallback={<ManageFrameSkeleton />}>
     {children}
-  </PageGate>
+  </PermissionGate>
+);
+
+/** The frame in skeleton: the back link, the title, the tabs and a block. */
+const ManageFrameSkeleton: React.FC = () => (
+  <HubPage>
+    <div aria-busy="true" className="flex flex-col">
+      <Skeleton className="h-5 w-28" />
+      <Skeleton className="mt-3 h-10 w-64" />
+      <Skeleton className="mt-7 h-6 w-80" />
+      <Skeleton className="mt-8 h-64 w-full rounded-panel" />
+    </div>
+  </HubPage>
 );
 
 const HubPrivatePage: React.FC = () => {
@@ -76,7 +89,7 @@ export const ManageFrame: React.FC<{ actions?: React.ReactNode; children: React.
               aria-current={active ? "page" : undefined}
               className={cn(
                 "-mb-px border-b-2 pb-2.5 text-body font-medium no-underline transition-colors",
-                active ? "border-accent text-primary" : "border-transparent text-secondary hover:text-primary",
+                active ? "border-accent text-primary" : "border-transparent text-tertiary hover:text-primary",
               )}
             >
               {label(tab.id)}
@@ -84,7 +97,7 @@ export const ManageFrame: React.FC<{ actions?: React.ReactNode; children: React.
           );
         })}
       </nav>
-      <div className="mt-8">{children}</div>
+      <div className="mt-8 flex flex-1 flex-col">{children}</div>
     </HubPage>
   );
 };

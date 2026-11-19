@@ -22,9 +22,11 @@ type Props<T extends string> = {
   fill?: boolean;
   /**
    * `sm` — Home's small switch (the designers' Home fixes H10, E7, E11b): a pill 28 high, segments 24 high, 12/20,
-   * the picked one 500 and the others 400. The default stays the 32-high control every other screen uses.
+   * the picked one 500 and the others 400. `window` — a switch inside an automations settings window (the designers'
+   * fixes C9): the same 32-high track, segments radius 6 at 13/20 500, the picked one under a lighter shadow. The
+   * default stays the 32-high control every other screen uses.
    */
-  size?: "md" | "sm";
+  size?: "md" | "sm" | "window";
   /**
    * The small switch's track: Mist with a soft shadow under the picked segment (the default); `divider` on a white
    * page, no shadow; `band` on the accent band — white 16 %, the unpicked words white, no shadow (E7).
@@ -54,6 +56,7 @@ export function SegmentedControl<T extends string>({
   className,
 }: Props<T>) {
   const small = size === "sm";
+  const inWindow = size === "window";
   const refs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const enabled = options.map((o, i) => (!disabled && !o.disabled ? i : -1)).filter((i) => i >= 0);
   const pickedIndex = options.findIndex((o) => o.value === value);
@@ -124,11 +127,11 @@ export function SegmentedControl<T extends string>({
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
               "inline-flex min-w-0 items-center justify-center truncate",
-              small ? "rounded-pill px-2.5 text-hint leading-5" : "rounded-control px-3 text-label",
+              small ? "rounded-pill px-2.5 text-hint leading-5" : inWindow ? "rounded-tag px-3 text-label leading-5" : "rounded-control px-3 text-label",
               "transition-[background-color,color,box-shadow] duration-(--duration-hover)",
               "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent",
               fill && "flex-1",
-              !small && (picked ? "bg-card text-primary shadow-raised" : "text-secondary hover:text-primary"),
+              !small && (picked ? cn("bg-card text-primary", inWindow ? "shadow-segment" : "shadow-raised") : "text-secondary hover:text-primary"),
               small &&
                 (picked
                   ? cn("bg-card font-medium text-primary", tone === "mist" && "shadow-card")

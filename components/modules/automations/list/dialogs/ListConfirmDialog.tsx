@@ -22,7 +22,10 @@ import { cn } from "@/lib/cn";
  * `InlineAlert` inside it (`automations-list` → Words, "Errors in dialogs").
  *
  * The confirm button has three looks: the accent, the red fill of a delete, and **the grey fill of an archive** —
- * `--text-tertiary` fill, white text, `--text-secondary` on hover (`automations-list` → Changes to SPEC, 2).
+ * `--text-tertiary` fill, white text, `--text-secondary` on hover (`automations-list` → Changes to SPEC, 2); beside it
+ * Cancel is a ghost (G13).
+ *
+ * One column 16 apart everywhere — title, each paragraph, the extra, the buttons (G12, as `ConfirmActionModal`).
  */
 export const ListConfirmDialog: React.FC<{
   open: boolean;
@@ -50,13 +53,18 @@ export const ListConfirmDialog: React.FC<{
         <AlertDialogHeader>
           <AlertDialogTitle className="break-words">{title}</AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="flex flex-col gap-2">{children}</div>
+            <div className="flex flex-col gap-4">{children}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         {extra}
         {error ? <InlineAlert tone="declined">{error}</InlineAlert> : null}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>{t("actions.cancel")}</AlertDialogCancel>
+          <AlertDialogCancel
+            disabled={busy}
+            className={cn(tone === "archive" && "border-transparent bg-transparent hover:border-transparent hover:bg-mist")}
+          >
+            {t("actions.cancel")}
+          </AlertDialogCancel>
           <AlertDialogAction
             disabled={busy}
             destructive={tone === "destructive"}

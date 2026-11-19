@@ -56,7 +56,12 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
   const [saved, setSaved] = React.useState(false);
   const [savedError, setSavedError] = React.useState(false);
 
+  // One start per page: every start makes a new secret on the server, so a second one (React's dev double effect, a
+  // remount) left the page showing a key the server no longer held, and every right code was refused (walk of 2026-11-19).
+  const started = React.useRef(false);
   React.useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     auth.enrolAtSignInStart().then(setEnrolment).catch(() => setFailed(true));
   }, [auth]);
 
@@ -110,8 +115,9 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
     return (
       <AuthSplit brand={brand}>
         <AuthHeading title={t("setUp.codesTitle")} lead={t("setUp.codesLead")} />
-        <ul className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-control bg-mist p-4 font-mono text-body text-primary">
-          {codes.map((c) => <li key={c}>{c}</li>)}
+        {/* RD5: Mist, radius 10, padding 16 20; the codes 500, letter-spaced .04em, centred. */}
+        <ul className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-popover bg-mist px-5 py-4 font-mono text-body font-medium tracking-[0.04em] text-primary">
+          {codes.map((c) => <li key={c} className="text-center">{c}</li>)}
         </ul>
         <div className="flex gap-2">
           <Button type="button" variant="secondary" className="gap-1.5" onClick={download}>
@@ -141,7 +147,8 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
         lead={t("setUp.lead", { company: brand.kind === "company" ? brand.name : "noddo" })}
       />
       <div className="flex flex-col gap-3">
-        <p className="text-body font-medium text-primary">{t("setUp.scan")}</p>
+        {/* RD4: the steps' labels 13/18 500, the link 13/18 500 accent, the key on a Mist panel (padding 12 16). */}
+        <p className="text-label font-medium text-primary">{t("setUp.scan")}</p>
         <div className="flex size-[184px] items-center justify-center rounded-control border border-divider bg-card">
           {qr && (
             // eslint-disable-next-line @next/next/no-img-element -- a data URL drawn here
@@ -151,17 +158,17 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
         {showKey && enrolment ? (
           <div className="flex flex-col gap-2">
             <p className="text-hint text-tertiary">{t("setUp.keyLead")}</p>
-            <code className="block break-all rounded-control bg-mist px-3 py-2 font-mono text-body">
+            <code className="block break-all rounded-popover bg-mist px-4 py-3 font-mono text-body">
               {enrolment.secret.replace(/(.{4})/g, "$1 ").trim()}
             </code>
             <div><CopyButton text={enrolment.secret} label={t("setUp.copyKey")} done={t("setUp.copied")} /></div>
           </div>
         ) : (
-          <Button type="button" variant="link" className="self-start" onClick={() => setShowKey(true)}>{t("setUp.cantScan")}</Button>
+          <Button type="button" variant="link" className="self-start text-label" onClick={() => setShowKey(true)}>{t("setUp.cantScan")}</Button>
         )}
       </div>
       <form noValidate className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); void confirm(); }}>
-        <p className="text-body font-medium text-primary">{t("setUp.enterCode")}</p>
+        <p className="text-label font-medium text-primary">{t("setUp.enterCode")}</p>
         <CodeInput
           label={t("fields.appCode")}
           value={code}
@@ -171,7 +178,8 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
           disabled={busy || !enrolment}
         />
         <FieldError>{fieldError}</FieldError>
-        <Button type="submit" size="lg" className="w-full" loading={busy} loadingLabel={t("busy.turningOn")}>
+        {/* RD4: Turn on stands 28 under the code, as the form's own block (it was 12). */}
+        <Button type="submit" size="lg" className="mt-4 w-full" loading={busy} loadingLabel={t("busy.turningOn")}>
           {t("setUp.turnOn")}
         </Button>
       </form>

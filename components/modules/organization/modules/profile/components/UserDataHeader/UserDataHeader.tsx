@@ -344,7 +344,7 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
               <HeaderFact label={t("profile.header.manager")}>
                 <Link href={`/organization/people/${user.manager.id}`} className="inline-flex items-center gap-1.5 text-primary no-underline hover:underline">
                   <Avatar className="size-5">
-                    <AvatarFallback name={user.manager.name} className="text-hint">{initialsOf(user.manager.name).slice(0, 1)}</AvatarFallback>
+                    <AvatarFallback name={user.manager.name}>{initialsOf(user.manager.name).slice(0, 1)}</AvatarFallback>
                   </Avatar>
                   {user.manager.name}
                 </Link>
@@ -756,14 +756,15 @@ function ProfileAvatar({ url, fullName }: { url: string | null; fullName: string
     <Avatar key={url ?? "avatar-fallback"} className="size-14">
       {url ? <AvatarImage src={url} alt={fullName}/> : null}
       {/* The name picks the tag colour (SPEC § 4.7) — without it every face was gray. */}
-      <AvatarFallback name={fullName} className="text-card-title">{initialsOf(fullName)}</AvatarFallback>
+      <AvatarFallback name={fullName}>{initialsOf(fullName)}</AvatarFallback>
     </Avatar>
   );
 }
 
 /**
- * Time with the company, the way the header says it: "3 weeks", "7 months", "2 y 7 m", "2 years". Nothing
- * before the first day — somebody who has not started has no tenure.
+ * Time with the company, the way the header says it: "Joined today", "4 days", "3 weeks", "7 months", "2 y 7 m",
+ * "2 years". Nothing before the first day — somebody who has not started has no tenure. **Never rounded up** (the
+ * designers' hub fixes Z2, 2026-11-19): somebody hired today has been here no days, not "1 week".
  */
 export function tenureOf(t: OrgTranslator, hireDate: string | null | undefined, today: Date = new Date()): string | null {
   if (!hireDate) return null;
@@ -773,8 +774,13 @@ export function tenureOf(t: OrgTranslator, hireDate: string | null | undefined, 
   let months = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth();
   if (today.getDate() < start.getDate()) months -= 1;
   if (months < 1) {
-    const weeks = Math.max(1, Math.floor((today.getTime() - start.getTime()) / (7 * 24 * 3600 * 1000)));
-    return t("profile.tenure.weeks", { count: weeks });
+    // Calendar days, so a change of clocks does not make a day 23 hours short of one.
+    const startDay = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const todayDay = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const days = Math.round((todayDay - startDay) / (24 * 3600 * 1000));
+    if (days === 0) return t("profile.tenure.today");
+    if (days < 7) return t("profile.tenure.days", { count: days });
+    return t("profile.tenure.weeks", { count: Math.floor(days / 7) });
   }
   if (months < 12) return t("profile.tenure.months", { count: months });
   const years = Math.floor(months / 12);

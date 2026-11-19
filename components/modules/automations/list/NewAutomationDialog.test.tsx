@@ -45,7 +45,9 @@ describe("New automation", () => {
 
     expect(screen.getByRole("heading", { name: "New automation" })).toBeInTheDocument();
     expect(screen.getAllByText("7 days before the hire date")).toHaveLength(3);
-    expect(screen.getAllByText("Email the new teammate")).toHaveLength(3);
+    // Line 2 says what a template does: a known template its own line, another its first step's title.
+    expect(screen.getByText("Tell their manager")).toBeInTheDocument();
+    expect(screen.getAllByText("Email the new teammate")).toHaveLength(2);
     // Only the categories that have a template.
     expect(screen.queryByRole("button", { name: "Compliance" })).not.toBeInTheDocument();
 

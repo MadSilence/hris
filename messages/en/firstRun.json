@@ -192,5 +192,13 @@
     },
     "skip": "Skip",
     "finish": "Finish"
+  },
+  "finishProfile": {
+    "title": "Finish your profile",
+    "lead": "Fill in what’s missing. All of it can wait.",
+    "save": "Save",
+    "notNow": "Not now",
+    "saveFailed": "Couldn’t save. Try again.",
+    "retry": "Retry"
   }
 }
