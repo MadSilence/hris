@@ -113,8 +113,9 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
 
 ## Built
 - **Where to see it:** the editor's Run history and Versions. Code: `components/modules/automations/runs`.
+- **The 4 px scroll thumb** (2026-11-19) is the system utility `scroll-thumb`, shown while the list moves, on Run history, Versions and the run window.
 - **Differs from the design:** the first version reads "Turned on" (the badge already says v1); steps on a path not
-  taken are not listed in the run window; the scrollbar is the default one, not the 4 px thumb; a retry's error uses the
+  taken are not listed in the run window; a retry's error uses the
   error catalogue's sentence.
 - **Images of the real screen:** not taken yet. Walked 2026-11-07 against these frames (`(claude)/HISTORY.md` § "Automations and live rules").
 

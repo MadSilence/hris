@@ -1,5 +1,5 @@
 import type { useTranslations } from "next-intl";
-import { formatDisplayDate } from "@/lib/date";
+import { formatDisplayDate, formatShortDate, formatShortRange } from "@/lib/date";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { Alert02Icon, Briefcase01Icon, CalendarLock01Icon, CancelCircleIcon, CheckListIcon, CheckmarkCircle02Icon, FileTextIcon, FlashIcon, Notification01Icon, ShieldCheckIcon, SquareLock02Icon, TaskDone01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import type { Notification } from "@/models/notifications";
@@ -42,11 +42,17 @@ const signedDays = (t: NotificationsTranslator, amount: string): string => {
   return t("presenter.signedDays", { sign: n > 0 ? "+" : "", ...dayArgs(amount) });
 };
 
+/**
+ * A date inside a notification's sentence: the short style with its weekday, the company's order ("due Sat, 30 Nov",
+ * "Sat, Nov 30"), the year only when it is not this one — never the numeric table format (DESIGN_LEFTOVERS batch 3).
+ * Every type goes through here, so a new one gets it too.
+ */
+const sentenceDate = (value: unknown, language?: string): string =>
+  str(value) ? formatShortDate(str(value), { weekday: true, language }) : "";
+
 const dates = (p: Params, language?: string): string => {
-  const start = formatDisplayDate(str(p.startDate), { language });
-  const end = formatDisplayDate(str(p.endDate), { language });
-  if (!start) return "";
-  return !end || end === start ? start : `${start} → ${end}`;
+  if (!str(p.startDate)) return "";
+  return formatShortRange(str(p.startDate), str(p.endDate) || null, { weekday: true, language });
 };
 
 /** The policy of a leave notification: `{hasPolicy, select, yes {{policy} request} other {time off}}`. */
@@ -83,7 +89,7 @@ const pauseReason = (reason: unknown): string =>
   reason === "MANUAL" || reason === "OWNER_LEFT" || reason === "OWNER_LACKS_RIGHT" || reason === "TARGET_GONE" ? reason : "other";
 
 /** A formatted due date, with its select. */
-const dueOn = (value: unknown, language?: string) => ({ hasDue: has(value), due: str(value) ? formatDisplayDate(str(value), { language }) : "" });
+const dueOn = (value: unknown, language?: string) => ({ hasDue: has(value), due: sentenceDate(value, language) });
 
 /**
  * Turns a stored notification (type + params) into display text + a deep-link, rendered at read time
@@ -189,7 +195,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
       const args = {
         ...leave(p),
         hasFrom: has(p.effectiveFrom),
-        from: str(p.effectiveFrom) ? formatDisplayDate(str(p.effectiveFrom), { language }) : "",
+        from: sentenceDate(p.effectiveFrom, language),
       };
       return {
         title: t("presenter.policyAssigned.title"),
@@ -204,7 +210,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
       const args = {
         ...leave(p),
         hasUntil: has(p.effectiveTo),
-        until: str(p.effectiveTo) ? formatDisplayDate(str(p.effectiveTo), { language }) : "",
+        until: sentenceDate(p.effectiveTo, language),
       };
       return {
         title: t("presenter.policyEnded.title"),
@@ -802,7 +808,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
           kind: reviewKind(p.kind),
           subject: str(p.subjectName) || t("fallback.aPerson"),
           cycle: str(p.cycleName) || t("fallback.yourCycle"),
-          due: formatDisplayDate(str(p.dueDate), { language }),
+          due: sentenceDate(p.dueDate, language),
         }),
         icon: Alert02Icon,
         href: str(p.cycleId) ? `/reviews/cycles/${str(p.cycleId)}` : "/reviews",
@@ -954,7 +960,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         message: t(`presenter.${key}.message`, {
           person: str(p.personName) || t("fallback.APerson"),
           today: yesNo(today),
-          date: formatDisplayDate(str(p.date), { language }),
+          date: sentenceDate(p.date, language),
         }),
         icon: UserGroupIcon,
         href: str(p.userId) ? `/organization/people/${str(p.userId)}` : null,
@@ -978,7 +984,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         message: t("presenter.carryoverExpiring.message", {
           ...leave(p),
           ...dayArgs(str(p.amount)),
-          date: formatDisplayDate(str(p.expiresOn), { language }),
+          date: sentenceDate(p.expiresOn, language),
         }),
         icon: CalendarLock01Icon,
         href: ownTimeOff(p.userId),

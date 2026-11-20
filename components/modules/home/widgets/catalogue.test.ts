@@ -57,6 +57,18 @@ describe("home's catalogue", () => {
     expect(HOME_WIDGETS.filter((w) => w.locked).map((w) => w.id)).toEqual(["waiting-on-you"]);
   });
 
+  it("offers Expiring documents in M only to a person who sees only their own documents (documents-expiry X10)", () => {
+    const sizes = (access: EffectiveAccess) => availableWidgets(access).find((w) => w.id === "expiring-documents")?.sizes;
+    const own = accessWith({ ...DEFAULT_USER.permissions, "PEOPLE.DOCUMENTS": { VIEW: ["SELF"] } });
+    const reports = accessWith({ ...DEFAULT_USER.permissions, "PEOPLE.DOCUMENTS": { VIEW: ["SELF", "DIRECT_REPORTS"] } });
+    const company = accessWith({ ...DEFAULT_USER.permissions, "PEOPLE.DOCUMENTS": { VIEW: ["COMPANY"] } });
+    expect(sizes(own)).toEqual(["M"]);
+    expect(sizes(reports)).toEqual(["S", "M", "L"]);
+    expect(sizes(company)).toEqual(["S", "M", "L"]);
+    expect(sizes({ ...own, systemOwner: true })).toEqual(["S", "M", "L"]);
+    expect(sizes(DEFAULT_USER)).toBeUndefined();
+  });
+
   it("reads the role a default home is for — not from the profile right everyone holds", () => {
     expect(homeRoleOf(DEFAULT_USER)).toBe("EMPLOYEE");
     expect(homeRoleOf(MANAGER)).toBe("MANAGER");

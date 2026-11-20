@@ -76,6 +76,16 @@ describe("the words of an automation", () => {
     );
     const wait: StepSpec = { id: "s2", type: "WAIT_UNTIL", until: "TASK_DONE", maxDays: 10, onTimeout: "STOP_AND_TELL", tell: [{ kind: "ROLE", roleId: "r-hr" }] };
     expect(words.stepTitle(wait)).toBe("The task is done");
+    // A wait on a signing says so (design leftovers, batch 3), by the document's title or as "the document".
+    const signing = (title: string | null): StepSpec[] => [
+      { id: "d1", type: "SIGN_DOCUMENT", title },
+      { ...wait, taskStepId: "d1" },
+    ];
+    expect(words.stepTitle({ ...wait, taskStepId: "d1" }, { steps: signing("Offer letter") })).toBe("Offer letter is signed");
+    expect(words.stepTitle({ ...wait, taskStepId: "d1" }, { steps: signing(null) })).toBe("The document is signed");
+    expect(words.stepTitle({ ...wait, taskStepId: "t1" }, { steps: [{ id: "t1", type: "CREATE_TASK", title: "Book" }, wait] })).toBe(
+      "The task is done",
+    );
     expect(nb(words.stepSubtitle(wait) ?? "")).toBe("At most 10 days, then stop and tell HR Admin");
     expect(words.stepTitle({ id: "s3", type: "WAIT_UNTIL", until: "FIELD_FILLED", field: "attr:a-contact" })).toBe("Emergency contact is filled");
   });
@@ -121,6 +131,20 @@ describe("the words of an automation", () => {
     );
     expect(parts.filter((p) => p.stepId).map((p) => p.stepId)).toEqual(["s1", "s2", "s3"]);
     expect(parts.find((p) => p.stepId === "s3")?.chip).toBe(true);
+  });
+
+  // WALK_QUESTIONS § 47: a wait on a signing says so in the sentence too, as its card does.
+  it("says in the sentence that a wait on a signing waits until the document is signed", () => {
+    const definition = definitionFixture({
+      trigger: { type: "DATE_OFFSET", field: "PROBATION_END", days: 14, direction: "BEFORE" },
+      steps: [
+        { id: "d1", type: "SIGN_DOCUMENT", title: "Offer letter" },
+        { id: "s2", type: "WAIT_UNTIL", until: "TASK_DONE", taskStepId: "d1" },
+      ],
+    });
+    const text = nb(words.sentence(definition).map((p) => p.text).join(""));
+    expect(text).toContain("waits until Offer letter is signed");
+    expect(text).not.toContain("the task is done");
   });
 
   it("puts grey placeholders in the sentence before anything is picked", () => {

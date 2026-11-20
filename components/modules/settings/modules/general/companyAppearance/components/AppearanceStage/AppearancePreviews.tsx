@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 
+import { NoddoMark, NoddoWordmark } from "@/components/brand";
 import { buttonVariants } from "@/components/desact/button";
+import { Icon } from "@/components/desact/icon";
 import { cn } from "@/lib/cn";
 import { AuthHeading, AuthSplit, RingGrid } from "@/components/modules/auth/layout";
 import { HomeBand } from "@/components/modules/home/components";
@@ -183,29 +186,85 @@ export function AppPreview({ companyName, logoUrl, background, address }: Previe
   );
 }
 
-/** The invitation email (sign-in-emails M2): the band, the card, Join. Light: a Gray 50 band, a white canvas, a border. */
+/** The moment band's row (design/email-images.mjs `band`): six rings, the second and fifth light, the fifth dropped. */
+const MAIL_RINGS = [23, 133.8, 244.6, 355.4, 466.2, 577].map((cx, i) => ({ cx, cy: i === 4 ? 32 : 23, hot: i === 1 || i === 4 }));
+
+/** The scale the 600 px email is shown at on the stage. */
+const MAIL_ZOOM = 0.72;
+
+/**
+ * The login-code email (sign-in-emails M16) as `LoginEmailLayout` writes it, at its true 600 px and zoomed: the inbox's
+ * sender line (every email comes from noddo, the subject names the company), the moment band — the company's mark,
+ * the two-tone heading and the row of rings cut by the band's edge — the code, "or", the wide button, the small print,
+ * and the footer signed by noddo (variant C). The address is text, never a link. Light: a Gray 50 band, a white canvas,
+ * a bordered card.
+ */
 export function EmailPreview({ companyName, logoUrl, background }: PreviewProps) {
   const t = useTranslations("settings.appearance.stage.email");
+  const code = t("sampleCode");
   return (
-    <div
-      className="appearance-mail w-[460px] max-w-full overflow-hidden rounded-card bg-mist p-6"
-      data-background={background.toLowerCase()}
-    >
-      <div className="appearance-mail-card">
-        <div className="appearance-mail-band flex items-center gap-3 px-8 py-6">
-          <LogoTile companyName={companyName} logoUrl={logoUrl} className="size-10 rounded-control text-card-title" />
-          <span className="text-section-title">{companyName}</span>
+    <div className="appearance-mail" data-background={background.toLowerCase()} style={{ width: 600 * MAIL_ZOOM }}>
+      <div style={{ width: 600, zoom: MAIL_ZOOM }}>
+        <div className="appearance-mail-sender">
+          <NoddoMark size={40} />
+          <div className="min-w-0">
+            <p className="m-0 truncate">
+              <strong>{t("from")}</strong> <span className="text-tertiary">{t("fromAddress")}</span>
+            </p>
+            <p className="m-0 truncate text-secondary">{t("subject", { code, company: companyName })}</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 px-8 py-7">
-          <p className="appearance-mail-title text-primary">
-            {t.rich("title", { company: companyName, br: () => <br />, em: (chunks) => <em>{chunks}</em> })}
-          </p>
-          <p className="m-0 text-body text-secondary">{t("body", { company: companyName, email: t("sampleEmail") })}</p>
-          <span className={cn(buttonVariants({ size: "lg" }), "self-start")}>{t("action", { company: companyName })}</span>
-          <p className="m-0 text-hint text-tertiary">{t("note")}</p>
+
+        <div className="appearance-mail-canvas">
+          <div className="appearance-mail-card">
+            <div className="appearance-mail-band">
+              <div className="flex items-center gap-2.5">
+                <LogoTile companyName={companyName} logoUrl={logoUrl} className="appearance-mail-tile" />
+                <span className="appearance-mail-name">{companyName}</span>
+              </div>
+              <p className="appearance-mail-title">
+                {t.rich("title", { br: () => <br />, em: (chunks) => <em>{chunks}</em> })}
+              </p>
+              <svg className="appearance-mail-rings" viewBox="0 0 600 36" width={520} height={31.2} aria-hidden="true">
+                {MAIL_RINGS.map((ring) => (
+                  <circle key={ring.cx} className={ring.hot ? "hot" : undefined} cx={ring.cx} cy={ring.cy} r={20} strokeWidth={6} />
+                ))}
+              </svg>
+            </div>
+
+            <div className="appearance-mail-body">
+              <p className="m-0">
+                {t.rich("body", {
+                  company: companyName,
+                  email: t("sampleEmail"),
+                  b: (chunks) => <strong>{chunks}</strong>,
+                })}
+              </p>
+              <div className="appearance-mail-code">
+                {code.slice(0, 3)}
+                <span className="pl-[18px]">{code.slice(3)}</span>
+              </div>
+              <div className="appearance-mail-or">
+                <i />
+                <span>{t("or")}</span>
+                <i />
+              </div>
+              <span className="appearance-mail-button">
+                {t("action")}
+                <Icon icon={ArrowRight02Icon} size="sm" />
+              </span>
+              <p className="appearance-mail-note">{t("browser")}</p>
+              <p className="appearance-mail-small">{t("note")}</p>
+            </div>
+          </div>
+
+          <div className="appearance-mail-footer">
+            <NoddoWordmark height={26} className="mx-auto mb-2.5" />
+            <p className="m-0 text-secondary">{t("sentBy", { company: companyName })}</p>
+            <p className="appearance-mail-reason">{t("reason", { company: companyName })}</p>
+          </div>
         </div>
       </div>
-      <p className="m-0 mt-4 text-center text-hint text-tertiary">{t("sentBy", { company: companyName })}</p>
     </div>
   );
 }

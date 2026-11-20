@@ -217,9 +217,9 @@ const cityOf = (zone: string): string => (zone.split("/").pop() ?? zone).replace
 
 /**
  * The second lines of the time zone list (C32): who gets it when in each person's zone — the reader themselves, in the
- * zone of this browser — the company's zone, any zone.
+ * zone of this browser — the company's zone by its name ("Europe/Vilnius · everyone at the same moment"), any zone.
  */
-const useZoneLines = (at: string): Record<"PERSON" | "COMPANY" | "PICK", string> => {
+const useZoneLines = (at: string, companyZone: string | null | undefined): Record<"PERSON" | "COMPANY" | "PICK", string> => {
   const t = useTranslations("automationsSettings");
   const { user } = useCurrentUser();
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
@@ -228,7 +228,7 @@ const useZoneLines = (at: string): Record<"PERSON" | "COMPANY" | "PICK", string>
     PERSON: user?.firstName
       ? t("schedule.zoneLine.PERSON", { name: user.firstName, city, time: at })
       : t("schedule.zoneHint.PERSON"),
-    COMPANY: t("schedule.zoneHint.COMPANY"),
+    COMPANY: companyZone ? t("schedule.zoneLine.COMPANY", { zone: companyZone }) : t("schedule.zoneHint.COMPANY"),
     PICK: t("schedule.zoneHint.PICK"),
   };
 };
@@ -263,11 +263,11 @@ const useQuarterHint = (monthOfPeriod: number, day: number) => {
  * Schedule (T4a–T4d): every day, week, month, quarter or year; for a week its days, for a month a day or a weekday,
  * for a quarter its month and day, for a year a month and day without a year; then the time and the time zone.
  */
-export const ScheduleFields: React.FC<TriggerPartProps> = ({ trigger, problems, onTrigger }) => {
+export const ScheduleFields: React.FC<TriggerPartProps> = ({ trigger, catalog, problems, onTrigger }) => {
   const t = useTranslations("automationsSettings");
   const everyId = React.useId();
   const frequency = trigger.frequency ?? "MONTHLY";
-  const zoneLines = useZoneLines(trigger.at ?? "09:00");
+  const zoneLines = useZoneLines(trigger.at ?? "09:00", catalog.companyTimeZone);
   const quarterHint = useQuarterHint(trigger.monthOfPeriod ?? 1, trigger.dayOfMonth ?? 1);
   const weekdayMode = trigger.weekOfMonth != null;
   const zone = trigger.timeZone ?? PERSON_ZONE;

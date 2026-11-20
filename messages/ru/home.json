@@ -88,7 +88,7 @@
     "S": "Маленький",
     "M": "Средний",
     "L": "Большой",
-    "smallOnly": "Только маленький",
+    "only": "{size, select, S {Только маленький} M {Только средний} other {Только большой}}",
     "label": "Размер: {size}"
   },
   "card": {
@@ -200,6 +200,7 @@
     "managerSeesAfter": "Руководитель увидит после отправки",
     "assignedBy": "Назначил(а) {name}",
     "wasUpdated": "обновлена",
+    "toReadAndAgree": "прочитать и согласиться",
     "whatChanged": "Что изменилось: {points}",
     "readAndAgree": "Прочитать и согласиться",
     "toSignFrom": "{hasSender, select, yes {от {sender} · на подпись} other {на подпись}}"

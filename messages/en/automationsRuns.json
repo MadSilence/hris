@@ -58,6 +58,7 @@
     "afterThat": "after that",
     "waitingFor": "Waiting for {name}.",
     "waitingForAnswer": "Waiting for an answer.",
+    "waitingSigned": "Waiting until {title} is signed.",
     "waitingTask": "Waiting until the task is done.",
     "waitingField": "Waiting until the field is filled in.",
     "asksManagerOn": "Asks their manager on {date}.",

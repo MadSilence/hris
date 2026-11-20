@@ -13,6 +13,7 @@ import {
   skipsOnFailure,
   removeStep,
   stepsAbove,
+  unsignedDocumentWait,
   updateStep,
 } from "./tree";
 
@@ -93,5 +94,29 @@ describe("If it fails (S8–S8c)", () => {
     expect(dependsOnSkippable(d, wait)?.id).toBe("t");
     expect(dependsOnSkippable({ ...d, steps: [{ ...task, ifFails: null }, wait] }, wait)).toBeNull();
     expect(dependsOnSkippable(d, notify("n"))).toBeNull();
+  });
+});
+
+describe("{document} after a wait that goes on (WALK_QUESTIONS § 39)", () => {
+  const sign: StepSpec = { id: "sg", type: "SIGN_DOCUMENT", title: "Offer letter" };
+  const wait = (onTimeout: StepSpec["onTimeout"]): StepSpec => ({ id: "w", type: "WAIT_UNTIL", until: "TASK_DONE", taskStepId: "sg", maxDays: 10, onTimeout });
+  const told: StepSpec = { id: "n", type: "NOTIFY", recipients: [{ kind: "MANAGER" }], text: "Signed: {document}" };
+  const def = (...steps: StepSpec[]): AutomationDefinition => ({ ...emptyDefinition(), steps });
+
+  it("warns on a step using {document} below a signing wait that goes on", () => {
+    expect(unsignedDocumentWait(def(sign, wait("CONTINUE"), told), told)?.id).toBe("w");
+    const email: StepSpec = { id: "e", type: "SEND_EMAIL", recipients: [{ kind: "PERSON" }], subject: "Hi", body: "{document}" };
+    expect(unsignedDocumentWait(def(sign, wait("CONTINUE"), email), email)?.id).toBe("w");
+  });
+
+  it("says nothing when the wait stops, waits for a task, or the step does not use {document}", () => {
+    expect(unsignedDocumentWait(def(sign, wait("STOP"), told), told)).toBeNull();
+    expect(unsignedDocumentWait(def(sign, wait("STOP_AND_TELL"), told), told)).toBeNull();
+    const task: StepSpec = { id: "sg", type: "CREATE_TASK", title: "Book" };
+    expect(unsignedDocumentWait(def(task, wait("CONTINUE"), told), told)).toBeNull();
+    const plain = { ...told, text: "Signed: {fullName}" };
+    expect(unsignedDocumentWait(def(sign, wait("CONTINUE"), plain), plain)).toBeNull();
+    // The step above the wait is not after it.
+    expect(unsignedDocumentWait(def(sign, told, wait("CONTINUE")), told)).toBeNull();
   });
 });

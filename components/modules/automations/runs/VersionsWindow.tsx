@@ -11,6 +11,7 @@ import type { AutomationVersion } from "@/models/automations";
 import { useRunWords } from "./runWords";
 import { ToolWindow, WindowEmpty } from "./ToolWindow";
 import { versionChanges, type VersionChange } from "./versionSummary";
+import { showThumbWhileScrolling } from "./scrollThumb";
 
 const lowerFirst = (s: string) => (s ? s.charAt(0).toLocaleLowerCase() + s.slice(1) : s);
 
@@ -82,7 +83,9 @@ export const VersionsWindow: React.FC<VersionsWindowProps> = ({ automationId, on
 
   return (
     <ToolWindow title={t("versions.title")} width={320} placement="left" onClose={onClose}>
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-2">{body}</div>
+      <div className="scroll-thumb flex min-h-0 flex-1 flex-col overflow-y-auto pb-2" onScroll={showThumbWhileScrolling}>
+        {body}
+      </div>
     </ToolWindow>
   );
 };

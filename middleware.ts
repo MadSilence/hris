@@ -41,7 +41,9 @@ export function middleware(request: NextRequest) {
 
 const withPolicy = (respond: (requestHeaders: Headers) => NextResponse, request: NextRequest): NextResponse => {
   const nonce = createNonce();
-  const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development" ? "development" : "production");
+  const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development" ? "development" : "production", {
+    httpImages: (process.env.APP_SCHEME || "http") === "http",
+  });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(NONCE_HEADER, nonce);
   requestHeaders.set("Content-Security-Policy", policy);

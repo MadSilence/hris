@@ -1003,12 +1003,19 @@
       "draft": "Not saved yet",
       "foot": "Live — this is what {company} sees",
       "email": {
-        "title": "You’re invited<br></br><em>to join {company}</em>",
-        "body": "You’ll join as {email}. {company} uses noddo for time off, approvals and everything around them.",
-        "action": "Join {company}",
-        "note": "The invitation works once. If you weren’t expecting it, ignore this email.",
+        "from": "noddo",
+        "fromAddress": "no-reply@noddo.so",
+        "subject": "{code} is your {company} login code",
+        "title": "Here’s your<br></br><em>login code</em>",
+        "body": "Log in to {company} as <b>{email}</b> with this code, or with one click.",
+        "or": "or",
+        "action": "Log in with one click",
+        "browser": "The button works in the browser where you asked for the code.",
+        "note": "The code works for 10 minutes. If you didn’t ask for it, ignore this email — no one can log in without it.",
         "sentBy": "Sent by noddo on behalf of {company}",
-        "sampleEmail": "anna@example.com"
+        "reason": "{company} · You get this because you have an account at {company}.",
+        "sampleEmail": "anna@example.com",
+        "sampleCode": "482913"
       }
     }
   },

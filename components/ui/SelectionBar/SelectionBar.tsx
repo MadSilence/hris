@@ -10,6 +10,14 @@ import { Button } from "@/components/desact/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/desact/dropdown-menu";
 import { cn } from "@/lib/cn";
 
+/** The nearest ancestor that scrolls vertically — what the sticky bar sticks to; null is the viewport. */
+const scrollParentOf = (node: HTMLElement): HTMLElement | null => {
+  for (let el = node.parentElement; el; el = el.parentElement) {
+    if (/(auto|scroll)/.test(getComputedStyle(el).overflowY)) return el;
+  }
+  return null;
+};
+
 export type SelectionAction = {
   key: string;
   label: string;
@@ -38,7 +46,7 @@ export const SelectionBar: React.FC<{
   actions: SelectionAction[];
 }> = ({ count, onClear, label, extra, actions }) => {
   const t = useTranslations("common");
-  const sentinel = useRef<HTMLDivElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
@@ -49,13 +57,23 @@ export const SelectionBar: React.FC<{
     return () => window.removeEventListener("keydown", onKey);
   }, [onClear]);
 
-  // A zero-height marker just above the bar: once it scrolls out of view, the bar is stuck.
+  // The bar is stuck once its scroller has scrolled and the bar sits at the scroller's top edge — measured on scroll.
+  // No marker element beside the bar: in a `flex gap-*` column a zero-height marker is still an item and adds a gap,
+  // which moved the rows under the pointer at the first tick (WALK_QUESTIONS § 50). An IntersectionObserver alone
+  // cannot tell "resting at the top edge" from "stuck there", and the documents list rests exactly there.
   useEffect(() => {
-    const el = sentinel.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting), { threshold: [0] });
-    observer.observe(el);
-    return () => observer.disconnect();
+    const node = bar.current;
+    if (!node) return;
+    const scroller = scrollParentOf(node);
+    const target: HTMLElement | Window = scroller ?? window;
+    const measure = () => {
+      const scrolled = scroller ? scroller.scrollTop > 0 : window.scrollY > 0;
+      const edge = scroller ? scroller.getBoundingClientRect().top : 0;
+      setStuck(scrolled && node.getBoundingClientRect().top - edge <= 0.5);
+    };
+    measure();
+    target.addEventListener("scroll", measure, { passive: true });
+    return () => target.removeEventListener("scroll", measure);
   }, []);
 
   const shown = actions.length > MAX_VISIBLE ? actions.slice(0, MAX_VISIBLE - 1) : actions;
@@ -82,8 +100,8 @@ export const SelectionBar: React.FC<{
 
   return (
     <>
-      <div ref={sentinel} aria-hidden className="h-0" />
       <div
+        ref={bar}
         role="region"
         aria-label={t("selection.selected", { count })}
         className={cn(

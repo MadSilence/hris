@@ -58,4 +58,11 @@ describe("createNonce", () => {
     expect(first).toMatch(/^[A-Za-z0-9+/]{22}==$/);
     expect(first).not.toEqual(second);
   });
+
+  // WALK_QUESTIONS § 51: a backend on http (a local machine) serves logos over http; on https they stay refused.
+  it("allows http images only when the app runs on http", () => {
+    expect(directive(contentSecurityPolicy("n", "production"), "img-src")).not.toContain("http:");
+    expect(directive(contentSecurityPolicy("n", "production", { httpImages: false }), "img-src")).not.toContain("http:");
+    expect(directive(contentSecurityPolicy("n", "production", { httpImages: true }), "img-src")).toContain("http:");
+  });
 });

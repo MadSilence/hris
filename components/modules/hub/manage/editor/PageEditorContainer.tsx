@@ -394,7 +394,8 @@ const Editor: React.FC<{ page: PageEdit }> = ({ page }) => {
               </div>
             </div>
           )}
-          <p className="mt-2.5 ml-[158px] text-hint text-tertiary">{t("editor.mustReadOffHint")}</p>
+          {/* 10 below Agree by: the column's own 2 px gap and 8 more (the hub walk of 2026-11-19 measured 12). */}
+          <p className="mt-2 ml-[158px] text-hint text-tertiary">{t("editor.mustReadOffHint")}</p>
         </div>
 
         <hr className="my-6 border-divider" />

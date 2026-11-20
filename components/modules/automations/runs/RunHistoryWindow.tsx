@@ -19,6 +19,7 @@ import { RunStatusBadge } from "./RunStatusBadge";
 import { initialsOf, runDay, useRunWords } from "./runWords";
 import { ToolWindow, WindowEmpty } from "./ToolWindow";
 import { useAutomationWords } from "./seams";
+import { showThumbWhileScrolling } from "./scrollThumb";
 
 /** The chips of a run history, in the frame's order, with the count each reads. */
 const CHIPS: { chip: Exclude<RunChip, "NEXT_7_DAYS">; count: keyof RunCounts }[] = [
@@ -53,6 +54,7 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
 
   const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const el = event.currentTarget;
+    showThumbWhileScrolling(event);
     if (!runs.hasNextPage || runs.isFetchingNextPage) return;
     if (el.scrollHeight - el.scrollTop - el.clientHeight < LOAD_AHEAD_PX) void runs.fetchNextPage();
   };
@@ -143,7 +145,7 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
           )}
         </div>
       )}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-2" onScroll={onScroll} data-testid="run-list">
+      <div className="scroll-thumb flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-2" onScroll={onScroll} data-testid="run-list">
         {body}
         {runs.isFetchingNextPage && (
           <div className="flex justify-center py-3">

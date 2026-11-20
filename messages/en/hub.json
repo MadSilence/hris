@@ -313,6 +313,7 @@
       "manyScheduled": "{count} posts scheduled, the nearest {date}",
       "agreedOf": "{agreed} of {needed} agreed",
       "noMustRead": "No must-read pages",
+      "pastDeadline": "{count, plural, one {# past the deadline} other {# past the deadline}}",
       "missedPages": "{count, plural, one {# page} other {# pages}}",
       "onTime": "Everyone is on time"
     },

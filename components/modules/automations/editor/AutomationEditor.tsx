@@ -336,8 +336,8 @@ export const AutomationEditor: React.FC<{
 
   // ── editing the steps ────────────────────────────────────────────────────────────────────
   const titleOf = React.useCallback(
-    (step: StepSpec) => words.stepTitle(step) || words.stepKind(step),
-    [words],
+    (step: StepSpec) => words.stepTitle(step, definition) || words.stepKind(step),
+    [words, definition],
   );
 
   const insert = React.useCallback(

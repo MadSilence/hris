@@ -23,7 +23,7 @@ import { PersonalDocumentsBreadcrumbs } from "../PersonalDocumentsBreadcrumbs/Pe
 import { PersonalDocumentsToolbar } from "../PersonalDocumentsToolbar/PersonalDocumentsToolbar";
 import { PersonalDocumentsFoldersSection } from "../PersonalDocumentsFoldersSection/PersonalDocumentsFoldersSection";
 import { PersonalDocumentsFilesTable } from "../PersonalDocumentsFilesTable/PersonalDocumentsFilesTable";
-import { PersonalDocumentsEmptyState } from "../PersonalDocumentsEmptyState/PersonalDocumentsEmptyState";
+import { EmptyFolderState } from "../PersonalDocumentsEmptyState/PersonalDocumentsEmptyState";
 import { PersonalDocumentsSkeleton } from "../PersonalDocumentsSkeleton/PersonalDocumentsSkeleton";
 import { documentService } from "../../services/documentService/documentService";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -102,6 +102,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
     setView,
     viewCounts,
     folderFileCounts,
+    folderNames,
     isLoading,
     error,
     isEmpty,
@@ -322,9 +323,6 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const dragDepth = React.useRef(0);
 
-  // Folder headings of All documents (F4): the root's folders; a file deeper down is headed by its own folder's id.
-  const allFolderNames = useMemo(() => folders.map((f) => [f.id, f.name] as [string, string]), [folders]);
-
   const folderOptions = useMemo(
     () => folders.map((folder) => ({ id: folder.id, name: folder.name, icon: folder.icon ?? null, color: folder.color ?? null })),
     [folders]
@@ -451,7 +449,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                 onClearSearch={() => setSearch("")}
               />
             ) : isEmpty ? (
-              <PersonalDocumentsEmptyState title={t("documents.container.emptyFolderTitle")} description={t("documents.container.emptyFolderDescription")} />
+              <EmptyFolderState canAdd={canEdit} />
             ) : (
               <div className="flex flex-col gap-6">
                 {/* Folders hide while searching: the search looks in every folder (T14). */}
@@ -468,23 +466,9 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                   />
                 )}
 
-                {atRoot && !isFiltered && (
-                  <SegmentedControl
-                    aria-label={t("documents.views.label")}
-                    fill={false}
-                    className="self-start"
-                    value={view}
-                    onChange={(next: DocumentsView) => { clearSelection(); setView(next); }}
-                    options={(["LOOSE", "ALL", "STARRED", "EXPIRING"] as const)
-                      .filter((v) => v !== "EXPIRING" || viewCounts.EXPIRING > 0 || view === "EXPIRING")
-                      .map((v) => ({
-                      value: v,
-                      label: `${t(`documents.views.${v}`)} ${viewCounts[v]}`,
-                    }))}
-                  />
-                )}
-
-                {selectedIds.length > 0 && (
+                {/* WALK_QUESTIONS § 50: the bar takes the view tabs' row while rows are selected, so the list does not move
+                    under the pointer at the first tick (a second click landed on the header's box and took all 16). */}
+                {selectedIds.length > 0 ? (
                   <SelectionBar
                     count={selectedIds.length}
                     onClear={clearSelection}
@@ -500,10 +484,26 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                       ...(canManage ? [{ key: "delete", label: t("documents.table.moveToTrash"), icon: Delete02Icon, danger: true, onClick: () => void batchDelete() }] : []),
                     ]}
                   />
-                )}
+                ) : atRoot && !isFiltered ? (
+                  <div className="flex h-12 items-center">
+                    <SegmentedControl
+                      aria-label={t("documents.views.label")}
+                      fill={false}
+                      className="self-start"
+                      value={view}
+                      onChange={(next: DocumentsView) => { clearSelection(); setView(next); }}
+                      options={(["LOOSE", "ALL", "STARRED", "EXPIRING"] as const)
+                        .filter((v) => v !== "EXPIRING" || viewCounts.EXPIRING > 0 || view === "EXPIRING")
+                        .map((v) => ({
+                        value: v,
+                        label: `${t(`documents.views.${v}`)} ${viewCounts[v]}`,
+                      }))}
+                    />
+                  </div>
+                ) : null}
 
                 {viewIsEmpty ? (
-                  <PersonalDocumentsEmptyState title={t("documents.container.emptyFolderTitle")} description={t("documents.container.emptyFolderDescription")} />
+                  <EmptyFolderState canAdd={canEdit} />
                 ) : (
                 <PersonalDocumentsFilesTable
                   documents={documents}
@@ -527,7 +527,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                   hiddenColumns={hiddenColumns}
                   showVisibility={showVisibility}
                   groupByFolder={atRoot && !isFiltered && view === "ALL"
-                    ? { names: new Map(allFolderNames), looseLabel: t("documents.views.LOOSE") }
+                    ? { names: folderNames, looseLabel: t("documents.views.LOOSE") }
                     : undefined}
                   columnPicker={
                     <ColumnPicker

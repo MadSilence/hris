@@ -313,6 +313,7 @@
       "manyScheduled": "Запланировано: {count}, ближайшая {date}",
       "agreedOf": "{agreed} из {needed} согласились",
       "noMustRead": "Обязательных страниц нет",
+      "pastDeadline": "{count, plural, one {# просрочена} few {# просрочены} many {# просрочено} other {# просрочено}}",
       "missedPages": "{count, plural, one {# страница} few {# страницы} many {# страниц} other {# страницы}}",
       "onTime": "Все успевают"
     },

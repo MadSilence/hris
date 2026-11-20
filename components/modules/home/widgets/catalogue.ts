@@ -34,10 +34,23 @@ export type HomeWidgetDefinition = ArrangeableWidget & {
    * their own, and a widget refused here is never drawn, never queried and never offered in the panel.
    */
   isAvailable: (access: EffectiveAccess | null) => boolean;
+  /**
+   * The sizes this reader is offered, when they depend on who reads (Expiring documents: M only for a person who sees
+   * only their own). Must keep `defaultSize`; `sizes` is the whole set, which a saved size is checked against here.
+   */
+  sizesFor?: (access: EffectiveAccess | null) => readonly HomeWidgetSize[];
   Component: React.FC<HomeWidgetProps>;
 };
 
 const everyone = () => true;
+
+/**
+ * Whether the reader sees somebody's documents beyond their own — the people the spec calls "those who manage
+ * documents" (`documents-expiry`, X10). A System Owner does; otherwise any documents VIEW scope other than SELF
+ * (direct reports, a department, the company). A person whose only grant is SELF is the employee of the spec.
+ */
+export const seesOthersDocuments = (access: EffectiveAccess | null): boolean =>
+  isSystemOwner(access) || (access?.permissions?.["PEOPLE.DOCUMENTS"]?.VIEW ?? []).some((scope) => scope !== "SELF");
 const can = (resource: Parameters<typeof canAccess>[0]["resource"], action: Parameters<typeof canAccess>[0]["action"]) =>
   (access: EffectiveAccess | null) => canAccess({ access, resource, action });
 
@@ -149,12 +162,17 @@ export const HOME_WIDGETS: HomeWidgetDefinition[] = [
     defaultSize: "M",
     // The list's own read refuses without it; within the reader's scope — their own documents for the person (X11).
     isAvailable: can("PEOPLE.DOCUMENTS", "VIEW"),
+    // S · M · L for those who see others' documents, M for the person, who has only a few of their own (X10).
+    sizesFor: (access) => (seesOthersDocuments(access) ? ["S", "M", "L"] : ["M"]),
     Component: ExpiringDocumentsWidget,
   },
 ];
 
-export const availableWidgets = (access: EffectiveAccess | null) =>
-  HOME_WIDGETS.filter((widget) => widget.isAvailable(access));
+/** The widgets this reader may have, each with the sizes this reader is offered. */
+export const availableWidgets = (access: EffectiveAccess | null): HomeWidgetDefinition[] =>
+  HOME_WIDGETS.filter((widget) => widget.isAvailable(access)).map((widget) =>
+    widget.sizesFor ? { ...widget, sizes: widget.sizesFor(access) } : widget,
+  );
 
 /**
  * Which default home a reader starts with (`home` spec, "Default layout"): HR runs processes or automations; a manager

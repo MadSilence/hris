@@ -132,7 +132,10 @@ Page 1512 × 982. Left column 420, gap 56 to the stage; heading 44/46; rings 44 
   only for a file uploaded in this visit; otherwise the tile reads "Your logo" (the stored logo keeps no name for the
   page). "Inside noddo" is the shell and Home's top in the draft — the sidebar, the greeting, the band and quiet
   widget cards — not the live Home with a person's data. The login preview is the real `AuthSplit` with a still form;
-  the phone is the strip and the form. The invitation email is drawn in the page, not rendered by the backend (the
-  emails are the next batch). The segmented control is the kit's, at 36. The quiet line shows only near Approved, and a
+  the phone is the strip and the form. The email is drawn in the page, not rendered by the backend, and since
+  2026-11-19 it is the login code (`sign-in-emails` M16) as `LoginEmailLayout` writes it, not the invitation (M2): the
+  inbox's sender line (noddo, the subject naming the company), the heading and the rings in the band, the code, "or",
+  the wide button, the small print and the footer signed by noddo; the address is text, never a link (SIGN_IN_PLAN A21). The segmented control is the kit's, at 36. The quiet line shows only near Approved, and a
   "red workspace" is measured by hue and lightness (Q-30).
 - **Images of the real screen:** not taken yet — the screen has not been walked.
+- **The Email stage** (2026-11-19) is drawn like the real login-code email again (SIGN_IN_PLAN A21), with Light and a custom colour.

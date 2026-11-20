@@ -30,7 +30,7 @@ import { ReadRows, type ReadRow } from "./ReadRows";
 const upperFirst = (s: string) => (s ? s[0].toLocaleUpperCase() + s.slice(1) : s);
 
 /** A step in read mode (R3): its own values as icon rows, then when it runs, for whom, and what a failure does. */
-export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: StepSpec; catalog: AutomationCatalog }> = ({ step }) => {
+export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: StepSpec; catalog: AutomationCatalog }> = ({ definition, step }) => {
   const t = useTranslations("automationsSettings");
   const tA = useTranslations("automations");
   const w = useAutomationWords();
@@ -68,7 +68,7 @@ export const StepReadRows: React.FC<{ definition: AutomationDefinition; step: St
       if (step.dueDays != null) rows.push({ icon: Calendar03Icon, value: t("read.dueIn", { days: step.dueDays }), caption: t("read.afterStarts") });
       break;
     case "WAIT_UNTIL":
-      rows.push({ icon: HourglassIcon, value: w.stepTitle(step), caption: t("read.waitsUntil") });
+      rows.push({ icon: HourglassIcon, value: w.stepTitle(step, definition), caption: t("read.waitsUntil") });
       if (step.maxDays != null) rows.push({ icon: Clock01Icon, value: w.stepSubtitle({ ...step, when: null, condition: null }) ?? "" });
       break;
     case "ASSIGN":

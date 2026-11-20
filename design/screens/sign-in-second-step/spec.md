@@ -63,7 +63,7 @@ None beyond § Common.
 
 ## Open questions
 - ~~Q-16~~ — built as recommended: the company's days in the label (Built).
-- Q-17 — may D3 start a new two-step setup right from login? Blocks nothing (if not, D3 shows only "Continue" and the warning).
+- ~~Q-17~~ — built as recommended: D3 starts a new phone right from the login (Built).
 
 ---
 
@@ -75,5 +75,8 @@ None beyond § Common.
 - **Differs from the design:**
   - "Remember this device for {n} days" takes the company's days and shows only when the company allows it (Q-16, as
     recommended).
-  - **D3's "Set up again" is not built** (Q-17, `SIGN_IN_PLAN.md` A2): D3 shows the warning and *Continue*; a new phone
-    is set up from My Preferences. The `setUpAgain` catalogue key is unused.
+  - **D3's "Set up again"** (Q-17, built 2026-11-19): with 1 or 0 codes left, *Set up again* opens D4 and D5 for a new
+    phone inside the session the backup code opened. The old phone keeps working until the new one's first code is right,
+    so D4 here has its own lead — "Scan this with the authenticator app on your new phone. Your old phone keeps working
+    until you turn the new one on." — instead of "{company} asks for a second step". A new set of backup codes replaces
+    the old one on D5. It needs the backup code's step-up, which lasts 10 minutes: past that, D6.

@@ -4,6 +4,19 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-19** — **The design leftovers built and walked.** For the package: **every email from the local and the
+  deployed sandbox now goes to Petya and Ulia** (the subject starts `[to: …]`; Ulia is on her noddo address); **50 wrong
+  passwords from one IP in an hour hold that IP's password logins for 30 minutes** (Q-54's table); **D3 "Set up again"**
+  works (`sign-in-second-step`); **no "HR" in automations** (`automations-list`); a signing Wait card says "… is
+  signed" (`automations-editor`); the trigger's company line names the zone (`automations-triggers`); the 4 px
+  `scroll-thumb` (`automations-run-history`); W15's two lines and CM01's "past the deadline" in the proposed words,
+  final in DQ-22 (`home-widgets`, `company-hub-manage`); initials at 28 read 10; the documents-expiry widget is M only
+  for an employee (`documents-expiry`); Appearance's Email stage drawn like the real email (`sign-in-appearance`);
+  notification sentences and the calendar export write a weekday date with the comma ("Mon, 2 Nov 2026"); the
+  personal time format is gone. Later the same day: the signing wait's words in the sentence and the run window too;
+  *New page* in a hub with no section makes "New section"; an empty folder shows no upload line to someone who cannot
+  upload. On 2026-11-20: **on Documents the selection bar takes the view tabs' row** (`documents-tab`), and the shared
+  `SelectionBar` no longer adds a gap above itself in any list.
 - **2026-11-19** — **Two briefs are yours**: `briefs/DOCUMENTS_TEMPLATES_BRIEF.md` (the template editor — the most urgent: Send for signature, the Sign task and "Open the template" wait on it) and `briefs/NOTIFICATIONS_BRIEF.md` (its § 11 holds seven questions). Open questions after the fix rounds, written out with where to look: `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
 - **2026-11-19** — **Corrections to the lines below, and the documents answers built.** The 2026-11-18 line "The Upload
   dialog (M3) is not redrawn yet" is no longer true: the documents build's answers of 2026-11-18 (batch 11) landed —

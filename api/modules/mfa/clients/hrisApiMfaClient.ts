@@ -22,6 +22,15 @@ export class HrisApiMfaClient {
     return hrisApiClient.post<BackupCodesDTO>("/auth/mfa/enrolment/confirm", { code, signOutOthers });
   }
 
+  /** "Set up again" (sign-in-second-step D3): a new phone beside the working one; needs a fresh step-up. */
+  public async startReplacement(): Promise<EnrolmentStartDTO> {
+    return hrisApiClient.post<EnrolmentStartDTO>("/auth/mfa/replacement/start");
+  }
+
+  public async confirmReplacement(code: string): Promise<BackupCodesDTO> {
+    return hrisApiClient.post<BackupCodesDTO>("/auth/mfa/replacement/confirm", { code, signOutOthers: false });
+  }
+
   public async regenerateBackupCodes(): Promise<BackupCodesDTO> {
     return hrisApiClient.post<BackupCodesDTO>("/auth/mfa/backup-codes/regenerate");
   }

@@ -89,7 +89,7 @@ const cardTexts = (
         : null;
     steps[step.id] = {
       kind,
-      title: muted ? t("canvas.addQuestion") : words.stepTitle(step) || kind,
+      title: muted ? t("canvas.addQuestion") : words.stepTitle(step, definition) || kind,
       subtitle: [signMeta(step), words.stepSubtitle(step)].filter(Boolean).join(" · ") || null,
       tokens: titleTokens(step),
       muted,

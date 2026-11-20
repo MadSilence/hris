@@ -2,7 +2,7 @@ import type { TimeOffRequest } from "@/models/timeOff";
 import type { Task } from "@/models/lifecycle";
 import type { AgreementRow } from "@/models/hub";
 import { partialMock } from "@/test/types";
-import { buildDeck, cardKey, markRead, readKey, skipCard, writeKey } from "./waitingOnYouDeck";
+import { agreementLineKey, buildDeck, cardKey, markRead, readKey, skipCard, writeKey } from "./waitingOnYouDeck";
 
 const request = (id: string, createdAt: string, status = "PENDING") =>
   partialMock<TimeOffRequest>({ id, createdAt, status: status as TimeOffRequest["status"], userId: "u" });
@@ -56,6 +56,12 @@ describe("Waiting on you, the deck", () => {
     const deck = deckOf({ agreements: [agreement] });
     expect(deck.filter((c) => c.group === "DO").map((c) => c.key)).toEqual(["task:t-soon", "agree:p1", "task:review", "task:t-later"]);
     expect(deck.find((c) => c.kind === "AGREE")).toMatchObject({ key: cardKey.agreement("p1"), agreement });
+  });
+
+  it("says 'was updated' only for a page the person agreed to before, 'to read and agree' for a new one (§ 42, W15)", () => {
+    expect(agreementLineKey({ what: "NEW", agreedVersion: null })).toBe("toReadAndAgree");
+    expect(agreementLineKey({ what: "CHANGED", agreedVersion: 1 })).toBe("wasUpdated");
+    expect(agreementLineKey({ what: "OVERDUE", agreedVersion: 1 })).toBe("wasUpdated");
   });
 
   it("a failed run marked as read leaves the deck for good, and skipping keeps the mark", () => {

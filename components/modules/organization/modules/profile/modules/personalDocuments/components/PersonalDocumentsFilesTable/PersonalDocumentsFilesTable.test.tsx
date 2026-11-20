@@ -53,3 +53,25 @@ describe("PersonalDocumentsFilesTable — Enter on a row", () => {
     expect(notCancelled).toBe(false);
   });
 });
+
+/** All documents: a file in a nested folder sits under that folder's name, beside the root's folders and the loose files. */
+describe("PersonalDocumentsFilesTable — grouped by folder", () => {
+  it("heads each group with its folder's name, a nested folder included", () => {
+    const inFolder = (id: string, name: string, folderId: string | null) =>
+      partialMock<DocumentDTO>({ id, name, folderId, isStarred: false, sizeBytes: 1, createdAt: "2026-10-30T12:00:00", mimeType: "application/pdf" });
+    render(
+      <PersonalDocumentsFilesTable
+        documents={[inFolder("a", "loose.pdf", null), inFolder("b", "offer.pdf", "root-1"), inFolder("c", "march.pdf", "nested-1")]}
+        sort={{ field: "name", dir: "asc" }}
+        onSortChange={jest.fn()}
+        onToggleStar={jest.fn()}
+        getDownloadUrl={(id) => `/d/${id}`}
+        groupByFolder={{ names: new Map([["root-1", "Contracts"], ["nested-1", "2026"]]), looseLabel: "Not in a folder" }}
+      />,
+    );
+    expect(screen.getByText("Contracts")).toBeInTheDocument();
+    expect(screen.getByText("2026")).toBeInTheDocument();
+    expect(screen.getByText("Not in a folder")).toBeInTheDocument();
+    expect(screen.queryByText("nested-1")).not.toBeInTheDocument();
+  });
+});

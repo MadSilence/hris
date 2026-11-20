@@ -28,11 +28,17 @@ import {
 } from "@/components/modules/automations/actions/automationActions";
 import { findStep, numbers } from "@/components/modules/automations/model/tree";
 import type { RunWindowProps } from "@/components/modules/automations/contracts";
-import type { AutomationDefinition, AutomationRun, AutomationRunStep, StepSpec } from "@/models/automations";
+import type {
+  AutomationDefinition,
+  AutomationRun,
+  AutomationRunStep,
+  StepSpec,
+} from "@/models/automations";
 import { OwnerPicker } from "./OwnerPicker";
 import { useRunWords, type RunWords } from "./runWords";
 import { ToolWindow } from "./ToolWindow";
 import { useAutomationWords } from "./seams";
+import { showThumbWhileScrolling } from "./scrollThumb";
 
 export type StepState = "DONE" | "WAITING" | "FAILED" | "NOT_STARTED" | "SKIPPED";
 
@@ -64,10 +70,17 @@ const STATE_ICONS: Record<StepState, { icon: IconSvgElement; className: string }
   SKIPPED: { icon: MinusSignCircleIcon, className: "text-tertiary" },
 };
 
-const str = (value: unknown): string | null => (typeof value === "string" && value.trim() ? value : null);
+const str = (value: unknown): string | null =>
+  typeof value === "string" && value.trim() ? value : null;
 
 /** One run's window (V1, V1b, G2): the steps in run order, a failed step's fixes, the run's own actions. */
-export const RunWindow: React.FC<RunWindowProps> = ({ runId, definition, canManage, onRun, onClose }) => {
+export const RunWindow: React.FC<RunWindowProps> = ({
+  runId,
+  definition,
+  canManage,
+  onRun,
+  onClose,
+}) => {
   const t = useTranslations("automationsRuns");
   const tCommon = useTranslations("common");
   const words = useRunWords();
@@ -150,20 +163,34 @@ export const RunWindow: React.FC<RunWindowProps> = ({ runId, definition, canMana
 
   return (
     <ToolWindow
-      eyebrow={t("run.header", { when: words.moment(data.createdAt, true), version: data.versionNo })}
+      eyebrow={t("run.header", {
+        when: words.moment(data.createdAt, true),
+        version: data.versionNo,
+      })}
       title={<span title={words.title(data)}>{words.title(data)}</span>}
       width={340}
       onClose={onClose}
     >
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+      <div
+        className="scroll-thumb min-h-0 flex-1 overflow-y-auto px-4 pb-4"
+        onScroll={showThumbWhileScrolling}
+      >
         <RunSteps
           run={data}
           definition={definition}
           canManage={canManage}
           busy={busy}
-          onSkip={(step) => void act(() => skip.mutateAsync({ runId: data.id, stepId: step.id }), t("run.stepSkipped"))}
+          onSkip={(step) =>
+            void act(
+              () => skip.mutateAsync({ runId: data.id, stepId: step.id }),
+              t("run.stepSkipped"),
+            )
+          }
           onReassign={(step, userId) =>
-            void act(() => reassign.mutateAsync({ runId: data.id, stepId: step.id, userId }), t("run.ownerChosen"))
+            void act(
+              () => reassign.mutateAsync({ runId: data.id, stepId: step.id, userId }),
+              t("run.ownerChosen"),
+            )
           }
         />
         {canManage && data.status === "FAILED" && (
@@ -212,7 +239,14 @@ type RunStepsProps = {
 };
 
 /** The run's steps (RunStepList): the trigger first, then each step in run order. */
-const RunSteps: React.FC<RunStepsProps> = ({ run, definition, canManage, busy, onSkip, onReassign }) => {
+const RunSteps: React.FC<RunStepsProps> = ({
+  run,
+  definition,
+  canManage,
+  busy,
+  onSkip,
+  onReassign,
+}) => {
   const t = useTranslations("automationsRuns");
   const tShared = useTranslations("automations");
   const words = useRunWords();
@@ -223,7 +257,9 @@ const RunSteps: React.FC<RunStepsProps> = ({ run, definition, canManage, busy, o
   const steps = [...(run.steps ?? [])].sort((a, b) => a.position - b.position);
   let blocked = false;
 
-  const triggerTitle = definition?.trigger ? automationWords.triggerTitle(definition.trigger) : words.about(run);
+  const triggerTitle = definition?.trigger
+    ? automationWords.triggerTitle(definition.trigger)
+    : words.about(run);
 
   return (
     <ol className="m-0 flex list-none flex-col gap-3 p-0">
@@ -233,7 +269,9 @@ const RunSteps: React.FC<RunStepsProps> = ({ run, definition, canManage, busy, o
         if (!state) return null;
         const spec = findStep(definition, step.stepId);
         const number = numbered[step.stepId];
-        const title = spec ? automationWords.stepTitle(spec) : tShared(`stepType.${step.actionType}`);
+        const title = spec
+          ? automationWords.stepTitle(spec, definition)
+          : tShared(`stepType.${step.actionType}`);
 
         let time: string;
         if (state === "WAITING") {
@@ -248,7 +286,12 @@ const RunSteps: React.FC<RunStepsProps> = ({ run, definition, canManage, busy, o
 
         const reason =
           state === "WAITING" ? (
-            <WaitingReason step={step} spec={spec} words={words} />
+            <WaitingReason
+              step={step}
+              spec={spec}
+              words={words}
+              signing={spec ? automationWords.signingWaitedOnTitle(spec, definition) : null}
+            />
           ) : state === "FAILED" || state === "SKIPPED" ? (
             words.reason(step.reason)
           ) : null;
@@ -264,7 +307,12 @@ const RunSteps: React.FC<RunStepsProps> = ({ run, definition, canManage, busy, o
             actions={
               canManage && state === "FAILED" ? (
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="secondary" disabled={busy} onClick={() => onSkip(step)}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => onSkip(step)}
+                  >
                     {t("run.skipStep")}
                   </Button>
                   {OWNED.has(step.actionType) && (
@@ -293,11 +341,23 @@ const StepLine: React.FC<{
   return (
     // V1b: the state icon 20, 12 from the step; the step's name 500; its reason 13/18 secondary.
     <li className="flex items-start gap-3" data-state={state}>
-      <Icon icon={icon.icon} size="md" label={t(`run.status.${state}`)} className={cn("shrink-0", icon.className)} />
+      <Icon
+        icon={icon.icon}
+        size="md"
+        label={t(`run.status.${state}`)}
+        className={cn("shrink-0", icon.className)}
+      />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start gap-2">
-          <p className={cn("min-w-0 flex-1 text-body font-medium", state === "NOT_STARTED" ? "text-secondary" : "text-primary")}>
-            {number && <span className="mr-1.5 text-hint font-semibold text-tertiary">{number}</span>}
+          <p
+            className={cn(
+              "min-w-0 flex-1 text-body font-medium",
+              state === "NOT_STARTED" ? "text-secondary" : "text-primary",
+            )}
+          >
+            {number && (
+              <span className="mr-1.5 text-hint font-semibold text-tertiary">{number}</span>
+            )}
             {title}
           </p>
           {time && <span className="shrink-0 text-hint text-tertiary">{time}</span>}
@@ -310,11 +370,13 @@ const StepLine: React.FC<{
 };
 
 /** "Waiting for Marta. Asks her manager on 6 Nov." — from the step's result. */
-const WaitingReason: React.FC<{ step: AutomationRunStep; spec: StepSpec | null; words: RunWords }> = ({
-  step,
-  spec,
-  words,
-}) => {
+const WaitingReason: React.FC<{
+  step: AutomationRunStep;
+  spec: StepSpec | null;
+  words: RunWords;
+  /** The signing the wait is on, by its title (§ 47); null for a task. */
+  signing?: string | null;
+}> = ({ step, spec, words, signing = null }) => {
   const t = useTranslations("automationsRuns");
   const dates = useShortDates();
   const result = step.result ?? {};
@@ -338,7 +400,12 @@ const WaitingReason: React.FC<{ step: AutomationRunStep; spec: StepSpec | null; 
             : t("run.stopsOn", { date });
     }
   } else if (until === "TASK_DONE" || until === "FIELD_FILLED") {
-    first = until === "TASK_DONE" ? t("run.waitingTask") : t("run.waitingField");
+    first =
+      until === "TASK_DONE"
+        ? signing
+          ? t("run.waitingSigned", { title: signing })
+          : t("run.waitingTask")
+        : t("run.waitingField");
     if (deadline) second = t("run.givesUpOn", { date: dates.date(deadline) });
   } else if (until === "TIME" && step.runAt) {
     // A step held for its time of day (K3). It read "Waiting for an answer." (walk of 2026-11-07).

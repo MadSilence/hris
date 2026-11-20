@@ -14,14 +14,36 @@ import { AuthHeading, AuthSplit, CodeInput, type AuthBrand } from "@/components/
 import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
 import { ApiError } from "@/components/clients/exceptions";
 import { messageForError } from "@/lib/errors/errorMessages";
+import { ActionStatus } from "@/components/models/ActionStatus";
+import { confirmMfaReplacementAction, startMfaReplacementAction } from "@/components/modules/mfa/actions";
 
 /*
  * Setting two-step login up inside a login, because the company requires it (sign-in-second-step D4–D6). No back
  * arrow: it cannot be skipped. Two numbered steps on one screen instead of a stepper (the owner's exception), then the
  * backup codes, then the app.
+ *
+ * `replace` is D3's "Set up again" (Q-17): the person is already logged in with a backup code and sets up a new phone.
+ * The same D4 and D5, talking to the signed-in replacement instead of the login's challenge; the old phone keeps working
+ * until the new one's first code is right.
  */
 
 const CODE_WRONG = new Set(["AUTH00006", "AUTH00008"]);
+
+type Enrolment = { otpauthUri: string; secret: string };
+/** A confirm's outcome, whichever way it went: the codes, or the code of the refusal and its sentence. */
+type Confirmed = { codes: string[] } | { errorCode?: string; message: string | null };
+
+/** Null when the start was refused — the step-up has run out, or the server failed: D6 either way. */
+async function startReplacement(): Promise<Enrolment | null> {
+  const res = await startMfaReplacementAction();
+  return res.status === ActionStatus.SUCCESS && res.data ? res.data : null;
+}
+
+async function confirmReplacement(code: string): Promise<Confirmed> {
+  const res = await confirmMfaReplacementAction(code);
+  if (res.status === ActionStatus.SUCCESS && res.data) return { codes: res.data.backupCodes };
+  return { errorCode: res.code, message: res.errorMessage ?? null };
+}
 
 function CopyButton({ text, label, done }: { text: string; label: string; done: string }) {
   const [copied, setCopied] = React.useState(false);
@@ -42,10 +64,10 @@ function CopyButton({ text, label, done }: { text: string; label: string; done: 
   );
 }
 
-export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; returnTo: string }) {
+export function SetUpTwoStepContainer({ brand, returnTo, replace = false }: { brand: AuthBrand; returnTo: string; replace?: boolean }) {
   const t = useTranslations("auth");
   const auth = useAuthService();
-  const [enrolment, setEnrolment] = React.useState<{ otpauthUri: string; secret: string } | null>(null);
+  const [enrolment, setEnrolment] = React.useState<Enrolment | null>(null);
   const [qr, setQr] = React.useState<string | null>(null);
   const [showKey, setShowKey] = React.useState(false);
   const [code, setCode] = React.useState("");
@@ -62,8 +84,10 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
   React.useEffect(() => {
     if (started.current) return;
     started.current = true;
-    auth.enrolAtSignInStart().then(setEnrolment).catch(() => setFailed(true));
-  }, [auth]);
+    (replace ? startReplacement() : auth.enrolAtSignInStart())
+      .then((e) => (e ? setEnrolment(e) : setFailed(true)))
+      .catch(() => setFailed(true));
+  }, [auth, replace]);
 
   React.useEffect(() => {
     if (!enrolment) return;
@@ -83,6 +107,12 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
     setBusy(true);
     setFieldError(null);
     try {
+      if (replace) {
+        const res = await confirmReplacement(value);
+        if ("codes" in res) setCodes(res.codes);
+        else setFieldError(res.errorCode && CODE_WRONG.has(res.errorCode) ? t("setUp.wrongCode") : res.message);
+        return;
+      }
       const res = await auth.enrolAtSignInConfirm(value);
       setCodes(res.backupCodes);
     } catch (error) {
@@ -144,7 +174,9 @@ export function SetUpTwoStepContainer({ brand, returnTo }: { brand: AuthBrand; r
     <AuthSplit brand={brand} long>
       <AuthHeading
         title={t("setUp.title")}
-        lead={t("setUp.lead", { company: brand.kind === "company" ? brand.name : "noddo" })}
+        lead={replace
+          ? t("setUp.replaceLead")
+          : t("setUp.lead", { company: brand.kind === "company" ? brand.name : "noddo" })}
       />
       <div className="flex flex-col gap-3">
         {/* RD4: the steps' labels 13/18 500, the link 13/18 500 accent, the key on a Mist panel (padding 12 16). */}

@@ -135,7 +135,8 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "zoneLine": {
-      "PERSON": "{name} in {city} gets it at {time} {city} time"
+      "PERSON": "{name} in {city} gets it at {time} {city} time",
+      "COMPANY": "{zone} · everyone at the same moment."
     }
   },
   "joins": {
@@ -303,6 +304,7 @@
   "notConnected": {
     "surveys": "Not connected yet: a run skips this step until surveys are connected."
   },
+  "documentAfterWait": "If the document isn't signed, the wait in step {number} goes on, and this step fails: there is no signed document for Document. Make the wait stop, or take Document out.",
   "wait": {
     "until": "Wait until",
     "taskDone": "A task or signing from this run is done",
@@ -562,6 +564,7 @@
       "task": "gives {who} a task",
       "taskNobody": "creates a task",
       "approval": "asks {who} to approve",
+      "waitSigned": "waits until {title} is signed",
       "waitTask": "waits until the task is done",
       "waitField": "waits until {field} is filled",
       "assign": "assigns {thing}",

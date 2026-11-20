@@ -29,6 +29,23 @@ export async function confirmMfaEnrolmentAction(code: string, signOutOthers: boo
   }
 }
 
+/** "Set up again" after a backup code (sign-in-second-step D3): the old phone keeps working until the new one's code. */
+export async function startMfaReplacementAction(): Promise<ActionResult<EnrolmentStartDTO>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisMfaService.startReplacement() };
+  } catch (error) {
+    return toActionError(error, "startMfaReplacementAction");
+  }
+}
+
+export async function confirmMfaReplacementAction(code: string): Promise<ActionResult<BackupCodesDTO>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisMfaService.confirmReplacement(code) };
+  } catch (error) {
+    return toActionError(error, "confirmMfaReplacementAction");
+  }
+}
+
 export async function regenerateBackupCodesAction(): Promise<ActionResult<BackupCodesDTO>> {
   try {
     return { status: ActionStatus.SUCCESS, data: await hrisMfaService.regenerateBackupCodes() };

@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Automations",
-    "description": "Routine HR work that runs by itself.",
+    "description": "Routine people work that runs by itself.",
     "add": "Add automation",
     "viewOnly": "You can view automations, not change them",
     "tabs": {
@@ -128,7 +128,7 @@
   "ai": {
     "label": "Describe what should happen",
     "example": "When someone's probation ends in 14 days, remind their manager to book a review",
-    "exampleLong": "When someone's probation ends in 14 days, remind their manager to book a review and tell HR",
+    "exampleLong": "When someone's probation ends in 14 days, remind their manager to book a review and tell the people team",
     "hintPage": "You check every step before it turns on.",
     "hintDialog": "noddo AI drafts the steps. You check them before turning it on.",
     "submit": "Draft with AI",
@@ -159,7 +159,7 @@
       "document-expiry": "Tell them and their manager",
       "long-leave": "Approval from their manager",
       "calendar-by-office": "Assign the office's holiday calendar",
-      "termination-hr": "Tell HR",
+      "termination-hr": "Tell the people you choose",
       "last-day-equipment": "Task to collect the equipment"
     },
     "templatesError": "We couldn't load the templates",

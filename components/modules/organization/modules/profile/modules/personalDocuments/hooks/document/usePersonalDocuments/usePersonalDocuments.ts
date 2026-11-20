@@ -4,6 +4,7 @@ import * as React from "react";
 import type {
   DocumentDTO,
   DocumentFolderDeleteStrategy,
+  DocumentFolderContentDTO,
   DocumentFolderDTO,
   DocumentVisibility,
 } from "@/api/modules/documents/dto";
@@ -68,6 +69,19 @@ const compareDocuments = (a: DocumentDTO, b: DocumentDTO, sort: DocumentSort) =>
 };
 
 /**
+ * The name of every folder a file of the listing sits in: the root's folders, and — for All documents, which lists
+ * files at any depth — the deeper ones the backend names in `folderNames` (a nested folder used to head its group with
+ * nothing but its id).
+ */
+export const folderNamesOf = (
+  content: Pick<DocumentFolderContentDTO, "folders" | "folderNames"> | undefined,
+): Map<string, string> => {
+  const names = new Map<string, string>(Object.entries(content?.folderNames ?? {}));
+  for (const f of content?.folders ?? []) names.set(f.id, f.name);
+  return names;
+};
+
+/**
  * Everything the documents tab needs: the folder the user is currently browsing, the filtered
  * contents, and every mutation. The container renders and owns modal state only — it must not
  * instantiate these mutations a second time, or each action ends up with two cache subscriptions.
@@ -119,6 +133,9 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
     for (const d of data?.documents ?? []) if (d.folderId) counts.set(d.folderId, (counts.get(d.folderId) ?? 0) + 1);
     return counts;
   }, [atRoot, data?.documents]);
+
+  // The heading of each group in All documents: the root's folders, and any deeper folder a listed file sits in.
+  const folderNames = React.useMemo(() => folderNamesOf(data), [data]);
 
   const documents = React.useMemo(() => {
     const inView = (doc: DocumentDTO) => {
@@ -243,6 +260,7 @@ export function usePersonalDocuments({ userId }: UsePersonalDocumentsParams) {
     setView,
     viewCounts,
     folderFileCounts,
+    folderNames,
     isLoading,
     error,
     isEmpty,

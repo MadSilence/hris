@@ -92,4 +92,4 @@ None blocks this.
   Documents → Categories (X07); Home → Edit home → "Expiring documents" (`components/modules/home/widgets/
   ExpiringDocumentsWidget.tsx`). Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part").
 - **Differs from the design:** the Home widget is offered to anyone with documents VIEW, in all three sizes — for the
-  person it lists their own (the read is scoped), but M-only for them is not enforced.
+  person it lists their own (the read is scoped), and since 2026-11-19 they are offered M only (a documents VIEW that reaches only their own record); whoever sees others' documents gets S · M · L.

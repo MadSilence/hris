@@ -33,6 +33,9 @@ jest.mock("./seams", () => ({
   useAutomationWords: () => ({
     triggerTitle: () => "Time off over 10 days is requested",
     stepTitle: (step: { id: string }) => `Step ${step.id}`,
+    // The real lookup's shape: the signing a wait points at, by its title.
+    signingWaitedOnTitle: (step: { taskStepId?: string | null }, def?: { steps: { id: string; type: string; title?: string | null }[] } | null) =>
+      def?.steps.find((s) => s.id === step.taskStepId && s.type === "SIGN_DOCUMENT")?.title ?? null,
   }),
 }));
 
@@ -145,6 +148,21 @@ describe("the run window", () => {
     expect(actions.cancelAutomationRunAction).toHaveBeenCalledWith("run-1");
     expect(showSuccess).toHaveBeenCalledWith("Run cancelled");
     expect(showUndoToast).not.toHaveBeenCalled();
+  });
+
+  // WALK_QUESTIONS § 47: the run window names the document a held wait is waiting on.
+  it("says a wait on a signing waits until the document is signed", () => {
+    current = runOf("WAITING", [step("s2", "WAITING", { actionType: "WAIT_UNTIL", result: { until: "TASK_DONE" } })]);
+    const signing: AutomationDefinition = {
+      ...definition,
+      steps: [
+        { id: "d1", type: "SIGN_DOCUMENT", title: "Offer letter" },
+        { id: "s2", type: "WAIT_UNTIL", until: "TASK_DONE", taskStepId: "d1" },
+      ],
+    };
+    render(<RunWindow runId="run-1" definition={signing} canManage onClose={() => undefined} />);
+    expect(screen.getByText(/Waiting until Offer letter is signed\./)).toBeInTheDocument();
+    expect(screen.queryByText(/Waiting until the task is done/)).not.toBeInTheDocument();
   });
 
   it("says when a step held for its time of day runs, not that it waits for an answer (walk of 2026-11-07)", () => {

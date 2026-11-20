@@ -17,7 +17,15 @@
  */
 export type CspMode = "production" | "development";
 
-export const contentSecurityPolicy = (nonce: string, mode: CspMode): string => {
+export interface CspOptions {
+  /**
+   * The app itself is served over http (`APP_SCHEME=http` — a local machine). Its backend then serves logos and photos
+   * over http too, and `https:` alone refused every one of them (WALK_QUESTIONS § 51). Never true on https.
+   */
+  httpImages?: boolean;
+}
+
+export const contentSecurityPolicy = (nonce: string, mode: CspMode, options: CspOptions = {}): string => {
   const development = mode === "development";
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
@@ -26,7 +34,7 @@ export const contentSecurityPolicy = (nonce: string, mode: CspMode): string => {
     "style-src": ["'self'", "'unsafe-inline'"],
     // Avatars, logos and the example people's portraits (`public/sample-avatars/`) come from the app itself; a company
     // may later serve files from a storage host — so any https image, never a script.
-    "img-src": ["'self'", "data:", "blob:", "https:"],
+    "img-src": ["'self'", "data:", "blob:", "https:", ...(options.httpImages ? ["http:"] : [])],
     "font-src": ["'self'", "data:"],
     // The browser talks only to its own host (`/api/…` — hris/CLAUDE.md); development adds the reload socket.
     // `blob:` is the page reading back bytes it already holds: `PdfViewer` fetches the blob URL its caller made from

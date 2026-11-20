@@ -92,7 +92,7 @@ Built and walked: A, C9–C15, R1–R4, B1, B4, B5, P1–P3, D7, E1. **Not built
 | Login code: send | 5 an hour | 30 an hour |
 | Login code: check | 5 tries a code | 120 an hour |
 | Forgot password | 5 an hour | 30 an hour |
-| Password | restricted after 10 wrong, locked after 20 | 10 wrong per 30 min for unknown addresses |
+| Password | restricted after 10 wrong, locked after 20 | 10 wrong per 30 min for unknown addresses; 50 wrong to existing accounts in an hour → every password login from that IP refused for 30 min, a correct one included (a login code and Google / Microsoft still work) |
 | Second step | 5 tries a challenge, then a pause | — |
 
 **Where to run what you couldn't:** a trial opens on a sandbox only when Petya turns registration on there; invitations, a first login and the welcome run on a second company, **`live-sandbox`** — live, not a demo — where you log in with your usual password at your address with `+1` before the @; you are System Owner in both. B2: Google and Microsoft aren't configured on any sandbox yet; on production they will show. E2 (no "via") needs the sending domain signed — Petya's side.

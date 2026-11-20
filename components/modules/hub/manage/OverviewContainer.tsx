@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/feedback/EmptyState";
 import type { Overview, OverviewPage } from "@/models/hub";
 import { cn } from "@/lib/cn";
 import { useHubOverview } from "../hooks";
+import { mustReadHint } from "./overviewHints";
 import { HubHeading, HubLoadError, LoadingBlock, ProgressBar, SkeletonRows, useHubDates } from "../shared";
 import { useNewPage } from "../reader/HubHomeContainer";
 import { ManageFrame } from "./ManageFrame";
@@ -66,7 +67,7 @@ export const useOverviewHints = () => {
           : o.scheduled === 1
             ? t("manage.tiles.oneScheduled", { date: dates.short(o.nearestScheduled) })
             : t("manage.tiles.manyScheduled", { count: o.scheduled, date: dates.short(o.nearestScheduled) }),
-      mustRead: o.openMustRead === 0 ? t("manage.tiles.noMustRead") : t("manage.tiles.agreedOf", { agreed: o.openAgreed, needed: o.openNeeded }),
+      mustRead: ((h) => t(`manage.tiles.${h.key}`, h.values))(mustReadHint(o)),
       missed:
         o.missedPeople === 0
           ? t("manage.tiles.onTime")

@@ -58,6 +58,7 @@
     "afterThat": "после этого",
     "waitingFor": "Ждём ответа от {name}.",
     "waitingForAnswer": "Ждём ответа.",
+    "waitingSigned": "Ждём, пока {title} подпишут.",
     "waitingTask": "Ждём, пока задача будет выполнена.",
     "waitingField": "Ждём, пока поле будет заполнено.",
     "asksManagerOn": "{date} спросит их руководителя.",

@@ -448,3 +448,5 @@ Answered by the owner (2026-11-12): **Q-9** — HR only in v1, no team-lead mode
 ### Built from the fixes of 2026-11-19
 
 Built from `design-fixes-company-hub-1` (2026-11-19, walked). Differences: **CM07's Apply is not shown while the audience reaches no one** (the text above says disabled; nothing is shown disabled); the filter row's "is" is the operator read as a word, a trigger when the field has more than one; L7's "Add filter" opens the CM07 dialog, not a popover; What changed stays the editor's field (Q-11, Q-49).
+- **CM01 with every must-read page past its deadline** (2026-11-19) shows its own hint, "{n} past the deadline" (proposed words, DQ-22), not "No must-read pages"; CM06's hint sits 10 below Agree by.
+- **New page in a hub with no section** (2026-11-19) makes a section "New section" and puts the page in it; the author renames it in place. With sections, it goes into the first one.

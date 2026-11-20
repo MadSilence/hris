@@ -376,8 +376,9 @@
   --text-avatar-s--font-weight: 600;
   /* Initials in any avatar (the designers' widgets fixes A1 and hub A9, 2026-11-19): 600, about a third of the
      avatar — 22 → 8, 24 → 9, 28 → 10, 32 → 11, 36 → 12, 44 → 14, 48 → 15, 64 → 20. `Avatar` is a size container, so
-     `cqw` is the avatar's own width and one role serves every size. */
-  --text-initials: calc(28cqw + 2px);
+     `cqw` is the avatar's own width and one role serves every size. Rounded to a whole pixel, so each size lands on
+     its step in that list: unrounded, 28 rendered 9.84 (the hub walk of 2026-11-19). */
+  --text-initials: round(nearest, calc(28cqw + 2px), 1px);
   --text-initials--line-height: 1;
   --text-initials--font-weight: 600;
 
@@ -639,6 +640,23 @@
   background-color: color-mix(in srgb, var(--on-accent) 14%, transparent);
   border-color: color-mix(in srgb, var(--on-accent) 26%, transparent);
 }
+/*
+ * A list's scrollbar as a thumb only (FORMS_AND_FIELDS § 7): 4 wide, a pill in the field border's grey, no arrows, no
+ * track — shown while the list moves, which its script marks with `data-scrolling`. Chromium and Safari draw it from
+ * the `::-webkit-scrollbar` parts (setting `scrollbar-width` would make Chromium ignore them); Firefox, which has none,
+ * keeps a thin bar of the same colour.
+ */
+@utility scroll-thumb {
+  &::-webkit-scrollbar { width: 4px; height: 4px; }
+  &::-webkit-scrollbar-button { display: none; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { border-radius: var(--radius-pill); background: transparent; }
+  &[data-scrolling]::-webkit-scrollbar-thumb { background: var(--border-field); }
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-field) transparent;
+  }
+}
 /* A list inside a widget fades at its bottom edge where it scrolls (PRODUCT-RULES 12). */
 @utility widget-fade {
   mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
@@ -799,13 +817,50 @@
   stroke: color-mix(in srgb, var(--accent) 30%, #FFFFFF); }
 .appearance-stage[data-accent="wine"] .appearance-phone:not([data-background="light"]) .auth-rings circle { stroke: var(--wine-500); }
 .appearance-stage[data-accent="wine"] .appearance-phone:not([data-background="light"]) .auth-rings circle.hot { stroke: var(--rose); }
-.appearance-mail-band { background: var(--accent); color: var(--on-accent); }
+/*
+ * The email preview: the login-code email (sign-in-emails M16) as hris-api's LoginEmailLayout writes it, at its true
+ * 600 px — the sizes below are the email's own, and the colours the same mixes its pictures and tints are made of.
+ */
+.appearance-mail { font-family: var(--font-text); color: var(--text-primary); }
+.appearance-mail-sender { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 12px 16px;
+  border-radius: 14px; background: var(--surface-card); box-shadow: var(--shadow-raised); font-size: 15px; line-height: 22px; }
+.appearance-mail-sender strong { font-weight: 600; }
+.appearance-mail-canvas { padding: 32px 16px 28px; border-radius: 20px; background: var(--gray-50); }
+.appearance-mail-card { background: var(--surface-card); border-radius: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(11, 11, 12, .06); }
+.appearance-mail-band { padding: 32px 40px 0; background: var(--accent); color: var(--on-accent); }
+.appearance-mail-tile { min-width: 36px; height: 36px; padding: 6px; border-radius: 8px; border-color: transparent;
+  font: 600 18px/36px var(--font-heading); }
+.appearance-mail-tile img { max-height: 24px; max-width: 120px; }
+.appearance-mail-name { font: 600 18px/24px var(--font-heading); letter-spacing: -0.01em; }
+.appearance-mail-title { margin: 40px 0 28px; font: 600 44px/46px var(--font-heading); letter-spacing: -0.02em; }
+.appearance-mail-title em { font-style: normal; color: color-mix(in srgb, var(--accent) 35%, var(--on-accent)); }
+.appearance-heading em { font-style: normal; color: var(--appearance-tried, var(--accent-text)); }
+.appearance-mail-rings { display: block; overflow: hidden; }
+.appearance-mail-rings circle { fill: none; stroke: color-mix(in srgb, var(--accent) 72%, #FFFFFF); }
+.appearance-mail-rings circle.hot { stroke: color-mix(in srgb, var(--accent) 30%, #FFFFFF); }
+.appearance-mail-body { padding: 32px 40px 36px; font-size: 16px; line-height: 26px; color: var(--text-secondary); }
+.appearance-mail-body strong { font-weight: 600; color: var(--text-primary); }
+.appearance-mail-code { margin-top: 24px; padding: 18px 16px; text-align: center; border-radius: 14px;
+  background: var(--accent-subtle); border: 1px solid color-mix(in srgb, var(--accent) 18%, #FFFFFF);
+  font: 600 36px/44px var(--font-mono); letter-spacing: .16em; color: var(--text-primary); }
+.appearance-mail-or { display: flex; align-items: center; gap: 12px; margin: 16px 0; font-size: 14px; line-height: 20px; color: var(--text-tertiary); }
+.appearance-mail-or i { flex: 1; border-top: 1px solid var(--border-divider); }
+.appearance-mail-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 56px; border-radius: 14px;
+  background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 600; }
+.appearance-mail-note { margin: 12px 0 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--text-tertiary); }
+.appearance-mail-small { margin: 32px 0 0; padding-top: 20px; border-top: 1px solid var(--border-divider);
+  font-size: 14px; line-height: 22px; color: var(--text-tertiary); }
+.appearance-mail-footer { padding-top: 28px; text-align: center; font-size: 14px; line-height: 20px; }
+.appearance-mail-reason { margin: 10px 0 0; font-size: 13px; line-height: 18px; color: var(--text-tertiary); }
+/* Light: both bands Gray 50 with Gray 200 rings, the heading Ink with its second line in the colour, a white canvas
+   and a card held by a border — mail apps drop shadows. */
+.appearance-mail[data-background="light"] .appearance-mail-canvas { background: var(--surface-card); }
+.appearance-mail[data-background="light"] .appearance-mail-card { border: 1px solid var(--gray-200); box-shadow: none; }
 .appearance-mail[data-background="light"] .appearance-mail-band { background: var(--gray-50); color: var(--text-primary); }
-.appearance-mail-card { background: var(--surface-card); border-radius: 12px; overflow: hidden; }
-.appearance-mail[data-background="light"] { background: var(--surface-card); }
-.appearance-mail[data-background="light"] .appearance-mail-card { border: 1px solid var(--gray-200); }
-.appearance-mail-title { margin: 0; font: 600 28px/32px var(--font-heading); letter-spacing: -0.03em; }
-.appearance-mail-title em, .appearance-heading em { font-style: normal; color: var(--appearance-tried, var(--accent-text)); }
+.appearance-mail[data-background="light"] .appearance-mail-tile { border-color: var(--border-divider); }
+.appearance-mail[data-background="light"] .appearance-mail-title em { color: var(--accent-text); }
+.appearance-mail[data-background="light"] .appearance-mail-rings circle { stroke: var(--gray-200); }
+.appearance-mail[data-background="light"] .appearance-mail-rings circle.hot { stroke: var(--accent); }
 
 /* The pane's foot: noddo's wordmark and slogan, or the company's mark and name. */
 .auth-pane-foot { display: flex; flex-direction: column; gap: 20px; }

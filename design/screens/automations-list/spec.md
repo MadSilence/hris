@@ -140,3 +140,4 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
 
 The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
 - A12 and the centred empty states take a viewport-based minimum height: the page has no height of its own to fill.
+- **No "HR"** (2026-11-19, the owner): the list's line reads "Routine people work that runs by itself."; the template `termination-hr` is "Tell a role about a termination" / "Tell the people you choose"; the assistant's example "…and tell the people team". The cards' second line waits on DQ-03.

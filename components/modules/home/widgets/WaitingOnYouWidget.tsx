@@ -55,7 +55,7 @@ import {
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
 import { TICKABLE_KINDS, taskDoneKey, useTickTask } from "./MyTasksWidget";
-import { buildDeck, markRead, skipCard, writeKey, type DeckCard } from "./waitingOnYouDeck";
+import { agreementLineKey, buildDeck, markRead, skipCard, writeKey, type DeckCard } from "./waitingOnYouDeck";
 import type { HomeWidgetProps } from "./catalogue";
 
 /** The most dashes under the title; past it, the counter alone. */
@@ -400,7 +400,7 @@ const DecisionCard: React.FC<{
     // No agreeing from Home (W15): the button only opens the page, where the person agrees after reading it.
     const agreement = card.agreement;
     tile = hubIcon(agreement.icon);
-    header = <CardHeader name={agreement.title} line={t("waitingOnYou.wasUpdated")} />;
+    header = <CardHeader name={agreement.title} line={t(`waitingOnYou.${agreementLineKey(agreement)}`)} />;
     main = agreement.overdue
       ? t("waitingOnYou.agreeOverdue", { date: dates.date(agreement.dueOn, { weekday: true, hideYear: true }) })
       : agreement.dueOn

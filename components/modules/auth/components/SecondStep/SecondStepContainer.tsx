@@ -13,9 +13,11 @@ import { AuthBack, AuthHeading, AuthSplit, CodeInput, type AuthBrand } from "@/c
 import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
 import { ApiError } from "@/components/clients/exceptions";
 import { messageForError } from "@/lib/errors/errorMessages";
+import { SetUpTwoStepContainer } from "./SetUpTwoStepContainer";
 
 /*
- * The second step of a login (sign-in-second-step D1–D3 and the timeout), on its own route — the challenge is a cookie
+ * The second step of a login (sign-in-second-step D1–D3 and the timeout; D3's "Set up again" hands over to D4–D5 for a
+ * new phone), on its own route — the challenge is a cookie
  * this page cannot read, so the page asks the server what it is: whether *Remember this device* is offered and for how
  * many days (0 = not offered: the company does not allow it, or a System Owner).
  */
@@ -34,6 +36,7 @@ export function SecondStepContainer({ brand, returnTo }: { brand: AuthBrand; ret
   const [busy, setBusy] = React.useState(false);
   const [timedOut, setTimedOut] = React.useState(false);
   const [codesLeft, setCodesLeft] = React.useState<number | null>(null);
+  const [settingUp, setSettingUp] = React.useState(false);
 
   // Asked once: after a backup code logs in, the challenge is spent, and asking again (a new client once the session
   // cookie is set) answered "gone" and put "Your login timed out" over D3 (walk of 2026-11-19).
@@ -84,8 +87,15 @@ export function SecondStepContainer({ brand, returnTo }: { brand: AuthBrand; ret
     );
   }
 
+  // D3's "Set up again" (Q-17): D4 and D5 for a new phone, inside the session the backup code just opened.
+  if (codesLeft != null && settingUp) {
+    return <SetUpTwoStepContainer brand={brand} returnTo={returnTo} replace />;
+  }
+
   if (codesLeft != null) {
     const last = codesLeft === 0;
+    // With one code left or none, D3 offers to set a new phone up; with more, only *Continue*.
+    const offerSetUp = codesLeft <= 1;
     return (
       <AuthSplit brand={brand}>
         <AuthHeading
@@ -94,7 +104,18 @@ export function SecondStepContainer({ brand, returnTo }: { brand: AuthBrand; ret
           title={t("secondStep.backupUsed.title")}
           lead={last ? t("secondStep.backupUsed.last") : t("secondStep.backupUsed.left", { count: codesLeft })}
         />
-        <Button type="button" size="lg" className="w-full" onClick={open}>{t("secondStep.backupUsed.continue")}</Button>
+        {offerSetUp ? (
+          <div className="flex flex-col gap-2">
+            <Button type="button" size="lg" className="w-full" onClick={() => setSettingUp(true)}>
+              {t("secondStep.backupUsed.setUpAgain")}
+            </Button>
+            <Button type="button" size="lg" variant="secondary" className="w-full" onClick={open}>
+              {t("secondStep.backupUsed.later")}
+            </Button>
+          </div>
+        ) : (
+          <Button type="button" size="lg" className="w-full" onClick={open}>{t("secondStep.backupUsed.continue")}</Button>
+        )}
       </AuthSplit>
     );
   }

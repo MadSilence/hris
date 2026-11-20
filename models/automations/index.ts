@@ -487,6 +487,8 @@ export type AutomationCatalog = {
   events: AutomationEventOption[];
   processTemplates: CatalogOption[];
   reviewForms: CatalogOption[];
+  /** The company's IANA zone, named on a schedule's "Company time zone" line (C32). */
+  companyTimeZone?: string | null;
 };
 
 // ── live assignment rules (the assignment modal) ──────────────────────────────────────────────

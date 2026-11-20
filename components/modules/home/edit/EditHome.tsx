@@ -62,7 +62,7 @@ const SizeSwitch: React.FC<{
   onChange: (size: HomeWidgetSize) => void;
 }> = ({ widget, value, onChange }) => {
   const t = useTranslations("home");
-  if (widget.sizes.length === 1) return <span className="text-hint leading-5 text-tertiary">{t("sizes.smallOnly")}</span>;
+  if (widget.sizes.length === 1) return <span className="text-hint leading-5 text-tertiary">{t("sizes.only", { size: widget.sizes[0] })}</span>;
   return (
     <SegmentedControl<HomeWidgetSize>
       aria-label={t("sizes.label", { size: t(`sizes.${value}`) })}

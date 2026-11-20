@@ -80,6 +80,11 @@ export type DocumentFolderContentDTO = {
   parentId: string | null;
   folders: DocumentFolderDTO[];
   documents: DocumentDTO[];
+  /**
+   * At the root with every document listed: each listed document's folder name by id, at any depth — All documents
+   * heads its groups with it, where `folders` holds only the root's.
+   */
+  folderNames?: Record<string, string>;
 };
 
 export type CreateDocumentFolderRequest = {

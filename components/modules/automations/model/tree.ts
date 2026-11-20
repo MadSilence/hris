@@ -120,6 +120,34 @@ export const dependsOnSkippable = (d: Pick<AutomationDefinition, "steps"> | null
   return on && skipsOnFailure(on) ? on : null;
 };
 
+/** The texts of a step that may hold `{name}` placeholders (hris-api `AutomationValidator#step`). */
+const PLACEHOLDER_TEXTS: Partial<Record<StepSpec["type"], (keyof StepSpec)[]>> = {
+  NOTIFY: ["text"],
+  SEND_EMAIL: ["subject", "body"],
+  CREATE_TASK: ["title", "description"],
+  REQUEST_APPROVAL: ["title", "description"],
+};
+
+/**
+ * WALK_QUESTIONS § 39: the wait above a step that uses `{document}` and goes on when the document is not signed —
+ * declined, cancelled or past its days — so the step would run with no signed document and fail the run. A warning,
+ * not a problem: the author may mean it, and the step can still be saved and turned on. Null when there is none.
+ */
+export const unsignedDocumentWait = (d: Pick<AutomationDefinition, "steps"> | null | undefined, step: StepSpec): StepSpec | null => {
+  if (!d) return null;
+  const texts = (PLACEHOLDER_TEXTS[step.type] ?? []).map((k) => step[k]);
+  if (!texts.some((v) => typeof v === "string" && v.includes("{document}"))) return null;
+  return (
+    stepsAbove(d, step.id).find(
+      (above) =>
+        above.type === "WAIT_UNTIL" &&
+        (above.until ?? "TASK_DONE") === "TASK_DONE" &&
+        above.onTimeout === "CONTINUE" &&
+        findStep(d, above.taskStepId ?? null)?.type === "SIGN_DOCUMENT",
+    ) ?? null
+  );
+};
+
 // ── ids ───────────────────────────────────────────────────────────────────────────────────────
 
 /** A fresh id, unique within the definition. */

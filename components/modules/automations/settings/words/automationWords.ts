@@ -11,7 +11,7 @@ import type {
 import type { Segment } from "@/models/segment/Segment";
 import type { FilterDTO } from "@/models/user/fields";
 import type { SentencePart } from "../../contracts";
-import { flatten } from "../../model/tree";
+import { findStep, flatten } from "../../model/tree";
 import { comparisons } from "../conditions/eventConditionModel";
 import { tokensAsWords } from "../tokens/tokens";
 import { fixedRunDate } from "../triggers/fixedRunDate";
@@ -62,9 +62,17 @@ export type WordsDeps = {
 
 const PERSON_DATES = ["HIRE_DATE", "PROBATION_END", "LAST_WORKING_DAY", "DATE_OF_BIRTH"] as const;
 type PersonDate = (typeof PERSON_DATES)[number];
-const isPersonDate = (v: string | null | undefined): v is PersonDate => (PERSON_DATES as readonly string[]).includes(v ?? "");
+const isPersonDate = (v: string | null | undefined): v is PersonDate =>
+  (PERSON_DATES as readonly string[]).includes(v ?? "");
 
-const RELATIVE = ["PERSON", "MANAGER", "MANAGERS_MANAGER", "DEPARTMENT_HEAD", "ONBOARDING_MANAGER", "APPROVER"] as const;
+const RELATIVE = [
+  "PERSON",
+  "MANAGER",
+  "MANAGERS_MANAGER",
+  "DEPARTMENT_HEAD",
+  "ONBOARDING_MANAGER",
+  "APPROVER",
+] as const;
 type Relative = (typeof RELATIVE)[number];
 
 const lowerFirst = (s: string) => (s ? s[0].toLocaleLowerCase() + s.slice(1) : s);
@@ -80,7 +88,9 @@ export const automationWords = (d: WordsDeps) => {
   const recipient = (r: RecipientSpec): string => {
     if (r.kind === "ROLE") return names.role(r.roleId) ?? t("words.aRole");
     if (r.kind === "USER") return t("words.aPerson");
-    return (RELATIVE as readonly string[]).includes(r.kind) ? t(`words.recipient.${r.kind as Relative}`) : t("words.aPerson");
+    return (RELATIVE as readonly string[]).includes(r.kind)
+      ? t(`words.recipient.${r.kind as Relative}`)
+      : t("words.aPerson");
   };
   const recipients = (rs: RecipientSpec[] | null | undefined): string | null => {
     const list = rs ?? [];
@@ -96,20 +106,32 @@ export const automationWords = (d: WordsDeps) => {
   const dateNoun = (field: string | null | undefined, attributeId?: string | null): string => {
     if (isPersonDate(field)) return t(`words.dateNoun.${field}`);
     if (field === "ATTRIBUTE") return names.dateAttribute(attributeId) ?? t("words.aDate");
-    if (field?.startsWith("ATTRIBUTE:")) return names.dateAttribute(field.slice("ATTRIBUTE:".length)) ?? t("words.aDate");
+    if (field?.startsWith("ATTRIBUTE:"))
+      return names.dateAttribute(field.slice("ATTRIBUTE:".length)) ?? t("words.aDate");
     return t("words.aDate");
   };
 
   /** "80 days after the hire date", "7 days after the step before". */
   const timing = (when: Timing | null | undefined): string | null => {
     if (!when || when.mode !== "LATER") return null;
-    const from = !when.countedFrom || when.countedFrom === "PREVIOUS_STEP" ? t("words.previousStep") : dateNoun(when.countedFrom);
-    return t("words.timing", { days: when.days ?? 0, dir: when.direction === "BEFORE" ? "BEFORE" : "AFTER", from });
+    const from =
+      !when.countedFrom || when.countedFrom === "PREVIOUS_STEP"
+        ? t("words.previousStep")
+        : dateNoun(when.countedFrom);
+    return t("words.timing", {
+      days: when.days ?? 0,
+      dir: when.direction === "BEFORE" ? "BEFORE" : "AFTER",
+      from,
+    });
   };
 
   /** "Department is Engineering" */
   const filterText = (f: FilterDTO): string =>
-    t("conditions.line", { field: names.fieldLabel(f.field) ?? f.field, op: t(`operator.${f.op}`), value: names.filterValue(f) });
+    t("conditions.line", {
+      field: names.fieldLabel(f.field) ?? f.field,
+      op: t(`operator.${f.op}`),
+      value: names.filterValue(f),
+    });
   const conditionsText = (s: Segment | null | undefined): string | null => {
     const filters = s?.filters ?? [];
     if (filters.length === 0) return null;
@@ -120,13 +142,17 @@ export const automationWords = (d: WordsDeps) => {
   const eventConditionsText = (c: EventCondition | null | undefined): string | null => {
     const leaves = comparisons(c);
     if (leaves.length === 0) return null;
-    const joiner = c?.kind === "ANY" ? ` ${t("conditions.orLower")} ` : ` ${t("conditions.andLower")} `;
+    const joiner =
+      c?.kind === "ANY" ? ` ${t("conditions.orLower")} ` : ` ${t("conditions.andLower")} `;
     return leaves
       .map((l) =>
         t("conditions.line", {
           field: names.eventField(l.field),
           op: l.op ? t(`eventOperator.${l.op}`) : "",
-          value: l.value.split(",").map((v) => names.eventValue(v.trim())).join(", "),
+          value: l.value
+            .split(",")
+            .map((v) => names.eventValue(v.trim()))
+            .join(", "),
         }),
       )
       .join(joiner);
@@ -136,9 +162,20 @@ export const automationWords = (d: WordsDeps) => {
     const label = names.changeableField(field) ?? t("words.aField");
     return field?.startsWith("attr:") ? label : label.toLocaleLowerCase();
   };
-  const changeValue = (field: string | null | undefined, value: string | null | undefined): string => {
+  const changeValue = (
+    field: string | null | undefined,
+    value: string | null | undefined,
+  ): string => {
     if (!value) return t("words.anyValue", { field: anyField(field) });
-    const type = ({ office: "OFFICE", department: "DEPARTMENT", team: "TEAM", legalEntity: "LEGAL_ENTITY", job: "JOB" } as Record<string, string>)[field ?? ""];
+    const type = (
+      {
+        office: "OFFICE",
+        department: "DEPARTMENT",
+        team: "TEAM",
+        legalEntity: "LEGAL_ENTITY",
+        job: "JOB",
+      } as Record<string, string>
+    )[field ?? ""];
     if (type) return names.assignable(type, value) ?? value;
     if (field === "hireDate" || field === "probationEnd") return d.date(value);
     if (field === "manager") return t("words.aPerson");
@@ -146,7 +183,11 @@ export const automationWords = (d: WordsDeps) => {
   };
 
   const processName = (trigger: TriggerSpec): "ANY_ONBOARDING" | "ANY_OFFBOARDING" | "TEMPLATE" =>
-    trigger.process === "ANY_OFFBOARDING" ? "ANY_OFFBOARDING" : trigger.process && trigger.process !== "ANY_ONBOARDING" ? "TEMPLATE" : "ANY_ONBOARDING";
+    trigger.process === "ANY_OFFBOARDING"
+      ? "ANY_OFFBOARDING"
+      : trigger.process && trigger.process !== "ANY_ONBOARDING"
+        ? "TEMPLATE"
+        : "ANY_ONBOARDING";
 
   const at = (trigger: TriggerSpec) => trigger.at || "09:00";
 
@@ -155,13 +196,26 @@ export const automationWords = (d: WordsDeps) => {
       case "DAILY":
         return t("words.schedule.daily", { at: at(trigger) });
       case "WEEKLY":
-        return t("words.schedule.weekly", { days: d.list((trigger.weekdays ?? []).map(d.weekday)), at: at(trigger) });
+        return t("words.schedule.weekly", {
+          days: d.list((trigger.weekdays ?? []).map(d.weekday)),
+          at: at(trigger),
+        });
       case "QUARTERLY":
         return trigger.dayOfMonth === 0
-          ? t("words.schedule.quarterlyLast", { month: String(trigger.monthOfPeriod ?? 1), at: at(trigger) })
-          : t("words.schedule.quarterly", { day: trigger.dayOfMonth ?? 1, month: String(trigger.monthOfPeriod ?? 1), at: at(trigger) });
+          ? t("words.schedule.quarterlyLast", {
+              month: String(trigger.monthOfPeriod ?? 1),
+              at: at(trigger),
+            })
+          : t("words.schedule.quarterly", {
+              day: trigger.dayOfMonth ?? 1,
+              month: String(trigger.monthOfPeriod ?? 1),
+              at: at(trigger),
+            });
       case "YEARLY":
-        return t("words.schedule.yearly", { date: d.dayOfMonth(trigger.monthOfPeriod ?? 1, trigger.dayOfMonth || 1), at: at(trigger) });
+        return t("words.schedule.yearly", {
+          date: d.dayOfMonth(trigger.monthOfPeriod ?? 1, trigger.dayOfMonth || 1),
+          at: at(trigger),
+        });
       default:
         if (trigger.weekOfMonth != null) {
           return t("words.schedule.monthlyWeekday", {
@@ -179,28 +233,46 @@ export const automationWords = (d: WordsDeps) => {
   // ── the trigger ─────────────────────────────────────────────────────────────────────────────
 
   /** The When card's title: "14 days before the end of probation", "Office changes", "Every day, 09:00". */
-  const triggerTitle = (trigger: TriggerSpec | null | undefined, conditions?: Segment | null): string => {
+  const triggerTitle = (
+    trigger: TriggerSpec | null | undefined,
+    conditions?: Segment | null,
+  ): string => {
     if (!trigger) return t("words.noTrigger");
     switch (trigger.type) {
       case "DATE_OFFSET": {
-        if (trigger.field === "FIXED") return trigger.date ? t("words.onDate", { date: d.date(fixedRunDate(trigger)!) }) : tA("trigger.FIXED_DATE");
+        if (trigger.field === "FIXED")
+          return trigger.date
+            ? t("words.onDate", { date: d.date(fixedRunDate(trigger)!) })
+            : tA("trigger.FIXED_DATE");
         const date = dateNoun(trigger.field, trigger.attributeId);
         if (trigger.direction === "ON") return upperFirst(t("words.onTheDate", { date }));
-        return upperFirst(t("words.relative", { days: trigger.days ?? 0, dir: trigger.direction === "AFTER" ? "AFTER" : "BEFORE", date }));
+        return upperFirst(
+          t("words.relative", {
+            days: trigger.days ?? 0,
+            dir: trigger.direction === "AFTER" ? "AFTER" : "BEFORE",
+            date,
+          }),
+        );
       }
       case "FIELD_CHANGED":
-        return t("words.fieldChanges", { field: names.changeableField(trigger.field) ?? t("words.aField") });
+        return t("words.fieldChanges", {
+          field: names.changeableField(trigger.field) ?? t("words.aField"),
+        });
       case "SCHEDULE":
         return scheduleTitle(trigger);
       case "JOINS_SEGMENT": {
         const only = conditions?.filters?.length === 1 ? conditions.filters[0] : null;
-        return only ? t("words.joins", { group: names.filterValue(only) }) : tA("trigger.JOINS_SEGMENT");
+        return only
+          ? t("words.joins", { group: names.filterValue(only) })
+          : tA("trigger.JOINS_SEGMENT");
       }
       case "EVENT":
         if (trigger.event === "PROCESS_COMPLETED") {
           const kind = processName(trigger);
           return kind === "TEMPLATE"
-            ? t("words.process.TEMPLATE", { name: names.processTemplate(trigger.process) ?? t("words.aProcess") })
+            ? t("words.process.TEMPLATE", {
+                name: names.processTemplate(trigger.process) ?? t("words.aProcess"),
+              })
             : t(`words.process.${kind}`);
         }
         return trigger.event ? tA(`trigger.${trigger.event}`) : tA("trigger.TIME_OFF_REQUESTED");
@@ -245,7 +317,10 @@ export const automationWords = (d: WordsDeps) => {
   const triggerPhrase = (trigger: TriggerSpec, conditions: Segment | null): string => {
     switch (trigger.type) {
       case "DATE_OFFSET": {
-        if (trigger.field === "FIXED") return t("words.sentence.fixed", { date: trigger.date ? d.date(fixedRunDate(trigger)!) : t("words.aDate") });
+        if (trigger.field === "FIXED")
+          return t("words.sentence.fixed", {
+            date: trigger.date ? d.date(fixedRunDate(trigger)!) : t("words.aDate"),
+          });
         const date = dateNoun(trigger.field, trigger.attributeId);
         if (trigger.direction === "ON") return t("words.sentence.dateOn", { date });
         return trigger.direction === "AFTER"
@@ -258,13 +333,17 @@ export const automationWords = (d: WordsDeps) => {
         return lowerFirst(scheduleTitle(trigger));
       case "JOINS_SEGMENT": {
         const only = conditions?.filters?.length === 1 ? conditions.filters[0] : null;
-        return only ? t("words.sentence.joins", { group: names.filterValue(only) }) : t("words.sentence.joinsAny");
+        return only
+          ? t("words.sentence.joins", { group: names.filterValue(only) })
+          : t("words.sentence.joinsAny");
       }
       case "EVENT":
         if (trigger.event === "PROCESS_COMPLETED") {
           const kind = processName(trigger);
           return kind === "TEMPLATE"
-            ? t("words.sentence.process.TEMPLATE", { name: names.processTemplate(trigger.process) ?? t("words.aProcess") })
+            ? t("words.sentence.process.TEMPLATE", {
+                name: names.processTemplate(trigger.process) ?? t("words.aProcess"),
+              })
             : t(`words.sentence.process.${kind}`);
         }
         return t(`words.sentence.timeOff.${trigger.event ?? "TIME_OFF_REQUESTED"}`);
@@ -286,8 +365,40 @@ export const automationWords = (d: WordsDeps) => {
 
   const words = (text: string | null | undefined) => tokensAsWords(text, names.placeholder).trim();
 
-  /** The card's title: "Their manager approves", "Book the probation review", "Tell HR Admin". */
-  const stepTitle = (step: StepSpec): string => {
+  /**
+   * A wait on a task or a signing, said of what it waits for: "The task is done", "Offer letter is signed". The
+   * definition tells a signing from a task; without it the wait reads as a task's.
+   */
+  /** The signing a wait points at, or null when it waits on a task (§ 47: one name for what a wait waits on). */
+  const signingWaitedOn = (
+    step: StepSpec,
+    definition?: Pick<AutomationDefinition, "steps"> | null,
+  ): StepSpec | null => {
+    if (step.type !== "WAIT_UNTIL" || step.until === "FIELD_FILLED" || !definition) return null;
+    const on = findStep(definition, step.taskStepId ?? null);
+    return on?.type === "SIGN_DOCUMENT" ? on : null;
+  };
+
+  const signingTitle = (on: StepSpec): string => on.title?.trim() || t("wait.untitledDocument");
+
+  const waitDone = (
+    step: StepSpec,
+    definition?: Pick<AutomationDefinition, "steps"> | null,
+  ): string => {
+    const on = definition ? findStep(definition, step.taskStepId ?? null) : null;
+    if (on?.type !== "SIGN_DOCUMENT") return t("words.step.taskDone");
+    // The settings' own option words, so the card and the pick say the same: "Offer letter is signed".
+    return t("wait.signedOption", { title: signingTitle(on) });
+  };
+
+  /**
+   * The card's title: "Their manager approves", "Book the probation review", "Tell HR Admin". The definition is needed
+   * only by a wait, to say whether it waits for a task or a signing.
+   */
+  const stepTitle = (
+    step: StepSpec,
+    definition?: Pick<AutomationDefinition, "steps"> | null,
+  ): string => {
     switch (step.type) {
       case "NOTIFY": {
         const who = recipients(step.recipients);
@@ -301,17 +412,20 @@ export const automationWords = (d: WordsDeps) => {
       case "CREATE_TASK":
         return words(step.title) || stepKind(step);
       case "REQUEST_APPROVAL":
-        return step.assignee ? upperFirst(t("words.step.approves", { who: recipient(step.assignee) })) : stepKind(step);
+        return step.assignee
+          ? upperFirst(t("words.step.approves", { who: recipient(step.assignee) }))
+          : stepKind(step);
       case "WAIT_UNTIL":
         return step.until === "FIELD_FILLED"
           ? step.field
             ? t("words.step.filled", { field: names.fillable(step.field) })
             : stepKind(step)
-          : t("words.step.taskDone");
+          : waitDone(step, definition);
       case "ASSIGN":
       case "UNASSIGN": {
         const thing = which(step);
-        if (!thing) return step.type === "UNASSIGN" ? t("words.step.unassign") : t("words.step.assign");
+        if (!thing)
+          return step.type === "UNASSIGN" ? t("words.step.unassign") : t("words.step.assign");
         return upperFirst(step.type === "UNASSIGN" ? t("words.step.takeBack", { thing }) : thing);
       }
       case "GRANT_TIME_OFF_POLICY":
@@ -346,15 +460,23 @@ export const automationWords = (d: WordsDeps) => {
         break;
       case "REQUEST_APPROVAL":
         if (step.maxDays != null) {
-          parts.push(t("words.step.noAnswer", { days: step.maxDays, then: t(`words.noAnswer.${step.ifNoAnswer ?? "ASK_THEIR_MANAGER"}`) }));
+          parts.push(
+            t("words.step.noAnswer", {
+              days: step.maxDays,
+              then: t(`words.noAnswer.${step.ifNoAnswer ?? "ASK_THEIR_MANAGER"}`),
+            }),
+          );
         }
         break;
       case "WAIT_UNTIL": {
         const then =
           step.onTimeout === "STOP_AND_TELL"
-            ? t("words.timeout.STOP_AND_TELL", { who: recipients(step.tell) ?? t("words.recipient.OWNER") })
+            ? t("words.timeout.STOP_AND_TELL", {
+                who: recipients(step.tell) ?? t("words.recipient.OWNER"),
+              })
             : t(`words.timeout.${step.onTimeout === "STOP" ? "STOP" : "CONTINUE"}`);
-        if (step.maxDays != null) parts.push(upperFirst(t("words.step.atMost", { days: step.maxDays, then })));
+        if (step.maxDays != null)
+          parts.push(upperFirst(t("words.step.atMost", { days: step.maxDays, then })));
         break;
       }
       case "ASSIGN":
@@ -378,7 +500,12 @@ export const automationWords = (d: WordsDeps) => {
     }
     const when = timing(step.when);
     // A chosen time is what the author looks for on the canvas; the default 09:00 says nothing new (WALK_QUESTIONS § 32 (a)).
-    if (when) parts.push(step.when?.at && step.when.at !== "09:00" ? t("words.timingAt", { timing: when, at: step.when.at }) : when);
+    if (when)
+      parts.push(
+        step.when?.at && step.when.at !== "09:00"
+          ? t("words.timingAt", { timing: when, at: step.when.at })
+          : when,
+      );
     const only = conditionsText(step.condition);
     if (only) parts.push(t("words.step.onlyIf", { conditions: only }));
     if (parts.length === 0) return null;
@@ -386,26 +513,39 @@ export const automationWords = (d: WordsDeps) => {
   };
 
   /** The step inside the sentence: "tells HR Admin", "asks their manager to approve". */
-  const stepPhrase = (step: StepSpec): string => {
+  const stepPhrase = (
+    step: StepSpec,
+    definition?: Pick<AutomationDefinition, "steps"> | null,
+  ): string => {
     switch (step.type) {
       case "NOTIFY":
         return t("words.phrase.notify", { who: recipients(step.recipients) ?? t("words.someone") });
       case "SEND_EMAIL":
         return t("words.phrase.email", { who: recipients(step.recipients) ?? t("words.someone") });
       case "CREATE_TASK":
-        return step.assignee ? t("words.phrase.task", { who: recipient(step.assignee) }) : t("words.phrase.taskNobody");
+        return step.assignee
+          ? t("words.phrase.task", { who: recipient(step.assignee) })
+          : t("words.phrase.taskNobody");
       case "REQUEST_APPROVAL":
-        return t("words.phrase.approval", { who: step.assignee ? recipient(step.assignee) : t("words.someone") });
+        return t("words.phrase.approval", {
+          who: step.assignee ? recipient(step.assignee) : t("words.someone"),
+        });
       case "WAIT_UNTIL":
         return step.until === "FIELD_FILLED"
           ? t("words.phrase.waitField", { field: names.fillable(step.field) || t("words.aField") })
-          : t("words.phrase.waitTask");
+          : signingWaitedOn(step, definition)
+            ? t("words.phrase.waitSigned", {
+                title: signingTitle(signingWaitedOn(step, definition)!),
+              })
+            : t("words.phrase.waitTask");
       case "ASSIGN":
         return t("words.phrase.assign", { thing: which(step) ?? t("words.something") });
       case "UNASSIGN":
         return t("words.phrase.unassign", { thing: which(step) ?? t("words.something") });
       case "GRANT_TIME_OFF_POLICY":
-        return t("words.phrase.policy", { policy: names.policy(step.policyId) ?? t("words.aPolicy") });
+        return t("words.phrase.policy", {
+          policy: names.policy(step.policyId) ?? t("words.aPolicy"),
+        });
       case "START_REVIEW":
         return t("words.phrase.review");
       case "SIGN_DOCUMENT":
@@ -426,30 +566,49 @@ export const automationWords = (d: WordsDeps) => {
    */
   const sentence = (definition: AutomationDefinition): SentencePart[] => {
     const out: SentencePart[] = [];
-    const text = (s: string) => out.push({ text: s, stepId: null, chip: false, placeholder: false });
+    const text = (s: string) =>
+      out.push({ text: s, stepId: null, chip: false, placeholder: false });
     const trigger = definition.trigger;
     const who = conditionsText(definition.conditions);
     if (!trigger) {
       text(t("words.sentence.when"));
-      out.push({ text: t("words.sentence.somethingHappens"), stepId: null, chip: true, placeholder: true });
+      out.push({
+        text: t("words.sentence.somethingHappens"),
+        stepId: null,
+        chip: true,
+        placeholder: true,
+      });
     } else if (trigger.type === "SCHEDULE") {
       out.push({ text: scheduleTitle(trigger), stepId: null, chip: true, placeholder: false });
     } else {
       text(t("words.sentence.when"));
-      out.push({ text: triggerPhrase(trigger, definition.conditions), stepId: null, chip: true, placeholder: false });
+      out.push({
+        text: triggerPhrase(trigger, definition.conditions),
+        stepId: null,
+        chip: true,
+        placeholder: false,
+      });
     }
     if (who && trigger?.type !== "JOINS_SEGMENT") {
       text(t("words.sentence.for"));
       out.push({ text: who, stepId: null, chip: true, placeholder: false });
     }
     text(t("words.sentence.noddo"));
-    const steps = flatten(definition).map((n) => n.step).filter((s) => !s.skipped);
+    const steps = flatten(definition)
+      .map((n) => n.step)
+      .filter((s) => !s.skipped);
     if (steps.length === 0) {
-      out.push({ text: t("words.sentence.doesTheSteps"), stepId: null, chip: true, placeholder: true });
+      out.push({
+        text: t("words.sentence.doesTheSteps"),
+        stepId: null,
+        chip: true,
+        placeholder: true,
+      });
     } else {
       steps.forEach((s, i) => {
-        if (i > 0) text(i === steps.length - 1 ? t("words.sentence.andLast") : t("words.sentence.then"));
-        out.push({ text: stepPhrase(s), stepId: s.id, chip: true, placeholder: false });
+        if (i > 0)
+          text(i === steps.length - 1 ? t("words.sentence.andLast") : t("words.sentence.then"));
+        out.push({ text: stepPhrase(s, definition), stepId: s.id, chip: true, placeholder: false });
       });
     }
     text(t("words.sentence.end"));
@@ -465,6 +624,14 @@ export const automationWords = (d: WordsDeps) => {
     stepKind,
     stepTitle,
     stepSubtitle,
+    /** The title of the signing a wait waits on, or null for a task (the run window's waiting line). */
+    signingWaitedOnTitle: (
+      step: StepSpec,
+      definition?: Pick<AutomationDefinition, "steps"> | null,
+    ): string | null => {
+      const on = signingWaitedOn(step, definition);
+      return on ? signingTitle(on) : null;
+    },
     sentence,
     // Pieces the read rows use.
     recipients,

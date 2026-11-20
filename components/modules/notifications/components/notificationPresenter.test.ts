@@ -420,3 +420,42 @@ describe("approvals for somebody else", () => {
     });
   });
 });
+
+describe("a date inside a notification's sentence", () => {
+  // The short style with its weekday, the company's order — never the numeric table format ("30.11.2026").
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-11-19T09:00:00"));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("reads a due date with its weekday and a comma, the year left out in this year", () => {
+    const view = presentNotification(
+      notification({ type: "AUTOMATION_TASK_ASSIGNED", params: { taskTitle: "Prepare a desk", personName: "Anna", ruleName: "First day", dueDate: "2026-11-28" } }),
+    );
+    expect(view.message).toBe("Prepare a desk for Anna — set by the automation First day. Due Sat, 28 Nov.");
+  });
+
+  it("reads the joining day the same way", () => {
+    const view = presentNotification(
+      notification({ type: "TEAM_MEMBER_JOINING", params: { personName: "Anna Smith", date: "2026-11-25", when: "RECORDED" } }),
+    );
+    expect(view.message).toBe("Anna Smith joins your team on Wed, 25 Nov.");
+  });
+
+  it("writes a span of leave with each end's weekday", () => {
+    const view = presentNotification(
+      notification({ type: "TIMEOFF_REQUEST_APPROVED", params: { policyName: "Annual Leave", startDate: "2026-11-25", endDate: "2026-11-27" } }),
+    );
+    expect(view.message).toBe("Your Annual Leave request Wed 25 – Fri 27 Nov was approved.");
+  });
+
+  it("names the year of a date in another year", () => {
+    const view = presentNotification(
+      notification({ type: "TIMEOFF_CARRYOVER_EXPIRING", params: { amount: "2", expiresOn: "2027-03-31" } }),
+    );
+    expect(view.message).toContain("Wed, 31 Mar 2027");
+    expect(view.message).not.toMatch(/\d{2}\.\d{2}\.\d{4}/);
+  });
+});

@@ -14,6 +14,14 @@ export class HrisMfaService {
     return hrisApiMfaClient.confirmEnrolment(code, signOutOthers);
   }
 
+  public startReplacement() {
+    return hrisApiMfaClient.startReplacement();
+  }
+
+  public confirmReplacement(code: string) {
+    return hrisApiMfaClient.confirmReplacement(code);
+  }
+
   public regenerateBackupCodes() {
     return hrisApiMfaClient.regenerateBackupCodes();
   }

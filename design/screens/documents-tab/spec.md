@@ -111,6 +111,9 @@ None blocks this.
     why), and so are dropping onto a folder tile and the tile's drop-target state (`UploadDocumentForm.tsx`,
     `PersonalDocumentsFolderCard.tsx` `onDropFiles`) — documents batch 11, 2026-11-18, not yet seen in a visible window.
   - **Folder icons** are the folder plus nine from the hub's set; the colours are the package's eight.
-  - **All documents** heads groups by the root's folders; a file in a nested folder sits under its own folder's id with
-    no name yet.
+  - **All documents** heads a group with the folder its files sit in — the root's, or a nested one under its own name
+    (the root listing names every folder a file sits in, `folderNames`; 2026-11-19, not yet seen on screen). A nested
+    folder heads its own group, not its root folder's.
   - The Expiring view (`documents-expiry`) appears in the switch only while something is expiring.
+- **An empty folder for a reader who may not upload** (2026-11-19, F5.1): one line, no buttons and no "Drop files here or use Add".
+- **The selection bar takes the view tabs' row** (2026-11-20, the owner): at the root, while rows are selected, the bar stands where Loose · All · Starred were, so the list does not move under the pointer; clearing brings the tabs back. Inside a folder (no tabs row) it still sits above the list.

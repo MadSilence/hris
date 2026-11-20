@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { InlineAlert } from "@/components/desact/alert";
 import type { AutomationCatalog, AutomationDefinition, AutomationEventOption, StepSpec } from "@/models/automations";
 import type { StepFieldsProps } from "../../contracts";
 import { StepReadRows } from "../read/StepReadRows";
@@ -11,7 +14,7 @@ import { AssignFields, PolicyFields } from "./RecordSteps";
 import { SplitFields } from "./SplitFields";
 import { WaitFields } from "./WaitFields";
 import type { StepPartProps } from "./stepPartProps";
-import { allSteps } from "../../model/tree";
+import { allSteps, numbers, unsignedDocumentWait } from "../../model/tree";
 
 /** The trigger's event, when it is one — it adds placeholders and "The approver". */
 export const eventOf = (definition: AutomationDefinition, catalog: AutomationCatalog): AutomationEventOption | null => {
@@ -68,6 +71,7 @@ const OwnFields: React.FC<StepPartProps> = (props) => {
  * value across.
  */
 export const StepFields: React.FC<StepFieldsProps> = ({ definition, step, catalog, readOnly, problems, onChange }) => {
+  const t = useTranslations("automationsSettings");
   if (readOnly) return <StepReadRows definition={definition} step={step} catalog={catalog} />;
   const props: StepPartProps = {
     definition,
@@ -78,9 +82,16 @@ export const StepFields: React.FC<StepFieldsProps> = ({ definition, step, catalo
     event: eventOf(definition, catalog),
     placeholders: placeholdersOf(definition, catalog),
   };
+  // WALK_QUESTIONS § 39: a warning, not a problem — the step still saves.
+  const unsigned = unsignedDocumentWait(definition, step);
   return (
     <FieldStack key={step.id}>
       <OwnFields {...props} />
+      {unsigned && (
+        <InlineAlert tone="pending" icon={Alert02Icon}>
+          {t("documentAfterWait", { number: numbers(definition)[unsigned.id] ?? "" })}
+        </InlineAlert>
+      )}
       <PartDivider />
       <CommonFields definition={definition} step={step} catalog={catalog} problems={problems} onStep={props.onStep} />
     </FieldStack>

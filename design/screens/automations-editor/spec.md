@@ -162,3 +162,4 @@ The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations
 - CR1: read mode shows × only — nothing in the step menu works there (Q-45).
 - C1b: the fit keeps the selected card level with the window too, so an insert that refits the canvas still ends the line on the window.
 - C13, E3b: initials are 12, not 11 — the design-system guard allows the 11 px size on Home only.
+- **A Wait on a signing** (2026-11-19) says "{document} is signed" on its card, in the sentence ("waits until {document} is signed") and in the run window ("Waiting until {document} is signed.") — WALK_QUESTIONS § 47. Putting `{document}` after a wait that goes on after a decline draws a warning.

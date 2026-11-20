@@ -429,7 +429,7 @@ const TestRunResult: React.FC<{
             <ResultLine
               key={step.stepId}
               badge={numbered[step.stepId] ?? ""}
-              title={happens(step) ?? (spec ? words.stepTitle(spec) : step.title ?? tShared(`stepType.${step.actionType}`))}
+              title={happens(step) ?? (spec ? words.stepTitle(spec, definition) : step.title ?? tShared(`stepType.${step.actionType}`))}
               hint={hint(step)}
               muted={skipped}
               action={

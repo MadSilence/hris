@@ -287,4 +287,5 @@ This week (T1–T3) and the Light top (L1–L2) as `hris/design/handoffs/2026-11
 
 ### Built from the fixes of 2026-11-19
 
-Built from `design-fixes-home-widgets-1` (2026-11-19, walked where the seed had data — the rest is owed in `(claude)/testing/DESIGN_FIXES_SMOKE_TESTS.md`). Differences: a task's due time, a review's question count and a document's pages and minutes are not shown — the API has none of them yet; the Automations chart's grey dot is `field` #DADADF (no token for #D3D3D8); This week Small switches to faces at three today, as the board.
+Built from `design-fixes-home-widgets-1` (2026-11-19, walked where the seed had data, and the rest with made-up data the same day). Differences: a task's due time, a review's question count and a document's pages and minutes are not shown — the API has none of them yet; the Automations chart's grey dot is `field` #DADADF (no token for #D3D3D8); This week Small switches to faces at three today, as the board.
+- **W15 by what changed** (2026-11-19): a page agreed to before reads "was updated", a new one "to read and agree" — proposed words, final in DQ-22.
