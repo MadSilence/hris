@@ -23,6 +23,7 @@ import type { PeopleView, ViewPayload } from "@/models/peopleView";
 import { usePeopleSearchInfinite } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearchInfinite";
 import { usePeopleSearchCount } from "@/components/modules/organization/hooks/usePeopleSearch/usePeopleSearchCount";
 import { bulkTargetFor, heldCountFor, offersAllMatching } from "./selection";
+import { useLastHeight } from "./useLastHeight";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import { useDraftCount } from "@/components/modules/organization/hooks/useDraftCount";
 import {
@@ -79,6 +80,7 @@ const PeopleTableContainer: React.FC = () => {
   const canRequestDocuments = useCanAccess("PEOPLE.DOCUMENTS", "EDIT");
   const nameLabel = tCommon("fields.personName");
   const [addPersonOpen, setAddPersonOpen] = useState(false);
+  const [toolbarRef, toolbarHeight] = useLastHeight();
   // First name, not last: the table shows one Name column and it sorts by first name, so a default
   // of last_name left the list in an order no header could explain or undo.
   const [sort, setSort] = useState<SortState>({ fieldId: "first_name", dir: "asc" });
@@ -445,7 +447,10 @@ const PeopleTableContainer: React.FC = () => {
 
         {/* While people are picked, the Mist bar takes the toolbar's place (the owner, 2026-11-05, D2); "select all
             matching" rides in it. */}
+        {/* The bar's slot keeps the toolbar's height — on a narrow window the toolbar wraps, and a shorter bar moved the
+            rows under the pointer (WALK_QUESTIONS § 52). */}
         {heldCount > 0 ? (
+          <div className="flex-none" style={toolbarHeight ? { minHeight: toolbarHeight } : undefined}>
           <SelectionBar
             count={heldCount}
             onClear={() => {
@@ -483,7 +488,9 @@ const PeopleTableContainer: React.FC = () => {
                 : []),
             ]}
           />
+          </div>
         ) : (
+          <div ref={toolbarRef} className="flex-none">
           <PeopleTopbar
             sort={sort}
             selectedCount={heldCount}
@@ -503,6 +510,7 @@ const PeopleTableContainer: React.FC = () => {
             }}
             samples={isDemo ? { hiding: hideSamples, onChange: setHideSamples } : undefined}
           />
+          </div>
         )}
 
         <PeopleTable
