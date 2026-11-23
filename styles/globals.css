@@ -14,6 +14,13 @@
 @import "./noddo/tokens.css";
 
 /*
+ * A touch screen — no hover, or a coarse pointer (the designers' AQ-15 / TOUCH, the owner's U11): an action that
+ * appears on hover on a desktop is always visible here, `opacity-0 group-hover:opacity-100 touch:opacity-100`, and is
+ * never copied into a ⋯ instead (`technical_documentation/ui/ACTIONS_AND_MENUS.md` § 11).
+ */
+@custom-variant touch (@media (hover: none), (pointer: coarse));
+
+/*
  * The package names the families ("Inter"); next/font serves them under generated names
  * (`styles/fonts/fonts.ts`). Same stacks as tokens.css otherwise.
  */
@@ -44,6 +51,49 @@
   --tag-orange-bg: #3E200A; --tag-orange-text: #BB825B; --tag-orange-bar: #9E5B29;
   --tag-mustard-bg: #372600; --tag-mustard-text: #AC8C42; --tag-mustard-bar: #B48C26;
   --tag-olive-bg: #292B18; --tag-olive-text: #8E9370; --tag-olive-bar: #686D44;
+}
+
+/*
+ * The leave palette (K01, "Leave colours", approved by Ulia 2026-11-19; the owner took it in the second sitting of
+ * 2026-11-19): what a time off policy's colour looks like wherever leave shows — the calendars, Who's out, the policy
+ * marker. **Apart from the tag palette**: a policy is still stored by a tag name (`TagColor`), but leave is drawn
+ * from these triplets, never from `--tag-*`; tags keep their own values for everything else a person colours.
+ * Each colour is a fill (an approved pill, the marker's tint), an edge (the marker's dot, a pending pill's dashed
+ * edge) and a text colour (on the fill, and on white for pending). Gray is never a policy's: it is "Away".
+ *
+ * The light values are the designers'. **The dark ones are ours**: a deep fill and a light text at 9 : 1 on it, and an
+ * edge kept within 4° of the designers' hue, set for 3 : 1 on a dark card and on its own fill, and tuned until every
+ * two edges stay 6 apart (OKLab × 100) for normal vision and 2.5 under protanopia, deuteranopia and tritanopia —
+ * `test/leavePalette.test.ts` holds them to it.
+ */
+:root {
+  --leave-berry-fill: #FAD9EA; --leave-berry-edge: #D2559A; --leave-berry-text: #6B1745;
+  --leave-plum-fill: #E6DDF8; --leave-plum-edge: #8467CF; --leave-plum-text: #3B2370;
+  --leave-lilac-fill: #F6DCF6; --leave-lilac-edge: #C46BC6; --leave-lilac-text: #5E1F60;
+  --leave-indigo-fill: #E1E1FF; --leave-indigo-edge: #6E6FE0; --leave-indigo-text: #2A2D79;
+  --leave-ocean-fill: #D9E8FF; --leave-ocean-edge: #5B8FE0; --leave-ocean-text: #163E73;
+  --leave-teal-fill: #CFF1EC; --leave-teal-edge: #2FA898; --leave-teal-text: #0A4C47;
+  --leave-olive-fill: #E3EDC8; --leave-olive-edge: #8AA53A; --leave-olive-text: #3A4A10;
+  --leave-mustard-fill: #F7EDB0; --leave-mustard-edge: #C9A800; --leave-mustard-text: #4F4300;
+  --leave-bronze-fill: #FCE7BF; --leave-bronze-edge: #D99A2B; --leave-bronze-text: #5C3B06;
+  --leave-orange-fill: #FFE1CC; --leave-orange-edge: #F08A3E; --leave-orange-text: #6E3208;
+  --leave-cocoa-fill: #F2E1D8; --leave-cocoa-edge: #B07A5E; --leave-cocoa-text: #4D2D21;
+  --leave-gray-fill: #E9E9EE; --leave-gray-edge: #9C9CA3; --leave-gray-text: #45454A;
+}
+
+[data-theme="dark"] {
+  --leave-berry-fill: #482138; --leave-berry-edge: #F469B1; --leave-berry-text: #F9C7DC;
+  --leave-plum-fill: #36284A; --leave-plum-edge: #8C75EA; --leave-plum-text: #D8D1FE;
+  --leave-lilac-fill: #422343; --leave-lilac-edge: #B951B1; --leave-lilac-text: #EECAEE;
+  --leave-indigo-fill: #2E2B4F; --leave-indigo-edge: #BCBDFE; --leave-indigo-text: #CCD5FE;
+  --leave-ocean-fill: #1D304E; --leave-ocean-edge: #61A7FF; --leave-ocean-text: #C3D9F9;
+  --leave-teal-fill: #013934; --leave-teal-edge: #76CEC0; --leave-teal-text: #C2DFDB;
+  --leave-olive-fill: #2C3500; --leave-olive-edge: #90B159; --leave-olive-text: #D2DDBF;
+  --leave-mustard-fill: #383102; --leave-mustard-edge: #DFC411; --leave-mustard-text: #DED8BB;
+  --leave-bronze-fill: #3F2D01; --leave-bronze-edge: #D78D00; --leave-bronze-text: #E8D4BC;
+  --leave-orange-fill: #492607; --leave-orange-edge: #FEAD80; --leave-orange-text: #F4CFBB;
+  --leave-cocoa-fill: #43291B; --leave-cocoa-edge: #A2745E; --leave-cocoa-text: #E7D2CB;
+  --leave-gray-fill: #303034; --leave-gray-edge: #9E9EA4; --leave-gray-text: #D7D7DA;
 }
 
 /*
@@ -190,6 +240,43 @@
   --color-tag-olive-bg: var(--tag-olive-bg);
   --color-tag-olive-text: var(--tag-olive-text);
   --color-tag-olive-bar: var(--tag-olive-bar);
+  /* The leave palette (K01) — apart from the tags above. */
+  --color-leave-berry-fill: var(--leave-berry-fill);
+  --color-leave-berry-edge: var(--leave-berry-edge);
+  --color-leave-berry-text: var(--leave-berry-text);
+  --color-leave-plum-fill: var(--leave-plum-fill);
+  --color-leave-plum-edge: var(--leave-plum-edge);
+  --color-leave-plum-text: var(--leave-plum-text);
+  --color-leave-lilac-fill: var(--leave-lilac-fill);
+  --color-leave-lilac-edge: var(--leave-lilac-edge);
+  --color-leave-lilac-text: var(--leave-lilac-text);
+  --color-leave-indigo-fill: var(--leave-indigo-fill);
+  --color-leave-indigo-edge: var(--leave-indigo-edge);
+  --color-leave-indigo-text: var(--leave-indigo-text);
+  --color-leave-ocean-fill: var(--leave-ocean-fill);
+  --color-leave-ocean-edge: var(--leave-ocean-edge);
+  --color-leave-ocean-text: var(--leave-ocean-text);
+  --color-leave-teal-fill: var(--leave-teal-fill);
+  --color-leave-teal-edge: var(--leave-teal-edge);
+  --color-leave-teal-text: var(--leave-teal-text);
+  --color-leave-olive-fill: var(--leave-olive-fill);
+  --color-leave-olive-edge: var(--leave-olive-edge);
+  --color-leave-olive-text: var(--leave-olive-text);
+  --color-leave-mustard-fill: var(--leave-mustard-fill);
+  --color-leave-mustard-edge: var(--leave-mustard-edge);
+  --color-leave-mustard-text: var(--leave-mustard-text);
+  --color-leave-bronze-fill: var(--leave-bronze-fill);
+  --color-leave-bronze-edge: var(--leave-bronze-edge);
+  --color-leave-bronze-text: var(--leave-bronze-text);
+  --color-leave-orange-fill: var(--leave-orange-fill);
+  --color-leave-orange-edge: var(--leave-orange-edge);
+  --color-leave-orange-text: var(--leave-orange-text);
+  --color-leave-cocoa-fill: var(--leave-cocoa-fill);
+  --color-leave-cocoa-edge: var(--leave-cocoa-edge);
+  --color-leave-cocoa-text: var(--leave-cocoa-text);
+  --color-leave-gray-fill: var(--leave-gray-fill);
+  --color-leave-gray-edge: var(--leave-gray-edge);
+  --color-leave-gray-text: var(--leave-gray-text);
 
   /* Charts (SPEC § 15) */
   --color-chart-1: var(--chart-1);
@@ -240,6 +327,8 @@
   --radius-widget: 28px;
   --radius-ai-box: 18px;
   --radius-tint: 12px;
+  /* The time off request dialogs (profile-time-off Q13, Q30: 520 and 680 wide, radius 24 — approved by Ulia). */
+  --radius-leave-dialog: 24px;
 
   /* Depth (SPEC § 7): level 0 … level 4 */
   --shadow-card: var(--shadow-0);
@@ -381,6 +470,10 @@
   --text-initials: round(nearest, calc(28cqw + 2px), 1px);
   --text-initials--line-height: 1;
   --text-initials--font-weight: 600;
+  /* A step's number in its 16 mark (7-product-wide/STEPS.md, 2026-11-20): 600 10/12. `StepList` only. */
+  --text-step-mark: 10px;
+  --text-step-mark--line-height: 12px;
+  --text-step-mark--font-weight: 600;
 
   /* The company hub only (company-hub specs, Changes to SPEC; CH7): its page titles, a document's title, the two
      column headings, reading text, and its big numbers. */
@@ -432,6 +525,27 @@
   --text-hub-small--line-height: 20px;
   --text-hub-lead: 16px;
   --text-hub-lead--line-height: 20px;
+  /* The profile's Time off tab (profile-time-off, 2026-11-19): a balance's number (24/28 Inter Tight — set the
+     family with `font-heading`) and the headline dates of a request opened in full (30/38). */
+  --text-leave-balance: 24px;
+  --text-leave-balance--line-height: 28px;
+  --text-leave-balance--letter-spacing: -0.01em;
+  --text-leave-balance--font-weight: 600;
+  --text-leave-dates: 30px;
+  --text-leave-dates--line-height: 38px;
+  --text-leave-dates--letter-spacing: -0.02em;
+  --text-leave-dates--font-weight: 600;
+  /* The profile header (profile-header, QR3): the person's name, 30/38 Inter Tight; and Manage account's section
+     headings, 16/24 Inter Tight (manage-account, MA1). Set the family with `font-heading`. */
+  --text-profile-name: 30px;
+  --text-profile-name--line-height: 38px;
+  --text-profile-name--letter-spacing: -0.02em;
+  --text-profile-name--font-weight: 600;
+  --text-profile-job: 16px;
+  --text-profile-job--line-height: 24px;
+  --text-account-section: 16px;
+  --text-account-section--line-height: 24px;
+  --text-account-section--font-weight: 600;
 
   /* Motion (SPEC § 11) */
   --ease-standard: var(--ease-standard);
@@ -729,9 +843,16 @@
 .auth-split { flex-direction: column; }
 @media (min-width: 768px) {
   .auth-split { flex-direction: row; }
-  .auth-split .auth-pane { display: flex; }
+  .auth-split .auth-pane { display: flex; zoom: var(--auth-grow); }
   .auth-split .auth-strip { display: none; }
 }
+/* Growing on wide windows (first-run-grow, AQ-20): a colour pane — this 520 one, the first-experience card's 600 —
+   is its 1280 size × window ÷ 1280, never smaller, and stops at 1920; everything in it (the heading, the line under
+   it, the rings, the orbit) scales with it. `tan(atan2(100vw, 1280px))` is the window ÷ 1280 as a plain number,
+   which `zoom` needs (a length cannot be divided by a length in calc yet). Inside Appearance's preview the pane is
+   drawn at its 1280 size: the window there is not the preview's. */
+.auth-split, .auth-first { --auth-grow: clamp(1, tan(atan2(100vw, 1280px)), 1.5); }
+.appearance-frame .auth-split { --auth-grow: 1; }
 
 /* noddo's own screens (root, registration) are always Wine, whatever the host's accent. */
 .auth-split[data-brand="noddo"] .auth-pane,
@@ -766,10 +887,23 @@
    rings as colour swatches with the nod, the Mist stage with a quiet ring grid, the framed previews. */
 .appearance-heading { margin: 0; font: 600 44px/46px var(--font-heading); letter-spacing: -0.035em; overflow-wrap: anywhere; }
 .appearance-step-number { width: 24px; height: 24px; flex: none; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 9999px; background: var(--accent-subtle); color: var(--accent-text); font-size: 13px; line-height: 18px; font-weight: 600; }
-.appearance-rings { display: grid; grid-template-columns: repeat(5, 44px); column-gap: 16px; row-gap: 6px; justify-content: start; }
-.appearance-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 64px; margin: 0 -10px;
-  background: none; border: 0; padding: 0; cursor: pointer; color: var(--text-secondary); font-size: 12px; line-height: 16px; }
+  border-radius: 9999px; background: var(--accent-subtle); color: var(--accent-text); font-size: 12px; line-height: 22px; font-weight: 600; }
+/* The page (L1): the column 40 from the sidebar, 420 wide, the stage 56 after it and to the window's edges. The column
+   fits 1440 x 932 under a banner: on a short window its gaps close up before anything is pushed under Save (AP1). */
+.appearance-page { display: flex; height: 100%; min-height: 0; gap: 56px; padding-left: 40px; }
+.appearance-column { width: 420px; flex: none; display: flex; flex-direction: column; min-height: 0; }
+.appearance-steps { display: flex; flex-direction: column; gap: 32px; flex: 1; min-height: 0; overflow-y: auto; padding-top: 24px; }
+.appearance-intro { display: flex; flex-direction: column; gap: 12px; }
+.appearance-intro > :first-child { margin-bottom: 10px; }
+.appearance-save { display: flex; align-items: center; gap: 12px; padding: 24px 0 32px; }
+@media (max-height: 940px) {
+  .appearance-steps { gap: 20px; padding-top: 16px; }
+  .appearance-intro > :first-child { margin-bottom: 2px; }
+  .appearance-save { padding: 16px 0 20px; }
+}
+.appearance-rings { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); row-gap: 16px; justify-items: center; }
+.appearance-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0;
+  background: none; border: 0; padding: 0; cursor: pointer; color: var(--text-tertiary); font-size: 12px; line-height: 16px; }
 .appearance-swatch:disabled { cursor: default; opacity: .5; }
 .appearance-swatch:focus-visible { outline: none; }
 .appearance-swatch:focus-visible .appearance-ring { box-shadow: 0 0 0 3px var(--accent-muted); }
@@ -795,15 +929,29 @@
 .appearance-knob { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 9999px;
   border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px rgba(11, 11, 12, .3); pointer-events: none; }
 .appearance-hue .appearance-knob { top: 50%; }
-.appearance-stage { position: relative; overflow: hidden; background: var(--surface-mist); border-radius: 32px 0 0 32px; }
-.appearance-stage-rings circle { fill: none; stroke: #DADADF; }
+.appearance-stage { position: relative; flex: 1; min-width: 0; height: 100%; overflow: hidden; background: var(--surface-mist);
+  border-radius: 32px 0 0 32px; }
+/* One quiet row of rings at the stage's bottom right, behind its foot (L1): the second in the accent. */
+.appearance-stage-rings { position: absolute; right: -40px; bottom: -56px; width: 420px; height: 128px; }
+.appearance-stage-rings circle { fill: none; stroke: var(--canvas-dot); }
 .appearance-stage-rings circle.hot { stroke: var(--accent); }
-.appearance-frame { overflow: hidden; border-radius: 14px; background: var(--surface-card); box-shadow: var(--shadow-3); }
-.appearance-frame-bar { height: 24px; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface-subtle);
-  border-bottom: 1px solid var(--border-divider); font-size: 11px; line-height: 16px; color: var(--text-tertiary); }
-.appearance-frame-bar i { width: 7px; height: 7px; border-radius: 9999px; background: var(--border-strong); }
+.appearance-stage-tab { height: 34px; padding: 0 14px; border-radius: 9999px; font-size: 13px; line-height: 18px; font-weight: 500;
+  background: var(--surface-card); color: var(--text-secondary); box-shadow: 0 0 0 1px var(--border-divider); }
+.appearance-stage-tab:hover { color: var(--text-primary); }
+.appearance-stage-tab[aria-selected="true"] { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+.appearance-draft { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 9999px;
+  background: var(--surface-card); box-shadow: 0 0 0 1px var(--border-divider); font-size: 12px; line-height: 16px; font-weight: 500;
+  color: var(--text-secondary); }
+.appearance-draft i { width: 6px; height: 6px; border-radius: 9999px; background: var(--accent); }
+.appearance-frame { overflow: hidden; border-radius: 14px; background: var(--surface-card);
+  box-shadow: 0 24px 60px -24px rgba(11, 11, 12, .28), 0 0 0 1px rgba(11, 11, 12, .06); }
+.appearance-frame-bar { height: 24px; display: flex; align-items: center; gap: 5px; padding: 0 10px; background: #F4F4F6; }
+.appearance-frame-bar i { width: 7px; height: 7px; border-radius: 9999px; background: var(--canvas-dot); }
+.appearance-frame-bar span { width: 160px; margin-left: 14px; padding-left: 8px; border-radius: 7px; background: var(--surface-card);
+  font-size: 9px; line-height: 14px; color: var(--text-tertiary); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .appearance-frame .auth-split { min-height: 0; height: 100%; }
-.appearance-phone { overflow: hidden; border: 3px solid var(--text-primary); border-radius: 26px; background: var(--surface-card); box-shadow: var(--shadow-3); }
+.appearance-phone { overflow: hidden; border: 3px solid var(--surface-card); border-radius: 28px; background: var(--surface-card);
+  box-shadow: 0 24px 60px -24px rgba(11, 11, 12, .28), 0 0 0 1px rgba(11, 11, 12, .06); }
 .appearance-phone .auth-strip { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 8px; background: var(--accent); color: var(--on-accent); }
 .appearance-phone[data-background="light"] .auth-strip { background: var(--gray-50); color: var(--text-primary); }
 .appearance-phone[data-background="light"] .auth-rings circle { stroke: var(--gray-200); }
@@ -818,13 +966,11 @@
 .appearance-stage[data-accent="wine"] .appearance-phone:not([data-background="light"]) .auth-rings circle { stroke: var(--wine-500); }
 .appearance-stage[data-accent="wine"] .appearance-phone:not([data-background="light"]) .auth-rings circle.hot { stroke: var(--rose); }
 /*
- * The email preview: the login-code email (sign-in-emails M16) as hris-api's LoginEmailLayout writes it, at its true
- * 600 px — the sizes below are the email's own, and the colours the same mixes its pictures and tints are made of.
+ * The email preview: the invitation (sign-in-emails M2) as hris-api writes it, at its true 600 px — the sizes below are
+ * the email's own, and the colours the same mixes its pictures and tints are made of — in a mail window (L1-Mail).
  */
-.appearance-mail { font-family: var(--font-text); color: var(--text-primary); }
-.appearance-mail-sender { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 12px 16px;
-  border-radius: 14px; background: var(--surface-card); box-shadow: var(--shadow-raised); font-size: 15px; line-height: 22px; }
-.appearance-mail-sender strong { font-weight: 600; }
+.appearance-mail { font-family: var(--font-text); color: var(--text-primary); padding: 22px 22px 28px; border-radius: 14px;
+  background: var(--surface-subtle); box-shadow: 0 24px 60px -24px rgba(11, 11, 12, .28), 0 0 0 1px rgba(11, 11, 12, .06); }
 .appearance-mail-canvas { padding: 32px 16px 28px; border-radius: 20px; background: var(--gray-50); }
 .appearance-mail-card { background: var(--surface-card); border-radius: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(11, 11, 12, .06); }
 .appearance-mail-band { padding: 32px 40px 0; background: var(--accent); color: var(--on-accent); }
@@ -834,20 +980,16 @@
 .appearance-mail-name { font: 600 18px/24px var(--font-heading); letter-spacing: -0.01em; }
 .appearance-mail-title { margin: 40px 0 28px; font: 600 44px/46px var(--font-heading); letter-spacing: -0.02em; }
 .appearance-mail-title em { font-style: normal; color: color-mix(in srgb, var(--accent) 35%, var(--on-accent)); }
+.appearance-code-chip { border-radius: 5px; }
+.appearance-logo-letter { font: 600 22px/28px var(--font-heading); }
 .appearance-heading em { font-style: normal; color: var(--appearance-tried, var(--accent-text)); }
 .appearance-mail-rings { display: block; overflow: hidden; }
 .appearance-mail-rings circle { fill: none; stroke: color-mix(in srgb, var(--accent) 72%, #FFFFFF); }
 .appearance-mail-rings circle.hot { stroke: color-mix(in srgb, var(--accent) 30%, #FFFFFF); }
 .appearance-mail-body { padding: 32px 40px 36px; font-size: 16px; line-height: 26px; color: var(--text-secondary); }
 .appearance-mail-body strong { font-weight: 600; color: var(--text-primary); }
-.appearance-mail-code { margin-top: 24px; padding: 18px 16px; text-align: center; border-radius: 14px;
-  background: var(--accent-subtle); border: 1px solid color-mix(in srgb, var(--accent) 18%, #FFFFFF);
-  font: 600 36px/44px var(--font-mono); letter-spacing: .16em; color: var(--text-primary); }
-.appearance-mail-or { display: flex; align-items: center; gap: 12px; margin: 16px 0; font-size: 14px; line-height: 20px; color: var(--text-tertiary); }
-.appearance-mail-or i { flex: 1; border-top: 1px solid var(--border-divider); }
-.appearance-mail-button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 56px; border-radius: 14px;
-  background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 600; }
-.appearance-mail-note { margin: 12px 0 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--text-tertiary); }
+.appearance-mail-button { display: inline-flex; align-items: center; gap: 8px; height: 48px; margin-top: 28px; padding: 0 24px;
+  border-radius: 8px; background: var(--accent); color: var(--on-accent); font-size: 16px; line-height: 22px; font-weight: 600; }
 .appearance-mail-small { margin: 32px 0 0; padding-top: 20px; border-top: 1px solid var(--border-divider);
   font-size: 14px; line-height: 22px; color: var(--text-tertiary); }
 .appearance-mail-footer { padding-top: 28px; text-align: center; font-size: 14px; line-height: 20px; }
@@ -967,6 +1109,8 @@
   .auth-first-card {
     display: flex; flex: none; width: 600px; margin: 12px; border-radius: var(--radius-panel); padding: 56px 48px 40px;
     flex-direction: column; align-items: center; text-align: center; background: var(--wine-700); color: #FFFFFF;
+    /* AQ-20: the card grows with the window (RB1g: 802 at 1710); its 12 margin does not — zoom would scale it too. */
+    zoom: var(--auth-grow); margin: calc(12px / var(--auth-grow));
   }
 }
 .auth-first-slogan { margin: 0; font: 600 44px/46px var(--font-heading); letter-spacing: -0.035em; }
@@ -1067,7 +1211,7 @@ body:has(.fr-welcome) { overflow-x: hidden; }
 .fr-welcome-col[data-wide="true"] { max-width: 560px; }
 .fr-welcome-col[data-intro="true"] { max-width: none; align-items: center; text-align: center; gap: 0; }
 .fr-welcome-rings { flex: none; margin-bottom: -24px; pointer-events: none; }
-.fr-welcome-rings svg { display: block; }
+.fr-welcome-rings svg { display: block; overflow: visible; } /* the nod lifts a ring 2 px above its row: never cut it (W1) */
 .fr-welcome-rings circle { fill: none; stroke: var(--accent-muted); }
 .fr-welcome-rings circle.hot { stroke: var(--accent); transform-box: fill-box; animation-duration: 24s; animation-iteration-count: infinite; }
 @media (prefers-reduced-motion: reduce) { .fr-welcome-rings circle.hot { animation: none !important; } }
@@ -1088,7 +1232,10 @@ body:has(.fr-welcome) { overflow-x: hidden; }
   .fr-logo img { max-width: 32px; max-height: 32px; }
   .fr-brand-name { font-size: 22px; line-height: 28px; }
   .fr-welcome-mid { align-items: center; padding: 40px 0; }
-  .fr-welcome-rings { margin-bottom: -36px; }
+  /* AQ-20 (W0g): the ring strip is 62.5 % of the window — 900 at 1440, never smaller, stopping at 1200 at 1920 — and its
+     rings, lines, gaps and the hang below the page scale with it; the nod is never cut (overflow stays visible). */
+  .fr-welcome-rings { margin-bottom: clamp(-48px, -2.5vw, -36px); }
+  .fr-welcome-rings svg { width: clamp(900px, 62.5vw, 1200px); height: auto; }
   .fr-greeting { font-size: 112px; line-height: 104px; }
   .fr-greeting span { white-space: nowrap; }
   .fr-intro-lead { margin-top: 28px; font-size: 17px; line-height: 26px; }

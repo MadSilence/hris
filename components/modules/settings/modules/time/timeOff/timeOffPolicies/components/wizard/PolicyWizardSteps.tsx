@@ -4,6 +4,7 @@ import { FC, ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
+import { cn } from "@/lib/cn";
 
 import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
@@ -846,11 +847,11 @@ export const ApprovalsStep: FC<StepProps> = ({ values, set }) => {
                     )}
                   </div>
 
+                  {/* The only step cannot be removed: hidden in place, not greyed (NEVER-DISABLED). */}
                   <button
                     type="button"
                     onClick={() => removeApprover(index)}
-                    disabled={values.apprApprovers.length <= 1}
-                    className="flex-none text-tertiary hover:text-danger-text disabled:opacity-40"
+                    className={cn("flex-none text-tertiary hover:text-danger-text", values.apprApprovers.length <= 1 && "invisible")}
                     aria-label={t("policyWizard.approvals.removeStep")}
                   >
                     <Icon icon={Delete02Icon} size="sm" />

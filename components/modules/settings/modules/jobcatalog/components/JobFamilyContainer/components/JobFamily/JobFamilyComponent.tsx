@@ -151,15 +151,17 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
         archived={{ count: archivedCount, showing: showArchived, onChange: setShowArchived }}
         secondary={
           <>
-            <Button type="button"
-              variant="ghost"
-              className="gap-1.5 text-secondary"
-              onClick={toggleAll}
-              disabled={families.length === 0}
-            >
-              {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
-              {allOpen ? t("toolbar.collapseAll") : t("toolbar.expandAll")}
-            </Button>
+            {/* Nothing to expand: hidden, not greyed (NEVER-DISABLED). */}
+            {families.length > 0 && (
+              <Button type="button"
+                variant="ghost"
+                className="gap-1.5 text-secondary"
+                onClick={toggleAll}
+              >
+                {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
+                {allOpen ? t("toolbar.collapseAll") : t("toolbar.expandAll")}
+              </Button>
+            )}
 
           <Button type="button"
             size="icon"
@@ -184,7 +186,7 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
         }
       />
 
-      <div className="-mx-1 max-h-[calc(100svh-380px)] overflow-y-auto px-1">
+      <div className="-mx-1 max-h-[calc(100cqh-380px)] overflow-y-auto px-1">
         <div className={`${GRID} sticky top-0 z-10 bg-card px-3 pb-2 pt-1 text-body font-medium text-primary`}>
           <div>{tCommon("fields.name")}</div>
           <div>{t("columns.assignedPeople")}</div>
@@ -200,12 +202,10 @@ export const JobFamilyComponent: FC<JobFamilyComponentProps> = ({
           {!isLoading && families.length === 0 && (
             <ListEmptyState
               query={query}
-              onClearSearch={() => setQuery("")}
               archivedView={showArchived}
               scene="job-families"
               title={t("empty.title")}
               description={t("empty.description")}
-              noResultsHint={t("empty.noResultsHint")}
               archivedDescription={t("empty.archivedDescription")}
               onCreate={onCreateFamily}
               createLabel={t("toolbar.addFamily")}

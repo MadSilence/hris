@@ -74,8 +74,8 @@ export const NewsContainer: React.FC = () => {
       <BackLink href="/hub" label={t("home.title")} />
       <div className="mt-3 flex items-center gap-4">
         <HubTitle>{t("news.title")}</HubTitle>
-        {/* CH02's box is 280 × 36 (FIXES A7). */}
-        <SearchBox className="ml-auto w-[280px]" fullWidth size="md" value={query} onChange={setQuery} aria-label={t("news.search")} />
+        {/* The toolbar search, 240 × 32, as on Automations (the designers' round 2, RC8). */}
+        <SearchBox className="ml-auto" value={query} onChange={setQuery} aria-label={t("news.search")} />
       </div>
       <div className="mt-7 flex items-center">
         <FeedScopeSwitch value={scope} onChange={setScope} />
@@ -93,11 +93,6 @@ export const NewsContainer: React.FC = () => {
               scene="no-results-s"
               size="s"
               title={t("news.noMatch")}
-              action={
-                <Button type="button" variant="secondary" onClick={() => setQuery("")}>
-                  {t("news.clearSearch")}
-                </Button>
-              }
             />
           ) : scope === "FOR_ME" ? (
             <EmptyState

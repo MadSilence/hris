@@ -36,7 +36,17 @@ const pdfjs = () => {
  * sizes; the counter says which page is in view. `src` is a URL the page may fetch — a blob of the bytes it already
  * read through the BFF.
  */
-export const PdfViewer: React.FC<{ src: string; title: string; className?: string }> = ({ src, title, className }) => {
+export const PdfViewer: React.FC<{
+  src: string;
+  title: string;
+  className?: string;
+  /**
+   * "stage" (documents-signing G02, 2026-11-20): no white strip with the file's name — the page count on the left
+   * of the stage's top line, the zoom on the right, pages 560 wide at 100 %, centred, 20 apart.
+   */
+  layout?: "strip" | "stage";
+}> = ({ src, title, className, layout = "strip" }) => {
+  const stageLayout = layout === "stage";
   const t = useTranslations("common");
   const stage = React.useRef<HTMLDivElement>(null);
   const [doc, setDoc] = React.useState<PdfDocument | null>(null);
@@ -91,30 +101,46 @@ export const PdfViewer: React.FC<{ src: string; title: string; className?: strin
 
   return (
     <div className={cn("flex min-h-0 flex-col overflow-hidden bg-subtle", className)}>
-      <div className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-divider bg-card px-3">
-        <span className="truncate text-label text-secondary" title={title}>{title}</span>
+      <div
+        className={cn(
+          "flex h-10 shrink-0 items-center justify-between gap-2",
+          stageLayout ? "px-5" : "border-b border-divider bg-card px-3",
+        )}
+      >
+        {stageLayout ? (
+          <span className="text-hint tabular-nums text-tertiary">{doc ? t("pdf.page", { current, total: doc.numPages }) : ""}</span>
+        ) : (
+          <span className="truncate text-label text-secondary" title={title}>{title}</span>
+        )}
         <div className="flex shrink-0 items-center gap-1">
-          {doc && (
+          {doc && !stageLayout && (
             <span className="mr-2 text-hint tabular-nums text-tertiary">{t("pdf.page", { current, total: doc.numPages })}</span>
           )}
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={t("pdf.zoomOut")} disabled={zoom === ZOOMS[0]} onClick={() => step(-1)}>
+          {/* At either end of the scale its button is hidden in place, not greyed (NEVER-DISABLED). */}
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={t("pdf.zoomOut")} className={cn(zoom === ZOOMS[0] && "invisible")} onClick={() => step(-1)}>
             <Icon icon={MinusSignIcon} size="sm" />
           </Button>
           <span className="w-10 text-center text-hint tabular-nums text-secondary">{Math.round(zoom * 100)}%</span>
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={t("pdf.zoomIn")} disabled={zoom === ZOOMS[ZOOMS.length - 1]} onClick={() => step(1)}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={t("pdf.zoomIn")} className={cn(zoom === ZOOMS[ZOOMS.length - 1] && "invisible")} onClick={() => step(1)}>
             <Icon icon={PlusSignIcon} size="sm" />
           </Button>
         </div>
       </div>
-      <div ref={stage} onScroll={onScroll} className="relative min-h-0 flex-1 overflow-auto p-4" role="document" aria-label={title}>
+      <div ref={stage} onScroll={onScroll} className={cn("relative min-h-0 flex-1 overflow-auto", stageLayout ? "px-5 pb-5" : "p-4")} role="document" aria-label={title}>
         {failed ? (
           <p className="py-16 text-center text-body text-secondary">{t("pdf.failed")}</p>
         ) : !doc || width === 0 ? (
           <div className="flex justify-center py-16"><NodRing size="md" /></div>
         ) : (
-          <div className="mx-auto flex w-fit flex-col items-center gap-4">
+          <div className={cn("mx-auto flex w-fit flex-col items-center", stageLayout ? "gap-5" : "gap-4")}>
             {Array.from({ length: doc.numPages }, (_, i) => (
-              <PdfPageCanvas key={i} doc={doc} number={i + 1} width={Math.max(200, (width - 32) * zoom)} label={t("pdf.pageLabel", { n: i + 1 })} />
+              <PdfPageCanvas
+                key={i}
+                doc={doc}
+                number={i + 1}
+                width={stageLayout ? Math.max(200, Math.min(560, width - 40) * zoom) : Math.max(200, (width - 32) * zoom)}
+                label={t("pdf.pageLabel", { n: i + 1 })}
+              />
             ))}
           </div>
         )}

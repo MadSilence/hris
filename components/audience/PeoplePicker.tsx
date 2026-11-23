@@ -255,7 +255,11 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
+            <PopoverContent
+              align="start"
+              className="flex max-h-[min(760px,var(--radix-popover-content-available-height))] w-[620px] max-w-[92vw] flex-col p-0"
+            >
+              {/* The product's filter (N09b): the conditions scroll, the foot — include inactive, Reset, Apply — stays. */}
               <AudienceBuilder
                 key={seed}
                 fields={fields}
@@ -264,15 +268,17 @@ export const PeoplePicker: React.FC<PeoplePickerProps> = ({
                 onChange={setDraft}
                 includeInactive={includeInactive}
                 onIncludeInactiveChange={onIncludeInactiveChange}
+                actions={
+                  <>
+                    <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
+                      {tCommon("actions.reset")}
+                    </Button>
+                    <Button type="button" size="sm" className="ml-auto" onClick={applyFilters}>
+                      {tCommon("actions.apply")}
+                    </Button>
+                  </>
+                }
               />
-              <div className="mt-3 flex items-center justify-end gap-2 border-t border-divider pt-3">
-                <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
-                  {tCommon("actions.reset")}
-                </Button>
-                <Button type="button" size="sm" onClick={applyFilters}>
-                  {tCommon("actions.apply")}
-                </Button>
-              </div>
             </PopoverContent>
           </Popover>
 

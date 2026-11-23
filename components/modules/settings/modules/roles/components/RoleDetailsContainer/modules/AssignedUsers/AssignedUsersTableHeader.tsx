@@ -6,13 +6,14 @@ import { Add01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { explain } from "@/lib/feedback/explainToast";
 import { HistoryToggle } from "@/components/audience/assignment/history/AssignmentHistory";
 
 export interface AssignedUsersTableHeaderProps {
   query: string;
   onQueryChange: (v: string) => void;
-  /** Set to turn Assign off and say why; the backend refuses these cases anyway (R00009). */
-  assignDisabledReason?: string;
+  /** Why Assign cannot work (an archived role): said when it is pressed, never greyed (NEVER-DISABLED). The backend refuses these cases anyway (R00009). */
+  cannotAssignReason?: string;
   onAssignClick?: () => void;
   onExportClick: () => void;
   /** Present to offer the history view of who held the role. */
@@ -23,7 +24,7 @@ export interface AssignedUsersTableHeaderProps {
 export default function AssignedUsersTableHeader({
   query,
   onQueryChange,
-  assignDisabledReason,
+  cannotAssignReason,
   onAssignClick,
   onExportClick,
   showHistory = false,
@@ -40,9 +41,7 @@ export default function AssignedUsersTableHeader({
         {/* Assigning roles is gated by PEOPLE.PROFILE MANAGE on the backend, not ROLES.ROLE. */}
         <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
           <Button type="button"
-            onClick={onAssignClick}
-            disabled={!!assignDisabledReason}
-            title={assignDisabledReason}
+            onClick={() => (cannotAssignReason ? explain(cannotAssignReason) : onAssignClick?.())}
             className="gap-1.5"
           >
             <Icon icon={Add01Icon} size="sm" />

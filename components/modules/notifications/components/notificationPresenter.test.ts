@@ -119,12 +119,27 @@ describe("presentNotification", () => {
       expect(view.href).toBe("/organization/people/u1/time-off");
     });
 
-    it("carries the reason of a rejection", () => {
+    it("carries the decliner's comment on a line of its own, and opens the request (AQ-13)", () => {
       const view = presentNotification(
-        notification({ type: "TIMEOFF_REQUEST_REJECTED", params: { requesterId: "u1", reason: "Release week" } }),
+        notification({
+          type: "TIMEOFF_REQUEST_REJECTED",
+          targetType: "TIME_OFF_REQUEST",
+          targetId: "req-9",
+          params: { requesterId: "u1", actorName: "Meryem Alaoui", policyName: "Vacation", startDate: "2026-12-11", endDate: "2026-12-13", comment: "Release week" },
+        }),
       );
 
-      expect(view.message).toMatch(/Reason: Release week$/);
+      expect(view.title).toBe("Meryem Alaoui declined your time off request");
+      expect(view.message).toMatch(/^Vacation, .+\nComment: Release week$/);
+      expect(view.href).toBe("/dashboard?leaveRequest=req-9");
+    });
+
+    it("has no comment line when the decliner wrote none", () => {
+      const view = presentNotification(
+        notification({ type: "TIMEOFF_REQUEST_REJECTED", params: { requesterId: "u1", policyName: "Vacation", startDate: "2026-12-11" } }),
+      );
+
+      expect(view.message).not.toMatch(/Comment/);
     });
 
     it("says how many days came back when a cancellation is agreed", () => {
@@ -186,14 +201,14 @@ describe("presentNotification", () => {
 });
 
 describe("an approval request leads to the request itself (WALK_QUESTIONS § 7)", () => {
-  it("opens the request's own page, where the decision's context sits beside Approve and Reject", () => {
+  it("opens the request in full over Home (AQ-12 b), where the decision's context sits beside Approve and Decline", () => {
     const p = presentNotification(notification({
       type: "TIMEOFF_APPROVAL_REQUESTED",
       targetType: "TIME_OFF_REQUEST",
       targetId: "req-1",
       params: { requesterId: "u-1", requesterName: "Ada", amount: "2" },
     }));
-    expect(p.href).toBe("/time-off/requests/req-1");
+    expect(p.href).toBe("/dashboard?leaveRequest=req-1");
   });
 
   it("falls back to the person's time off when the notification carries no request", () => {

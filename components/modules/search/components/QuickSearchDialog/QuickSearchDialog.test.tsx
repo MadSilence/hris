@@ -130,7 +130,7 @@ describe("QuickSearchDialog", () => {
     // A kind the server left out is not drawn — not even as an empty heading.
     expect(screen.queryByText("Departments")).not.toBeInTheDocument();
 
-    expect(screen.getByText("Archived")).toBeInTheDocument();
+    expect(screen.getByText("Inactive")).toBeInTheDocument();
     expect(screen.queryByText("Active")).not.toBeInTheDocument();
     expect(searchMock).toHaveBeenCalledWith({ q: "an", limit: 5 });
   });

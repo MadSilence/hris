@@ -150,7 +150,7 @@ export function ColorRings({
             side="right"
             align="start"
             sideOffset={24}
-            className="w-[260px]"
+            className="w-[260px] p-3 shadow-popover"
             aria-label={t("picker")}
             onOpenAutoFocus={(event) => event.preventDefault()}
           >
@@ -165,7 +165,14 @@ export function ColorRings({
       </div>
 
       <div className="flex min-h-5 flex-col gap-1">
-        {ownPicked && custom ? <p className="m-0 text-label font-normal text-secondary">{t("yourOwnPicked", { hex: custom.toUpperCase() })}</p> : null}
+        {ownPicked && custom ? (
+          <p className="m-0 text-label font-normal text-tertiary">
+            {t.rich("yourOwnPicked", {
+              hex: custom.toUpperCase(),
+              code: (chunks) => <span className="font-mono font-semibold text-primary">{chunks}</span>,
+            })}
+          </p>
+        ) : null}
         {adjusted ? <Quiet>{t("adjusted")}</Quiet> : null}
         {close ? <Quiet>{t("closeToApproved")}</Quiet> : null}
       </div>

@@ -12,15 +12,12 @@ export interface EmployeeTimeOffBalanceDTO {
   usedBalance: number;
   adjustedBalance: number;
   carriedOverBalance: number;
+  /** What is left — the ledger. A pending request is not counted in it (U7). Counts halves (15.5). */
   currentBalance: number;
-  /**
-   * Of `usedBalance`, how much is reserved by requests nobody has answered yet.
-   *
-   * The days are consumed at submission — that is what stops two requests spending the same day —
-   * but the balance could not say so, and "20 left" meant the same thing whether the missing three
-   * were taken or merely asked for.
-   */
+  /** What the requests nobody has answered yet reserve, apart from the balance — "Not counted yet" (U7). */
   pendingBalance: number;
+  /** `currentBalance - pendingBalance`: what a new request is checked against. */
+  availableBalance: number;
   /** The carried-over days still standing — what an expiry would actually take back. */
   remainingCarryover: number;
   createdAt: string;

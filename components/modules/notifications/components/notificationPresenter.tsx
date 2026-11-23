@@ -3,6 +3,7 @@ import { formatDisplayDate, formatShortDate, formatShortRange } from "@/lib/date
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { Alert02Icon, Briefcase01Icon, CalendarLock01Icon, CancelCircleIcon, CheckListIcon, CheckmarkCircle02Icon, FileTextIcon, FlashIcon, Notification01Icon, ShieldCheckIcon, SquareLock02Icon, TaskDone01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import type { Notification } from "@/models/notifications";
+import { requestOnHome } from "@/components/modules/timeOff/lib/requestLink";
 import type { IconSvgElement } from "@/components/desact/icon";
 
 /** The `notifications` translator, handed to the pure helpers that build a notification's sentence. */
@@ -73,6 +74,15 @@ const withReason = (t: NotificationsTranslator, message: string, reason: unknown
 const ownTimeOff = (userId: unknown): string | null =>
   str(userId) ? `/organization/people/${str(userId)}/time-off` : null;
 
+/**
+ * A notification about one request opens that request in full (AQ-12 b): Home with it open — the inbox opens it over
+ * itself instead — and the person's time off when the notification carries no request.
+ */
+const theRequest = (n: Notification, p: Params, userId: unknown): string | null => {
+  const requestId = n.targetType === "TIME_OFF_REQUEST" ? str(n.targetId) : str(p.requestId);
+  return requestId ? requestOnHome(requestId) : ownTimeOff(userId);
+};
+
 const ownProfile = (userId: unknown): string | null =>
   str(userId) ? `/organization/people/${str(userId)}/personal` : null;
 
@@ -104,10 +114,8 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
 
   switch (n.type) {
     case "TIMEOFF_APPROVAL_REQUESTED": {
-      const requesterId = str(p.requesterId);
-      // The request itself, with what the decision needs beside Approve and Reject (WALK_QUESTIONS § 7):
+      // The request itself, with what the decision needs beside Approve and Decline (WALK_QUESTIONS § 7):
       // the person's time-off tab refused an approver without a role over them.
-      const requestId = n.targetType === "TIME_OFF_REQUEST" ? str(n.targetId) : "";
       return {
         title: t("presenter.approvalRequested.title"),
         // A delegate's copy says whom they are answering for ("for Anna").
@@ -119,9 +127,9 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
           onBehalfOf: str(p.onBehalfOfName),
         }),
         icon: CalendarLock01Icon,
-        href: requestId
-          ? `/time-off/requests/${requestId}`
-          : requesterId ? `/organization/people/${requesterId}/time-off` : null,
+        href: n.targetType === "TIME_OFF_REQUEST" && str(n.targetId)
+          ? requestOnHome(str(n.targetId))
+          : ownTimeOff(p.requesterId),
       };
     }
     case "TIMEOFF_CANCELLATION_REQUESTED":
@@ -139,7 +147,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
           p.reason,
         ),
         icon: CalendarLock01Icon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_REQUEST_CANCELLED":
       return {
@@ -150,35 +158,42 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
           p.reason,
         ),
         icon: CancelCircleIcon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_REQUEST_APPROVED":
       return {
         title: t("presenter.requestApproved.title"),
         message: t("presenter.requestApproved.message", { ...leave(p), dates: dates(p, language), ...by(p) }),
         icon: CheckmarkCircle02Icon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_REQUEST_REJECTED":
+      // AQ-13: "{full name} declined your time off request" / "{Policy}, {dates}" / "Comment: {text}" when there is one.
       return {
-        title: t("presenter.requestRejected.title"),
-        message: withReason(t, t("presenter.requestRejected.message", { ...leave(p), dates: dates(p, language), ...by(p) }), p.reason),
+        title: t("presenter.requestRejected.title", by(p)),
+        message: t("presenter.requestRejected.message", {
+          ...leave(p),
+          hasDates: has(p.startDate),
+          dates: dates(p, language),
+          hasComment: has(p.comment ?? p.reason),
+          comment: str(p.comment ?? p.reason).trim(),
+        }),
         icon: CancelCircleIcon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_CANCELLATION_APPROVED":
       return {
         title: t("presenter.cancellationApproved.title"),
         message: t("presenter.cancellationApproved.message", { ...leave(p), dates: dates(p, language), ...by(p), ...returned(p) }),
         icon: CheckmarkCircle02Icon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_CANCELLATION_DECLINED":
       return {
         title: t("presenter.cancellationDeclined.title"),
         message: t("presenter.cancellationDeclined.message", { ...leave(p), dates: dates(p, language), ...by(p) }),
         icon: CancelCircleIcon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_LEAVE_CANCELLED":
       return {
@@ -189,7 +204,7 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
           p.reason,
         ),
         icon: CancelCircleIcon,
-        href: ownTimeOff(p.requesterId),
+        href: theRequest(n, p, p.requesterId),
       };
     case "TIMEOFF_POLICY_ASSIGNED": {
       const args = {

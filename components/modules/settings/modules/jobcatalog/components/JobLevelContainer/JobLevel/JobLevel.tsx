@@ -86,17 +86,15 @@ export const JobLevel: React.FC<JobLevelProps> = ({
     </div>
 
     {/* Only the cards scroll; the header above stays put. */}
-    <div className="-mx-1 max-h-[calc(100svh-405px)] overflow-y-auto px-1">
+    <div className="-mx-1 max-h-[calc(100cqh-405px)] overflow-y-auto px-1">
       {isLoading ? (
         <JobLevelSkeleton/>
       ) : visible.length === 0 ? (
         <ListEmptyState
           query={query}
-          onClearSearch={() => setQuery("")}
           scene="career"
           title={t("empty.title")}
           description={t("empty.description")}
-          noResultsHint={t("empty.noResultsHint")}
           onCreate={onCreateGroup}
           createLabel={t("addTrack")}
           createAccess={{ resource: "JOBS.LEVEL_GROUP" }}

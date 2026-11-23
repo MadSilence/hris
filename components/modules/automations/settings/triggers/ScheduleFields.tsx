@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider";
-import { partsToISO, useDisplayLocale, useShortDates, useWeekStartsOn } from "@/lib/date";
+import { partsToISO, threeLetterMonths, useDisplayLocale, useShortDates, useWeekStartsOn } from "@/lib/date";
 import type { ScheduleFrequency, TriggerSpec } from "@/models/automations";
 import { cn } from "@/lib/cn";
 import { CompactPick } from "../conditions/chrome";
@@ -238,7 +238,7 @@ const useMonthNames = (style: "long" | "short") => {
   const locale = useDisplayLocale();
   return React.useMemo(() => {
     const f = new Intl.DateTimeFormat(locale, { month: style });
-    return Array.from({ length: 12 }, (_, m) => f.format(new Date(2024, m, 1)));
+    return Array.from({ length: 12 }, (_, m) => threeLetterMonths(f.format(new Date(2024, m, 1))));
   }, [locale, style]);
 };
 

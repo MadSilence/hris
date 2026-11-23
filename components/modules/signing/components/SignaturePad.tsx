@@ -153,9 +153,12 @@ export const SignaturePad = React.forwardRef<
         onPointerLeave={up}
         aria-label={hint}
       />
-      <div className="pointer-events-none absolute inset-x-6 bottom-8 border-b border-divider" />
+      {/* G5: the baseline 40 above the bottom, 20 in; the hint in the middle until there is ink. */}
+      <div className="pointer-events-none absolute inset-x-5 bottom-10 border-b border-field" />
       {!hasInk && (
-        <p className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-hint text-tertiary">{hint}</p>
+        <p className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 text-center text-label font-normal text-tertiary">
+          {hint}
+        </p>
       )}
     </div>
   );

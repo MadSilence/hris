@@ -10,12 +10,18 @@ import { InlineAlert } from "@/components/desact/alert";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { cn } from "@/lib/cn";
 
-/** One screen back: a ghost icon button 36, top-left of the white side, named and tooltipped "Back". */
-export function AuthBack({ href, onClick }: { href?: string; onClick?: () => void }) {
+/**
+ * One screen back: a ghost icon button 36, top-left of the white side, named and tooltipped "Back". `circle` is the
+ * settings page's back (Appearance, sign-in-appearance L1): a white 40 circle with a hairline and a 16 Ink chevron;
+ * the login screens keep the ghost.
+ */
+export function AuthBack({ href, onClick, variant = "ghost" }: { href?: string; onClick?: () => void; variant?: "ghost" | "circle" }) {
   const t = useTranslations("common");
   const className =
-    "inline-flex size-9 items-center justify-center rounded-control text-secondary hover:bg-mist active:bg-divider";
-  const icon = <Icon icon={ArrowLeft01Icon} size="md" />;
+    variant === "circle"
+      ? "inline-flex size-10 shrink-0 items-center justify-center rounded-pill border border-divider bg-card text-primary hover:bg-subtle active:bg-mist"
+      : "inline-flex size-9 items-center justify-center rounded-control text-secondary hover:bg-mist active:bg-divider";
+  const icon = <Icon icon={ArrowLeft01Icon} size={variant === "circle" ? "sm" : "md"} />;
   return (
     <Tooltip>
       <TooltipTrigger asChild>

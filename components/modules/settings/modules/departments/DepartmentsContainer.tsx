@@ -15,7 +15,6 @@ import {
 } from "@dnd-kit/core";
 
 import { Button } from "@/components/desact/button";
-import { ClearSearchButton } from "@/components/feedback/EmptyState";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useAccess } from "@/components/auth/useAccess";
@@ -572,7 +571,6 @@ export default function DepartmentsContainer() {
         {noUnitMatches && (
           <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 flex items-center gap-2 rounded-control border border-divider bg-card px-3 py-1.5 text-body text-tertiary shadow-card">
             {t("container.noMatch", { query: debouncedQuery })}
-            <ClearSearchButton variant="link" className="pointer-events-auto" onClick={() => setQuery("")} />
           </div>
         )}
       </>
@@ -713,17 +711,19 @@ export default function DepartmentsContainer() {
             </Button>
           )}
 
-          <Button
-            type="button"
-            size="icon"
-            variant="secondary"
-            aria-label={t("container.export")}
-            title={t("container.export")}
-            disabled={allFlat.length === 0}
-            onClick={() => setIsExportOpen(true)}
-          >
-            <Icon icon={Download01Icon} size="sm" />
-          </Button>
+          {/* Nothing to export yet: hidden, not greyed (NEVER-DISABLED). */}
+          {allFlat.length > 0 && (
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              aria-label={t("container.export")}
+              title={t("container.export")}
+              onClick={() => setIsExportOpen(true)}
+            >
+              <Icon icon={Download01Icon} size="sm" />
+            </Button>
+          )}
         </div>
       </div>
 

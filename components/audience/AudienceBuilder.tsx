@@ -2,40 +2,31 @@
 
 import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/desact/icon";
-import { Button } from "@/components/desact/button";
 import { Input } from "@/components/desact/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/desact/select";
+import { Checkbox } from "@/components/desact/checkbox";
 import { useAccess } from "@/components/auth/useAccess";
-import {
-  UserPickerField,
-} from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
+import { UserPickerField } from "@/components/modules/settings/shared/UserPickerField/UserPickerField";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { canAccess } from "@/models/access";
-import type { FieldDTO, FilterDTO, OptionDTO } from "@/models/user/fields";
-import type { AttributeType } from "@/models/attribute/AttributeType";
-import { DatePicker } from "@/components/ui/DatePicker";
+import type { FieldDTO, FilterDTO } from "@/models/user/fields";
+import { DatePicker, DateRangePicker } from "@/components/ui/DatePicker";
 import { Combobox } from "@/components/ui/Combobox";
-import { Checkbox } from "@/components/desact/checkbox";
+import { cn } from "@/lib/cn";
 import {
   AudienceField,
   AudienceOperator,
-  AudienceValueSource,
   buildAudienceFields,
   isNegativeOperator,
 } from "@/components/audience/fieldCatalog";
+import { useAudienceFieldOptions } from "@/components/audience/hooks/useAudienceFieldOptions";
 import {
-  AudienceOption,
-  useAudienceFieldOptions,
-} from "@/components/audience/hooks/useAudienceFieldOptions";
-import { SearchableSelect } from "@/components/ui/SearchableSelect";
+  AddConditionButton,
+  CompactSelect,
+  ConditionCard,
+  ConditionJoiner,
+  PendingPick,
+  type ConditionLayout,
+} from "@/components/audience/ConditionChrome";
 
 type Props = {
   fields: FieldDTO[] | undefined;
@@ -51,13 +42,23 @@ type Props = {
   value: FilterDTO[];
   onChange: (next: FilterDTO[]) => void;
   /**
-   * Segment-level, so it lives above the rows rather than on one of them. Omit the handler and the
+   * Segment-level, so it lives in the foot rather than on a condition. Omit the handler and the
    * control is not rendered at all — for callers where the population is not theirs to choose.
    */
   includeInactive?: boolean;
   onIncludeInactiveChange?: (next: boolean) => void;
   /** The checkbox's words — "search" fits a picker, not an access scope, which reaches people. */
   includeInactiveLabel?: string;
+  /**
+   * `line` (the default): each condition on one line — a popover 620 wide, a dialog. `stacked`: two lines, for a
+   * narrow side panel (~320–400).
+   */
+  layout?: ConditionLayout;
+  /**
+   * The popover's buttons — Reset and Apply. Given, the builder is the popover's whole body: the conditions scroll
+   * inside it and the foot (the checkboxes, then these) stays under a hairline.
+   */
+  actions?: React.ReactNode;
 };
 
 type Row = {
@@ -73,12 +74,6 @@ type Row = {
 const isMultiOp = (op: AudienceOperator) =>
   op === "in" || op === "has_any" || op === "not_in" || op === "not_has_any";
 const isRangeOp = (op: AudienceOperator) => op === "between";
-
-const optionsForKey = (key: string, fields: FieldDTO[] | undefined): OptionDTO[] | null =>
-  fields?.find((f) => f.id === key)?.options ?? null;
-
-const typeForKey = (key: string, fields: FieldDTO[] | undefined): AttributeType | null =>
-  fields?.find((f) => f.id === key)?.type ?? null;
 
 const rowComplete = (r: Row): boolean => {
   if (!r.key || !r.op) return false;
@@ -113,6 +108,16 @@ const blankRow = (): Row => ({
   id: SEQ++, key: "", op: null, value: "", valueTo: "", values: [], includeEmpty: false,
 });
 
+/**
+ * The conditions of a list of people — the People table, the calendar, Attendance, a picker, an audience, an access
+ * scope — in the product's one filter design (`hris/design/screens/filter`, N09b–N09d): a flat AND list of Mist cards,
+ * each field 150 · operator 96 · value the rest · ×, "and" between them, "Add a condition" under them.
+ *
+ * <p>What one line has no room for (AQ-17, as the designers answered it): **include inactive** and **include empty**
+ * are checkboxes in the foot, left of Reset; a **range of dates** is the shared date field in range mode; several
+ * values from a list are the list's own dropdown, the picks ticked, the closed field reading the names that fit and
+ * "+N" (MULTI-VALUE). Include empty is one choice for every excluding condition ("is not", "has none of").
+ */
 export const AudienceBuilder: React.FC<Props> = ({
   fields,
   isLoadingFields = false,
@@ -121,6 +126,8 @@ export const AudienceBuilder: React.FC<Props> = ({
   includeInactive = false,
   onIncludeInactiveChange,
   includeInactiveLabel,
+  layout = "line",
+  actions,
 }) => {
   const t = useTranslations("access");
   const { access } = useAccess();
@@ -130,8 +137,11 @@ export const AudienceBuilder: React.FC<Props> = ({
     [fields, access],
   );
   const [rows, setRows] = useState<Row[]>(() =>
-    value.length ? value.map((f, i) => fromFilter(f, SEQ + i)) : [blankRow()],
+    value.length ? value.map((f) => fromFilter(f, SEQ++)) : [blankRow()],
   );
+  // The row whose field list is open: a new condition opens it at once, and so does its operator or value pressed
+  // before the field is picked (D5).
+  const [fieldOpenFor, setFieldOpenFor] = useState<number | null>(null);
 
   const commit = (next: Row[]) => {
     setRows(next);
@@ -141,138 +151,305 @@ export const AudienceBuilder: React.FC<Props> = ({
   const patch = (id: number, changes: Partial<Row>) =>
     commit(rows.map((r) => (r.id === id ? { ...r, ...changes } : r)));
 
+  const excluding = rows.filter((r) => r.op && isNegativeOperator(r.op));
+  const includeEmpty = excluding.length > 0 && excluding.every((r) => r.includeEmpty);
+
   const onPickField = (id: number, key: string) => {
     const field = catalog.find((f) => f.key === key) ?? null;
-    patch(id, { key, op: field?.operators[0] ?? null, value: "", valueTo: "", values: [] });
+    const op = field?.operators[0] ?? null;
+    patch(id, { key, op, value: "", valueTo: "", values: [], includeEmpty: op ? isNegativeOperator(op) && includeEmpty : false });
   };
 
   const onPickOp = (id: number, op: AudienceOperator) =>
-    patch(id, { op, value: "", valueTo: "", values: [] });
+    patch(id, { op, value: "", valueTo: "", values: [], includeEmpty: isNegativeOperator(op) && includeEmpty });
 
-  const addRow = () => commit([...rows, blankRow()]);
+  const addRow = () => {
+    const row = blankRow();
+    commit([...rows, row]);
+    setFieldOpenFor(row.id);
+  };
   const removeRow = (id: number) => {
     const next = rows.filter((r) => r.id !== id);
     commit(next.length ? next : [blankRow()]);
   };
+  const setIncludeEmpty = (next: boolean) =>
+    commit(rows.map((r) => (r.op && isNegativeOperator(r.op) ? { ...r, includeEmpty: next } : r)));
 
   const allComplete = rows.every(rowComplete);
+  const popover = actions !== undefined;
 
-  return (
-    <div className="flex flex-col gap-2">
+  const checkboxes = (
+    <>
       {onIncludeInactiveChange && (
-        <label className="flex cursor-pointer items-center gap-2 self-end text-hint text-tertiary">
-          <Checkbox
-            checked={includeInactive}
-            onCheckedChange={(checked) => onIncludeInactiveChange(checked === true)}
-          />
-          {includeInactiveLabel ?? t("audience.builder.includeInactive")}
-        </label>
+        <FootCheckbox
+          checked={includeInactive}
+          onChange={onIncludeInactiveChange}
+          label={includeInactiveLabel ?? t("audience.builder.includeInactive")}
+        />
       )}
+      {/* Only an exclusion has an opinion about people with no value at all. */}
+      {excluding.length > 0 && (
+        <FootCheckbox checked={includeEmpty} onChange={setIncludeEmpty} label={t("audience.builder.includeEmpty")} />
+      )}
+    </>
+  );
+  const hasCheckboxes = Boolean(onIncludeInactiveChange) || excluding.length > 0;
 
-      {rows.map((r) => {
+  const list = (
+    <div className={cn("flex flex-col gap-2", popover && "min-h-0 flex-1 overflow-y-auto p-3")}>
+      {rows.map((r, i) => {
         const field = catalog.find((f) => f.key === r.key) ?? null;
-        // CM07 O4: the field 160, the operator as a word ("is"), the value taking the rest, then remove.
+        const openField = () => setFieldOpenFor(r.id);
         return (
-          <div key={r.id} className="flex flex-wrap items-center gap-2">
-            <FieldPicker
-              fields={catalog}
-              value={r.key}
-              onChange={(v) => onPickField(r.id, v)}
-              loading={isLoadingFields}
-            />
-
-            {field && r.op && (
-              <>
-                {field.operators.length === 1 ? (
-                  <span className="text-hint text-tertiary">{t(`audience.operatorWords.${r.op}`)}</span>
+          <React.Fragment key={r.id}>
+            {i > 0 && <ConditionJoiner />}
+            <ConditionCard
+              layout={layout}
+              removeLabel={t("audience.builder.removeFilter")}
+              onRemove={() => removeRow(r.id)}
+              first={
+                <FieldPicker
+                  fields={catalog}
+                  value={r.key}
+                  onChange={(v) => {
+                    onPickField(r.id, v);
+                    setFieldOpenFor(null);
+                  }}
+                  loading={isLoadingFields}
+                  open={fieldOpenFor === r.id ? true : undefined}
+                  onOpenChange={(open) => setFieldOpenFor(open ? r.id : null)}
+                />
+              }
+              second={
+                field && r.op ? (
+                  <>
+                    <div className="w-24 shrink-0">
+                      <CompactSelect
+                        ariaLabel={t("audience.builder.operator")}
+                        options={field.operators.map((o) => ({ value: o, label: t(`audience.operators.${o}`) }))}
+                        value={r.op}
+                        triggerLabel={t(`audience.operatorWords.${r.op}`)}
+                        onChange={(v) => onPickOp(r.id, v as AudienceOperator)}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <ValueCell
+                        field={field}
+                        dto={fields?.find((f) => f.id === field.key) ?? null}
+                        row={r}
+                        onPatch={(changes) => patch(r.id, changes)}
+                      />
+                    </div>
+                  </>
                 ) : (
-                  <Select value={r.op} onValueChange={(v) => onPickOp(r.id, v as AudienceOperator)}>
-                    {/* The operator reads as a word in the sentence, 12/16 tertiary; it opens the full list. */}
-                    <SelectTrigger
-                      aria-label={t("audience.builder.operator")}
-                      className="h-9 w-auto gap-1 border-transparent bg-transparent px-1 text-hint text-tertiary shadow-none hover:border-transparent [&_svg]:size-3"
-                    >
-                      <SelectValue>{t(`audience.operatorWords.${r.op}`)}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {field.operators.map((o) => (
-                        <SelectItem key={o} value={o}>
-                          {t(`audience.operators.${o}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                <div className="min-w-48 flex-1">
-                  <RuleValueEditor
-                  source={field.valueSource}
-                  op={r.op}
-                  attributeOptions={optionsForKey(field.key, fields)}
-                  attributeType={typeForKey(field.key, fields)}
-                  value={r.value}
-                  valueTo={r.valueTo}
-                  values={r.values}
-                  onValue={(v) => patch(r.id, { value: v })}
-                  onValueTo={(v) => patch(r.id, { valueTo: v })}
-                  onValues={(v) => patch(r.id, { values: v })}
-                  />
-                </div>
-
-                {/* Only an exclusion has an opinion about people with no value at all. */}
-                {isNegativeOperator(r.op) && (
-                  <label className="flex cursor-pointer items-center gap-2 text-hint text-tertiary">
-                    <Checkbox
-                      checked={r.includeEmpty}
-                      onCheckedChange={(checked) => patch(r.id, { includeEmpty: checked === true })}
-                    />
-                    {t("audience.builder.includeEmpty")}
-                  </label>
-                )}
-              </>
-            )}
-
-            {/* O4: removing a row is not destructive — a 32 icon button, secondary, never red. */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => removeRow(r.id)}
-              aria-label={t("audience.builder.removeFilter")}
-              className="ml-auto text-secondary"
-            >
-              <Icon icon={Cancel01Icon} size="md" />
-            </Button>
-          </div>
+                  <>
+                    <div className="w-24 shrink-0">
+                      <PendingPick placeholder={t("audience.operatorWords.eq")} ariaLabel={t("audience.builder.operator")} onPress={openField} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <PendingPick placeholder={t("audience.builder.selectValue")} ariaLabel={t("audience.builder.value")} onPress={openField} />
+                    </div>
+                  </>
+                )
+              }
+            />
+          </React.Fragment>
         );
       })}
 
-      {/* O5: ghost sm 32, + 16, 13/18 500 secondary, 10 under the last row. */}
       {allComplete && (
-        <div className="mt-0.5">
-          <Button type="button" variant="ghost" size="sm" onClick={addRow} className="gap-1.5 text-secondary">
-            <Icon icon={Add01Icon} size="sm" />
-            {t("audience.builder.addFilter")}
-          </Button>
+        <div className="py-1">
+          <AddConditionButton onClick={addRow}>{t("audience.builder.addCondition")}</AddConditionButton>
         </div>
       )}
     </div>
   );
+
+  if (popover) {
+    // N09d: the list scrolls, the foot stays — the one place a divider stays.
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        {list}
+        <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-2 border-t border-divider px-3 py-2.5">
+          {checkboxes}
+          {actions}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {list}
+      {hasCheckboxes && <div className="flex flex-wrap items-center gap-x-4 gap-y-2">{checkboxes}</div>}
+    </div>
+  );
 };
 
-// ---- value editor -------------------------------------------------------
+const FootCheckbox: React.FC<{ checked: boolean; onChange: (next: boolean) => void; label: string }> = ({
+  checked,
+  onChange,
+  label,
+}) => (
+  <label className="flex cursor-pointer items-center gap-2 text-hint text-secondary">
+    <Checkbox checked={checked} onCheckedChange={(c) => onChange(c === true)} />
+    {label}
+  </label>
+);
 
-type ValueEditorProps = {
-  source: AudienceValueSource;
-  op: AudienceOperator;
-  attributeOptions: OptionDTO[] | null;
-  attributeType: AttributeType | null;
-  value: string;
-  valueTo: string;
-  values: string[];
-  onValue: (v: string) => void;
-  onValueTo: (v: string) => void;
-  onValues: (v: string[]) => void;
+// ---- the value of a condition ---------------------------------------------
+
+const ValueCell: React.FC<{
+  field: AudienceField;
+  dto: FieldDTO | null;
+  row: Row;
+  onPatch: (changes: Partial<Row>) => void;
+}> = ({ field, dto, row, onPatch }) => {
+  const t = useTranslations("access");
+  const tCommon = useTranslations("common");
+  const source = field.valueSource;
+  const { options: loaded, isLoading, hasOptions } = useAudienceFieldOptions(
+    source === "boolean" ? "freeText" : source,
+    dto?.options ?? null,
+    dto?.type ?? null,
+  );
+  const op = row.op as AudienceOperator;
+  const booleans = [
+    { id: "true", label: tCommon("values.yes") },
+    { id: "false", label: tCommon("values.no") },
+  ];
+  const options = source === "boolean" ? booleans : loaded;
+
+  // People are searched, not enumerated — a company-wide dropdown of employees is unusable.
+  if (source === "people") {
+    return row.value ? (
+      <PickedPersonField id={row.value} onValue={(v) => onPatch({ value: v })} />
+    ) : (
+      <UserPickerField value={null} onChange={(u) => onPatch({ value: u?.id ?? "" })} placeholder={t("audience.builder.selectPerson")} />
+    );
+  }
+
+  // Every option list here is data — the company's records, its option lists, the world's countries — so every one
+  // is searched (FORMS_AND_FIELDS.md § 7). Several values are the list's multi-pick, named on the closed field.
+  if (hasOptions || source === "boolean") {
+    const list = options.map((o) => ({ value: o.id, label: o.label }));
+    if (isMultiOp(op)) {
+      return (
+        <Combobox
+          multiple
+          size="sm"
+          options={list}
+          value={row.values}
+          onChange={(values) => onPatch({ values })}
+          aria-label={t("audience.builder.value")}
+          placeholder={isLoading ? tCommon("states.loading") : t("audience.builder.selectValues")}
+          emptyLabel={list.length === 0 ? t("audience.builder.noOptions") : undefined}
+          className="w-full"
+          listClassName="min-w-56"
+        />
+      );
+    }
+    return (
+      <Combobox
+        size="sm"
+        options={list}
+        value={row.value || null}
+        onChange={(v) => v && onPatch({ value: v })}
+        clearable={false}
+        aria-label={t("audience.builder.value")}
+        placeholder={isLoading ? tCommon("states.loading") : t("audience.builder.selectValue")}
+        emptyLabel={list.length === 0 ? t("audience.builder.noOptions") : undefined}
+        className="w-full"
+        listClassName="min-w-56"
+      />
+    );
+  }
+
+  if (isRangeOp(op) || isMultiOp(op)) {
+    return <SummaryValue field={field} row={row} onPatch={onPatch} />;
+  }
+
+  // The one shared date field — a raw `<input type="date">` is the browser's control, not ours.
+  if (source === "date") {
+    return <DatePicker className="h-7 w-full" value={row.value} onChange={(v) => onPatch({ value: v })} ariaLabel={t("audience.builder.value")} />;
+  }
+
+  return (
+    <Input
+      className="h-7 w-full bg-card text-label"
+      inputMode={source === "number" ? "decimal" : undefined}
+      value={row.value}
+      aria-label={t("audience.builder.value")}
+      onChange={(e) => onPatch({ value: e.target.value })}
+    />
+  );
+};
+
+/**
+ * A range ("between"), or several typed values, in the value cell itself (AQ-17, MULTI-VALUE — no separate popover):
+ * a range of dates is the shared date field in range mode, reading "1 Jan – 31 Mar" and opening the one picker; a
+ * range of numbers is its two ends side by side; several typed values are one field, comma-separated.
+ */
+const SummaryValue: React.FC<{
+  field: AudienceField;
+  row: Row;
+  onPatch: (changes: Partial<Row>) => void;
+}> = ({ field, row, onPatch }) => {
+  const t = useTranslations("access");
+  const op = row.op as AudienceOperator;
+
+  if (isRangeOp(op) && field.valueSource === "date") {
+    return (
+      <DateRangePicker
+        className="h-7 px-2 text-label"
+        value={row.value && row.valueTo ? { start: row.value, end: row.valueTo } : null}
+        onChange={(range) => onPatch({ value: range?.start ?? "", valueTo: range?.end ?? "" })}
+        clearable={false}
+        placeholder={t("audience.builder.selectValue")}
+        ariaLabel={t("audience.builder.value")}
+      />
+    );
+  }
+
+  if (isRangeOp(op)) {
+    const numeric = field.valueSource === "number";
+    const end = (part: "value" | "valueTo", label: string) => (
+      <Input
+        className="h-7 min-w-0 flex-1 bg-card text-label"
+        inputMode={numeric ? "decimal" : undefined}
+        value={row[part]}
+        aria-label={label}
+        onChange={(e) => onPatch({ [part]: e.target.value })}
+      />
+    );
+    return (
+      <div className="flex min-w-0 items-center gap-1.5">
+        {end("value", t("audience.builder.from"))}
+        {end("valueTo", t("audience.builder.to"))}
+      </div>
+    );
+  }
+
+  return <TypedValues values={row.values} onChange={(values) => onPatch({ values })} />;
+};
+
+/** Several typed values in one field, comma-separated; the text is kept as typed until the field is left. */
+const TypedValues: React.FC<{ values: string[]; onChange: (values: string[]) => void }> = ({ values, onChange }) => {
+  const t = useTranslations("access");
+  const [text, setText] = useState<string | null>(null);
+  const split = (raw: string) => raw.split(",").map((v) => v.trim()).filter(Boolean);
+  return (
+    <Input
+      className="h-7 w-full bg-card text-label"
+      value={text ?? values.join(", ")}
+      aria-label={t("audience.builder.typedValues")}
+      onChange={(e) => {
+        setText(e.target.value);
+        onChange(split(e.target.value));
+      }}
+      onBlur={() => setText(null)}
+    />
+  );
 };
 
 /**
@@ -294,94 +471,6 @@ const PickedPersonField: React.FC<{ id: string; onValue: (v: string) => void }> 
   );
 };
 
-const RuleValueEditor: React.FC<ValueEditorProps> = ({
-  source,
-  op,
-  attributeOptions,
-  attributeType,
-  value,
-  valueTo,
-  values,
-  onValue,
-  onValueTo,
-  onValues,
-}) => {
-  const t = useTranslations("access");
-  const tCommon = useTranslations("common");
-  const { options, isLoading, hasOptions } = useAudienceFieldOptions(source, attributeOptions, attributeType);
-
-  // People are searched, not enumerated — a company-wide dropdown of employees is unusable.
-  if (source === "people") {
-    return (
-      <div className="w-full">
-        {value ? (
-          <PickedPersonField id={value} onValue={onValue} />
-        ) : (
-          <UserPickerField
-            value={null}
-            onChange={(user) => onValue(user?.id ?? "")}
-            placeholder={t("audience.builder.selectPerson")}
-          />
-        )}
-      </div>
-    );
-  }
-
-  if (hasOptions) {
-    if (isMultiOp(op)) {
-      return <MultiSelect options={options} values={values} onChange={onValues} loading={isLoading} />;
-    }
-    // Every option list here is data — the company's records, its own option lists, the world's
-    // countries and zones — so every one is searched (FORMS_AND_FIELDS.md § 7).
-    return (
-      <SearchableSelect
-        className="h-9 w-full"
-        aria-label={t("audience.builder.value")}
-        options={options.map((o) => ({ value: o.id, label: o.label }))}
-        value={value || null}
-        onChange={(v) => v && onValue(v)}
-        placeholder={isLoading ? tCommon("states.loading") : t("audience.builder.selectValue")}
-        clearable={false}
-      />
-    );
-  }
-
-  // The one shared date field — a raw `<input type="date">` is the browser's control, not ours.
-  if (source === "date") {
-    if (isRangeOp(op)) {
-      return (
-        <div className="flex items-center gap-1">
-          <DatePicker className="h-9 min-w-0 flex-1" value={value} onChange={onValue} ariaLabel={t("audience.builder.from")} />
-          <span className="text-body text-tertiary">…</span>
-          <DatePicker className="h-9 min-w-0 flex-1" value={valueTo} onChange={onValueTo} ariaLabel={t("audience.builder.to")} />
-        </div>
-      );
-    }
-    return <DatePicker className="h-9 w-full" value={value} onChange={onValue} />;
-  }
-
-  const inputType = source === "number" ? "number" : "text";
-
-  if (isRangeOp(op)) {
-    return (
-      <div className="flex items-center gap-1">
-        <Input className="h-9 min-w-0 flex-1" type={inputType} value={value} onChange={(e) => onValue(e.target.value)} />
-        <span className="text-body text-tertiary">…</span>
-        <Input className="h-9 min-w-0 flex-1" type={inputType} value={valueTo} onChange={(e) => onValueTo(e.target.value)} />
-      </div>
-    );
-  }
-
-  return (
-    <Input
-      className="h-9 w-full"
-      type={inputType}
-      value={value}
-      onChange={(e) => onValue(e.target.value)}
-    />
-  );
-};
-
 // ---- the field of a condition: searchable and grouped ------------------
 
 const FIELD_GROUP_ORDER: AudienceField["group"][] = ["System", "Org", "Custom"];
@@ -389,14 +478,16 @@ const FIELD_GROUP_ORDER: AudienceField["group"][] = ["System", "Org", "Custom"];
 /**
  * Fifty-odd fields do not fit a plain list (WALK_QUESTIONS § 17, answering NEED_TO_DISCUSS § 19 for
  * this case): the shared combobox the value pickers use — the field is its own search — with the fields in
- * their groups.
+ * their groups, 28 high inside the card.
  */
 const FieldPicker: React.FC<{
   fields: AudienceField[];
   value: string;
   onChange: (key: string) => void;
   loading: boolean;
-}> = ({ fields, value, onChange, loading }) => {
+  open?: boolean;
+  onOpenChange: (open: boolean) => void;
+}> = ({ fields, value, onChange, loading, open, onOpenChange }) => {
   const t = useTranslations("access");
   // Alphabetical inside each group: the catalogue's own order is the registry's, which nobody reads by.
   const options = FIELD_GROUP_ORDER.flatMap((g) =>
@@ -409,6 +500,7 @@ const FieldPicker: React.FC<{
   // Hub A18: the field is the search — no search row inside the list.
   return (
     <Combobox
+      size="sm"
       options={options}
       value={value || null}
       onChange={(key) => {
@@ -419,34 +511,10 @@ const FieldPicker: React.FC<{
       placeholder={loading ? t("audience.builder.loadingFields") : t("audience.builder.selectField")}
       emptyLabel={fields.length === 0 ? t("audience.builder.noFields") : undefined}
       disabled={loading}
-      className="w-40"
-    />
-  );
-};
-
-// ---- multiselect (the shared combobox: the field searches, the picks are tags inside it) ------------
-
-const MultiSelect: React.FC<{
-  options: AudienceOption[];
-  values: string[];
-  onChange: (v: string[]) => void;
-  loading?: boolean;
-}> = ({ options, values, onChange, loading }) => {
-  const t = useTranslations("access");
-  const tCommon = useTranslations("common");
-  // Hub A18: the field is the search. CM07 O4: the picks are tags inside the field, which takes the rest of the row.
-  return (
-    <Combobox
-      multiple
-      chips
-      options={options.map((o) => ({ value: o.id, label: o.label }))}
-      value={values}
-      onChange={onChange}
-      aria-label={t("audience.builder.value")}
-      placeholder={loading ? tCommon("states.loading") : t("audience.builder.selectValues")}
-      emptyLabel={options.length === 0 ? t("audience.builder.noOptions") : undefined}
       className="w-full"
-      listClassName="min-w-56"
+      listClassName="min-w-64"
+      open={open}
+      onOpenChange={onOpenChange}
     />
   );
 };

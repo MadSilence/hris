@@ -77,16 +77,17 @@ describe("JobLevelCard", () => {
     expect(screen.getByRole("button", { name: /Done/ })).toBeInTheDocument();
   });
 
-  it("cannot move the top rung up or the bottom rung down", () => {
+  it("offers no Move up on the top rung and no Move down on the bottom one — hidden in place, not greyed", () => {
     renderCard(true);
 
     const ups = screen.getAllByLabelText("Move level up");
     const downs = screen.getAllByLabelText("Move level down");
 
-    expect(ups[0]).toBeDisabled();
-    expect(ups[2]).toBeEnabled();
-    expect(downs[2]).toBeDisabled();
-    expect(downs[0]).toBeEnabled();
+    expect(ups[0]).toHaveClass("invisible");
+    expect(ups[2]).not.toHaveClass("invisible");
+    expect(downs[2]).toHaveClass("invisible");
+    expect(downs[0]).not.toHaveClass("invisible");
+    [...ups, ...downs].forEach((button) => expect(button).toBeEnabled());
   });
 
   it("moves a rung in the requested direction", () => {

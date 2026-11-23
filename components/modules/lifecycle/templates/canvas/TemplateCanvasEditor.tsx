@@ -332,7 +332,7 @@ export function TemplateCanvasEditor({ type, templateId }: Props) {
   return (
     // Exactly the window, less the settings page's own padding (6rem): taller, and the page scrolled a little,
     // carrying the whole editor with it.
-    <div className="flex h-[calc(100vh-6rem)] min-h-[560px] flex-col gap-4">
+    <div className="flex h-[calc(100cqh-6rem)] min-h-[560px] flex-col gap-4">
       <header className="flex flex-wrap items-center gap-3 px-8">
         <Link
           href={listHref(type)}

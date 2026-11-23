@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Clock01Icon, Download04Icon, Tick02Icon, Unlink01Icon } from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon, Clock01Icon, Download01Icon, EraserIcon, FileValidationIcon, Unlink04Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/desact/button";
 import { Icon } from "@/components/desact/icon";
@@ -10,25 +10,28 @@ import { FormError } from "@/components/feedback/FormError";
 import { internalApiClient } from "@/components/clients/apiClient";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { uploadPhoneDrawingAction } from "../actions";
-import { PoweredBy } from "./SigningScreen";
+import { CompanyBand, PoweredBy, type SigningBrand } from "./SigningScreen";
 import { SignaturePad, type SignaturePadHandle } from "./SignaturePad";
 
-function Page({ children }: { children: React.ReactNode }) {
+/** A company's page with one message on it (G10–G12): the band, the message in the middle, the footer. */
+function Page({ brand, children }: { brand: SigningBrand; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-page">
+    <div className="flex min-h-screen flex-col bg-card">
+      <CompanyBand brand={brand} />
       <main className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">{children}</main>
       <PoweredBy />
     </div>
   );
 }
 
-function Circle({ icon, good }: { icon: typeof Tick02Icon; good?: boolean }) {
+/** The state's circle, 56: green when it went well — never the accent (G9) — Mist otherwise. */
+function Circle({ icon, good }: { icon: typeof CheckmarkCircle02Icon; good?: boolean }) {
   return (
     <span
       className={
         good
-          ? "flex size-12 items-center justify-center rounded-pill bg-accent-subtle text-accent-text"
-          : "flex size-12 items-center justify-center rounded-pill bg-mist text-secondary"
+          ? "flex size-14 items-center justify-center rounded-pill bg-status-approved-bg text-status-approved-icon"
+          : "flex size-14 items-center justify-center rounded-pill bg-mist text-secondary"
       }
     >
       <Icon icon={icon} />
@@ -37,19 +40,19 @@ function Circle({ icon, good }: { icon: typeof Tick02Icon; good?: boolean }) {
 }
 
 /** G10: a guest's link that no longer works — the login's dead-link words. */
-export function DeadLink({ company }: { company: string | null }) {
+export function DeadLink({ company, logoUrl }: { company: string | null; logoUrl?: string | null }) {
   const t = useTranslations("signing");
   return (
-    <Page>
-      <Circle icon={Unlink01Icon} />
+    <Page brand={{ companyName: company, logoUrl }}>
+      <Circle icon={Unlink04Icon} />
       <h1 className="text-section-title text-primary">{t("states.deadLink")}</h1>
-      <p className="max-w-sm text-body text-secondary">{t("states.deadLinkBody", { company: company ?? "" })}</p>
+      <p className="max-w-[420px] text-body text-secondary">{t("states.deadLinkBody", { company: company ?? "" })}</p>
     </Page>
   );
 }
 
 /** G12: the guest's signed copy, by the link they were emailed, for thirty days. */
-export function SignedCopy({ token, company }: { token: string; company: string | null }) {
+export function SignedCopy({ token, company, logoUrl }: { token: string; company: string | null; logoUrl?: string | null }) {
   const t = useTranslations("signing");
   const [failed, setFailed] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -77,18 +80,18 @@ export function SignedCopy({ token, company }: { token: string; company: string 
   };
 
   return (
-    <Page>
-      <Circle icon={failed ? Clock01Icon : Tick02Icon} good={!failed} />
+    <Page brand={{ companyName: company, logoUrl }}>
+      <Circle icon={failed ? Clock01Icon : FileValidationIcon} good={!failed} />
       <h1 className="text-section-title text-primary">{t("copy.title")}</h1>
       {failed ? (
         <p className="max-w-sm text-body text-secondary">{t("copy.expired", { company: company ?? "" })}</p>
       ) : (
         <>
-          <Button type="button" size="lg" loading={busy} onClick={download}>
-            <Icon icon={Download04Icon} size="sm" />
+          <Button type="button" loading={busy} onClick={download}>
+            <Icon icon={Download01Icon} size="sm" />
             {t("copy.download")}
           </Button>
-          <p className="text-hint text-tertiary">{t("copy.until")}</p>
+          <p className="mt-1 text-hint text-secondary">{t("copy.until")}</p>
         </>
       )}
     </Page>
@@ -99,7 +102,17 @@ export function SignedCopy({ token, company }: { token: string; company: string 
  * The phone page (G03f–G03i): opened by the QR code, one-time and ten minutes, for one signer. A big pad, Clear and
  * Done; Done sends the drawing, and the signer's computer picks it up by itself.
  */
-export function PhoneDraw({ token, title, signerName }: { token: string; title: string; signerName: string }) {
+export function PhoneDraw({
+  token,
+  title,
+  signerName,
+  brand,
+}: {
+  token: string;
+  title: string;
+  signerName: string;
+  brand: SigningBrand;
+}) {
   const t = useTranslations("signing");
   const pad = React.useRef<SignaturePadHandle>(null);
   const [state, setState] = React.useState<"drawing" | "sent" | "expired">("drawing");
@@ -120,18 +133,19 @@ export function PhoneDraw({ token, title, signerName }: { token: string; title: 
     else setError(r.errorMessage ?? null);
   };
 
-  if (state !== "drawing") return <PhoneEnd expired={state === "expired"} />;
+  if (state !== "drawing") return <PhoneEnd expired={state === "expired"} brand={brand} />;
   return (
     <div className="flex min-h-screen flex-col bg-card">
-      <div className="h-[52px] shrink-0 bg-accent" />
-      <main className="flex flex-1 flex-col gap-3 p-5">
+      <CompanyBand brand={brand} compact />
+      <main className="flex flex-1 flex-col p-5 pt-6">
         <h1 className="text-section-title text-primary">{t("phone.title")}</h1>
-        <p className="text-hint text-secondary">{t("phone.for", { title, name: signerName })}</p>
-        <SignaturePad ref={pad} hint={t("phone.pad")} className="min-h-[260px] flex-1" />
-        <p className="text-hint text-tertiary">{t("phone.sideways")}</p>
+        <p className="mt-2 text-label font-normal text-secondary">{t("phone.for", { title, name: signerName })}</p>
+        <SignaturePad ref={pad} hint={t("phone.pad")} className="mt-4 h-[300px]" />
+        <p className="mt-2 text-label font-normal text-secondary">{t("phone.sideways")}</p>
         <FormError message={error} />
-        <div className="flex gap-2">
-          <Button type="button" variant="secondary" size="lg" className="flex-1" onClick={() => pad.current?.clear()}>
+        <div className="mt-auto flex gap-2 pt-6">
+          <Button type="button" variant="secondary" size="lg" className="w-[136px]" onClick={() => pad.current?.clear()}>
+            <Icon icon={EraserIcon} size="sm" />
             {t("phone.clear")}
           </Button>
           <Button type="button" size="lg" className="flex-1" loading={busy} onClick={done}>
@@ -145,15 +159,15 @@ export function PhoneDraw({ token, title, signerName }: { token: string; title: 
 }
 
 /** G03h sent, G03i expired or used. */
-export function PhoneEnd({ expired }: { expired: boolean }) {
+export function PhoneEnd({ expired, brand }: { expired: boolean; brand: SigningBrand }) {
   const t = useTranslations("signing");
   return (
     <div className="flex min-h-screen flex-col bg-card">
-      <div className="h-[52px] shrink-0 bg-accent" />
+      <CompanyBand brand={brand} compact />
       <main className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <Circle icon={expired ? Clock01Icon : Tick02Icon} good={!expired} />
+        <Circle icon={expired ? Clock01Icon : CheckmarkCircle02Icon} good={!expired} />
         <h1 className="text-section-title text-primary">{expired ? t("phone.expiredTitle") : t("phone.sentTitle")}</h1>
-        <p className="max-w-xs text-body text-secondary">{expired ? t("phone.expiredBody") : t("phone.sentBody")}</p>
+        <p className="max-w-[280px] text-body text-secondary">{expired ? t("phone.expiredBody") : t("phone.sentBody")}</p>
       </main>
       <PoweredBy />
     </div>

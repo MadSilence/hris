@@ -15,12 +15,12 @@
       "needsAction": "Needs action"
     },
     "empty": {
-      "search": "No notifications match your search.",
-      "unread": "No unread notifications.",
-      "starred": "No starred notifications.",
-      "needsAction": "Nothing needs your action.",
-      "category": "Nothing in this category.",
-      "none": "No notifications yet."
+      "unread": "No unread notifications",
+      "starred": "No starred notifications",
+      "needsAction": "Nothing needs your action",
+      "category": "Nothing in this category",
+      "none": "Nothing to check",
+      "noneLine": "We’ll tell you when something needs your yes."
     },
     "dateGroup": {
       "today": "Today",
@@ -67,15 +67,13 @@
   },
   "actions": {
     "approve": "Approve",
-    "reject": "Reject",
-    "reason": "Reason",
     "approveCancellation": "Approve cancellation",
     "decline": "Decline",
     "outcomes": {
       "approved": "Approved",
       "approvedByYou": "You approved · waiting for the rest of the chain",
       "rejected": "Rejected",
-      "cancelled": "Cancelled",
+      "cancelled": "Canceled",
       "cancellationApproved": "Cancellation approved",
       "cancellationDeclined": "Cancellation declined"
     },
@@ -178,16 +176,16 @@
       "message": "{requester} asks to cancel approved time off · {dates}{forSomeone, select, yes { · for {onBehalfOf}} other {}}."
     },
     "requestCancelled": {
-      "title": "Time off cancelled",
-      "message": "{requester}'s time off {dates} is cancelled."
+      "title": "Time off canceled",
+      "message": "{requester}'s time off {dates} is canceled."
     },
     "requestApproved": {
       "title": "Time off approved",
       "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was approved{hasActor, select, yes { by {actor}} other {}}."
     },
     "requestRejected": {
-      "title": "Time off rejected",
-      "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was rejected{hasActor, select, yes { by {actor}} other {}}."
+      "title": "{hasActor, select, yes {{actor} declined your time off request} other {Your time off request was declined}}",
+      "message": "{hasPolicy, select, yes {{policy}} other {Time off}}{hasDates, select, yes {, {dates}} other {}}{hasComment, select, yes {\nComment: {comment}} other {}}"
     },
     "cancellationApproved": {
       "title": "Cancellation approved",
@@ -198,8 +196,8 @@
       "message": "Your request to cancel {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was declined{hasActor, select, yes { by {actor}} other {}}. The time off stands."
     },
     "leaveCancelled": {
-      "title": "Time off cancelled",
-      "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was cancelled{hasActor, select, yes { by {actor}} other {}}{hasRestored, select, yes {, and {restoredCount, plural, one {{restored} day} other {{restored} days}} went back to your balance} other {}}."
+      "title": "Time off canceled",
+      "message": "Your {hasPolicy, select, yes {{policy} request} other {time off}} {dates} was canceled{hasActor, select, yes { by {actor}} other {}}{hasRestored, select, yes {, and {restoredCount, plural, one {{restored} day} other {{restored} days}} went back to your balance} other {}}."
     },
     "policyAssigned": {
       "title": "Leave policy assigned",
@@ -300,8 +298,8 @@
       "message": "{what} was not signed before its deadline."
     },
     "signatureCancelled": {
-      "title": "Signing cancelled",
-      "message": "{who} cancelled the signing of {what}.{hasReason, select, yes { “{reason}”} other {}}"
+      "title": "Signing canceled",
+      "message": "{who} canceled the signing of {what}.{hasReason, select, yes { “{reason}”} other {}}"
     },
     "documentRequested": {
       "title": "Document requested",

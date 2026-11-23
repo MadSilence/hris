@@ -50,8 +50,7 @@
     }
   },
   "period": {
-    "month": "{month} {year}",
-    "week": "{fromDay} {fromMonth} – {toDay} {toMonth} {year}"
+    "month": "{month} {year}"
   },
   "grouping": {
     "department": "Отдел",
@@ -62,43 +61,20 @@
     "noOffice": "Без офиса",
     "untitled": "Без названия"
   },
-  "capacity": {
-    "atLimit": "Лимит достигнут — новые заявки {who, select, team {от этой команды} department {от этого отдела} other {от любого сотрудника компании}} {behavior, select, block {будут отклонены} other {получат предупреждение}}",
-    "awayOfCap": "Отсутствуют {away} из {cap}",
-    "formDecides": "Окончательно решает форма заявки — для каждого сотрудника"
-  },
   "board": {
-    "halfDayCountsWhole": "(полдня — в отпуске всё равно считается целым днём)",
-    "away": "Отсутствует",
-    "pendingYourApproval": "Ждёт вашего согласования",
-    "pendingApproval": "Ждёт согласования",
-    "cancellationAwaitingYou": "Отмена ждёт вашего согласования",
-    "cancellationRequested": "Запрошена отмена",
-    "halfDay": "Полдня",
-    "waitingForYourApproval": "Ждёт вашего согласования",
-    "people": "Сотрудники",
-    "emptyTitle": "Некого показать",
-    "emptyDescription": "Под текущий вид никто не подходит."
+    "away": "Отсутствует"
   },
   "toolbar": {
-    "filter": "Фильтр",
     "group": "Группировка",
-    "groupBy": "Группировка: {grouping}",
-    "views": "Представления",
-    "allPeople": "Все сотрудники",
-    "deleteView": "Удалить «{name}»",
-    "saveCurrentAsView": "Сохранить текущие фильтры как вид",
-    "density": {
-      "week": "неделя",
-      "month": "месяц"
-    },
-    "previous": "Назад",
-    "saveViewTitle": "Сохранить вид",
-    "saveViewHint": "Вид запоминает фильтры, группировку и выбор «неделя/месяц» — но не период. Открытый в июне, он покажет июнь."
+    "groupPicked": "Группировка:",
+    "groupBy": "Группировать по",
+    "ungroup": "Убрать группировку",
+    "scale": "Масштаб",
+    "week": "Неделя",
+    "month": "Месяц",
+    "person": "Сотрудник"
   },
   "export": {
-    "printAria": "Распечатать календарь",
-    "print": "Печать",
     "exportAria": "Выгрузить календарь",
     "title": "Выгрузка календаря",
     "description": "Сотрудники текущего представления, по столбцу на каждый день показанного периода. Отпуска выглядят так же, как в календаре.",
@@ -108,49 +84,18 @@
     "title": "Календарь",
     "description": "Кто отсутствует и какие дни — праздничные."
   },
-  "awaiting": {
-    "review": "Посмотреть",
-    "line": "{count, plural, one {# заявка ждёт} few {# заявки ждут} many {# заявок ждут} other {# заявки ждут}} вашего согласования"
-  },
   "request": {
     "title": "Заявка на отсутствие",
     "titleFor": "Заявка на отсутствие: {name}",
-    "selectDates": "Выберите даты",
-    "errors": {
-      "pickPolicy": "Выберите политику, по которой подаётся заявка.",
-      "chooseDates": "Выберите даты отсутствия.",
-      "endBeforeStart": "Дата окончания не может быть раньше даты начала.",
-      "failed": "Не удалось отправить заявку."
-    },
-    "policy": "Политика",
-    "leftHint": "Осталось {amount} {unit}",
-    "dates": "Даты",
     "note": "Комментарий <muted>(необязательно)</muted>",
     "notePlaceholder": "Что стоит знать вашему руководителю",
-    "available": "Доступно",
-    "noLimit": "Без ограничений",
-    "amountUnit": "{amount} {unit}",
-    "duration": "Длительность",
-    "workingDays": "рабочие дни",
-    "leftAfter": "Останется",
     "coverage": {
       "submitted": "Заявка отправлена.",
       "warning": "Эта политика предупреждает, когда одновременно отсутствует слишком много людей, и {count, plural, one {один из ваших дней уже достиг} few {# ваших дня уже достигли} many {# ваших дней уже достигли} other {# ваших дня уже достигли}} этого лимита: {days}. Ничего не заблокировано — согласующий видит то же самое."
     },
     "gotIt": "Понятно",
-    "requesting": "Отправка…",
-    "submitDays": "Запросить {amount} {count, plural, one {день} few {дня} many {дней} other {дня}}",
-    "notePlaceholderSick": "Что-нибудь добавить",
-    "durationWorkingDays": "{amount} {count, plural, one {рабочий день} few {рабочих дня} many {рабочих дней} other {рабочего дня}}",
-    "shortfall": "Это на {amount} {count, plural, one {день} few {дня} many {дней} other {дня}} больше, чем у вас есть.",
-    "requested": "Запрос отправлен.",
-    "requestedTo": "Запрос отправлен. Его получит {name}.",
     "goesTo": "Получит {name}",
-    "goesToMore": "Получит {name} +{count}",
-    "alsoOff": "Тоже отсутствуют",
-    "alsoOffOfTeam": "Тоже отсутствуют · {count} из команды",
-    "yourManager": "ваш руководитель",
-    "alsoOffMore": "Ещё {count}"
+    "goesToMore": "Получит {name} +{count}"
   },
   "boardRequest": {
     "loadFailed": "Не удалось загрузить отсутствия сотрудника {name}.",
@@ -171,38 +116,11 @@
     "daysShort": "дн."
   },
   "adjustment": {
-    "amountRequired": "Введите ненулевое количество (для списания — со знаком минус).",
-    "reasonRequired": "Укажите причину.",
-    "failed": "Не удалось скорректировать баланс.",
-    "title": "Ручная корректировка",
-    "amount": "Количество ({unit})",
-    "reason": "Причина",
-    "hint": "Чтобы списать, введите отрицательное число. В истории баланса появится запись."
-  },
-  "ledger": {
-    "type": {
-      "accrual": "Начисление",
-      "usage": "Отсутствие",
-      "adjustment": "Корректировка",
-      "carryover": "Перенос остатка",
-      "expiry": "Сгорание",
-      "reversal": "Сторно"
-    },
-    "projectedOn": "Прогноз на {date}",
-    "empty": "Записей пока нет."
+    "failed": "Не удалось скорректировать баланс."
   },
   "balances": {
     "fallbackName": "Отсутствие",
-    "unlimited": "Без ограничений",
-    "left": "Осталось <b>{amount}</b> {unit}",
-    "awaitingDecision": "{amount} ждут решения",
-    "carriedOver": "{amount} перенесено",
-    "title": "Балансы отсутствий",
-    "description": "Балансы по политикам и история начислений.",
-    "usedInYear": "Использовано {amount} {unit} · {year}",
-    "leftOfInYear": "Осталось {amount} {unit} из {granted} · {year}",
-    "history": "История",
-    "empty": "Нет балансов для показа."
+    "unlimited": "Без ограничений"
   },
   "assign": {
     "quotaPerYear": "{amount} {unit} в год",
@@ -221,58 +139,63 @@
     "assigning": "Назначение…",
     "submit": "Назначить политику"
   },
-  "requestsPreview": {
-    "title": "Заявки на отсутствие",
-    "description": "Все заявки, сначала новые. Ожидающие и согласованные ещё можно отменить."
-  },
-  "sidePanel": {
-    "taken": "{unit, select, hours {{count, plural, one {час использован} few {часа использовано} many {часов использовано} other {часа использовано}}} other {{count, plural, one {день использован} few {дня использовано} many {дней использовано} other {дня использовано}}}}",
-    "left": "{unit, select, hours {{count, plural, one {час остался} few {часа осталось} many {часов осталось} other {часа осталось}}} other {{count, plural, one {день остался} few {дня осталось} many {дней осталось} other {дня осталось}}}}",
-    "onRequest": "По заявке",
-    "withBalance": "С балансом",
-    "allPoliciesTitle": "Все политики",
-    "searchPolicies": "Поиск политик",
-    "noMatch": "Ни одна политика не подходит под «{query}».",
-    "balances": "Балансы",
-    "allPolicies": "{count, plural, one {Все политики (#)} few {Все # политики} many {Все # политик} other {Все # политики}}",
-    "upcoming": "Предстоящие",
-    "amountHours": "{amount} ч"
-  },
-  "timeOffTab": {
-    "noPolicy": "Политика отсутствий пока не назначена.",
-    "allRequests": "Все заявки",
-    "balanceHistory": "История баланса"
-  },
   "requests": {
-    "status": {
-      "pending": "На согласовании",
-      "approved": "Согласована",
-      "cancellationPending": "Запрошена отмена",
-      "rejected": "Отклонена",
-      "cancelled": "Отменена"
-    },
-    "requestCancellation": "Запросить отмену",
-    "cancel": "Отменить",
     "errors": {
-      "cancel": "Не удалось отменить заявку.",
-      "edit": "Не удалось изменить заявку.",
-      "answerCancellation": "Не удалось ответить на запрос отмены.",
-      "approve": "Не удалось согласовать заявку.",
-      "reject": "Не удалось отклонить заявку."
+      "cancel": "Не удалось отменить заявку."
+    }
+  },
+  "views": {
+    "everyone": "Все",
+    "myTeam": "Моя команда",
+    "saveAsView": "Сохранить как вид",
+    "saveView": "Сохранить вид",
+    "renameTitle": "Переименовать вид",
+    "name": "Название",
+    "more": "Ещё {count}",
+    "actions": "Действия с видом «{name}»"
+  },
+  "share": {
+    "button": "Поделиться",
+    "title": "Поделиться этим видом",
+    "keeps": "Ссылка откроет календарь таким, каким вы видите его сейчас:",
+    "period": "{scale, select, week {Неделя} other {Месяц}} · <b>с {date}</b>",
+    "access": "Каждый увидит только то, к чему у него есть доступ.",
+    "copy": "Скопировать ссылку",
+    "copied": "Ссылка скопирована"
+  },
+  "pill": {
+    "back": "выход {date}",
+    "days": "{count, plural, one {{amount} день} few {{amount} дня} many {{amount} дней} other {{amount} дня}}",
+    "hours": "{count, plural, one {{amount} час} few {{amount} часа} many {{amount} часов} other {{amount} часа}}",
+    "workingDays": "{count, plural, one {{amount} рабочий день} few {{amount} рабочих дня} many {{amount} рабочих дней} other {{amount} рабочего дня}}"
+  },
+  "card": {
+    "status": {
+      "approved": "Согласовано",
+      "pending": "На согласовании",
+      "cancellationPending": "Запрошена отмена"
     },
-    "anyYear": "Любой год",
-    "anyStatus": "Любой статус",
-    "emptyFiltered": "Нет заявок, подходящих под фильтры.",
-    "empty": "Заявок на отсутствие пока нет.",
-    "line": "{start} → {end} · {amount} {unit}",
-    "rejectionReason": "<b>Причина:</b> {reason}",
-    "awaitingCancellation": "Ждёт, пока согласующий подтвердит отмену",
+    "openFull": "Открыть запрос полностью",
+    "days": "{count, plural, one {{amount} день} few {{amount} дня} many {{amount} дней} other {{amount} дня}}",
+    "hours": "{count, plural, one {{amount} час} few {{amount} часа} many {{amount} часов} other {{amount} часа}}",
+    "lengthAndBack": "{length} · выход {back}",
+    "back": "Выход {date}",
+    "alsoAway": "{others, plural, =0 {{name} тоже отсутствует} one {{name} и ещё # тоже отсутствуют} few {{name} и ещё # тоже отсутствуют} many {{name} и ещё # тоже отсутствуют} other {{name} и ещё # тоже отсутствуют}}",
     "approve": "Согласовать",
-    "reject": "Отклонить",
-    "confirmCancellation": "Подтвердить отмену",
-    "keepAbsence": "Оставить отсутствие",
-    "editDates": "Изменить даты",
-    "to": "по",
-    "reason": "Причина"
+    "decline": "Отклонить",
+    "approvedToast": "Отсутствие согласовано",
+    "workingDays": "{count, plural, one {{amount} рабочий день} few {{amount} рабочих дня} many {{amount} рабочих дней} other {{amount} рабочего дня}}"
+  },
+  "states": {
+    "noResultsTitle": "Никого не нашли",
+    "noResultsHint": "Проверьте написание или попробуйте другое имя.",
+    "noMatchTitle": "Под эти фильтры никто не подходит",
+    "noMatchHint": "Измените фильтр или сбросьте все.",
+    "clearAll": "Сбросить все",
+    "errorTitle": "Не удалось загрузить календарь",
+    "errorHint": "Отсутствия всех сотрудников в сохранности.",
+    "tryAgain": "Повторить",
+    "noAccessTitle": "Вам это недоступно",
+    "noAccessHint": "Попросите доступ у администратора вашей компании."
   }
 }

@@ -1,0 +1,74 @@
+# Words — leave-colours
+
+Every string drawn on the boards of this screen, per frame, in reading order (from the export pages; sidebar left out; bare day numbers and weekday letters left out). Names, dates and numbers are sample data; the spec says which parts are data. Sentence case, US English, no period on toasts and field errors.
+
+## K01-LeaveColours
+
+- Leave colours
+- The colours a time-off policy can take in the calendar. Approved by Ulia on 19 Nov 2026. They replace the tag palette's pale fills (SPEC § 4
+- A policy picks one of the first eleven. A new policy takes the first colour no other policy uses.
+- Eleven to pick from
+- Gray is never offered: it marks leave whose type the viewer may not see.
+- Gray is Away
+- The fill, the text colour on it. Pill radius full, 28 high on the board.
+- Approved
+- White, a 1.5 px dashed edge in the edge colour, the text colour.
+- Waiting for approval
+- A dot on a tint: a 16 px circle of the fill with an 8 px dot of the edge colour, no edge (replaces the 16 × 6 policy marker). Pending in a l
+- Marker
+- Berry
+- Fill
+- #FAD9EA
+- Edge and dot
+- #D2559A
+- Text
+- #6B1745
+- Annual leave
+- · 5 days
+- · waiting for approval
+- Pending ring 16
+- Plum
+- #E6DDF8
+- #8467CF
+- #3B2370
+- Lilac
+- #F6DCF6
+- #C46BC6
+- #5E1F60
+- Indigo
+- #E1E1FF
+- #6E6FE0
+- #2A2D79
+- Ocean
+- #D9E8FF
+- #5B8FE0
+- #163E73
+- Teal
+- #CFF1EC
+- #2FA898
+- #0A4C47
+- Olive
+- #E3EDC8
+- #8AA53A
+- #3A4A10
+- Mustard
+- #F7EDB0
+- #C9A800
+- #4F4300
+- Bronze
+- #FCE7BF
+- #D99A2B
+- #5C3B06
+- Orange
+- #FFE1CC
+- #F08A3E
+- #6E3208
+- Cocoa
+- #F2E1D8
+- #B07A5E
+- #4D2D21
+- Gray · Away only
+- #E9E9EE
+- #9C9CA3
+- #45454A
+- Away

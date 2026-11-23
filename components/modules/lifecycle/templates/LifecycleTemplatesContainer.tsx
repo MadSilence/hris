@@ -14,7 +14,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { showActionError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { useDateFormatter } from "@/lib/date";
+import { useShortDates } from "@/lib/date";
 import {
   archiveTemplateAction,
   deleteTemplateAction,
@@ -43,7 +43,7 @@ export const templateHref =(type: ProcessType, id: string) =>
  * how many tasks and a small timeline of where they fall — each opening its canvas.
  */
 export function LifecycleTemplatesContainer({ type }: Props) {
-  const formatDisplayDate = useDateFormatter();
+  const dates = useShortDates();
   const t = useTranslations("lifecycle");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -99,7 +99,6 @@ export function LifecycleTemplatesContainer({ type }: Props) {
       ) : rows.length === 0 ? (
         <ListEmptyState
           query={query}
-          onClearSearch={() => setQuery("")}
           archivedView={showArchived}
           scene={TEMPLATE_SCENES[type]}
           title={t("templates.emptyTitle", { type })}
@@ -130,8 +129,8 @@ export function LifecycleTemplatesContainer({ type }: Props) {
                 </div>
                 <div className="mt-0.5 text-hint text-tertiary">
                   {row.description
-                    ? t("templates.rowMetaDescription", { count: row.taskCount, date: formatDisplayDate(row.updatedAt), description: row.description })
-                    : t("templates.rowMeta", { count: row.taskCount, date: formatDisplayDate(row.updatedAt) })}
+                    ? t("templates.rowMetaDescription", { count: row.taskCount, date: dates.date(row.updatedAt), description: row.description })
+                    : t("templates.rowMeta", { count: row.taskCount, date: dates.date(row.updatedAt) })}
                 </div>
                 {row.hasProblems && (
                   <div className="mt-1 flex items-center gap-1 text-hint text-status-pending-text">

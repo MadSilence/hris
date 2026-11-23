@@ -32,6 +32,7 @@ import {
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
 import type { HomeWidgetProps } from "./catalogue";
+import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
 
 const HOLDING = new Set(["APPROVED", "PENDING", "CANCELLATION_PENDING"]);
 
@@ -96,9 +97,10 @@ const RequestPill: React.FC<{ request: TimeOffRequest; href: string; tabIndex?: 
 /** A request in the "+N" menu (C5): a plain row 32 high, the date on the left and the status on the right. */
 const RequestRow: React.FC<{ request: TimeOffRequest }> = ({ request }) => {
   const days = useRequestDays();
+  const leaveHref = useLeaveRequestHref();
   return (
     <Link
-      href={`/time-off/requests/${request.id}`}
+      href={leaveHref(request.id)}
       className="flex h-8 min-w-0 items-center justify-between gap-3 rounded-control px-2 text-label text-primary hover:bg-subtle"
     >
       <span className="truncate">{days(request)}</span>
@@ -114,6 +116,7 @@ const RequestRow: React.FC<{ request: TimeOffRequest }> = ({ request }) => {
  */
 export const TimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const t = useTranslations("home");
+  const leaveHref = useLeaveRequestHref();
   const { userId } = useCurrentUser();
   const settings = useUserSettings();
   const balances = useEmployeeTimeOffBalancesByUser({ userId: userId ?? "" });
@@ -268,7 +271,7 @@ export const TimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
         <div className="mt-auto flex flex-col gap-3">
           {nearest && (
             <div className="flex min-w-0 items-center gap-2">
-              <RequestPill request={nearest} href={`/time-off/requests/${nearest.id}`} tabIndex={tab} />
+              <RequestPill request={nearest} href={leaveHref(nearest.id)} tabIndex={tab} />
               {moreMenu(rest, false)}
             </div>
           )}
@@ -290,7 +293,7 @@ export const TimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
         <div className="flex min-w-0 flex-col gap-2">
           {shown.length > 0 && <p className="text-hint leading-5 font-medium text-tertiary">{t("timeOff.comingUp")}</p>}
           {shown.map((request) => (
-            <RequestPill key={request.id} request={request} href={`/time-off/requests/${request.id}`} tabIndex={tab} wide />
+            <RequestPill key={request.id} request={request} href={leaveHref(request.id)} tabIndex={tab} wide />
           ))}
           {moreMenu(rest, true)}
           <div className="mt-auto flex justify-end">{requestButton(false)}</div>

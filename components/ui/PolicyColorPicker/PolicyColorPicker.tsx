@@ -6,14 +6,23 @@ import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { cn } from "@/lib/cn";
-import { POLICY_COLORS, TAG_CLASSES, TAG_COLOR_LABELS, type TagColor } from "@/lib/theme/tags";
+import { POLICY_COLORS, TAG_COLOR_LABELS, type TagColor } from "@/lib/theme/tags";
+import { LEAVE_CLASSES } from "@/lib/theme/leave";
 
 const PER_ROW = 6;
 
+/** The picked circle's ring, in the colour's edge — written out so Tailwind finds each class. */
+const RING: Record<TagColor, string> = {
+  gray: "ring-leave-gray-edge", berry: "ring-leave-berry-edge", plum: "ring-leave-plum-edge", lilac: "ring-leave-lilac-edge",
+  indigo: "ring-leave-indigo-edge", ocean: "ring-leave-ocean-edge", teal: "ring-leave-teal-edge", olive: "ring-leave-olive-edge",
+  mustard: "ring-leave-mustard-edge", bronze: "ring-leave-bronze-edge", orange: "ring-leave-orange-edge", cocoa: "ring-leave-cocoa-edge",
+};
+
 /**
- * Picking a time off policy's colour (the designers' answer 2.4, `DESIGN_SYSTEM.md` § 7): eleven 32 px circles in the
- * bar tone — gray is not offered, a gray bar is "Away" — six to a row on 48 px columns, 8 × 12 apart. The picked one
- * carries a white 16 px tick and a 2 px ring of its own colour with a 2 px gap; never the accent. A colour another
+ * Picking a time off policy's colour (the designers' answer 2.4, `DESIGN_SYSTEM.md` § 7): eleven 32 px circles in K01's
+ * order, each the policy marker drawn large — the leave fill with a 16 px dot of its edge — gray is not offered, gray is
+ * "Away" — six to a row on 48 px columns, 8 × 12 apart. The picked one carries a 16 px tick in the colour's text tone in
+ * place of the dot and a 2 px ring of its edge with a 2 px gap; never the accent. A colour another
  * policy uses says "In use" under it and "Used by …" on hover, and may still be picked. A radio group: the arrow keys
  * move the choice (up and down by a row), Tab leaves it.
  */
@@ -62,12 +71,16 @@ export const PolicyColorPicker: React.FC<{
             onKeyDown={(e) => move(e, i)}
             className={cn(
               "grid size-8 place-items-center rounded-pill transition-shadow duration-(--duration-hover)",
-              TAG_CLASSES[color].bar,
-              selected && cn("ring-2 ring-offset-2 ring-offset-card", TAG_CLASSES[color].ring),
+              LEAVE_CLASSES[color].fill,
+              selected && cn("ring-2 ring-offset-2 ring-offset-card", RING[color]),
               "disabled:cursor-not-allowed disabled:opacity-60",
             )}
           >
-            {selected ? <Icon icon={Tick02Icon} size="sm" className="size-4 text-on-tag" /> : null}
+            {selected ? (
+              <Icon icon={Tick02Icon} size="sm" className={cn("size-4", LEAVE_CLASSES[color].text)} />
+            ) : (
+              <span aria-hidden className={cn("size-4 rounded-pill", LEAVE_CLASSES[color].edge)} />
+            )}
           </button>
         );
         return (

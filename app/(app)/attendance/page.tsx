@@ -13,7 +13,7 @@ export default function AttendancePage() {
   const t = useTranslations("attendance");
   return (
     <PageGate resource="PEOPLE.ATTENDANCE" action="MANAGE">
-      <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6">
+      <div className="flex h-[calc(100cqh-6rem)] min-h-0 flex-col gap-6">
         <section className="flex flex-col gap-2">
           <h1 className="text-page-title">{t("page.title")}</h1>
           <p className="max-w-2xl text-tertiary">{t("page.description")}</p>

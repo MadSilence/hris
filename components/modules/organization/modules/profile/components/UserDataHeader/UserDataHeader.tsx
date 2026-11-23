@@ -3,7 +3,6 @@
 import { SampleBadge, useIsDemo } from "@/components/modules/demo";
 import { InlineAlert } from "@/components/desact/alert";
 import * as React from "react";
-import { PersonEmailsModal } from "@/components/modules/email/components";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { DeleteProfileModal } from "./modals/DeleteProfileModal";
@@ -11,41 +10,42 @@ import { useSWRConfig } from "swr";
 import type { User } from "@/models/user/User";
 import { useUser } from "@/components/hooks/useUser/useUser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
-import {
-  canBeInvited,
-  formatUserStatus,
-  isProspectiveStatus,
-} from "@/models/user/status";
-import { useDateFormatter } from "@/lib/date";
+import { canBeInvited } from "@/models/user/status";
+import { useDateFormatter, useShortDates } from "@/lib/date";
 import { useRouter } from "next/navigation";
 import { WaitingOnYou } from "@/components/modules/organization/modules/profile/components/WaitingOnYou";
 import Link from "next/link";
 import { Button } from "@/components/desact/button";
-import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
-import { CalendarRemove01Icon, HierarchySquare02Icon, Delete02Icon, DoorIcon, DoorLockIcon, Download01Icon, Key01Icon, Logout01Icon, Mail01Icon, PencilEdit02Icon, Refresh01Icon, Rocket01Icon, ShieldOffIcon, SquareLock02Icon, SquareUnlock02Icon, Unlink01Icon, UserRemove01Icon } from "@hugeicons/core-free-icons";
+import { RowAction, RowActionDestructive, RowActionSeparator, RowActionsMenu } from "@/components/ui/RowActionsMenu";
+import { ArrowRight02Icon, Calendar03Icon, Cancel01Icon, HierarchySquare02Icon, Delete02Icon, Key01Icon, Login03Icon, Logout03Icon, Mail01Icon, PencilEdit02Icon, Rocket01Icon, UnavailableIcon, UserAccountIcon, UserCheck01Icon, UserMultipleIcon, UserRemove01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useCanAccess } from "@/components/auth/useAccess";
-import { AccountStatusBadge, StatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
+import { cn } from "@/lib/cn";
+import { leaveClasses } from "@/lib/theme/leave";
 import { ChangePasswordModal } from "@/components/modules/auth/components/ChangePasswordModal";
-import { exportPersonalData } from "@/components/modules/organization/modules/profile/actions/exportPersonalData";
-import {
-  AccountAccessModal,
-  type AccountAccessKind,
-} from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/AccountAccessModal";
+import { ManageAccountDialog } from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/ManageAccountDialog";
+import { usePersonAbsenceSummary } from "@/components/modules/organization/modules/profile/hooks/usePersonAbsenceSummary";
+import { accountPillOf, nameStatusOf, setActiveDescriptionKey, type AccountPill, type NameStatus, type ReturnDays } from "./headerStatus";
+import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
+import { useUserPublicHolidays } from "@/components/modules/calendar/hooks/useUserPublicHolidays";
+import { expandSpanToDays, nonWorkingDayTest } from "@/components/modules/calendar/lib/dateRange";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { messageForError } from "@/lib/errors/errorMessages";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useStartImpersonation } from "@/components/modules/auth/impersonation/hooks/useStartImpersonation";
 import {
   cancelInviteAction,
-  changeUserStatusAction,
   deleteUserAction,
+  setActiveAction,
+  setInactiveAction,
   terminateUserAction,
 } from "@/components/modules/organization/modules/profile/actions/userLifecycleActions/userLifecycleActions";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { InviteUserModal } from "@/components/modules/organization/modules/profile/components/UserDataHeader/modals/InviteUserModal";
-import { showActionError, showError } from "@/lib/errors/errorToast";
+import { showSuccess } from "@/lib/errors/errorToast";
 import { StartProcessModal } from "@/components/modules/lifecycle/start/StartProcessModal";
 import type { ProcessType } from "@/models/lifecycle";
 import {
@@ -61,11 +61,8 @@ import {
   useInvalidateUserScheduledChanges,
   useUserScheduledChanges,
 } from "@/components/modules/organization/modules/profile/hooks/useUserScheduledChanges";
-import {
-  PendingValue,
-  pendingSteps,
-  ScheduledChangesPanel,
-} from "@/components/modules/organization/modules/profile/components/ScheduledChanges";
+import { ScheduledChangesPanel } from "@/components/modules/organization/modules/profile/components/ScheduledChanges";
+import { isProspectiveStatus } from "@/models/user/status";
 
 export type UserDataHeaderProps = {
   userId: string;
@@ -76,8 +73,7 @@ type OrgTranslator = ReturnType<typeof useTranslations<"organization">>;
 
 export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) {
   const t = useTranslations("organization");
-  const formatDisplayDate = useDateFormatter();
-  const tCommon = useTranslations("common");
+  const shortDates = useShortDates();
   const tDemo = useTranslations("demo.sample");
   const isDemo = useIsDemo();
   const { data: userFetched } = useUser(userId);
@@ -93,21 +89,34 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   // Booking someone else's leave is a time-off action, not a profile one.
 
   const [isTerminateOpen, setIsTerminateOpen] = useState(false);
-  const [isReactivateOpen, setIsReactivateOpen] = useState(false);
+  const [statusChange, setStatusChange] = useState<"inactive" | "active" | null>(null);
+  const [isCancelInviteOpen, setIsCancelInviteOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [startType, setStartType] = useState<ProcessType | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isEmailsOpen, setIsEmailsOpen] = useState(false);
+  const [isManageAccountOpen, setIsManageAccountOpen] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isLifecycleBusy, setIsLifecycleBusy] = useState(false);
   const [lifecycleError, setLifecycleError] = useState<string | null>(null);
-  const [accountAccess, setAccountAccess] = useState<AccountAccessKind | null>(null);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   // Above the early return: hooks are counted per render.
   const canManageProfiles = useCanAccess("PEOPLE.PROFILE", "MANAGE");
-  // One person's link to the company's provider (E-Q9): whoever manages Login & SSO. UX only — Java decides.
-  const canUnlinkSso = useCanAccess("SETTINGS.IDENTITY", "MANAGE");
+  const canImpersonate = useCanAccess("SETTINGS.IMPERSONATION", "MANAGE");
+  // "Back" and the next leave (R12) are read under the board's gate; without it nothing is asked.
+  const canSeeCalendar = useCanAccess("PEOPLE.CALENDAR", "VIEW");
+  const { data: absences } = usePersonAbsenceSummary(userId, canSeeCalendar);
+  // "Back {first working day}" counts as the leave card does (W14): the company's week and the person's holidays,
+  // asked only while they are off.
+  const { company } = useCompanyData();
+  const { data: holidayRows } = useUserPublicHolidays({ userId: absences?.current ? userId : "" });
+  const returnDays = React.useMemo<ReturnDays>(
+    () => ({
+      isNonWorking: nonWorkingDayTest(company?.workingDays),
+      holidays: new Set((holidayRows ?? []).flatMap((h) => expandSpanToDays(h.holidayDate, h.endDate))),
+    }),
+    [company?.workingDays, holidayRows],
+  );
   // Java lists only what this reader may act on, so a reader who may only view gets none.
   const { data: scheduledChanges } = useUserScheduledChanges(userId);
   const invalidateScheduledChanges = useInvalidateUserScheduledChanges();
@@ -216,14 +225,12 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   const fullName =
     `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || t("profile.header.unnamed");
   const isOwnProfile = currentUserId === user.id;
-  const mayUnlinkSso = canUnlinkSso && !isOwnProfile;
   const isArchived = (user.status ?? "").toUpperCase() === "ARCHIVED";
   /*
    * A termination date is written when the termination is *scheduled*, and the effects land the day
    * after it. Reading the date alone labelled a person still coming to work "Already Terminated" — the
    * opposite of the truth. Applied means archived; a date without that is pending.
    */
-  const isTerminated = !!user.terminationDate && isArchived;
   const isTerminationPending = !!user.terminationDate && !isArchived;
   /**
    * A draft is a name in a table: no account, no employment, no history. The header used to offer it
@@ -235,40 +242,46 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   // A demo invites nobody (R5.5): its people are samples, and Java refuses it (BIL00010).
   const mayInvite = !isOwnProfile && !isArchived && canBeInvited(user.accountStatus) && !isDemo;
   const isInvited = user.accountStatus === "INVITED";
+  const firstName = user.firstName?.trim() || fullName;
+  /*
+   * The ⋯ per status (AQ-08, U8): a person is Draft (not invited yet), Joining (invited), Active (also with a last
+   * day ahead) or Inactive (archived — by hand, or after the last day). Every item is shown only where it can act.
+   */
+  const menuStatus: "draft" | "joining" | "active" | "inactive" =
+    isArchived ? "inactive" : isDraft ? "draft" : isInvited ? "joining" : "active";
+  const rights = user.capabilities?.["PEOPLE.PROFILE"] ?? [];
   // Preboarding is for somebody with no account; onboarding for somebody who is in the system.
-  const mayPreboard = !isOwnProfile && !isArchived && canBeInvited(user.accountStatus);
-  const mayOnboard = !isOwnProfile && !isArchived && Boolean(user.accountStatus) && user.accountStatus !== "DRAFT";
+  const mayPreboard = canManageProfiles && !isOwnProfile && (menuStatus === "draft" || menuStatus === "joining");
+  const mayOnboard = canManageProfiles && !isOwnProfile && (menuStatus === "joining" || menuStatus === "active");
   // An offboarding counts from the last working day, so it needs the termination recorded — before or after
   // the day itself (DECISIONS.md § "Lifecycle tasks", D1).
-  const mayOffboard = !isOwnProfile && Boolean(user.terminationDate) && user.accountStatus !== "DRAFT";
-  // BLOCK is scoped on the person, so the server's per-target answer decides — not "do I hold it
-  // anywhere". Never on the own profile: blocking yourself is refused (U00010), and your own password
-  // is changed, not reset.
-  const mayControlAccess = !isOwnProfile && (user.capabilities?.["PEOPLE.PROFILE"] ?? []).includes("BLOCK");
-  // Only somebody with a password to sign in with can be impersonated. A draft has no account at
-  // all, an invitation has not been accepted, and a blocked account is refused at the door.
-  const mayImpersonate = !isOwnProfile && user.accountStatus === "ACTIVE";
-  // Employment is ended for somebody who has one. Never on yourself: the confirmation is the only
-  // thing between a single click and locking yourself out of the company.
-  const mayTerminate = canManageProfiles && !isOwnProfile && !isDraft;
-  const mayBlock = mayControlAccess && (user.accountStatus === "ACTIVE" || user.accountStatus === "INVITED");
-  const mayUnblock = mayControlAccess && user.accountStatus === "BLOCKED";
-  const maySendReset = mayControlAccess && user.accountStatus === "ACTIVE";
-  // Only an account that signs in has sessions to end.
-  const mayEndSessions = mayControlAccess && user.accountStatus === "ACTIVE";
-  // GDPR access and portability (P17): EDIT over the person, scoped — "carrying data out is an EDIT". Not
-  // while impersonating: the export is the actor's act, and Java refuses it inside an impersonation anyway.
-  const mayExportPersonalData = !impersonating && (user.capabilities?.["PEOPLE.PROFILE"] ?? []).includes("EDIT");
-  const isLocked = Boolean(user.accountLocked);
-  const isRestricted = Boolean(user.loginRestricted);
-  const mayUnlock = mayControlAccess && (isLocked || isRestricted);
-  // Your own password, on your own profile — and not while impersonating. The screen says "own
-  // profile" because the session is that person, but the human at the keyboard is somebody else, and
-  // the dialog would ask for a password they do not have and must not set.
+  const mayOffboard = canManageProfiles && !isOwnProfile && menuStatus === "active" && Boolean(user.terminationDate);
+  // BLOCK is scoped on the person, so the server's per-target answer decides — not "do I hold it anywhere". Never on
+  // the own profile: blocking yourself is refused (U00010). Everything sign-in lives in Manage account (R13); a draft
+  // has no account to manage.
+  const mayManageAccount = !isOwnProfile && menuStatus !== "draft" && rights.includes("BLOCK");
+  // Only somebody with a password to sign in with can be impersonated: an Active person whose account is open.
+  const mayImpersonate = !isOwnProfile && menuStatus === "active" && user.accountStatus === "ACTIVE" && canImpersonate;
+  // Employment is ended once: while a termination waits, Last day beside the name says so.
+  const mayTerminate = canManageProfiles && !isOwnProfile && menuStatus === "active" && !isTerminationPending;
+  // Set to inactive archives without a termination (U8): a person who never worked, or was added by mistake.
+  const maySetInactive = canManageProfiles && !isOwnProfile && menuStatus === "active";
+  const maySetActive = canManageProfiles && !isOwnProfile && menuStatus === "inactive";
+  // Delete is offered for a draft and for an inactive person (U8; DELETION.md applies).
+  const mayDelete = canManageProfiles && !isOwnProfile && (menuStatus === "draft" || menuStatus === "inactive");
+  // A scheduled invitation is withdrawn; one already sent is revoked — its link stops working and the person is a
+  // draft again (C4).
+  const mayCancelInvitation = canManageProfiles && !isOwnProfile && !isArchived &&
+    (Boolean(user.inviteScheduledFor) || isInvited);
+  // Your own password, on your own profile — and not while impersonating. The screen says "own profile" because the
+  // session is that person, but the human at the keyboard is somebody else, and the dialog would ask for a password
+  // they do not have and must not set. Your own data is exported from your preferences (B4), not from here.
   const mayChangeOwnPassword = isOwnProfile && !impersonating;
-  const hasPersonActions =
-    mayChangeOwnPassword || mayTerminate || mayBlock || mayUnblock || mayUnlock || maySendReset || mayEndSessions || mayExportPersonalData ||
-    (canManageProfiles && (Boolean(user.inviteScheduledFor) || mayPreboard || mayOnboard || mayOffboard || !isOwnProfile));
+  const secondGroup = (mayOnboard && menuStatus === "active") || mayOffboard || mayTerminate || maySetInactive ||
+    maySetActive || mayCancelInvitation;
+  // View in org chart is always there, so the menu shows whenever anything else would.
+  const hasPersonActions = mayImpersonate || mayManageAccount || mayChangeOwnPassword || mayPreboard || mayOnboard ||
+    secondGroup || mayDelete;
 
   const teamFact = user.teams && user.teams.length > 0
     ? { label: t("profile.header.teams", { count: user.teams.length }), value: user.teams.map((team) => team.name).join(", ") }
@@ -276,6 +289,10 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
       ? { label: t("profile.header.department"), value: user.department.name }
       : null;
   const tenure = tenureOf(t, user.hireDate);
+  // Before the first day the fact reads "—", with no tooltip (QR3); with no start date at all it is not shown.
+  const notStartedYet = !tenure && Boolean(user.hireDate);
+  const nameStatus = nameStatusOf(user, absences, undefined, returnDays);
+  const accountPill = accountPillOf(user);
 
   const rawAvatarUrl =
     avatarOverrideUrl !== undefined ? avatarOverrideUrl : user.avatarUrl ?? null;
@@ -285,9 +302,9 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
   return (
     <div>
       <header className="pb-6">
-        {/* One row (design fixes of 2026-11-04, fix 5): the avatar, the name over the job title, the facts a
-            reader looks for — manager, team, time with us — and the actions on the right. */}
-        <div className="flex items-center gap-4">
+        {/* One row (the product-wide header, QR3): the photo, the name with one status beside it over the job title,
+            the facts with their round marks, the account pill and the actions on the right. */}
+        <div className="flex items-center gap-6">
           {/* Own photo is always editable; someone else's needs profile EDIT. The pencil shows on hover and
               focus only; on a touch screen, which has no hover, it stays as a small badge in the corner. */}
           <PermissionGate
@@ -317,205 +334,180 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
             </button>
           </PermissionGate>
 
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-10 gap-y-2">
-            <div className="min-w-0 lg:mr-14">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-section-title text-primary">{fullName}</h1>
-                {user.status && (
-                  <PendingValue
-                    steps={pendingSteps(tCommon, scheduledChanges, "sys:status", [
-                      { id: user.status, name: formatUserStatus(tCommon, user.status) },
-                    ])}
-                  >
-                    <UserStatusBadge status={user.status}/>
-                  </PendingValue>
-                )}
-                {/* Registered and able to sign in is the unremarkable case, and gets no chip. */}
-                <AccountStatusBadge accountStatus={user.accountStatus}/>
-                {user.isSample && <SampleBadge />}
-                {isLocked && <StatusBadge status="inactive" label={t("profile.header.locked")}/>}
-                {!isLocked && isRestricted && <StatusBadge status="inactive" label={t("profile.header.signInPaused")}/>}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-12 gap-y-3">
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-3.5">
+                <h1
+                  title={fullName}
+                  className={cn("truncate font-heading text-profile-name", isArchived ? "text-secondary" : "text-primary")}
+                >
+                  {fullName}
+                </h1>
+                {/* Sample is said only in a demo (R14: a person added by hand is real). */}
+                {isDemo && user.isSample && <SampleBadge />}
+                {nameStatus && <NameStatusMark status={nameStatus} userId={user.id} />}
               </div>
-              {user.jobName && <p className="mt-1 truncate text-body text-secondary">{user.jobName}</p>}
-              {user.email && <p className="truncate text-hint text-tertiary">{user.email}</p>}
+              {user.jobName && <p className="mt-2 truncate text-profile-job text-secondary">{user.jobName}</p>}
             </div>
 
-            {user.manager && (
-              <HeaderFact label={t("profile.header.manager")}>
-                <Link href={`/organization/people/${user.manager.id}`} className="inline-flex items-center gap-1.5 text-primary no-underline hover:underline">
-                  <Avatar className="size-5">
-                    <AvatarFallback name={user.manager.name}>{initialsOf(user.manager.name).slice(0, 1)}</AvatarFallback>
-                  </Avatar>
-                  {user.manager.name}
-                </Link>
-              </HeaderFact>
-            )}
-            {teamFact && <HeaderFact label={teamFact.label}>{teamFact.value}</HeaderFact>}
-            {tenure && <HeaderFact label={t("profile.header.withUs")}>{tenure}</HeaderFact>}
+            <div className="flex min-w-0 items-center gap-12">
+              {user.manager && (
+                <HeaderFact
+                  label={t("profile.header.manager")}
+                  mark={
+                    <Avatar className="size-9">
+                      <AvatarFallback name={user.manager.name} className="text-hint">{initialsOf(user.manager.name)}</AvatarFallback>
+                    </Avatar>
+                  }
+                >
+                  <Link href={`/organization/people/${user.manager.id}`} className="text-primary no-underline hover:underline">
+                    {user.manager.name}
+                  </Link>
+                </HeaderFact>
+              )}
+              {teamFact && (
+                <HeaderFact label={teamFact.label} mark={<FactIcon icon={UserMultipleIcon} />}>
+                  {teamFact.value}
+                </HeaderFact>
+              )}
+              {tenure && (
+                <HeaderFact label={t("profile.header.withUs")} mark={<FactIcon icon={Calendar03Icon} />}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span tabIndex={0} className="cursor-default outline-none" suppressHydrationWarning>{tenure}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("profile.header.since", { date: shortDates.date(user.hireDate) })}
+                    </TooltipContent>
+                  </Tooltip>
+                </HeaderFact>
+              )}
+              {notStartedYet && (
+                <HeaderFact label={t("profile.header.withUs")} mark={<FactIcon icon={Calendar03Icon} />}>—</HeaderFact>
+              )}
+            </div>
           </div>
 
           {/*
-            Only actions with something behind them. Share and "Set a reminder" were removed with
-            the other stubs and deliberately not brought back — there is no feature under them.
+            The account pill, then the actions. Only actions with something behind them: Share and "Set a reminder"
+            were removed with the other stubs and deliberately not brought back. No Edit here — editing stays per tab.
           */}
-          <div className="flex items-center gap-2">
-            {mayImpersonate && (
-              <PermissionGate resource="SETTINGS.IMPERSONATION" action="MANAGE">
-                <Button type="button"
-                  variant="secondary"
-                  size="icon"
-                  aria-label={t("profile.header.loginAs")}
-                  title={t("profile.header.loginAs")}
-                  disabled={startImpersonation.isPending}
-                  onClick={() => startImpersonation.mutate({ targetUserId: user.id })}
-                >
-                  <Icon icon={Refresh01Icon} size="sm" />
-                </Button>
-              </PermissionGate>
-            )}
+          <div className="flex shrink-0 items-center gap-6 lg:ml-8">
+            {accountPill && <AccountPillMark pill={accountPill} />}
 
-            {mayInvite && (
-              <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
-                <Button type="button"
-                  variant={isInvited ? "secondary" : "primary"}
-                  className="gap-1.5"
-                  onClick={() => setIsInviteOpen(true)}
-                >
-                  <Icon icon={Mail01Icon} size="sm" />
-                  {isInvited ? t("profile.header.resendInvitation") : t("profile.header.invite")}
-                </Button>
-              </PermissionGate>
-            )}
+            <div className="flex items-center gap-2">
+              {/* The main button while the person has no account (QR3s). */}
+              {mayInvite && (
+                <PermissionGate resource="PEOPLE.PROFILE" action="MANAGE">
+                  <Button type="button" className="gap-1.5" onClick={() => setIsInviteOpen(true)}>
+                    <Icon icon={Mail01Icon} size="sm" />
+                    {isInvited ? t("profile.header.resendInvitation") : t("profile.header.invite")}
+                  </Button>
+                </PermissionGate>
+              )}
 
-            {/*
-              Two rights meet in this menu: MANAGE for the record, BLOCK for sign-in. Somebody holding
-              only BLOCK — a security officer, say — still gets the menu, with only its access items.
-            */}
-            {hasPersonActions && (
-              <RowActionsMenu label={t("profile.header.personActions")}>
-                {/* The chart opens with this person picked and centred (`?person=`). Shown whenever the menu is. */}
-                <RowAction
-                  icon={<Icon icon={HierarchySquare02Icon} size="sm" />}
-                  onClick={() => router.push(`/organization/chart?person=${encodeURIComponent(user.id)}`)}
-                >
-                  {t("profile.header.viewInOrgChart")}
-                </RowAction>
-                {/* In the kebab like every other action on a profile — the own one is no exception. */}
-                {mayChangeOwnPassword && (
-                  <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setIsChangePasswordOpen(true)}>
-                    {t("profile.header.changePassword")}
-                  </RowAction>
-                )}
-                {canManageProfiles && user.inviteScheduledFor && (
+              {/*
+                Two rights meet in this menu: MANAGE for the record, BLOCK for sign-in. Somebody holding
+                only BLOCK — a security officer, say — still gets the menu, with View in org chart and Manage account.
+              */}
+              {hasPersonActions && (
+                <RowActionsMenu label={t("profile.header.personActions")} trigger="secondary">
+                  {/* The chart opens with this person picked and centred (`?person=`). Shown whenever the menu is. */}
                   <RowAction
-                    icon={<Icon icon={CalendarRemove01Icon} size="sm" />}
-                    onClick={async () => {
-                      const res = await cancelInviteAction({ userId: user.id });
-                      if (res.status === ActionStatus.SUCCESS) {
-                        await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
-                      } else {
-                        showActionError(res);
-                      }
-                    }}
+                    icon={<Icon icon={HierarchySquare02Icon} size="sm" />}
+                    onClick={() => router.push(`/organization/chart?person=${encodeURIComponent(user.id)}`)}
                   >
-                    {t("profile.header.cancelScheduledInvitation")}
+                    {t("profile.header.viewInOrgChart")}
                   </RowAction>
-                )}
-                {canManageProfiles && mayPreboard && (
-                  <RowAction icon={<Icon icon={DoorIcon} size="sm" />} onClick={() => setStartType("PREBOARDING")}>
-                    {t("profile.header.startPreboarding")}
-                  </RowAction>
-                )}
-                {canManageProfiles && mayOnboard && (
-                  <RowAction icon={<Icon icon={Rocket01Icon} size="sm" />} onClick={() => setStartType("ONBOARDING")}>
-                    {t("profile.header.startOnboarding")}
-                  </RowAction>
-                )}
-                {canManageProfiles && mayOffboard && (
-                  <RowAction icon={<Icon icon={DoorLockIcon} size="sm" />} onClick={() => setStartType("OFFBOARDING")}>
-                    {t("profile.header.startOffboarding")}
-                  </RowAction>
-                )}
-                {mayUnlock && (
-                  <RowAction icon={<Icon icon={SquareUnlock02Icon} size="sm" />} onClick={() => setAccountAccess("UNLOCK")}>
-                    {t("profile.header.unlock")}
-                  </RowAction>
-                )}
-                {maySendReset && (
-                  <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setAccountAccess("RESET")}>
-                    {isLocked ? t("profile.header.sendResetToUnlock") : t("profile.header.sendReset")}
-                  </RowAction>
-                )}
-                {mayExportPersonalData && (
-                  <RowAction
-                    icon={<Icon icon={Download01Icon} size="sm" />}
-                    onClick={() => void exportPersonalData(user.id).catch((error: unknown) => showError(error))}
-                  >
-                    {t("profile.header.exportPersonalData")}
-                  </RowAction>
-                )}
-                {mayEndSessions && (
-                  <RowAction icon={<Icon icon={ShieldOffIcon} size="sm" />} onClick={() => setAccountAccess("RESET_MFA")}>
-                    {t("profile.header.resetMfa")}
-                  </RowAction>
-                )}
-                {mayUnlinkSso && !isArchived && (
-                  <RowAction icon={<Icon icon={Unlink01Icon} size="sm" />} onClick={() => setAccountAccess("UNLINK_SSO")}>
-                    {t("profile.header.unlinkSso")}
-                  </RowAction>
-                )}
-                {mayEndSessions && (
-                  <RowAction icon={<Icon icon={Logout01Icon} size="sm" />} onClick={() => setAccountAccess("END_SESSIONS")}>
-                    {t("profile.header.endSessions")}
-                  </RowAction>
-                )}
-                {mayBlock && (
-                  <RowAction icon={<Icon icon={SquareLock02Icon} size="sm" />} onClick={() => setAccountAccess("BLOCK")}>
-                    {t("profile.header.block")}
-                  </RowAction>
-                )}
-                {mayUnblock && (
-                  <RowAction icon={<Icon icon={SquareUnlock02Icon} size="sm" />} onClick={() => setAccountAccess("UNBLOCK")}>
-                    {t("profile.header.unblock")}
-                  </RowAction>
-                )}
-                {/* A rehire is one person, not a segment (WALK_QUESTIONS § 36 (a)): an archived person comes back
-                    from their own profile, through the same status change bulk edit makes. */}
-                {mayTerminate && isTerminated && (
-                  <RowAction icon={<Icon icon={Refresh01Icon} size="sm" />} onClick={() => setIsReactivateOpen(true)}>
-                    {t("profile.header.reactivate")}
-                  </RowAction>
-                )}
-                {mayTerminate && !isTerminated && (
-                  <RowAction
-                    icon={<Icon icon={UserRemove01Icon} size="sm" />}
-                    onClick={() => setIsTerminateOpen(true)}
-                    disabled={isTerminationPending}
-                  >
-                    {isTerminationPending
-                        ? t("profile.header.leaving", { date: formatDisplayDate(String(user.terminationDate)) })
-                        : t("profile.header.terminate")}
-                  </RowAction>
-                )}
-                {canManageProfiles && !isOwnProfile && !isDraft && (
-                  <RowAction icon={<Icon icon={Mail01Icon} size="sm" />} onClick={() => setIsEmailsOpen(true)}>
-                    {t("profile.header.emails")}
-                  </RowAction>
-                )}
-                {canManageProfiles && !isOwnProfile && (
-                  <RowActionDestructive
-                    icon={<Icon icon={Delete02Icon} size="sm" />}
-                    onClick={() => setIsDeleteOpen(true)}
-                  >
-                    {t("profile.header.deleteProfile")}
-                  </RowActionDestructive>
-                )}
-              </RowActionsMenu>
-            )}
+                  {/* Out of the header and into the menu (P6). */}
+                  {mayImpersonate && (
+                    <RowAction
+                      icon={<Icon icon={Login03Icon} size="sm" />}
+                      onClick={() => { if (!startImpersonation.isPending) startImpersonation.mutate({ targetUserId: user.id }); }}
+                    >
+                      {t("profile.header.loginAsName", { name: firstName })}
+                    </RowAction>
+                  )}
+                  {/* Sign-in, sessions, emails, the data export and blocking live in one dialog (MA, R13). */}
+                  {mayManageAccount && (
+                    <RowAction icon={<Icon icon={UserAccountIcon} size="sm" />} onClick={() => setIsManageAccountOpen(true)}>
+                      {t("profile.header.manageAccount")}
+                    </RowAction>
+                  )}
+                  {/* In the kebab like every other action on a profile — the own one is no exception. */}
+                  {mayChangeOwnPassword && (
+                    <RowAction icon={<Icon icon={Key01Icon} size="sm" />} onClick={() => setIsChangePasswordOpen(true)}>
+                      {t("profile.header.changePassword")}
+                    </RowAction>
+                  )}
+                  {mayPreboard && (
+                    <RowAction icon={<Icon icon={ArrowRight02Icon} size="sm" />} onClick={() => setStartType("PREBOARDING")}>
+                      {t("profile.header.startPreboarding")}
+                    </RowAction>
+                  )}
+                  {mayOnboard && menuStatus === "joining" && (
+                    <RowAction icon={<Icon icon={Rocket01Icon} size="sm" />} onClick={() => setStartType("ONBOARDING")}>
+                      {t("profile.header.startOnboarding")}
+                    </RowAction>
+                  )}
+
+                  {secondGroup && <RowActionSeparator />}
+                  {mayOnboard && menuStatus === "active" && (
+                    <RowAction icon={<Icon icon={Rocket01Icon} size="sm" />} onClick={() => setStartType("ONBOARDING")}>
+                      {t("profile.header.startOnboarding")}
+                    </RowAction>
+                  )}
+                  {mayOffboard && (
+                    <RowAction icon={<Icon icon={Logout03Icon} size="sm" />} onClick={() => setStartType("OFFBOARDING")}>
+                      {t("profile.header.startOffboarding")}
+                    </RowAction>
+                  )}
+                  {/* Ink text with a red icon (AQ-08 "cau"): it ends something, and it can be undone. */}
+                  {mayTerminate && (
+                    <RowAction
+                      icon={<Icon icon={UnavailableIcon} size="sm" className="text-danger-text" />}
+                      onClick={() => setIsTerminateOpen(true)}
+                    >
+                      {t("profile.header.terminate")}
+                    </RowAction>
+                  )}
+                  {maySetInactive && (
+                    <RowAction
+                      icon={<Icon icon={UserRemove01Icon} size="sm" className="text-danger-text" />}
+                      title={t("profile.header.setInactiveHint")}
+                      onClick={() => setStatusChange("inactive")}
+                    >
+                      {t("profile.header.setInactive")}
+                    </RowAction>
+                  )}
+                  {maySetActive && (
+                    <RowAction icon={<Icon icon={UserCheck01Icon} size="sm" />} onClick={() => setStatusChange("active")}>
+                      {t("profile.header.setActive")}
+                    </RowAction>
+                  )}
+                  {mayCancelInvitation && (
+                    <RowAction
+                      icon={<Icon icon={Cancel01Icon} size="sm" className="text-danger-text" />}
+                      onClick={() => setIsCancelInviteOpen(true)}
+                    >
+                      {t("profile.header.cancelInvitation")}
+                    </RowAction>
+                  )}
+                  {mayDelete && (
+                    <RowActionDestructive
+                      icon={<Icon icon={Delete02Icon} size="sm" />}
+                      onClick={() => setIsDeleteOpen(true)}
+                    >
+                      {t("profile.header.deleteProfile")}
+                    </RowActionDestructive>
+                  )}
+                </RowActionsMenu>
+              )}
+            </div>
           </div>
         </div>
 
-        <LifecycleNote user={user} />
+        <LifecycleNote user={user} startsShown={nameStatus?.kind === "starts"} />
 
         <div className="mt-2 -ml-2 empty:hidden">
           <ScheduledChangesPanel
@@ -551,20 +543,15 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         }}
       />
 
-      <AccountAccessModal
-        kind={accountAccess}
-        userId={user.id}
-        fullName={fullName}
-        accountLocked={isLocked}
-        onCloseAction={() => setAccountAccess(null)}
-        onChangedAction={() => refreshUser(user.id)}
-      />
-      <PersonEmailsModal
-        userId={user.id}
-        fullName={fullName}
-        open={isEmailsOpen}
-        onCloseAction={() => setIsEmailsOpen(false)}
-      />
+      {mayManageAccount && (
+        <ManageAccountDialog
+          open={isManageAccountOpen}
+          onCloseAction={() => setIsManageAccountOpen(false)}
+          user={user}
+          fullName={fullName}
+          onChangedAction={() => refreshUser(user.id)}
+        />
+      )}
 
       <ChangePasswordModal
         open={isChangePasswordOpen}
@@ -636,31 +623,71 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         }}
       />
 
+      {/* Set to inactive / Set to active (U8). Inactive is an archive: a confirm, as every archive gets. */}
       <ConfirmActionModal
-        isOpen={isReactivateOpen}
-        title={t("profile.reactivate.title", { name: fullName })}
-        // Termination blocks the account, so after one the sign-in stays blocked; an archived person whose account is
-        // open (a seed, an unblock since) is not told something untrue.
-        description={user.accountStatus === "BLOCKED"
-          ? t("profile.reactivate.descriptionBlocked")
-          : t("profile.reactivate.description")}
-        confirmLabel={t("profile.reactivate.confirm")}
+        isOpen={statusChange !== null}
+        title={statusChange === "active"
+          ? t("profile.setActive.title", { name: firstName })
+          : t("profile.setInactive.title", { name: firstName })}
+        description={statusChange === "active"
+          ? t(setActiveDescriptionKey(user), { name: firstName })
+          : t("profile.setInactive.description", { name: firstName })}
+        confirmLabel={statusChange === "active" ? t("profile.header.setActive") : t("profile.header.setInactive")}
         isLoading={isLifecycleBusy}
         errorMessage={lifecycleError}
         onCancelAction={() => {
-          setIsReactivateOpen(false);
+          setStatusChange(null);
+          setLifecycleError(null);
+        }}
+        onConfirmAction={async () => {
+          const to = statusChange;
+          if (!to) return;
+          setIsLifecycleBusy(true);
+          setLifecycleError(null);
+          try {
+            const res = to === "active"
+              ? await setActiveAction({ userId: user.id })
+              : await setInactiveAction({ userId: user.id });
+            if (res.status === ActionStatus.SUCCESS) {
+              setStatusChange(null);
+              showSuccess(to === "active"
+                ? t("profile.setActive.done", { name: firstName })
+                : t("profile.setInactive.done", { name: firstName }));
+              await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
+            } else {
+              setLifecycleError(res.errorMessage ?? null);
+            }
+          } finally {
+            setIsLifecycleBusy(false);
+          }
+        }}
+      />
+
+      <ConfirmActionModal
+        isOpen={isCancelInviteOpen}
+        title={t("profile.cancelInvitation.title", { name: firstName })}
+        description={isInvited
+          ? t("profile.cancelInvitation.descriptionSent", { name: firstName })
+          : t("profile.cancelInvitation.description", { name: firstName })}
+        confirmLabel={t("profile.header.cancelInvitation")}
+        destructive
+        isLoading={isLifecycleBusy}
+        errorMessage={lifecycleError}
+        onCancelAction={() => {
+          setIsCancelInviteOpen(false);
           setLifecycleError(null);
         }}
         onConfirmAction={async () => {
           setIsLifecycleBusy(true);
           setLifecycleError(null);
           try {
-            const res = await changeUserStatusAction({ userId: user.id, status: "ACTIVE" });
+            const res = await cancelInviteAction({ userId: user.id });
             if (res.status === ActionStatus.SUCCESS) {
-              setIsReactivateOpen(false);
+              setIsCancelInviteOpen(false);
+              showSuccess(t("profile.cancelInvitation.done"));
               await Promise.all([refreshUser(user.id), invalidateScheduledChanges(user.id)]);
             } else {
-              setLifecycleError(res.errorMessage ?? t("profile.reactivate.failed"));
+              setLifecycleError(res.errorMessage ?? null);
             }
           } finally {
             setIsLifecycleBusy(false);
@@ -674,11 +701,8 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
         fullName={fullName}
         isBusy={isLifecycleBusy}
         error={lifecycleError}
-        onTerminateInstead={isTerminated || isTerminationPending ? null : () => {
-          setIsDeleteOpen(false);
-          setLifecycleError(null);
-          setIsTerminateOpen(true);
-        }}
+        // Delete is offered for a draft and an inactive person only (U8): neither has an employment to end.
+        onTerminateInstead={null}
         onClose={() => {
           setIsDeleteOpen(false);
           setLifecycleError(null);
@@ -705,14 +729,15 @@ export function UserDataHeader({ userId, user: userProp }: UserDataHeaderProps) 
 
 /**
  * One line under the chips saying where the person stands before they are an employee: when they
- * start, and where their invitation is. Nothing for somebody already working and registered.
+ * start, and where their invitation is. Nothing for somebody already working and registered. The start date is left
+ * out while the pill beside the name says it (`startsShown`).
  */
-function LifecycleNote({ user }: { user: User }) {
+function LifecycleNote({ user, startsShown }: { user: User; startsShown: boolean }) {
   const t = useTranslations("organization");
   const formatDisplayDate = useDateFormatter();
   const parts: string[] = [];
 
-  if (isProspectiveStatus(user.status)) {
+  if (isProspectiveStatus(user.status) && !(startsShown && user.hireDate)) {
     parts.push(user.hireDate
       ? t("profile.lifecycleNote.starts", { date: formatDisplayDate(user.hireDate, { style: "medium" }) })
       : t("profile.lifecycleNote.noStartDate"));
@@ -741,22 +766,99 @@ function LifecycleNote({ user }: { user: User }) {
   );
 }
 
-/** A label over a value, as the header's facts read. */
-function HeaderFact({ label, children }: { label: string; children: React.ReactNode }) {
+/** A fact (QR3): a round 36 mark, 12 apart, then the label over the value. */
+function HeaderFact({ label, mark, children }: { label: string; mark: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="min-w-0">
-      <p className="text-label font-normal text-tertiary">{label}</p>
-      <div className="mt-1 truncate text-body font-medium text-primary">{children}</div>
+    <div className="flex min-w-0 items-center gap-3">
+      {mark}
+      <div className="min-w-0">
+        <p className="text-hint text-tertiary">{label}</p>
+        <div className="mt-0.5 truncate text-body font-medium text-primary">{children}</div>
+      </div>
     </div>
   );
 }
 
+/** A fact's mark when it is not a face: a Mist circle 36 with a 16 icon. */
+function FactIcon({ icon }: { icon: React.ComponentProps<typeof Icon>["icon"] }) {
+  return (
+    <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-pill bg-mist text-secondary">
+      <Icon icon={icon} size="sm" />
+    </span>
+  );
+}
+
+/**
+ * The one status beside the name (QR3s): Starts and Last day are status pills; Back is a pill in the policy's
+ * leave colour; the next leave is quiet text with the policy's dot and opens the Time off tab. A policy the reader
+ * may not see is gray, "Away".
+ */
+function NameStatusMark({ status, userId }: { status: NameStatus; userId: string }) {
+  const t = useTranslations("organization");
+  const dates = useShortDates();
+  switch (status.kind) {
+    case "starts":
+      return <StatusBadge status="scheduled" label={t("profile.header.starts", { date: dates.date(status.date, { weekday: true }) })} />;
+    case "lastDay":
+      return (
+        <StatusBadge
+          status="pending"
+          icon={Logout03Icon}
+          label={t("profile.header.lastDay", { date: dates.date(status.date, { weekday: true }) })}
+        />
+      );
+    case "back": {
+      const leave = leaveClasses(status.color ?? "gray");
+      return (
+        <span
+          title={status.policy ?? t("profile.header.away")}
+          className={cn("inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill pr-2.5 pl-2 text-hint font-semibold", leave.approved)}
+        >
+          <span aria-hidden className={cn("size-2 rounded-pill", leave.edge)} />
+          {t("profile.header.back", { date: dates.date(status.date, { weekday: true }) })}
+        </span>
+      );
+    }
+    case "nextLeave": {
+      const leave = leaveClasses(status.color ?? "gray");
+      return (
+        <Link
+          href={`/organization/people/${encodeURIComponent(userId)}/time-off`}
+          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-label text-secondary no-underline hover:underline"
+        >
+          <span aria-hidden className={cn("size-2 rounded-pill", leave.edge)} />
+          {t("profile.header.nextLeave", {
+            policy: status.policy ?? t("profile.header.away"),
+            dates: dates.range(status.start, status.end),
+          })}
+        </Link>
+      );
+    }
+  }
+}
+
+/** The account, always on the right (QR3s): the shared status chip, Locked and Login paused included. */
+function AccountPillMark({ pill }: { pill: AccountPill }) {
+  const t = useTranslations("organization");
+  const tCommon = useTranslations("common");
+  const label = {
+    active: tCommon("status.active"),
+    inactive: tCommon("status.inactive"),
+    invited: tCommon("accountStatus.invited"),
+    draft: tCommon("accountStatus.draft"),
+    blocked: tCommon("accountStatus.blocked"),
+    locked: t("profile.header.locked"),
+    signInPaused: t("profile.header.signInPaused"),
+  }[pill.word];
+  return <StatusBadge status={pill.tone} label={label} icon={pill.word === "invited" ? Mail01Icon : undefined} />;
+}
+
 function ProfileAvatar({ url, fullName }: { url: string | null; fullName: string }) {
   return (
-    <Avatar key={url ?? "avatar-fallback"} className="size-14">
+    <Avatar key={url ?? "avatar-fallback"} className="size-24">
       {url ? <AvatarImage src={url} alt={fullName}/> : null}
       {/* The name picks the tag colour (SPEC § 4.7) — without it every face was gray. */}
-      <AvatarFallback name={fullName}>{initialsOf(fullName)}</AvatarFallback>
+      <AvatarFallback name={fullName} className="text-greeting">{initialsOf(fullName)}</AvatarFallback>
     </Avatar>
   );
 }

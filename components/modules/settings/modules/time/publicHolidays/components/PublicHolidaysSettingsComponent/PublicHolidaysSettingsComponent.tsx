@@ -276,7 +276,7 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
 
   return (
     <>
-      <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+      <div className="flex h-[calc(100cqh-6rem)] flex-col overflow-hidden">
         <div className="shrink-0 px-8 pt-2">
           <div className="space-y-2">
             <SettingsPageHeader title={t("publicHolidays.list.title")} backHref="/settings" />
@@ -340,12 +340,10 @@ export const PublicHolidaysSettingsComponent: FC<Props> = ({ calendars, isLoadin
                       <TableCell colSpan={6}>
                         <ListEmptyState
                           query={query}
-                          onClearSearch={() => setQuery("")}
                           archivedView={showArchived}
                           scene="calendar"
                           title={t("publicHolidays.list.emptyTitle")}
                           description={t("publicHolidays.list.emptyDescription")}
-                          noResultsHint={t("publicHolidays.list.noResultsHint")}
                           archivedDescription={t("publicHolidays.list.archivedDescription")}
                           action={addCalendarMenu}
                         />

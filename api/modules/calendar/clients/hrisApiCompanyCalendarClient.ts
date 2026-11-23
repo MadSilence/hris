@@ -3,10 +3,10 @@ import type {
   CompanyCalendarGroup,
   CompanyCalendarGrouping,
   CompanyCalendarAbsence,
-  CompanyCalendarCapacity,
   CompanyCalendarMark,
   CompanyCalendarPeoplePage,
 } from "@/models/calendar";
+import type { CompanyCalendarAbsenceSummary } from "@/models/calendar";
 import type { FilterDTO } from "@/models/user/fields";
 
 export type CompanyCalendarPeopleQuery = {
@@ -34,13 +34,6 @@ export type CompanyCalendarExportRequest = {
   format: "csv" | "xlsx";
 };
 
-export type CompanyCalendarCapacityQuery = {
-  from: string;
-  to: string;
-  groupBy: CompanyCalendarGrouping | null;
-  groupIds: string[];
-};
-
 export type CompanyCalendarMarksQuery = {
   from: string;
   to: string;
@@ -58,6 +51,17 @@ export class HrisApiCompanyCalendarClient {
       filters: params.filters ?? null,
       groupBy: params.groupBy ?? null,
       groupId: params.groupId ?? null,
+    });
+  }
+
+  /**
+   * The count beside a saved view (B5): the people the board would show for its `q` and `filters`, within the
+   * reader's own calendar scope.
+   */
+  public async count(params: { q?: string | null; filters?: FilterDTO[] | null }): Promise<{ total: number }> {
+    return hrisApiClient.post<{ total: number }>(`${this.BASE_PATH}/people/count`, {
+      q: params.q ?? null,
+      filters: params.filters ?? null,
     });
   }
 
@@ -81,16 +85,6 @@ export class HrisApiCompanyCalendarClient {
     return hrisApiClient.postForBinary(`${this.BASE_PATH}/export?format=${body.format}`, body);
   }
 
-  /** The days a group (or, ungrouped, the company) is at its limit of people away. */
-  public async capacity(params: CompanyCalendarCapacityQuery): Promise<CompanyCalendarCapacity[]> {
-    return hrisApiClient.post<CompanyCalendarCapacity[]>(`${this.BASE_PATH}/capacity`, {
-      from: params.from,
-      to: params.to,
-      groupBy: params.groupBy,
-      groupIds: params.groupIds,
-    });
-  }
-
   /** Leave on the same rows and window; what each bar carries is decided by the server. */
   public async absences(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarAbsence[]> {
     return hrisApiClient.post<CompanyCalendarAbsence[]>(`${this.BASE_PATH}/absences`, {
@@ -98,6 +92,13 @@ export class HrisApiCompanyCalendarClient {
       to: params.to,
       userIds: params.userIds,
     });
+  }
+
+  /** One person's absence today and their next one, for the profile header (R12). */
+  public async currentAndNext(userId: string): Promise<CompanyCalendarAbsenceSummary> {
+    return hrisApiClient.get<CompanyCalendarAbsenceSummary>(
+      `${this.BASE_PATH}/people/${encodeURIComponent(userId)}/absences/current-and-next`,
+    );
   }
 
 }

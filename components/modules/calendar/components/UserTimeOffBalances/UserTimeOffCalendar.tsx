@@ -1,149 +1,230 @@
 "use client";
 
-import { Skeleton } from "@/components/desact/skeleton";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { Illustration } from "@/components/illustrations";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { useCanAccess } from "@/components/auth/useAccess";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
+import { useUser } from "@/components/hooks/useUser/useUser";
+import { dateToISO } from "@/lib/date";
 
 import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
-import { Button } from "@/components/desact/button";
-import { Card } from "@/components/desact/card";
-import { UserCalendarContainer } from "@/components/modules/calendar/components/UserCalendarContainer/UserCalendarContainer";
-import { PermissionGate } from "@/components/auth/PermissionGate";
+import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
+import { useTimeOffRequestsAwaitingMe } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsAwaitingMe";
+import { useUserPublicHolidays } from "@/components/modules/calendar/hooks/useUserPublicHolidays";
+import { expandSpanToDays, nonWorkingDayTest } from "@/components/modules/calendar/lib/dateRange";
+import { DeclineLeaveDialog, LeaveRequestDialog } from "@/components/modules/timeOff";
 import { RequestTimeOffModal } from "./RequestTimeOffModal";
-import { BalancesPreviewModal } from "./BalancesPreviewModal";
-import { RequestsPreviewModal } from "./RequestsPreviewModal";
 import { AssignTimeOffPolicyModal } from "./AssignTimeOffPolicyModal";
 import { TimeOffSidePanel } from "./TimeOffSidePanel";
+import { TimeOffMonth } from "./TimeOffMonth";
+import { BalanceHistoryDialog } from "./BalanceHistoryDialog";
+import { AllRequestsDialog } from "./AllRequestsDialog";
 
 type Props = { userId: string };
 
-type ModalState = { open: boolean; start?: string; end?: string };
+type RequestState = { open: boolean; start?: string; end?: string };
+type Opened = { id: string; fromAll?: boolean } | null;
 
 /**
- * The person's time-off calendar plus its request flow. Owns the balances/policies data and the
- * request modal so the SAME modal can be opened two ways: the side panel's button (no preset) or a
- * click/drag on the calendar (which presets the request's start/end to the picked day-range).
+ * **The person profile's Time off tab** (`hris/design/screens/profile-time-off`, Q01–Q32, built 2026-11-20): a grid of
+ * 340 and the rest — the time off card on the left, the person's month on the right with no frame.
+ *
+ * The card: **Request time off** (never disabled; with no policy the card is the empty state instead, Q08), the
+ * balances — each opening its history (Q20) — what is coming up, **All requests ›**; under it **+ Assign policy** for
+ * whoever may assign, never on one's own view (Q11). The month: leave as pills with their card, days picked by click
+ * or drag straight into the request window (Q12). A request opens in full (Q30) from the card's ↗, Upcoming, and All
+ * requests. Loading draws the month at once and the balances as shapes (Q09); a month that cannot load says so in its
+ * place (Q10).
  */
 export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
-  const t = useTranslations("calendar");
-  const { data: balances, isLoading: balancesLoading } =
-    useEmployeeTimeOffBalancesByUser({ userId });
+  const t = useTranslations("leave");
+  const balancesQuery = useEmployeeTimeOffBalancesByUser({ userId });
   const { data: policies, isLoading: policiesLoading } = useTimeOffPolicies();
+  const requestsQuery = useTimeOffRequestsByUser({ userId, year: null, status: null });
+  const { data: awaiting } = useTimeOffRequestsAwaitingMe();
+  const holidaysQuery = useUserPublicHolidays({ userId });
+  const { data: person } = useUser(userId);
+  const { userId: me } = useCurrentUser();
+  const { company } = useCompanyData();
+  const canAdjust = useCanAccess("PEOPLE.TIME_OFF", "MANAGE");
+  const own = me === userId;
+  const firstName = own ? null : person?.firstName ?? null;
+  const todayISO = useMemo(() => dateToISO(new Date()), []);
 
-  const [modal, setModal] = useState<ModalState>({ open: false });
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [requestsOpen, setRequestsOpen] = useState(false);
-  const [assignOpen, setAssignOpen] = useState(false);
+  const balances = balancesQuery.data;
+  const requests = useMemo(() => requestsQuery.data ?? [], [requestsQuery.data]);
+  const policyMap = useMemo(() => new Map((policies ?? []).map((p) => [p.id, p])), [policies]);
+  const isNonWorking = useMemo(() => nonWorkingDayTest(company?.workingDays), [company?.workingDays]);
+  const holidays = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const h of holidaysQuery.data ?? []) {
+      for (const iso of expandSpanToDays(h.holidayDate, h.endDate)) map.set(iso, [...(map.get(iso) ?? []), h.name]);
+    }
+    return map;
+  }, [holidaysQuery.data]);
+  const awaitingIds = useMemo(() => new Set((awaiting ?? []).map((r) => r.id)), [awaiting]);
 
-  const policyMap = useMemo(
-    () => new Map((policies ?? []).map((p) => [p.id, p])),
-    [policies],
-  );
-
+  const loadingCard = balancesQuery.isLoading || policiesLoading;
   const hasBalances = Boolean(balances && balances.length > 0);
 
-  const open = (start?: string, end?: string) => setModal({ open: true, start, end });
-  const close = () => setModal({ open: false });
+  const [request, setRequest] = useState<RequestState>({ open: false });
+  const [historyFor, setHistoryFor] = useState<string | null>(null);
+  const [allOpen, setAllOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [opened, setOpened] = useState<Opened>(null);
+  const [declining, setDeclining] = useState<string | null>(null);
+  const declined = declining ? requests.find((r) => r.id === declining) : undefined;
 
-  // `?request=1` opens the request modal on arrival — the entry point a link or a redirect uses,
-  // since the modal needs this person's balances and therefore lives on this tab.
+  // `?request=1` opens the request window on arrival — the entry point a link or a redirect uses.
   const searchParams = useSearchParams();
-  const requestedFromHeader = searchParams.get("request") === "1";
-
+  const requestedFromLink = searchParams.get("request") === "1";
   useEffect(() => {
-    if (requestedFromHeader && hasBalances) setModal({ open: true });
-  }, [requestedFromHeader, hasBalances]);
+    if (requestedFromLink && hasBalances) setRequest({ open: true });
+  }, [requestedFromLink, hasBalances]);
 
-  // The tab rendered nothing at all while these were in flight, so it flashed "no policies" at
-  // somebody who has several — the same shape the shared Skeleton solves in thirteen other modules.
-  if (balancesLoading || policiesLoading) {
-    return (
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <div className="space-y-3 lg:basis-2/3">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-72 w-full" />
-        </div>
-        <Skeleton className="h-40 lg:basis-1/3" />
-      </div>
-    );
-  }
+  const historyBalances = historyFor ? (balances ?? []).filter((b) => b.policyId === historyFor) : [];
+  // What Adjust changes: the period running today, failing that the latest.
+  const historyCurrent =
+    historyBalances.find((b) => b.periodStart <= todayISO && (b.periodEnd === null || b.periodEnd >= todayISO))
+    ?? [...historyBalances].sort((a, b) => b.periodStart.localeCompare(a.periodStart))[0];
 
-  // Laid out like the Attendance tab: the month on the left, a stepper above it and seven columns
-  // in it, and the tab's actions in a side panel on the right.
+  const monthError = requestsQuery.error ?? holidaysQuery.error;
+
   return (
     <>
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <div className="min-w-0 lg:flex-1">
-          <UserCalendarContainer
-            userId={userId}
-            variant="compact"
-            toolbar="split"
-            onSelectRange={hasBalances ? (start, end) => open(start, end) : undefined}
-          />
-        </div>
-
-        <Card className="h-fit gap-6 border-divider p-5 lg:w-[340px] lg:shrink-0">
-          <div className="flex items-center gap-2">
-            <Button type="button" onClick={() => open()} disabled={!hasBalances}>
-              <Icon icon={Add01Icon} size="sm" />
-              {t("request.title")}
-            </Button>
-            {/* Without an assignment there is no balance and no way to request — so the people who
-                manage policies get the entry point here, on the person, not only in settings. */}
-            <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
-              <Button type="button" variant="secondary" onClick={() => setAssignOpen(true)}>
-                {t("assign.submit")}
-              </Button>
-            </PermissionGate>
-
-          </div>
-
-          {hasBalances && balances ? (
-            <TimeOffSidePanel userId={userId} balances={balances} policyMap={policyMap} />
-          ) : (
-            <p className="text-body text-tertiary">{t("timeOffTab.noPolicy")}</p>
-          )}
-
-          {/* The history and the ledger, as links under the panel: a kebab beside the two buttons did not fit
-              the 340 px panel and pushed the page sideways (walk of 2026-11-04). Requests carry Cancel too. */}
-          <div className="flex items-center gap-4 border-t border-divider pt-3">
-            <Button type="button" variant="link" size="sm" onClick={() => setRequestsOpen(true)}>
-              {t("timeOffTab.allRequests")}
-            </Button>
-            {hasBalances && (
-              <Button type="button" variant="link" size="sm" onClick={() => setPreviewOpen(true)}>
-                {t("timeOffTab.balanceHistory")}
-              </Button>
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[340px_minmax(0,1fr)]">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3.5 rounded-card border border-divider bg-card p-5">
+            {!loadingCard && !balancesQuery.error && !hasBalances ? (
+              <NoPolicy firstName={firstName} own={own} onAssign={() => setAssignOpen(true)} />
+            ) : (
+              <>
+                <Button type="button" className="w-full" onClick={() => setRequest({ open: true })}>
+                  <Icon icon={Add01Icon} size="sm" />
+                  {t("tab.request")}
+                </Button>
+                {balancesQuery.error ? (
+                  <ErrorState compact error={balancesQuery.error} onRetry={() => void balancesQuery.refetch()} />
+                ) : (
+                  <TimeOffSidePanel
+                    balances={balances}
+                    balancesLoading={loadingCard}
+                    requests={requestsQuery.data}
+                    policyMap={policyMap}
+                    todayISO={todayISO}
+                    onOpenBalance={setHistoryFor}
+                    onOpenRequest={(id) => setOpened({ id })}
+                    onOpenAll={() => setAllOpen(true)}
+                  />
+                )}
+              </>
             )}
           </div>
-        </Card>
+
+          {/* Without an assignment there is no balance and no way to request — the people who manage policies get
+              the entry point on the person. Not on one's own view (Q11); with no policy the empty state carries it. */}
+          {!own && hasBalances ? (
+            <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
+              <button
+                type="button"
+                onClick={() => setAssignOpen(true)}
+                className="inline-flex w-fit items-center gap-2 rounded-control px-3 py-1.5 text-body font-medium text-accent-text hover:bg-subtle"
+              >
+                <Icon icon={Add01Icon} size="sm" />
+                {t("tab.assignPolicy")}
+              </button>
+            </PermissionGate>
+          ) : null}
+        </div>
+
+        {monthError ? (
+          <ErrorState
+            error={monthError}
+            title={t("tab.errorTitle")}
+            message={firstName ? t("tab.errorText", { name: firstName }) : t("tab.errorTextOwn")}
+            onRetry={() => { void requestsQuery.refetch(); void holidaysQuery.refetch(); }}
+          />
+        ) : (
+          <TimeOffMonth
+            requests={requests}
+            policyMap={policyMap}
+            holidays={holidays}
+            isNonWorking={isNonWorking}
+            awaitingIds={awaitingIds}
+            onPick={hasBalances ? (start, end) => setRequest({ open: true, start, end }) : undefined}
+            onOpenRequest={(id, options) => (options?.decline ? setDeclining(id) : setOpened({ id }))}
+          />
+        )}
       </div>
 
-      {modal.open && balances && (
+      {request.open && balances && (
         <RequestTimeOffModal
-          isOpen={modal.open}
+          isOpen={request.open}
           userId={userId}
           balances={balances}
           policyMap={policyMap}
-          initialStartDate={modal.start}
-          initialEndDate={modal.end}
-          onCloseAction={close}
+          initialStartDate={request.start}
+          initialEndDate={request.end}
+          onCloseAction={() => setRequest({ open: false })}
         />
       )}
 
-      {previewOpen && balances && (
-        <BalancesPreviewModal
-          isOpen={previewOpen}
+      {historyFor && (
+        <BalanceHistoryDialog
           userId={userId}
-          balances={balances}
-          policyMap={policyMap}
-          onCloseAction={() => setPreviewOpen(false)}
+          policy={policyMap.get(historyFor)}
+          balances={historyBalances}
+          current={historyCurrent}
+          requests={requests}
+          canAdjust={canAdjust}
+          firstName={firstName}
+          onClose={() => setHistoryFor(null)}
         />
       )}
+
+      {allOpen && (
+        <AllRequestsDialog
+          userId={userId}
+          requests={requests}
+          policyMap={policyMap}
+          firstName={firstName}
+          open={!opened?.fromAll}
+          onOpenRequest={(id) => setOpened({ id, fromAll: true })}
+          onClose={() => setAllOpen(false)}
+        />
+      )}
+
+      <LeaveRequestDialog
+        requestId={opened?.id ?? null}
+        onBack={opened?.fromAll ? () => setOpened(null) : undefined}
+        onClose={() => {
+          if (opened?.fromAll) setAllOpen(false);
+          setOpened(null);
+        }}
+      />
+
+      <DeclineLeaveDialog
+        target={declined
+          ? {
+              requestId: declined.id,
+              startDate: declined.startDate,
+              endDate: declined.endDate,
+              policyName: policyMap.get(declined.policyId)?.name ?? null,
+              policyColor: policyMap.get(declined.policyId)?.color ?? null,
+              firstName: person?.firstName ?? null,
+            }
+          : null}
+        onClose={() => setDeclining(null)}
+      />
 
       {assignOpen && (
         <AssignTimeOffPolicyModal
@@ -154,15 +235,29 @@ export const UserTimeOffCalendar: FC<Props> = ({ userId }) => {
           onCloseAction={() => setAssignOpen(false)}
         />
       )}
-
-      {requestsOpen && (
-        <RequestsPreviewModal
-          isOpen={requestsOpen}
-          userId={userId}
-          onCloseAction={() => setRequestsOpen(false)}
-        />
-      )}
     </>
+  );
+};
+
+/** The card with no policy to show (Q08): the picture, what is missing, and Assign for whoever may. */
+const NoPolicy: FC<{ firstName: string | null; own: boolean; onAssign: () => void }> = ({ firstName, own, onAssign }) => {
+  const t = useTranslations("leave");
+  return (
+    <div className="flex flex-col items-center gap-1.5 py-6 text-center">
+      <Illustration scene="time-off-s" size="s" />
+      <p className="mt-2 text-card-title text-primary">{t("tab.noPolicyTitle")}</p>
+      <p className="text-body text-secondary">
+        {own || !firstName ? t("tab.noPolicyTextOwn") : t("tab.noPolicyText", { name: firstName })}
+      </p>
+      {!own ? (
+        <PermissionGate resource="PEOPLE.TIME_OFF_POLICIES" action="EDIT">
+          <Button type="button" className="mt-4" onClick={onAssign}>
+            <Icon icon={Add01Icon} size="sm" />
+            {t("tab.assignPolicy")}
+          </Button>
+        </PermissionGate>
+      ) : null}
+    </div>
   );
 };
 

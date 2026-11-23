@@ -133,8 +133,9 @@ const shiftUntil = (color: string, target: string, backgrounds: string[], min = 
 
 /**
  * The inputs tokens.css reads for an accent (`--accent-base` and the contrast-dependent values beside it).
- * `adjusted` is true when the links had to be darkened to stay readable — Appearance says "Text and links a little
- * darker to stay readable".
+ * `adjusted` is true for a light accent — one that carries Graphite, not white — whose links had to be darkened to stay
+ * readable: Appearance says "Text and links a little darker to stay readable" (L3-Adjusted). A dark accent darkened a
+ * touch for the tinted backgrounds (Basil, a deep green) is not worth a line (the designers' AP3).
  */
 export type AccentInputs = {
   properties: Record<string, string>;
@@ -163,7 +164,7 @@ export const deriveAccentInputs = (hex: string): AccentInputs => {
       "--accent-text-dark": shiftUntil(accent, WHITE, [DARK_SURFACE, "#1E1E22", darkSubtle, darkMuted]),
       "--sidebar-dark-bg": mix(DARK_SURFACE, accent, 0.16),
     },
-    adjusted: textLight !== accent,
+    adjusted: onLight !== WHITE && textLight !== accent,
   };
 };
 

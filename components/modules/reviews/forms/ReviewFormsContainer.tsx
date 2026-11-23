@@ -104,7 +104,6 @@ export function ReviewFormsContainer() {
       ) : rows.length === 0 ? (
         <ListEmptyState
           query={query}
-          onClearSearch={() => setQuery("")}
           archivedView={showArchived}
           scene="forms"
           title={t("forms.empty.title")}

@@ -93,3 +93,34 @@ None blocks this.
   ExpiringDocumentsWidget.tsx`). Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part").
 - **Differs from the design:** the Home widget is offered to anyone with documents VIEW, in all three sizes — for the
   person it lists their own (the read is scoped), and since 2026-11-19 they are offered M only (a documents VIEW that reaches only their own record); whoever sees others' documents gets S · M · L.
+
+- **The designers' package of 2026-11-19, built 2026-11-20**, not yet seen in a browser:
+  - ExpiryCell 14/20 500 with icons 14 — the hourglass amber, the crossed circle red; valid grey 400; none "—" (X1).
+  - "Expiring" is always in the tab's switch, with its hourglass and "0" (X2, AQ-18 asks the designers to confirm).
+  - Expiry date (X04, X3): the title "Expiry date", "Valid until (optional)", "Reza and whoever manages their
+    documents get a reminder 30 days before." with the category's days (X11). Neither button is greyed: Remove date
+    shows only while there is a date, Save with the field cleared removes it. The toast has no full stop (X6).
+  - The preview's expiry strip (X7) and the upload's required-date error under Valid until, fields in X05's order (X8).
+  - The category dialog (X10), as far as X12 allows: 560, the edited category's name under the title; "Needs an
+    expiry date" with its hint and no box; "Remind before it expires" — a number 96, "days before", and a "Don't
+    remind" checkbox that dims it; the hint; "Who can see new files" as three stacked options with icons.
+- **Not built this round:** X4 and X5, the typeable field and the new date picker (AQ-02); X12, dropping Description and
+  Active (AQ-19) — both stay in the dialog; X9, the categories page's own layout (it keeps the settings page frame).
+
+## Built from documents-categories (AQ-19 — 2026-11-23)
+*`hris/design/handoffs/2026-11-20-answers-from-design/specs/documents-categories`, plan `DESIGN_ANSWERS_2026_11_20_PLAN.md`
+item 6. Code: `components/modules/settings/modules/documentCategories` (with a test). Not walked yet.*
+- **X07's rows** have **⋯ with Edit and Delete** only (AQ19a); a system category keeps its lock. The second line is the
+  category's rules, as drawn ("Expiry date optional · remind 30 days before · visible to the person"). **No description
+  and no Active switch** — gone from the form, the list and the search; a category deleted with "keep" leaves the list
+  and every picker (the upload form, Request many, the lifecycle task's category), and stays on its documents as a tag.
+- **Delete** reads `GET /documents/categories/{id}/delete-impact` first: "Delete “{name}”?" with "{n} documents have
+  this category" and the two options (AQ19b, c) — **Keep them as they are** (default, "Delete category", red) or
+  **Move them to another category** with a select ("Delete and move", red; without a category picked it says so under
+  the select). Nobody uses it: the plain confirm (AQ19d), "No documents have this category". `POST …/delete
+  {strategy, targetCategoryId}`.
+- **Templates follow the category (C3, 2026-11-23):** with "keep" (and for an unused category) it is cleared from the
+  document templates and the lifecycle template tasks that name it — they file, or ask for, a document with no
+  category; with "move" both move to the target. Running processes keep their copy; the journal line carries the
+  counts. Not walked.
+- **Differs:** the select is the product's searchable select, not a native one; the dialog is the md width (520).

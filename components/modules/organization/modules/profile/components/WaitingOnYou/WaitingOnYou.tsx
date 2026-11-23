@@ -3,7 +3,7 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { CalendarLock01Icon, TaskDone01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowUp01Icon, CalendarLock01Icon, TaskDone01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
@@ -86,7 +86,8 @@ export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId
             amount: formatDayAmount(r.requestedAmount),
             count: r.requestedAmount,
           }),
-          approvedText: t("profile.waiting.approved", { name: firstName, range: shortDates.range(r.startDate, r.endDate) }),
+          // Not "{name}'s off": an approval may be one step of a chain, and the request still waits on the next.
+          approvedText: t("profile.waiting.approved"),
         };
       });
     const inputs: Strip[] = (myReviews?.toWrite ?? [])
@@ -195,9 +196,10 @@ export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId
           type="button"
           onClick={() => setExpanded((e) => !e)}
           aria-expanded={expanded}
-          className="self-start text-label text-accent-text hover:underline"
+          className="inline-flex items-center gap-1 self-start text-label text-accent-text hover:underline"
         >
           {expanded ? t("profile.waiting.showLess") : t("profile.waiting.showMore", { count: open.length - VISIBLE })}
+          <Icon icon={expanded ? ArrowUp01Icon : ArrowDown01Icon} size="sm" />
         </button>
       )}
     </section>

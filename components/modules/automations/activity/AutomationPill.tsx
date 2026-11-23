@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { ArrowDown01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 
 import { Icon } from "@/components/desact/icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { FilterChip } from "@/components/ui/FilterChip";
-import { AutomationIcon } from "@/components/modules/automations/shared";
+import { cn } from "@/lib/cn";
 import type { AutomationSummary } from "@/models/automations";
 
 /**
@@ -35,22 +35,29 @@ export const AutomationPill: React.FC<{
         {shown.length === 0 ? (
           <li className="px-2.5 py-3 text-body text-tertiary">{t("activity.noAutomationMatches")}</li>
         ) : (
-          shown.map((automation) => (
-            <li key={automation.id} role="option" aria-selected={automation.id === value}>
-              <button
-                type="button"
-                className="flex w-full items-center gap-2.5 rounded-control px-2.5 py-1.5 text-left text-body text-primary hover:bg-subtle"
-                onClick={() => {
-                  onChange(automation.id);
-                  setOpen(false);
-                  setQ("");
-                }}
-              >
-                <AutomationIcon icon={automation.icon} trigger={automation.trigger} size={16} className="text-tertiary" />
-                <span className="truncate">{automation.name}</span>
-              </button>
-            </li>
-          ))
+          shown.map((automation) => {
+            // A single choice (RC12, MENU): the picked one in the accent with a tick on the right, no icons.
+            const on = automation.id === value;
+            return (
+              <li key={automation.id} role="option" aria-selected={on}>
+                <button
+                  type="button"
+                  className={cn(
+                    "flex h-8 w-full items-center justify-between gap-2.5 rounded-control px-2.5 text-left text-body hover:bg-accent-subtle",
+                    on ? "font-medium text-accent-text" : "text-primary",
+                  )}
+                  onClick={() => {
+                    onChange(automation.id);
+                    setOpen(false);
+                    setQ("");
+                  }}
+                >
+                  <span className="truncate">{automation.name}</span>
+                  {on ? <Icon icon={Tick02Icon} size="sm" className="shrink-0 text-accent-text" /> : null}
+                </button>
+              </li>
+            );
+          })
         )}
       </ul>
     </PopoverContent>

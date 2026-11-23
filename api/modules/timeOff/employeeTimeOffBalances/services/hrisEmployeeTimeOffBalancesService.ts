@@ -1,6 +1,5 @@
 import { hrisApiEmployeeTimeOffBalancesClient } from "@/api/modules/timeOff/employeeTimeOffBalances/clients";
 import type {
-  BalanceAsOfDTO,
   CreateEmployeeTimeOffBalanceRequest,
   AdjustEmployeeTimeOffBalanceRequest,
   EmployeeTimeOffBalanceTransactionDTO,
@@ -30,10 +29,6 @@ export class HrisEmployeeTimeOffBalancesService {
     body: AdjustEmployeeTimeOffBalanceRequest
   ): Promise<UpdateResponse> {
     return hrisApiEmployeeTimeOffBalancesClient.adjust(id, body);
-  }
-
-  public async balanceAsOf(id: string, date: string): Promise<BalanceAsOfDTO> {
-    return hrisApiEmployeeTimeOffBalancesClient.balanceAsOf(id, date);
   }
 
   public async listTransactions(

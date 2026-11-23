@@ -86,7 +86,8 @@
     "remove": "Remove {name}",
     "note": "Runs already going finish as they are. New runs come from {firstName}.",
     "confirm": "Change owner",
-    "busy": "Changing owner…"
+    "busy": "Changing owner…",
+    "required": "Choose the new owner"
   },
   "makeMeOwner": {
     "title": "Become the owner of {name}?",
@@ -108,14 +109,12 @@
   },
   "empty": {
     "title": "No automations yet",
-    "description": "Tell noddo what should happen.\nWe'll draft the steps.",
+    "description": "Tell noddo what should happen.\nWe’ll draft the steps.",
     "pickTemplate": "Pick a template",
     "fromScratch": "Start from scratch"
   },
   "noResults": {
-    "title": "No automations match these filters",
-    "hint": "Try another word or clear the filters.",
-    "clear": "Clear filters"
+    "title": "No automations match"
   },
   "emptyArchive": {
     "title": "Nothing archived",

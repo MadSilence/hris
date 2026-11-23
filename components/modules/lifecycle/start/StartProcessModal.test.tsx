@@ -73,7 +73,10 @@ describe("StartProcessModal", () => {
     await openReview();
 
     expect(screen.getByText(/Old Colleague: Has left the company/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start" })).toBeDisabled();
+    // Start stays pressable (NEVER-DISABLED): pressed, it says what is left and starts nothing.
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    expect(screen.getByText("Choose who does each task marked above, or remove it")).toBeInTheDocument();
+    expect(startProcessAction).not.toHaveBeenCalled();
   });
 
   it("starts with the correction made in the summary", async () => {

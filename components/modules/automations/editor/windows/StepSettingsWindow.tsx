@@ -84,7 +84,7 @@ export const StepSettingsWindow: React.FC<{
     <section
       aria-label={eyebrow}
       data-test="step-settings"
-      className="flex shrink-0 flex-col rounded-card border-[1.5px] border-accent-ring bg-card shadow-dialog"
+      className="flex min-h-0 flex-col rounded-card border-[1.5px] border-accent-ring bg-card shadow-dialog"
     >
       <header className="flex items-start gap-1 border-b border-divider pt-4 pr-3 pb-3 pl-5">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -100,7 +100,7 @@ export const StepSettingsWindow: React.FC<{
           <Icon icon={Cancel01Icon} size="sm" />
         </Button>
       </header>
-      <div className="flex flex-col gap-4 px-5 pt-4 pb-5">{children}</div>
+      <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pt-4 pb-5">{children}</div>
     </section>
   );
 };

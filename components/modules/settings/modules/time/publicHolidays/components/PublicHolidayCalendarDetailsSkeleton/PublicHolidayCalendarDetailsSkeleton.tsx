@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/desact/skeleton";
 
 export const PublicHolidayCalendarDetailsSkeleton: React.FC = () => {
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col gap-5 overflow-hidden px-8 pt-2">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col gap-5 overflow-hidden px-8 pt-2">
       {/* Header + status + description */}
       <div className="flex flex-none flex-col gap-3">
         <div className="flex items-center justify-between gap-4">

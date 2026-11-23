@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/desact/icon";
 import { Input } from "@/components/desact/input";
@@ -16,7 +16,9 @@ import { cn } from "@/lib/cn";
  * inside a screen that already says what it lists, so repeating the noun buys nothing and guarantees
  * drift. Rule: `technical_documentation/ui/ACTIONS_AND_MENUS.md` § 4.
  *
- * **Escape clears.** Twenty-five hand-rolled copies existed and not one of them did.
+ * **Escape clears, and so does the × inside it** (the designers' DT24, taken product-wide by the owner on 2026-11-23,
+ * B10): a 16 tertiary × 12 in from the right edge, shown while there is something to clear. Twenty-five hand-rolled
+ * copies existed and not one of them did either.
  *
  * **Two sizes** (the designers' Automations fixes, A5 and E4, 2026-11-18): `sm`, the toolbar's — 240 × 32, the icon
  * 10 in, 13/20 text — is every list's; `md` — 36 high, 14/20 — is the search at the top of a picker window
@@ -55,13 +57,26 @@ export const SearchBox: React.FC<{
         }
       }}
       className={cn(
-        size === "sm" ? "h-8 pr-2.5 pl-8.5 text-label font-normal leading-5" : "h-9 pr-3 pl-9",
+        size === "sm" ? "h-8 pr-8 pl-8.5 text-label font-normal leading-5" : "h-9 pr-9 pl-9",
         fullWidth ? "w-full" : "w-60",
       )}
       placeholder={t("actions.search")}
       aria-label={ariaLabel ?? t("actions.search")}
       inputMode="search"
     />
+    {value.length > 0 && (
+      <button
+        type="button"
+        aria-label={t("searchField.clear")}
+        onClick={() => onChange("")}
+        className={cn(
+          "absolute top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-control text-tertiary outline-none hover:text-primary focus-visible:shadow-focus",
+          size === "sm" ? "right-2.5" : "right-3",
+        )}
+      >
+        <Icon icon={Cancel01Icon} size="sm" />
+      </button>
+    )}
   </div>
   );
 };

@@ -14,7 +14,7 @@
     },
     "comingSoon": {
       "title": "{tab} is not available yet",
-      "description": "This part of the profile is planned and has not been built. Nothing here changes how the product works today."
+      "description": "We’re building it — nothing to set up yet."
     },
     "leaveGuard": {
       "title": "Leave without saving?",
@@ -135,33 +135,33 @@
       "locked": "Locked",
       "manager": "Manager",
       "withUs": "With us",
-      "loginAs": "Login as user",
       "resendInvitation": "Resend invitation",
       "invite": "Invite",
       "personActions": "Person actions",
       "viewInOrgChart": "View in org chart",
       "changePassword": "Change password",
-      "cancelScheduledInvitation": "Cancel scheduled invitation",
       "startPreboarding": "Start preboarding",
       "startOnboarding": "Start onboarding",
       "startOffboarding": "Start offboarding",
       "unlock": "Unlock account",
       "signInPaused": "Login paused",
-      "sendResetToUnlock": "Send password reset to unlock",
-      "sendReset": "Send password reset",
-      "exportPersonalData": "Export personal data",
-      "resetMfa": "Reset two-step login",
-      "endSessions": "End all sessions",
-      "block": "Block account",
-      "unblock": "Unblock account",
-      "reactivate": "Reactivate",
-      "leaving": "Leaving {date}",
       "terminate": "Terminate employment",
       "deleteProfile": "Delete profile",
       "terminateFailed": "Failed to terminate employment.",
       "deleteFailed": "Failed to delete the profile.",
-      "emails": "Emails sent",
-      "unlinkSso": "Remove single sign-on link"
+      "loginAsName": "Log in as {name}",
+      "manageAccount": "Manage account",
+      "starts": "Starts {date}",
+      "lastDay": "Last day {date}",
+      "back": "Back {date}",
+      "nextLeave": "{policy} · {dates}",
+      "away": "Away",
+      "since": "Since {date}",
+      "team": "Team",
+      "setInactive": "Set to inactive",
+      "setActive": "Set to active",
+      "setInactiveHint": "You can delete a profile once it’s inactive.",
+      "cancelInvitation": "Cancel invitation"
     },
     "lifecycleNote": {
       "starts": "Starts {date}",
@@ -181,30 +181,27 @@
       "yearsMonths": "{years} y {months} m"
     },
     "access": {
-      "resetSentUnlock": "Password reset sent to {name}. Setting a new password unlocks the account.",
-      "resetSent": "Password reset sent to {name}.",
-      "mfaReset": "{name}'s two-step login was reset. They were logged out everywhere.",
-      "noSessions": "{name} was not logged in anywhere.",
-      "sessionsEnded": "{name} was logged out of {count, plural, one {# session} other {# sessions}}.",
-      "verified": "I confirmed this request with {name} by a call or in person, not by email.",
+      "mfaReset": "Two-step login reset",
+      "verified": "I checked it’s really {name}, another way than email",
       "reason": "Reason",
-      "blockDescription": "{name} will be logged out everywhere and will not be able to log in until the account is unblocked.",
-      "blockConfirm": "Block",
-      "unblockDescription": "{name} will be able to log in again.",
       "unlockDescription": "{name} can log in again with their current password. If you suspect somebody else tried to get in, send a password reset instead.",
       "unlockConfirm": "Unlock",
-      "unlocked": "{name} can log in again.",
-      "unblockConfirm": "Unblock",
-      "resetLockedDescription": "{name}'s account is locked after too many failed logins. They will get an email with a link to set a new password, which unlocks it. The link works for one hour.",
-      "resetDescription": "{name} will get an email with a link to set a new password. The link works for one hour.",
-      "resetConfirm": "Send",
-      "mfaDescription": "{name}'s authenticator app, backup codes and remembered devices stop working, and they are logged out everywhere. If your company requires two-step login, they set it up again at their next login.",
+      "unlocked": "{name} can log in again",
       "mfaConfirm": "Reset",
-      "endSessionsDescription": "{name} will be logged out of every browser at once. They can log in again straight away — to keep them out, block the account instead.",
-      "endSessionsConfirm": "End sessions",
-      "unlinkDescription": "{name} will be linked again the next time they log in through your provider, or when they connect it themselves.",
-      "unlinkConfirm": "Remove link",
-      "unlinked": "{name}'s single sign-on link is removed."
+      "blockTitle": "Block {name}’s account?",
+      "blockText": "{name} won’t be able to log in. Their profile and data stay. You can unblock any time.",
+      "blockPlaceholder": "For example: lost laptop",
+      "unblockTitle": "Unblock {name}’s account?",
+      "unblockText": "{name} can log in again right away.",
+      "unblockPlaceholder": "For example: laptop found",
+      "unblocked": "Account unblocked",
+      "mfaTitle": "Reset {name}’s two-step login?",
+      "mfaText": "{name} sets it up again the next time they log in. {mode, select, password {Enter your password to go on.} code {Enter a code from your authenticator app to go on.} other {Enter the code we sent to you to go on.}}",
+      "mfaYourPassword": "Your password",
+      "mfaEmailCode": "Enter the code we sent to you",
+      "mfaAppCode": "Code from your authenticator app",
+      "mfaEnterCode": "Enter the code.",
+      "mfaWrongPassword": "That password doesn’t match"
     },
     "delete": {
       "description": "This deletes <b>{name}</b> and their history, and cannot be undone.",
@@ -234,7 +231,7 @@
       "timezoneNote": "It goes out on that day, in your company's timezone.",
       "preboardingTitle": "{name} has an unfinished preboarding.",
       "preboardingKeep": "Keep it — the remaining tasks follow them into the app",
-      "preboardingEnd": "End it early — the remaining tasks are cancelled",
+      "preboardingEnd": "End it early — the remaining tasks are canceled",
       "sending": "Sending…",
       "schedule": "Schedule"
     },
@@ -263,13 +260,6 @@
       "more": "and {count} more",
       "reassignTo": "Reassign to…"
     },
-    "reactivate": {
-      "title": "Reactivate {name}?",
-      "description": "They become Active again and their termination record is cleared; the activity log keeps it.",
-      "descriptionBlocked": "They become Active again and their termination record is cleared; the activity log keeps it. Their sign-in stays blocked until somebody unblocks it.",
-      "confirm": "Reactivate",
-      "failed": "Could not reactivate this person."
-    },
     "terminate": {
       "description": "{name} will be archived and lose access.",
       "reasons": {
@@ -292,7 +282,7 @@
         "reports": "{count, plural, one {# direct report moves} other {# direct reports move}} to <b>{manager}</b>.",
         "reportsNoManager": "{count, plural, one {# direct report moves} other {# direct reports move}} to <b>no manager</b>.",
         "requests": "{count, plural, one {# request is} other {# requests are}} waiting for this person to decide. They are handed on as chosen above, or to their policy's fallback role.",
-        "absences": "{count, plural, one {# approved absence runs} other {# approved absences run}} past the last working day. They are cancelled, or cut at that day, and the days go back to the balance."
+        "absences": "{count, plural, one {# approved absence runs} other {# approved absences run}} past the last working day. They are canceled, or cut at that day, and the days go back to the balance."
       },
       "terminating": "Terminating…",
       "confirm": "Terminate"
@@ -324,34 +314,120 @@
       "notNow": "Not now",
       "approve": "Approve",
       "giveInput": "Give input",
-      "approved": "Approved. {name}'s off {range}.",
+      "approved": "Time off approved",
       "head": "Waiting on you",
       "moduleTimeOff": "Time off",
       "moduleReview": "Review",
       "showMore": "Show {count} more",
       "showLess": "Show less"
     },
-    "emails": {
-      "title": "Emails to {name}",
-      "description": "The last emails noddo sent this person: subjects and what happened to them, never their text.",
-      "empty": "No emails yet.",
-      "suppressed": "Emails to {address} are not delivered: {reason, select, HARD_BOUNCE {the address bounced} SOFT_BOUNCES {it bounced three times in a week} COMPLAINT {they were marked as spam} other {the address is blocked}} on {date}.",
-      "lift": "Send to this address again",
-      "lifted": "Emails go to this address again.",
-      "columns": {
-        "subject": "Subject",
-        "status": "Status",
-        "date": "Date"
+    "manageAccount": {
+      "title": "Manage account",
+      "sub": "{name} · {email}",
+      "dateTime": "{date}, {time}",
+      "login": {
+        "heading": "Login",
+        "password": "Password",
+        "passwordSet": "Set",
+        "passwordChanged": "Set · changed {date}",
+        "sendReset": "Send reset link",
+        "twoStep": "Two-step login",
+        "twoStepOn": "On · authenticator app",
+        "reset": "Reset",
+        "unlink": "Unlink",
+        "locked": "Locked",
+        "lockedValue": "After too many failed logins",
+        "paused": "Login paused",
+        "pausedValue": "Until {time}",
+        "unlock": "Unlock",
+        "sso": "Single sign-on",
+        "ssoValue": "Linked to your company’s provider",
+        "nothing": "No way to log in yet",
+        "email": "Email",
+        "bounced": "Bounced on {date} · {email}",
+        "tryAgain": "Try again"
       },
-      "status": {
-        "QUEUED": "Waiting",
-        "SENT": "Sent",
-        "DELIVERED": "Delivered",
-        "FAILED": "Failed",
-        "BOUNCED": "Bounced",
-        "COMPLAINED": "Marked as spam",
-        "SUPPRESSED": "Not sent"
+      "sessions": {
+        "heading": "Sessions · {count, plural, one {# device} other {# devices}}",
+        "headingPlain": "Sessions",
+        "logOutEverywhere": "Log out everywhere",
+        "device": "{device} · {browser}",
+        "unknownDevice": "Unknown device",
+        "unknownBrowser": "Browser",
+        "activeNow": "active now",
+        "today": "today, {time}",
+        "logOut": "Log out",
+        "none": "No devices",
+        "noneBlocked": "Logged out when the account was blocked",
+        "noneActive": "Not logged in anywhere",
+        "ip": "IP address {ip}"
+      },
+      "emails": {
+        "heading": "Emails sent · {count}",
+        "showAll": "Show all",
+        "none": "No emails yet",
+        "allTitle": "Emails sent",
+        "allSub": "{count, plural, one {# email} other {# emails}} to {email}",
+        "showMore": "Show {count} more",
+        "back": "Back"
+      },
+      "personalData": {
+        "heading": "Personal data",
+        "key": "Everything noddo keeps about {name}",
+        "value": "One file",
+        "export": "Export"
+      },
+      "block": {
+        "title": "Block account",
+        "text": "{name} can’t log in until you unblock. They’re logged out everywhere at once.",
+        "button": "Block account"
+      },
+      "unblock": {
+        "title": "Unblock account",
+        "text": "{name} can log in again right away.",
+        "button": "Unblock account"
+      },
+      "blocked": {
+        "label": "Blocked",
+        "on": "on {date} · can’t log in",
+        "noDate": "can’t log in",
+        "inactive": "Inactive"
+      },
+      "logOutConfirm": {
+        "title": "Log {name} out everywhere?",
+        "description": "{name} is logged out on every device and has to log in again.",
+        "confirm": "Log out everywhere"
+      },
+      "error": {
+        "title": "We couldn’t load the account",
+        "message": "Nothing is lost. Try again in a moment."
+      },
+      "toast": {
+        "resetSent": "Reset link sent",
+        "unlinked": "{provider} unlinked",
+        "ssoUnlinked": "Single sign-on unlinked",
+        "loggedOutOf": "Logged out of {device}",
+        "loggedOutEverywhere": "Logged out everywhere",
+        "exported": "Export downloaded",
+        "emailSentAgain": "Email sent again"
       }
+    },
+    "setInactive": {
+      "title": "Set {name} to inactive?",
+      "description": "{name} can’t log in and leaves the active lists. Their profile and history stay, and you can set them to active again.",
+      "done": "{name} is inactive"
+    },
+    "setActive": {
+      "title": "Set {name} to active?",
+      "description": "{name} is back in the active lists, and can log in again if they had an account.",
+      "descriptionBlocked": "{name} is back in the active lists. Their account stays blocked until somebody unblocks it.",
+      "done": "{name} is active again"
+    },
+    "cancelInvitation": {
+      "title": "Cancel {name}’s invitation?",
+      "description": "The invitation won’t be sent. You can invite {name} again any time.",
+      "descriptionSent": "The link already sent to {name} will stop working. You can invite {name} again any time.",
+      "done": "Invitation canceled"
     }
   },
   "documents": {
@@ -366,21 +442,21 @@
       "trash": "Trash",
       "blankTitle": "No documents yet",
       "blankDescription": "Contracts, IDs and certificates live here.",
-      "blankDescriptionEditable": "Contracts, IDs and certificates live here.\nDrop files here or upload them below.",
-      "uploadFile": "Upload file",
+      "blankDescriptionEditable": "Contracts, IDs and certificates live here.\nDrop files here or upload them.",
+      "uploadFile": "Upload files",
       "newFolder": "New folder",
-      "emptyFolderTitle": "This folder is empty",
-      "emptyFolderDescription": "Drop files here or use Add.",
       "add": "Add",
       "uploadFiles": "Upload files",
       "selectAll": "Select all {count}",
       "noResultsTitle": "Nothing called “{query}”",
-      "noResultsHint": "Try a different word. Search looks in every folder.",
-      "loadFailed": "We couldn’t load the documents"
-    },
-    "emptyState": {
-      "title": "No folders or files",
-      "description": "This location is empty. Create a folder or upload a file to get started."
+      "noResultsHint": "Try a different word.\nSearch looks in every folder.",
+      "loadFailed": "We couldn’t load the documents",
+      "loadFailedBody": "Nothing is lost. Try again in a moment.",
+      "starredEmptyTitle": "Nothing starred yet",
+      "starredEmptyBody": "Star a file to find it here fast.",
+      "looseEmptyTitle": "Every file is in a folder",
+      "emptyFolderTitle": "This folder is empty",
+      "emptyFolderDescription": "Drop files here or upload them."
     },
     "folderCard": {
       "actions": "Folder actions",
@@ -399,36 +475,44 @@
       "unstar": "Unstar",
       "actions": "Document actions",
       "move": "Move",
-      "movedToTrash": "{name} moved to the trash",
+      "movedToTrash": "{name} moved to trash",
       "visibilityFailed": "Could not change who can see it.",
       "selectAll": "Select all",
       "select": "Select {name}",
       "batchFailed": "Could not do that to the selection.",
-      "movedManyToTrash": "{count, plural, one {# document} other {# documents}} moved to the trash",
+      "movedManyToTrash": "{count, plural, one {# document} other {# documents}} moved to trash",
       "whoCanSee": "Who can see",
       "visible": "Visible",
       "hidden": "Hidden",
-      "moveToTrash": "Move to trash"
+      "moveToTrash": "Move to trash",
+      "hiddenFrom": "Hidden from {name}",
+      "visibleTo": "Visible to {name}",
+      "folder": "Folder",
+      "moveTo": "Move to…"
     },
     "trash": {
       "restoreFailed": "Failed to restore",
       "purgeFailed": "Failed to delete permanently",
       "unavailable": "Trash unavailable",
       "emptyTitle": "Nothing in the trash",
-      "emptyDescription": "Deleted documents wait here until they are restored or permanently removed.",
+      "emptyDescription": "Deleted files wait here.\nYou can restore them any time.",
       "meta": "{size} · uploaded {date}",
-      "deleteForever": "Delete forever"
+      "deleteForever": "Delete forever",
+      "hint": "Restore puts a file back where it was. Delete forever removes it for good.",
+      "wasIn": "Was in",
+      "movedToTrash": "Moved to trash"
     },
     "folderForm": {
       "label": "Folder name",
-      "hint": "Minimum 2 characters.",
       "required": "Please enter a folder name.",
       "min": "Folder name must be at least 2 characters.",
       "max": "Folder name must be at most 120 characters."
     },
     "createFolder": {
-      "title": "Add folder",
-      "description": "Create a new folder to organize personal documents."
+      "title": "New folder",
+      "submit": "Add folder",
+      "inOwn": "In your documents",
+      "inPerson": "In {name}’s documents"
     },
     "renameFolder": {
       "title": "Rename folder",
@@ -462,13 +546,20 @@
       "destination": "Destination folder",
       "destinationRequired": "Please select destination folder.",
       "submit": "Move",
-      "nDocuments": "{count, plural, one {# document} other {# documents}}"
+      "nDocuments": "{count, plural, one {# document} other {# documents}}",
+      "titleFiles": "{count, plural, one {Move # file} other {Move # files}}",
+      "titleOne": "Move {name}",
+      "pick": "Pick where they go",
+      "moveHere": "Move here"
     },
     "preview": {
       "readOnly": "Read-only preview.",
       "downloadInstead": "Download instead",
       "renamed": "Renamed",
-      "validUntil": "Valid until {date}"
+      "validUntil": "Valid until {date}",
+      "inFolder": "In the {folder} folder",
+      "expires": "Expires {date}",
+      "expired": "Expired on {date}"
     },
     "purge": {
       "title": "Delete forever",
@@ -481,7 +572,7 @@
       "description": "Changes the display name only — the file itself is untouched."
     },
     "upload": {
-      "title": "Add document",
+      "title": "Upload documents",
       "description": "Upload a document and place it into a folder.",
       "files": "Files",
       "chooseAtLeastOne": "Please choose at least one file.",
@@ -498,7 +589,14 @@
       "submit": "{count, plural, =0 {Upload} =1 {Upload} other {Upload # files}}",
       "uploading": "Uploading…",
       "waiting": "Waiting",
-      "done": "Uploaded"
+      "done": "Uploaded",
+      "toOwn": "To your documents",
+      "toPerson": "To {name}’s documents",
+      "dropHere": "Drop files here",
+      "orChoose": "or choose them",
+      "noCategory": "No category",
+      "onlyPeople": "Only people with access to {name}’s documents see them.",
+      "needsDate": "Your company asks for an expiry date on {category}."
     },
     "folders": "Folders",
     "views": {
@@ -514,15 +612,21 @@
       "color": "Color",
       "icons": {
         "folder": "Folder",
-        "briefcase": "Briefcase",
-        "shield": "Shield",
-        "heart": "Health",
-        "file": "Page",
-        "book": "Book",
-        "building": "Building",
+        "signature": "Signature",
+        "id-card": "ID card",
+        "wallet": "Wallet",
+        "education": "Education",
+        "certificate": "Certificate",
         "calendar": "Calendar",
-        "people": "People",
-        "laptop": "Laptop"
+        "person": "Person",
+        "star": "Star",
+        "lock": "Lock",
+        "chart": "Chart",
+        "clock": "Clock",
+        "mail": "Mail",
+        "laptop": "Laptop",
+        "checklist": "Checklist",
+        "hourglass": "Hourglass"
       }
     }
   },
@@ -653,8 +757,9 @@
     "selectRow": "select row",
     "loadingMore": "Loading more…",
     "empty": {
-      "title": "No people to show",
-      "description": "Try changing filters or come back later."
+      "title": "No people yet",
+      "description": "Add your first teammate — it takes a minute.",
+      "noMatch": "No people match"
     },
     "dismiss": "Dismiss",
     "notice": {
@@ -689,8 +794,7 @@
     "includedShown": "Included: {list}. Status is added when the view leaves it out, so a former employee is never mistaken for a current one."
   },
   "topbar": {
-    "columns": "Columns",
-    "filter": "Filter"
+    "columns": "Columns"
   },
   "layout": {
     "people": {

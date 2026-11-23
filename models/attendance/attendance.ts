@@ -18,6 +18,11 @@ export type AttendanceEntry = {
   endTime: string;
   minutes: number;
   description: string | null;
+  /**
+   * Who wrote it — the person, or whoever logged it for them (U4: "Logged by {full name}" when it is not the person).
+   * Null when no writer was recorded; `fullName` null when the writer is gone.
+   */
+  loggedBy?: { id: string; fullName: string | null } | null;
 };
 
 /** What logged time is owed at, in one currency — never converted into another. */
@@ -78,7 +83,10 @@ export type AttendanceLog = {
 /** What the caller may do on one person's attendance — the server's answer, not a guess. */
 export type AttendanceCapabilities = {
   canView: boolean;
-  /** Only on your own timesheet: nobody logs somebody else's time. */
+  /**
+   * Log, amend and remove here: your own time with EDIT, somebody else's with `PEOPLE.ATTENDANCE_FOR_OTHERS` EDIT over
+   * them (U4).
+   */
   canLog: boolean;
   /** The company overview, the person pages and the export. */
   canManage: boolean;

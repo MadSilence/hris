@@ -2,7 +2,7 @@
 status: built
 screen: sign-in-appearance
 owner: Ulia
-updated: 2026-11-13
+updated: 2026-11-20
 ---
 
 # Settings → General → Appearance (L)
@@ -130,12 +130,40 @@ Page 1512 × 982. Left column 420, gap 56 to the stage; heading 44/46; rings 44 
   shades merged, at most three with 5 % of the colourful pixels or more; removing the logo removes them.
 - **Differs from the design:** the formats say PNG, JPEG or WebP and no SVG (Q-25). The logo's file name is shown
   only for a file uploaded in this visit; otherwise the tile reads "Your logo" (the stored logo keeps no name for the
-  page). "Inside noddo" is the shell and Home's top in the draft — the sidebar, the greeting, the band and quiet
-  widget cards — not the live Home with a person's data. The login preview is the real `AuthSplit` with a still form;
-  the phone is the strip and the form. The email is drawn in the page, not rendered by the backend, and since
-  2026-11-19 it is the login code (`sign-in-emails` M16) as `LoginEmailLayout` writes it, not the invitation (M2): the
-  inbox's sender line (noddo, the subject naming the company), the heading and the rings in the band, the code, "or",
-  the wide button, the small print and the footer signed by noddo; the address is text, never a link (SIGN_IN_PLAN A21). The segmented control is the kit's, at 36. The quiet line shows only near Approved, and a
-  "red workspace" is measured by hue and lightness (Q-30).
+  page). The previews are drawn in the page, not rendered by the backend (see "The designers' fixes of 19 Nov" below).
+  The segmented control is the kit's, at 36. The quiet line shows only near Approved, and a "red workspace" is measured
+  by hue and lightness (Q-30).
 - **Images of the real screen:** not taken yet — the screen has not been walked.
-- **The Email stage** (2026-11-19) is drawn like the real login-code email again (SIGN_IN_PLAN A21), with Light and a custom colour.
+- **The designers' fixes of 19 Nov** (`design/handoffs/2026-11-19-appearance-empty-states`, AP1–AP20 but AP0; built
+  2026-11-20, not yet seen in a browser):
+  - **The page runs edge to edge** (AP1, AP2, AP5): the app frame's new `full` mode (`components/layout/AppFrame`) drops
+    the page padding under the banners; the column sits 40 from the sidebar, 420 wide, and scrolls on its own only as a
+    last resort — under 940 px of height its gaps close up (32 → 20) so step 3 stays above Save; the stage fills the
+    rest to the window's right and bottom edges at a fixed width, whatever the tab.
+  - **Back** is `AuthBack variant="circle"` (white 40, hairline, 16 Ink chevron); the login screens keep the ghost (AP6).
+  - Step numbers 12 px (AP7); the drop zone's tile radius 12, the upload icon where there is no logo, the title 14/20
+    600, the second line 14/20 tertiary (AP8); a refused file is a red dashed border on white (AP14).
+  - The rings spread over the 420 (five columns, rows 16 apart), names tertiary (AP9); "Your own ·" quiet with the code
+    in mono Ink (AP10); the picker at padding 12 with the popover shadow, one code field with the colour's chip inside,
+    its error 13/18 (AP11); the background's picked half 600 (AP12).
+  - Save has no line above it, the status 14/20 tertiary on one line, and an upload or Remove clears "Saved. Everyone…"
+    (AP13). "Text and links a little darker…" only for a light colour, never Basil or a deep green (AP3, `accent.ts`).
+  - **Loading** (AP4) is the page's shape at once — the real back, heading and lead, the steps' skeletons, the ten
+    rings, the stage with its tabs and a window — also as the route's own `loading.tsx`.
+  - **The stage** (AP15–AP18): one quiet row of five rings in its bottom-right corner; tabs at 40 / 28; the foot 14/20
+    600 at the left; "Not saved yet" a white pill with a dot; the windows 604 × 402 (Home), 560 × 374 + the phone 170
+    wide (login), radius 14, a 24 bar with 7 px dots and the address in a white pill.
+  - **The previews as drawn** (AP19): Inside noddo is Home's top — the date, "Good afternoon, {first name}", My profile,
+    the AI box — and Waiting on you, Time off, Next time off with To sign, Who's out and This week with sample people
+    from the catalogue; the sidebar is quiet bars. **No *My time*** (it is not on Home; AQ-10). The login page has
+    Continue with Google / Microsoft and "or" as drawn, then the form and "Not your company?". **The email is the
+    invitation again** (M2, the owner's R19 / A16): "You’re invited / to join Acme", the body, "Join Acme →", the small
+    print, the footer signed by noddo — in hris-api's own words — in a mail window; **no postal address** in the footer
+    (the product has none; AQ-10).
+  - **View only with no logo** (L6b): the letter tile and "{Company}’s logo", nothing to drop and no size hint. The
+    view-only banner's text was already secondary (AP20).
+  - **AP0, the uploaded logo's URL — built 2026-11-23** (the owner's R3, `(claude)/DECISIONS.md` § "The walk of
+    2026-11-23 — the owner's answers"): the logo is `/uploads/…` on the company's own address, passed to the backend by
+    the web app, and the page's image policy is `'self'`; an email's logo is the company's address too. Not yet seen in
+    a browser. Not done: the hydration warning #418 the
+    designers saw on this page was not traced — it needs the page open in a browser.

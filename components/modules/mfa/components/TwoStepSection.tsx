@@ -26,6 +26,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useDateFormatter } from "@/lib/date";
 import { showActionError } from "@/lib/errors/errorToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { describeUserAgent } from "@/components/modules/sessions/components/describeUserAgent";
 import { useMfaStatus, useInvalidateMfaStatus } from "@/components/modules/mfa/hooks";
 import {
@@ -102,9 +103,8 @@ export const TwoStepSection: React.FC = () => {
                 type="button"
                 variant="secondary"
                 size="sm"
-                disabled={s.required}
-                title={s.required ? t("mfa.section.requiredTitle") : undefined}
-                onClick={() => setDialog("disable")}
+                // Required by the company, it cannot be turned off: pressed, it says so (NEVER-DISABLED).
+                onClick={() => (s.required ? explain(t("mfa.section.requiredTitle")) : setDialog("disable"))}
               >
                 {t("mfa.disable.submit")}
               </Button>

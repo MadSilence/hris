@@ -118,12 +118,13 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
       <CommandGroup key={group.kind} heading={t(SEARCH_KIND_LABELS[group.kind])}>
         {group.items.map((item) => {
           const href = searchItemHref(group.kind, item);
+          // A hit with nowhere to open is not listed greyed out: it is not listed (NEVER-DISABLED).
+          if (!href) return null;
           return (
             <CommandItem
               key={`${group.kind}:${item.id}`}
               value={`${group.kind}:${item.id}`}
-              disabled={!href}
-              onSelect={() => href && go(href)}
+              onSelect={() => go(href)}
             >
               {group.kind === "PEOPLE" ? <PersonHit item={item}/> : <EntityHit item={item}/>}
             </CommandItem>
@@ -182,7 +183,7 @@ export const QuickSearchDialog: React.FC<Props> = ({ open, onOpenChange, appPage
       return <div role="status" className="px-4 py-6 text-center text-body text-tertiary">{t("dialog.searching")}</div>;
     }
     if (!hasServerHits && visiblePages.length === 0) {
-      return <NoResults hint={t("dialog.noResultsHint")}/>;
+      return <NoResults variant="panel" hint={t("dialog.noResultsHint")}/>;
     }
     return (
       <>

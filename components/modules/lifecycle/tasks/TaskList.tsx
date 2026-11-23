@@ -32,6 +32,7 @@ import { SigningPill } from "@/components/modules/signing/components/SigningPane
 import { TaskMaterials, saveBlob } from "./TaskMaterials";
 import { TaskComments } from "./TaskComments";
 import { QuestionnaireForm } from "./QuestionnaireForm";
+import { explain } from "@/lib/feedback/explainToast";
 import { TaskFieldInput, canFillInPlace } from "./TaskFieldInput";
 import { FilePickButton } from "@/components/modules/lifecycle/shared/FilePickButton";
 
@@ -271,8 +272,11 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   const [error, setError] = useState<string | null>(null);
   const [answering, setAnswering] = useState(false);
   const disabled = busy || working;
-  // What would act; in a preview it never does, while the fields stay usable.
-  const act = disabled || Boolean(preview);
+  // In a preview nothing acts, while the fields stay usable: the button says so when pressed (NEVER-DISABLED).
+  const previewed = () => {
+    if (preview) explain(t("preview.nothingSent"));
+    return Boolean(preview);
+  };
 
   const run = async (body: () => Promise<void>) => {
     setWorking(true);
@@ -340,10 +344,10 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
       <div className="mt-3 space-y-2">
         <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
         <FieldError>{tried && !file ? t("shared.pickFile") : null}</FieldError>
-        <Button type="button" size="sm" variant="secondary" disabled={act}
+        <Button type="button" size="sm" variant="secondary" disabled={disabled}
           onClick={() => {
             setTried(true);
-            if (!file) return;
+            if (!file || previewed()) return;
             void run(async () => {
               const doc = await upload(file);
               await onCompleteAction(task, doc.id);
@@ -365,7 +369,8 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
     if (!onCompleteAction || !canComplete) return null;
     return (
       <div className="mt-3">
-        <Button type="button" size="sm" variant="secondary" disabled={act} onClick={() => run(async () => { await onCompleteAction(task); })}>
+        <Button type="button" size="sm" variant="secondary" disabled={disabled}
+          onClick={() => !previewed() && run(async () => { await onCompleteAction(task); })}>
           {task.kind === "ACKNOWLEDGE" ? t("shared.iHaveReadIt") : t("shared.markDone")}
         </Button>
         <FormError message={error} />
@@ -378,10 +383,10 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
       <div className="mt-3 space-y-2">
         <FilePickButton file={file} disabled={disabled} onPickAction={setFile} />
         <FieldError>{tried && !file ? t("shared.pickFile") : null}</FieldError>
-        <Button type="button" size="sm" variant="secondary" disabled={act}
+        <Button type="button" size="sm" variant="secondary" disabled={disabled}
           onClick={() => {
             setTried(true);
-            if (!file) return;
+            if (!file || previewed()) return;
             void run(async () => {
               const doc = await upload(file);
               // With no category the file closes the task itself; with one, its arrival does (the listener).
@@ -417,10 +422,10 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
           />
         ))}
         <FieldError>{tried && Object.keys(values).length === 0 ? t("shared.fillSomething") : null}</FieldError>
-        <Button type="button" size="sm" variant="secondary" disabled={act}
+        <Button type="button" size="sm" variant="secondary" disabled={disabled}
           onClick={() => {
             setTried(true);
-            if (Object.keys(values).length === 0) return;
+            if (Object.keys(values).length === 0 || previewed()) return;
             void run(async () => {
               const res = await updateUserAttributesAction({ userId: task.subject.id, values });
               if (res.status !== ActionStatus.SUCCESS) {
@@ -446,7 +451,7 @@ function TaskBody({ task, mine, canComplete, busy, preview, onCompleteAction, on
   }
   return answering ? (
     <div className="mt-3">
-      <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} sendDisabled={preview}
+      <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} preview={preview}
         onSubmit={async (answers) => {
           const res = await answerQuestionnaireAction({ id: task.id, answers });
           if (res.status !== ActionStatus.SUCCESS) return res.errorMessage ?? t("shared.answersNotSent");

@@ -84,6 +84,24 @@ Every string is in `words.md` (pulled from the frames); the table holds the prod
 | Pane slogan | Every yes, handled. |
 | Errors | listed under States |
 
+**Slogans in other languages** (DQ-15, Ulia 2026-11-20; strings for later — no locale is added yet, and the owner's U1
+keeps Russian for now). Each keeps the meaning of "Every yes, handled."; the last word is in Rose, as "handled." is:
+
+| Language | Slogan |
+|---|---|
+| de | Jedes Ja, erledigt. |
+| fr | Chaque oui, réglé. |
+| es | Cada sí, resuelto. |
+| pt | Cada sim, resolvido. |
+| it | Ogni sì, sistemato. |
+| pl | Każde „tak” – załatwione. |
+| cs | Každé ano, vyřízeno. |
+| ro | Fiecare „da”, rezolvat. |
+| uk | Кожне «так» — вирішено. |
+| et | Iga jah, korras. |
+
+A native check runs before launch (`handoffs/2026-11-20-answers-from-design/7-product-wide/LANGUAGES.md`).
+
 ## Values
 Pane 520 (desktop), form max 400, heading 32/40 (SPEC § 5 heading), lead 15/22 (body-l), controls lg 44 (SPEC § 13.2), radius control 8. Desktop frames are 1280 × 800 (A) — the layout holds from 1024 up; below 768 it is the phone layout.
 
@@ -112,3 +130,10 @@ See "Common". A2's company tile is new (`RememberedCompany`): 56 logo tile, name
 - **"Log in to another one"** (R4) goes to the root the installation is configured with (`APP_ROOT_DOMAIN`, `APP_SCHEME`); nothing in the code names noddo.so. The sandbox company it was checked on lives under the production root, so its root *is* noddo.so.
 - **The address ending** (R1) sits on Mist #F7F7F8 (`--surface-subtle`) with a border-field divider, as board RA1.
 - **Terms and Privacy policy** (B3, sign-in-registration) are still plain text: the pages do not exist yet.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the colour pane grows with the window — 520 at 1280 × window ÷ 1280, never smaller, stopping at 1920 — and
+  everything in it (rings, wordmark, slogan or company name) scales with it (`--auth-grow` as the pane's `zoom`,
+  `styles/globals.css`; `technical_documentation/ui/DESIGN_SYSTEM.md` § 9).
+- DQ-15: the ten slogans are in § Words as strings for later; no code, no new locale.
+- Not seen in a browser.

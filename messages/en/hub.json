@@ -59,8 +59,7 @@
     "error": "Couldn't load the news",
     "noMatch": "No news matches this",
     "forMeEmptyTitle": "Nothing just for you yet",
-    "forMeEmptyAction": "See everything",
-    "clearSearch": "Clear search"
+    "forMeEmptyAction": "See everything"
   },
   "handbook": {
     "title": "Handbook",
@@ -119,7 +118,7 @@
     "agree": "I agree",
     "agreeing": "Agreeing…",
     "agreedLine": "You agreed to version {version} on {date}",
-    "agreeFailed": "Couldn't save your answer. Try again.",
+    "agreeFailed": "Couldn't save your answer. Try again",
     "retry": "Retry",
     "emptyBody": "This page has no text yet",
     "previewBanner": "Preview — not published",
@@ -372,7 +371,7 @@
       "unpinned": "Unpinned",
       "unpublished": "Unpublished",
       "published": "Published",
-      "scheduleCancelled": "Schedule cancelled",
+      "scheduleCancelled": "Schedule canceled",
       "movedTo": "Moved to {section}",
       "reminded": "{count, plural, one {Reminded # person} other {Reminded # people}}"
     },
@@ -419,6 +418,7 @@
     "title": "Who agreed",
     "subtitle": "{page} · version {version} · due {date}",
     "subtitleNoDue": "{page} · version {version}",
+    "subtitleOverdue": "{page} · version {version} · <pill>Overdue</pill> was due {date}",
     "remindPeople": "{count, plural, one {Remind # person} other {Remind # people}}",
     "ofNeeded": "of {needed} agreed",
     "notYet": "not yet",
@@ -471,7 +471,7 @@
     "joiners": "New joiners",
     "celebrationsHint": "People can still hide their own birthday in their preferences.",
     "autosave": "Changes save automatically.",
-    "saveFailed": "Couldn't save. Try again.",
+    "saveFailed": "Couldn't save. Try again",
     "error": "Couldn't load settings"
   },
   "errors": {

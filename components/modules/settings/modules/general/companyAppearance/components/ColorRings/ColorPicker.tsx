@@ -126,18 +126,25 @@ export function ColorPicker({ value, onChange, onInvalidChange, invalid }: Props
 
       <div className="grid gap-1.5">
         <Label htmlFor="appearance-color-code" className="mb-0">{t("code")}</Label>
-        <div className="flex items-center gap-2">
+        {/* One field with the colour's chip inside on its left (L3-Picker); the code as typed, lowercase. */}
+        <div className="relative">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-2.5 size-[18px] -translate-y-1/2 appearance-code-chip ring-1 ring-divider"
+            style={{ backgroundColor: value }}
+          />
           <Input
             id="appearance-color-code"
             value={code}
             onChange={(event) => typed(event.currentTarget.value)}
             aria-invalid={invalid}
+            aria-describedby={invalid ? "appearance-color-code-error" : undefined}
             spellCheck={false}
-            className="font-mono"
+            className="h-9 pl-9 font-mono text-body font-medium"
           />
-          <span aria-hidden className="size-9 shrink-0 rounded-control ring-1 ring-divider" style={{ backgroundColor: value }} />
         </div>
-        {invalid ? <FieldError>{t("invalid")}</FieldError> : null}
+        {/* 13/18 under the field (L3-Invalid), a step up from a form's 12/16. */}
+        <FieldError id="appearance-color-code-error" className="mt-0 text-label font-normal">{invalid ? t("invalid") : null}</FieldError>
       </div>
     </div>
   );

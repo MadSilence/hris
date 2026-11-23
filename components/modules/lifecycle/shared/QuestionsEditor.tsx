@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/desact/select";
 import type { Question, QuestionType } from "@/models/lifecycle";
+import { cn } from "@/lib/cn";
 
 const QUESTION_TYPES: QuestionType[] = ["SHORT_TEXT", "LONG_TEXT", "NUMBER", "DATE", "YES_NO", "SINGLE_CHOICE", "MULTIPLE_CHOICE"];
 
@@ -84,11 +85,12 @@ export function QuestionsEditor({ idPrefix, questions, disabled, onChange }: {
               />
             )}
             {!disabled && (
+              // The first has no Move up and the last no Move down: hidden in place, not greyed (NEVER-DISABLED).
               <div className="flex justify-end gap-1">
-                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label={t("questions.moveUp")} disabled={i === 0} onClick={() => move(i, -1)}>
+                <Button type="button" variant="ghost" size="icon" className={cn("h-7 w-7", i === 0 && "invisible")} aria-label={t("questions.moveUp")} onClick={() => move(i, -1)}>
                   <Icon icon={ArrowUp02Icon} size="sm" />
                 </Button>
-                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label={t("questions.moveDown")} disabled={i === questions.length - 1} onClick={() => move(i, 1)}>
+                <Button type="button" variant="ghost" size="icon" className={cn("h-7 w-7", i === questions.length - 1 && "invisible")} aria-label={t("questions.moveDown")} onClick={() => move(i, 1)}>
                   <Icon icon={ArrowDown02Icon} size="sm" />
                 </Button>
                 <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label={t("questions.remove")}

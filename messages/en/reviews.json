@@ -119,8 +119,8 @@
       "view": "Peers — {name}"
     },
     "approvedBy": "approved by {name}",
-    "approvedToast": "Peers approved and asked.",
-    "sentToast": "Nomination sent for approval.",
+    "approvedToast": "Peers approved and asked",
+    "sentToast": "Nomination sent for approval",
     "somebody": "Somebody",
     "nominateIntro": "Choose {same, select, yes {{min}} other {{min} to {max}}} colleagues who know your work. Your manager writes their own review, so they cannot be one of them. {hasApprover, select, yes {{approver}} other {Your manager}} approves the list{hasDate, select, yes { by {date}} other {}}; if nobody does by then, it stands as you sent it.",
     "approveIntro": "{name} nominated these colleagues. Remove or add before approving — between {min} and {max}. Each approved peer is asked at once.{hasDate, select, yes { If nobody approves by {date}, the nomination stands as sent.} other {}}",
@@ -150,7 +150,7 @@
       "dueBeforeApproved": "The peer review is due before its peers are approved.",
       "approvalNeedsManager": "An approval of the manager review needs a manager review."
     },
-    "saved": "Cycle saved.",
+    "saved": "Cycle saved",
     "newCycle": "New review cycle",
     "saveTemplate": "Save template",
     "saveDraft": "Save draft",
@@ -193,7 +193,7 @@
       "approvalHint": "A submitted manager review waits for approval before it can be shared or released. The approver may send it back with a comment.",
       "approvalHintSkipLevel": "A submitted manager review waits for approval before it can be shared or released. The approver may send it back with a comment. A manager with no manager of their own has their reviews approved by the cycle's owner."
     },
-    "launched": "Cycle launched.",
+    "launched": "Cycle launched",
     "deleteDialog": {
       "templateTitle": "Delete template",
       "cycleTitle": "Delete cycle",
@@ -233,7 +233,7 @@
     "savedAsTemplate": "Saved as a template.",
     "fromTemplate": "Cycle added from the template.",
     "repeat": {
-      "done": "{name} added as a draft.",
+      "done": "{name} added as a draft",
       "title": "Repeat cycle",
       "description": "A new draft with the same people, reviews, forms and settings as {name}, every date moved later.",
       "moveBy": "Move every date by",
@@ -260,8 +260,8 @@
   },
   "write": {
     "commentOn": "Comment on {question}",
-    "updatedToast": "Review updated and shared again.",
-    "submittedToast": "Review submitted.",
+    "updatedToast": "Review updated and shared again",
+    "submittedToast": "Review submitted",
     "due": "due {date}",
     "anonymous": "Your name is not shown with this review, to anybody.",
     "draftSaved": "Draft saved",
@@ -295,7 +295,7 @@
   "personTab": {
     "empty": {
       "title": "No reviews",
-      "description": "Reviews from performance review cycles appear here once there is one you can read."
+      "description": "Reviews show up here once they’re shared."
     }
   },
   "packetLine": {
@@ -348,7 +348,7 @@
   "overview": {
     "empty": {
       "title": "No review cycles yet",
-      "description": "A cycle asks a group of people to review themselves and each other, and their managers to review them, on dates you set.",
+      "description": "Most teams start with a 3-month probation review.",
       "archived": "No closed review cycles."
     },
     "addCycle": "Add cycle",
@@ -416,26 +416,26 @@
     "upwardHeading": "Upward reviews — from direct reports, anonymous",
     "approveDialog": {
       "title": "Approve review",
-      "done": "Review approved.",
+      "done": "Review approved",
       "released": "{hasManager, select, yes {{manager}'s} other {The manager's}} review of {subject} is released with the others on the date.",
       "share": "{hasManager, select, yes {{manager}} other {The manager}} can then share the review with {subject}."
     },
     "sendBackDialog": {
       "required": "Say what should change.",
-      "done": "Review sent back.",
+      "done": "Review sent back",
       "body": "{hasManager, select, yes {{manager}} other {The manager}} reads your comment on the review, which opens again with its answers.",
       "comment": "What should change"
     },
     "shareDialog": {
       "title": "Share review",
       "confirm": "Share",
-      "done": "Review shared.",
+      "done": "Review shared",
       "onBehalf": "{subject} will read {hasManager, select, yes {{manager}'s} other {the manager's}} review, their self review and the rating, and is told as if the manager had shared it. The journal records that you shared it on the manager's behalf. A shared review cannot be unshared.",
       "own": "{subject} will read your review, their self review and the rating. Peer reviews stay with you. A shared review cannot be unshared; you can still update yours."
     },
     "acknowledgeDialog": {
       "title": "Acknowledge review",
-      "done": "Review acknowledged.",
+      "done": "Review acknowledged",
       "body": "Acknowledging says you have read it — not that you agree. Your manager sees any comment you add.",
       "comment": "Comment"
     }
@@ -524,7 +524,7 @@
       "name": "Give the form a name to save it.",
       "unfinished": "{count, plural, one {One question is not finished yet.} other {# questions are not finished yet.}}"
     },
-    "saved": "Form saved.",
+    "saved": "Form saved",
     "tabs": {
       "questions": "Questions"
     },
@@ -599,7 +599,7 @@
       "actions": "Reviewer actions"
     },
     "sendReminder": "Send a reminder",
-    "closeBody": "Reviews not yet submitted ({count}) are withdrawn and their tasks cancelled. What was written stays, and shared reviews stay readable. A closed cycle cannot be reopened.",
+    "closeBody": "Reviews not yet submitted ({count}) are withdrawn and their tasks canceled. What was written stays, and shared reviews stay readable. A closed cycle cannot be reopened.",
     "shareBody": "{subject} will read the manager review{hasManager, select, yes { by {manager}} other {}}, their self review and the rating, and is told as if the manager had shared it. The journal records that you shared it on the manager's behalf. A shared review cannot be unshared.",
     "removeFromCycle": "Remove from cycle",
     "removeBody": "{name} is no longer reviewed in this cycle. Reviews about them that are not in yet are withdrawn; what was written stays.",
@@ -647,7 +647,7 @@
       "pickSomeone": "Pick at least one person."
     },
     "handOnDialog": {
-      "done": "Review handed on.",
+      "done": "Review handed on",
       "description": "The {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} other {upward review}} of {subject}, now with {reviewer}. Anything already typed goes with it.",
       "descriptionManager": "The {kind, select, SELF {self review} MANAGER {manager review} PEER {peer review} other {upward review}} of {subject}, now with {reviewer}. Anything already typed goes with it. The new reviewer becomes the manager who shares this review.",
       "newReviewer": "New reviewer",
@@ -655,7 +655,7 @@
       "handOn": "Hand on"
     },
     "datesDialog": {
-      "done": "Dates saved.",
+      "done": "Dates saved",
       "description": "Open reviews take the new due date, and their reminders move with it."
     }
   },
@@ -668,7 +668,7 @@
       "table": "Table",
       "nineBox": "9-Box"
     },
-    "closed": "Session closed.",
+    "closed": "Session closed",
     "closeBody": "Ratings and potentials in this session are frozen. The ratings stand as calibrated; a closed session cannot be reopened.",
     "empty": {
       "title": "Nobody to calibrate here",
@@ -689,7 +689,7 @@
     "noPotential": "No potential",
     "changeRating": "Change rating",
     "adjust": {
-      "done": "Rating calibrated.",
+      "done": "Rating calibrated",
       "description": "{name}'s final rating. Their manager gave {hasRating, select, yes {{rating}} other {no rating}}; what the manager wrote stays as it is. The change and its reason are recorded.",
       "selectRating": "Select a rating",
       "reasonPlaceholder": "Why the rating changes",

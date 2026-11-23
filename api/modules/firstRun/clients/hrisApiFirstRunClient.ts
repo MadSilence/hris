@@ -30,12 +30,10 @@ export class HrisApiFirstRunClient {
   }
 
   /**
-   * The welcome, with the photo's address made absolute.
+   * The welcome, with the photo's address as a page writes it.
    *
-   * <p>The backend answers `/uploads/<key>` — a path on **its** origin, not on this one. Returned
-   * as-is it resolves against the company's own host, where nothing serves it, so the `<img>` 404s
-   * and the avatar quietly falls back to initials: the upload worked, the preview never appeared.
-   * Every other avatar in the product goes through this same resolver; this one was the exception.
+   * <p>The backend answers `/uploads/<key>`; every company host serves that path itself (R3, `app/uploads`).
+   * Every other avatar in the product goes through this same resolver; this one once was the exception.
    */
   public async getWelcome(): Promise<WelcomeDTO> {
     const dto = await hrisApiClient.get<WelcomeDTO>("/me/welcome");

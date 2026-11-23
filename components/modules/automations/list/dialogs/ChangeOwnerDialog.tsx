@@ -5,6 +5,7 @@ import { ArrowDown01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
+import { FieldError } from "@/components/desact/field-error";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
 import { Banner, InlineAlert } from "@/components/desact/alert";
 import { Icon } from "@/components/desact/icon";
@@ -18,7 +19,7 @@ import { useOwnerCandidates, type OwnerCandidate } from "./useOwnerCandidates";
 
 /**
  * Change owner (O1 → O2): the owner now, then a single-person picker of people who may manage automations.
- * "Change owner" stays off until somebody is picked; once picked, a note says what happens to runs going.
+ * "Change owner" pressed with nobody picked says so under the picker (NEVER-DISABLED); once picked, a note says what happens to runs going.
  *
  * G11: 560 wide, one column 16 apart; the owner now on mist with their role ("Owner now · HR Admin"); the picker's rows
  * 56 high with "{job title} · {office}" under the name.
@@ -33,6 +34,7 @@ export const ChangeOwnerDialog: React.FC<{
   const t = useTranslations("automationsList");
   const tCommon = useTranslations("common");
   const [picked, setPicked] = React.useState<OwnerCandidate | null>(null);
+  const [tried, setTried] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const debounced = useDebouncedValue(query, 250);
@@ -49,6 +51,7 @@ export const ChangeOwnerDialog: React.FC<{
       setPicked(null);
       setQuery("");
       setOpen(false);
+      setTried(false);
     }
   }, [automation]);
 
@@ -126,6 +129,7 @@ export const ChangeOwnerDialog: React.FC<{
                     aria-expanded={open}
                     aria-controls={`${listId}-list`}
                     aria-describedby={`${listId}-hint`}
+                    aria-invalid={(tried && !picked) || undefined}
                     value={query}
                     placeholder={picked ? "" : t("changeOwner.searchPlaceholder")}
                     onChange={(event) => {
@@ -184,7 +188,11 @@ export const ChangeOwnerDialog: React.FC<{
                 </ul>
               </PopoverContent>
             </Popover>
-            <p id={`${listId}-hint`} className="text-hint text-tertiary">{t("changeOwner.hint")}</p>
+            {tried && !picked ? (
+              <FieldError id={`${listId}-hint`}>{t("changeOwner.required")}</FieldError>
+            ) : (
+              <p id={`${listId}-hint`} className="text-hint text-tertiary">{t("changeOwner.hint")}</p>
+            )}
           </div>
 
           {picked ? <Banner>{t("changeOwner.note", { firstName })}</Banner> : null}
@@ -195,7 +203,7 @@ export const ChangeOwnerDialog: React.FC<{
           <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
             {tCommon("actions.cancel")}
           </Button>
-          <Button type="button" disabled={!picked} loading={busy} onClick={() => picked && onConfirm(picked)}>
+          <Button type="button" loading={busy} onClick={() => (picked ? onConfirm(picked) : setTried(true))}>
             {busy ? t("changeOwner.busy") : t("changeOwner.confirm")}
           </Button>
         </DialogFooter>

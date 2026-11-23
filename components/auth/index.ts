@@ -3,3 +3,4 @@ export * from "./PermissionGate";
 export * from "./accessQueryKeys";
 export * from "./permissionsStorage";
 export * from "./useAccess";
+export * from "./RenewSession";

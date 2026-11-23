@@ -100,7 +100,7 @@ export const PostsContainer: React.FC = () => {
           <EmptyState scene="announcements" title={t("manage.posts.emptyTitle")} description={t("manage.posts.emptyLine")} onCreate={dialog.openNew} createLabel={t("manage.newPost")} />
         ) : shown.length === 0 ? (
           q ? (
-            <NoResults title={t("manage.nothingMatches", { text: q })} hint="" onClearSearch={() => setQuery("")} />
+            <NoResults title={t("manage.nothingMatches", { text: q })} hint="" />
           ) : (
             <EmptyState compact scene="announcements" title={emptyTab} description="" />
           )

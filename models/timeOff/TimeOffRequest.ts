@@ -1,4 +1,5 @@
 ﻿import type { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto/TimeOffRequestStatus";
+import type { TimeOffPolicyCountingMode } from "@/api/modules/timeOff/timeOffPolicies/dto/TimeOffPolicyCountingMode";
 
 export interface TimeOffRequest {
   id: string;
@@ -26,4 +27,6 @@ export interface TimeOffRequest {
   /** "Awaiting me" only: the approver this request reaches the reader for, as their delegate ("for Anna"). */
   awaitingOnBehalfOfUserId?: string | null;
   awaitingOnBehalfOfName?: string | null;
+  /** The policy's counting method — WORKING_DAYS reads "5 working days", CALENDAR_DAYS "5 days" (B5). */
+  countingMode?: TimeOffPolicyCountingMode | null;
 }

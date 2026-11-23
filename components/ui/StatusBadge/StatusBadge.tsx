@@ -134,10 +134,15 @@ export const StatusBadge: React.FC<{
   status: StatusTone | EntityStatus;
   /** Overrides the word only. The colour and the icon stay tied to the status. */
   label?: string;
+  /**
+   * Overrides the icon, only where a ready spec draws another one for the same status (the profile header: Last day
+   * with Logout03, Invited with Mail01). The colour stays the status's.
+   */
+  icon?: IconSvgElement;
   /** `sm` (20 px) in dense tables; `md` (24 px) everywhere else. */
   size?: "sm" | "md";
   className?: string;
-}> = ({ status, label, size = "md", className }) => {
+}> = ({ status, label, icon, size = "md", className }) => {
   const t = useTranslations("common");
   const resolved = resolve(status);
   const style = STYLES[resolved.tone];
@@ -153,7 +158,7 @@ export const StatusBadge: React.FC<{
         className,
       )}
     >
-      <Icon icon={style.icon} size="sm" className={cn("size-3.5", style.iconClassName)} />
+      <Icon icon={icon ?? style.icon} size="sm" className={cn("size-3.5", style.iconClassName)} />
       {label ?? t(resolved.labelKey)}
     </span>
   );

@@ -289,3 +289,10 @@ This week (T1–T3) and the Light top (L1–L2) as `hris/design/handoffs/2026-11
 
 Built from `design-fixes-home-widgets-1` (2026-11-19, walked where the seed had data, and the rest with made-up data the same day). Differences: a task's due time, a review's question count and a document's pages and minutes are not shown — the API has none of them yet; the Automations chart's grey dot is `field` #DADADF (no token for #D3D3D8); This week Small switches to faces at three today, as the board.
 - **W15 by what changed** (2026-11-19): a page agreed to before reads "was updated", a new one "to read and agree" — proposed words, final in DQ-22.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- DQ-19: W11 a review card is titled "Review", its cycle's name (the review task's description) on the line under it,
+  with the person when it is somebody else's; no question count, no "Write your self review". W10 / K7 a task is due on
+  a day, no time (as built); W12 shows no pages or minutes (as built).
+- DQ-22: W15 a must-read page never agreed to has no second line; "was updated" stays for an update to a page agreed to
+  before. Not walked.

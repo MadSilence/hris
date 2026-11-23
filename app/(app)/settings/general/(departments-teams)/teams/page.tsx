@@ -14,7 +14,7 @@ export default function TeamsPage() {
   // The page owns the viewport height so the canvas can fill what is left instead of pushing the
   // whole page into a scroll.
   return (
-    <div className="flex h-[calc(100dvh-6rem)] flex-col gap-5 px-10">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col gap-5 px-10">
       <div className="flex-none space-y-3">
         <SettingsPageHeader title={t("page.title")} backHref="/settings" />
 

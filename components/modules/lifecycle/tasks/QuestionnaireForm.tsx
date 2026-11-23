@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/desact/radio-group";
 import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { FormError } from "@/components/feedback/FormError";
+import { explain } from "@/lib/feedback/explainToast";
 import type { Question } from "@/models/lifecycle";
 
 /**
@@ -17,11 +18,11 @@ import type { Question } from "@/models/lifecycle";
  * preboarding page. Sent once: the task closes with the answers. The backend checks every answer; the
  * form only stops a send with a required question left empty, where the reader can see which.
  */
-export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }: {
+export function QuestionnaireForm({ taskId, questions, onSubmit, preview }: {
   taskId: string;
   questions: Question[];
-  /** A preview: the questions can be tried, nothing is sent. */
-  sendDisabled?: boolean;
+  /** A preview: the questions can be tried, nothing is sent — Send says so when pressed (NEVER-DISABLED). */
+  preview?: boolean;
   onSubmit: (answers: Record<string, unknown>) => Promise<string | null>;
 }) {
   const t = useTranslations("lifecycle");
@@ -36,6 +37,11 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
   const submit = async () => {
     if (missing.length > 0) {
       setError(t("questionnaire.answerRequired", { questions: missing.map((q) => q.label).join(", ") }));
+      return;
+    }
+    setError(null);
+    if (preview) {
+      explain(t("preview.nothingSent"));
       return;
     }
     setBusy(true);
@@ -125,7 +131,7 @@ export function QuestionnaireForm({ taskId, questions, onSubmit, sendDisabled }:
             );
         }
       })}
-      <Button type="button" size="sm" disabled={busy || sendDisabled} onClick={() => void submit()}>{t("questionnaire.send")}</Button>
+      <Button type="button" size="sm" disabled={busy} onClick={() => void submit()}>{t("questionnaire.send")}</Button>
       <FormError message={error} />
     </div>
   );

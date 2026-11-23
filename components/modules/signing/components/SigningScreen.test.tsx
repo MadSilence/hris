@@ -13,6 +13,7 @@ jest.mock("@/components/clients/apiClient", () => ({
 }));
 jest.mock("../actions", () => ({
   sendSigningCodeAction: jest.fn(async () => ({ status: "SUCCESS" })),
+  checkSigningCodeAction: jest.fn(async () => ({ status: "SUCCESS" })),
   signAction: jest.fn(async () => ({ status: "SUCCESS" })),
   declineSigningAction: jest.fn(async () => ({ status: "SUCCESS" })),
   drawingLinkAction: jest.fn(),
@@ -34,6 +35,7 @@ beforeEach(() => {
   (internalApiClient.fetch as jest.Mock).mockImplementation(async () => ({ ok: true, blob: async () => new Blob(["%PDF-"]) }));
   (internalApiClient.post as jest.Mock).mockImplementation(async () => ({ drawing: null, at: null }));
   (actions.sendSigningCodeAction as jest.Mock).mockImplementation(async () => ({ status: "SUCCESS" }));
+  (actions.checkSigningCodeAction as jest.Mock).mockImplementation(async () => ({ status: "SUCCESS" }));
   (actions.signAction as jest.Mock).mockImplementation(async () => ({ status: "SUCCESS" }));
   (actions.declineSigningAction as jest.Mock).mockImplementation(async () => ({ status: "SUCCESS" }));
 });
@@ -65,7 +67,7 @@ describe("the signing screen (documents-signing)", () => {
     expect(screen.getByText("Tomas Petrauskas")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Sign/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByTitle("Employment contract 2026")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("document", { name: "Employment contract 2026" })).toBeInTheDocument());
   });
 
   it("Sign sends the code to the signer's email and asks for it (G03a)", async () => {
@@ -86,7 +88,7 @@ describe("the signing screen (documents-signing)", () => {
   it("G08: a closed signing says so and does not show the document", () => {
     screenFor(envelope({ status: "CANCELLED" }));
     expect(screen.getByText("This signing request is closed")).toBeInTheDocument();
-    expect(screen.queryByTitle("Employment contract 2026")).not.toBeInTheDocument();
+    expect(screen.queryByRole("document")).not.toBeInTheDocument();
   });
 
   it("G06: declining needs a comment", async () => {
@@ -100,7 +102,9 @@ describe("the signing screen (documents-signing)", () => {
     await waitFor(() =>
       expect(actions.declineSigningAction).toHaveBeenCalledWith({ kind: "member", envelopeId: "env-1" }, "Wrong start date"),
     );
-    expect(await screen.findByText("You declined. Lena Novak has been told.")).toBeInTheDocument();
+    // G04b: the red circle, the comment kept in quotes, and who sees it.
+    expect(await screen.findByText("You declined to sign")).toBeInTheDocument();
+    expect(screen.getByText("“Wrong start date”")).toBeInTheDocument();
   });
 
   it("the code, then the typed name, sign it (G03 → G04)", async () => {
@@ -129,6 +133,32 @@ describe("the signing screen (documents-signing)", () => {
     fireEvent.click(screen.getByRole("button", { name: /Sign/ }));
     expect(await screen.findByText("Everyone has signed. The signed copy is in Documents.")).toBeInTheDocument();
     expect(screen.queryByText("Tomas Petrauskas")).not.toBeInTheDocument();
+  });
+});
+
+describe("the code step (G0, G12)", () => {
+  it("shows the code step at once, before the email has gone (G12)", async () => {
+    let release: () => void = () => undefined;
+    (actions.sendSigningCodeAction as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => (release = () => resolve({ status: "SUCCESS" }))),
+    );
+    screenFor(envelope());
+    fireEvent.click(screen.getByRole("button", { name: /Sign/ }));
+    expect(await screen.findByText("Check your email")).toBeInTheDocument();
+    release();
+  });
+
+  it("a wrong code stays on the code step, its digits kept, in the approved words (G0, G05)", async () => {
+    (actions.checkSigningCodeAction as jest.Mock).mockImplementation(async () => ({ status: "ERROR", code: "D00044" }));
+    screenFor(envelope());
+    fireEvent.click(screen.getByRole("button", { name: /Sign/ }));
+    await screen.findByText("Check your email");
+    fireEvent.change(screen.getByLabelText("Digit 1"), { target: { value: "000000" } });
+    expect(await screen.findByText("That code doesn’t match. Check your email or get a new code.")).toBeInTheDocument();
+    expect(screen.queryByText("Code confirmed")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Digit 1")).toHaveValue("0");
+    expect(actions.checkSigningCodeAction).toHaveBeenCalledWith({ kind: "member", envelopeId: "env-1" }, "000000", expect.any(String));
+    expect(actions.signAction).not.toHaveBeenCalled();
   });
 });
 

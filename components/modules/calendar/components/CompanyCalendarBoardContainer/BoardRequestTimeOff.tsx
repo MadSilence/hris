@@ -17,10 +17,7 @@ import { useEmployeeTimeOffBalancesByUser } from "@/components/modules/settings/
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { RequestTimeOffModal } from "@/components/modules/calendar/components/UserTimeOffBalances/RequestTimeOffModal";
-import {
-  COMPANY_CALENDAR_ABSENCES_QUERY_KEY,
-  COMPANY_CALENDAR_CAPACITY_QUERY_KEY,
-} from "@/components/modules/calendar/hooks/useCompanyCalendar";
+import { COMPANY_CALENDAR_ABSENCES_QUERY_KEY } from "@/components/modules/calendar/hooks/useCompanyCalendar";
 
 export type BoardRequest = { userId: string; name: string; start: string; end: string };
 
@@ -47,9 +44,8 @@ export const BoardRequestTimeOff: FC<Props> = ({ request, onClose }) => {
   const policyMap = useMemo(() => new Map((policies ?? []).map((p) => [p.id, p])), [policies]);
 
   const close = () => {
-    // The new request is a bar on the board and may tip a limit.
+    // The new request is a pill on the board.
     void queryClient.invalidateQueries({ queryKey: [COMPANY_CALENDAR_ABSENCES_QUERY_KEY] });
-    void queryClient.invalidateQueries({ queryKey: [COMPANY_CALENDAR_CAPACITY_QUERY_KEY] });
     onClose();
   };
 

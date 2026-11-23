@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
   ArrowLeft02Icon,
@@ -11,6 +11,7 @@ import {
   CancelCircleIcon,
   FileTextIcon,
   FlashIcon,
+  SignatureIcon,
   StarIcon,
   TaskDone01Icon,
   Tick02Icon,
@@ -20,7 +21,6 @@ import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Skeleton } from "@/components/desact/skeleton";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
@@ -28,11 +28,13 @@ import { hubIcon } from "@/components/modules/hub/shared";
 import { cn } from "@/lib/cn";
 import { useDisplayLocale, useShortDates } from "@/lib/date";
 import { showActionError, showError } from "@/lib/errors/errorToast";
-import { dayAmountArgs, type TimeOffDecisionContext, type TimeOffRequest } from "@/models/timeOff";
+import { dayAmountArgs, type TimeOffRequest } from "@/models/timeOff";
 import { getTimeOffRequestsAwaitingMeQueryKey } from "@/components/modules/settings/modules/time/timeOff/utils";
 import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
 import { useDecideCancellation } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useDecideCancellation";
-import { timeOffDecisionQueryKey } from "@/components/modules/timeOffDecision";
+import { DeclineLeaveDialog } from "@/components/modules/timeOff/DeclineLeaveDialog";
+import { useLeaveRequestContext } from "@/components/modules/timeOff/lib/requestQuery";
+import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
 import { NEEDS_ACTION_INBOX_HREF } from "@/components/modules/notifications/utils/inboxFilters";
 import { getWaitingOnMeQueryKey } from "@/components/modules/notifications/utils/notificationsQueryKeys";
 import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
@@ -69,21 +71,13 @@ const KIND_ICON: Record<DeckCard["kind"], IconSvgElement> = {
   TASK: TaskDone01Icon,
   REVIEW: StarIcon,
   AGREE: FileTextIcon,
-  SIGN: FileTextIcon,
+  SIGN: SignatureIcon,
   FAILED_RUN: CancelCircleIcon,
 };
 
 
-/** One request's decision context — who asked, who else is out, what is left after. Shared with the request page. */
-const useDecisionContext = (requestId: string | null) => {
-  const { internalApiClient } = useAppDataContext();
-  return useQuery<TimeOffDecisionContext>({
-    queryKey: timeOffDecisionQueryKey(requestId ?? ""),
-    queryFn: () => internalApiClient.get<TimeOffDecisionContext>(`/time-off/requests/${requestId}/decision-context`),
-    enabled: Boolean(requestId),
-    staleTime: 30_000,
-  });
-};
+/** One request's decision context — who asked, who else is out, what is left after. Shared with the request in full. */
+const useDecisionContext = (requestId: string | null) => useLeaveRequestContext(requestId, { staleTime: 30_000 });
 
 /**
  * Every source of the deck, read once for whichever size is drawn. What waits on the reader is the one list
@@ -188,12 +182,12 @@ const useAnswers = () => {
   };
 };
 
-/** Where a card opens: its request, its task, its review step, its failed run. */
-const hrefOf = (card: DeckCard) => {
+/** Where a card opens: its request (in full over Home, AQ-12), its task, its review step, its failed run. */
+const hrefOf = (card: DeckCard, leaveHref: (requestId: string) => string) => {
   switch (card.kind) {
     case "TIME_OFF":
     case "CANCELLATION":
-      return `/time-off/requests/${card.request.id}`;
+      return leaveHref(card.request.id);
     case "REVIEW":
       return card.task.kind === "REVIEW" ? `/reviews/write/by-task/${card.task.id}` : `/reviews/steps/by-task/${card.task.id}`;
     case "FAILED_RUN":
@@ -205,8 +199,11 @@ const hrefOf = (card: DeckCard) => {
     case "TASK":
       // A signature waiting (documents-signing G01): Sign opens the signing screen, not the task list.
       if (card.task.kind === "SIGN" && card.task.envelopeId) return `/documents/sign/${card.task.envelopeId}`;
-      // A request for a document (documents-requests R09): its box and Upload are on the person's own tab.
-      if (card.task.kind === "DOCUMENT" && card.task.processId === null) return `/organization/people/${card.task.subject.id}/documents`;
+      // A request for a document (documents-requests R09, R7): the tab of the person it is about, with the request's
+      // upload open at once — for whoever is asked to upload, the person or someone else.
+      if (card.task.kind === "DOCUMENT" && card.task.processId === null) {
+        return `/organization/people/${card.task.subject.id}/documents?request=${card.task.id}`;
+      }
       return "/tasks";
     default:
       return "/tasks";
@@ -264,6 +261,8 @@ const DecisionCard: React.FC<{
   const { userId } = useCurrentUser();
   const today = isoDateInZone(new Date(), settings.data?.companyTimeZone);
   const context = useDecisionContext(card.kind === "TIME_OFF" || card.kind === "CANCELLATION" ? card.request.id : null);
+  const leaveHref = useLeaveRequestHref();
+  const [declining, setDeclining] = useState(false);
   const tab = preview ? -1 : undefined;
 
   let header: React.ReactNode = null;
@@ -315,8 +314,9 @@ const DecisionCard: React.FC<{
               ? t("waitingOnYou.workingDays", dayAmountArgs(card.request.requestedAmount))
               : days}
           </FactChip>
+          {/* U7: a waiting request is not counted yet — what is left after it is the balance minus what waits. */}
           {balance && card.kind === "TIME_OFF" && (
-            <FactChip>{t("waitingOnYou.leftAfter", { left: tTimeOff("amount.days", dayAmountArgs(balance.currentBalance)) })}</FactChip>
+            <FactChip>{t("waitingOnYou.leftAfter", { left: tTimeOff("amount.days", dayAmountArgs(balance.availableBalance ?? balance.currentBalance)) })}</FactChip>
           )}
         </span>
       );
@@ -328,7 +328,7 @@ const DecisionCard: React.FC<{
           variant="secondary"
           size="sm"
           tabIndex={tab}
-          onClick={() => router.push(`/time-off/requests/${card.request.id}?decline=1`)}
+          onClick={() => (card.kind === "TIME_OFF" ? setDeclining(true) : router.push(leaveHref(card.request.id)))}
         >
           {t("waitingOnYou.decline")}
         </Button>
@@ -355,17 +355,28 @@ const DecisionCard: React.FC<{
     const task = card.task;
     const process = task.processType ? t(`processes.types.${task.processType}`) : "";
     const self = Boolean(userId) && task.subject?.id === userId;
-    // Never the reader's own name (W11): their own review is "your self-review".
+    // Never the reader's own name (W11).
     const person = self ? "" : task.subject?.name ?? "";
+    // W11 (DQ-19): a review card is titled "Review", its cycle on the line under it (the review task carries the cycle's
+    // name as its description); no question count, and no "Write your self review", which the card already says.
+    const cycle = card.kind === "REVIEW" ? task.description?.trim() ?? "" : "";
+    const from = card.kind === "REVIEW" ? cycle : process;
     const line =
-      card.kind === "REVIEW" && self
-        ? t("waitingOnYou.selfReview")
-        : process || person
-          ? t("waitingOnYou.taskFrom", { hasProcess: process ? "yes" : "no", process, hasPerson: person ? "yes" : "no", person })
-          : "";
-    header = <CardHeader name={task.title} line={line} />;
+      from || person
+        ? t("waitingOnYou.taskFrom", { hasProcess: from ? "yes" : "no", process: from, hasPerson: person ? "yes" : "no", person })
+        : "";
+    header = <CardHeader name={card.kind === "REVIEW" ? t("waitingOnYou.kinds.review") : task.title} line={line} />;
     const left = task.dueDate ? daysBetween(today, task.dueDate) : null;
-    if (task.dueReached && task.dueDate && task.dueDate < today) {
+    // A signature a task stands for reads as one sent from a profile (G01): the signature tile, "Sign by Wed, 17 Dec".
+    const signTask = card.kind === "TASK" && task.kind === "SIGN";
+    if (signTask) {
+      tile = SignatureIcon;
+      const sender = task.requestedBy?.name ?? "";
+      header = <CardHeader name={task.title} line={t("waitingOnYou.toSignFrom", { hasSender: sender ? "yes" : "no", sender })} />;
+    }
+    if (signTask && task.dueDate && !(task.dueReached && task.dueDate < today)) {
+      main = t("waitingOnYou.signBy", { date: dates.date(task.dueDate, { weekday: true, hideYear: true }) });
+    } else if (task.dueReached && task.dueDate && task.dueDate < today) {
       main = t("waitingOnYou.taskOverdue", { date: dates.date(task.dueDate, { weekday: true, hideYear: true }) });
     } else if (card.kind === "REVIEW") {
       main = t("waitingOnYou.reviewDue", { hasDate: left === null ? "no" : "yes", count: Math.max(0, left ?? 0) });
@@ -382,7 +393,7 @@ const DecisionCard: React.FC<{
           <FactChip>{t("waitingOnYou.managerSeesAfter")}</FactChip>
         </span>
       ) : null;
-    } else if (task.requestedBy?.name) {
+    } else if (task.requestedBy?.name && !signTask) {
       under = <p className="mt-0.5 truncate text-label font-normal text-tertiary">{t("waitingOnYou.assignedBy", { name: task.requestedBy.name })}</p>;
     }
     actions =
@@ -393,14 +404,24 @@ const DecisionCard: React.FC<{
         </Button>
       ) : (
         <Button asChild size="sm" tabIndex={tab}>
-          <Link href={hrefOf(card)}>{card.kind === "TASK" && task.kind === "SIGN" ? t("waitingOnYou.sign") : t("waitingOnYou.start")}</Link>
+          {card.kind === "TASK" && task.kind === "SIGN" ? (
+            <Link href={hrefOf(card, leaveHref)}>
+              <Icon icon={SignatureIcon} size="sm" />
+              {t("waitingOnYou.sign")}
+            </Link>
+          ) : (
+            <Link href={hrefOf(card, leaveHref)}>{t("waitingOnYou.start")}</Link>
+          )}
         </Button>
       );
   } else if (card.kind === "AGREE") {
     // No agreeing from Home (W15): the button only opens the page, where the person agrees after reading it.
     const agreement = card.agreement;
     tile = hubIcon(agreement.icon);
-    header = <CardHeader name={agreement.title} line={t(`waitingOnYou.${agreementLineKey(agreement)}`)} />;
+    // W15 (DQ-22): a page never agreed to has no second line — its name and the card's own action; "was updated" stays
+    // for a new version of a page agreed to before.
+    const lineKey = agreementLineKey(agreement);
+    header = <CardHeader name={agreement.title} line={lineKey ? t(`waitingOnYou.${lineKey}`) : null} />;
     main = agreement.overdue
       ? t("waitingOnYou.agreeOverdue", { date: dates.date(agreement.dueOn, { weekday: true, hideYear: true }) })
       : agreement.dueOn
@@ -413,7 +434,7 @@ const DecisionCard: React.FC<{
     ) : null;
     actions = (
       <Button asChild size="sm" tabIndex={tab}>
-        <Link href={hrefOf(card)}>{t("waitingOnYou.readAndAgree")}</Link>
+        <Link href={hrefOf(card, leaveHref)}>{t("waitingOnYou.readAndAgree")}</Link>
       </Button>
     );
   } else if (card.kind === "SIGN") {
@@ -431,7 +452,10 @@ const DecisionCard: React.FC<{
     main = lastDay ? t("waitingOnYou.signBy", { date: dates.date(lastDay, { weekday: true, hideYear: true }) }) : envelope.title;
     actions = (
       <Button asChild size="sm" tabIndex={tab}>
-        <Link href={hrefOf(card)}>{t("waitingOnYou.sign")}</Link>
+        <Link href={hrefOf(card, leaveHref)}>
+          <Icon icon={SignatureIcon} size="sm" />
+          {t("waitingOnYou.sign")}
+        </Link>
       </Button>
     );
   } else {
@@ -454,13 +478,13 @@ const DecisionCard: React.FC<{
           {t("waitingOnYou.markAsRead")}
         </Button>
         <Button asChild size="sm" tabIndex={tab}>
-          <Link href={hrefOf(card)}>{t("waitingOnYou.fixIt")}</Link>
+          <Link href={hrefOf(card, leaveHref)}>{t("waitingOnYou.fixIt")}</Link>
         </Button>
       </>
     );
   }
 
-  const href = hrefOf(card);
+  const href = hrefOf(card, leaveHref);
   return (
     <article
       data-deck-leaving={leaving ?? undefined}
@@ -495,6 +519,20 @@ const DecisionCard: React.FC<{
         </button>
         <span className="flex gap-2">{actions}</span>
       </div>
+      {card.kind === "TIME_OFF" ? (
+        <DeclineLeaveDialog
+          target={declining
+            ? {
+                requestId: card.request.id,
+                startDate: card.request.startDate,
+                endDate: card.request.endDate,
+                policyName: context.data?.leaveTypeName ?? null,
+                firstName: context.data?.requesterName?.split(" ")[0] ?? null,
+              }
+            : null}
+          onClose={() => setDeclining(false)}
+        />
+      ) : null}
     </article>
   );
 };
@@ -663,6 +701,7 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
   const locale = useDisplayLocale();
   const leave = card.kind === "TIME_OFF" || card.kind === "CANCELLATION";
   const context = useDecisionContext(leave ? card.request.id : null);
+  const leaveHref = useLeaveRequestHref();
   const name = leave
     ? context.data?.requesterName ?? t("card.unnamed")
     : card.kind === "FAILED_RUN"
@@ -693,7 +732,7 @@ const DeckRow: React.FC<{ card: DeckCard; preview?: boolean }> = ({ card, previe
   return (
     <li>
       <Link
-        href={hrefOf(card)}
+        href={hrefOf(card, leaveHref)}
         tabIndex={preview ? -1 : undefined}
         className={TWO_LINE_ROW.row}
       >

@@ -205,7 +205,7 @@ export default function PolicyDetailContainer({ leaveTypeId, policyId }: Props) 
   const isDraft = policy.status === TimeOffPolicyStatus.Draft;
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
         <SettingsPageHeader title={policy.name} backHref={listHref} />
 

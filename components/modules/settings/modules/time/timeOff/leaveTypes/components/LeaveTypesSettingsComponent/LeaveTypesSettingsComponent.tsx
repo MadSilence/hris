@@ -85,7 +85,7 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
   );
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
           <SettingsPageHeader title={t("leaveTypes.list.title")} backHref="/settings" />
@@ -140,12 +140,10 @@ export const LeaveTypesSettingsComponent: FC<Props> = ({
                     <TableCell colSpan={4}>
                       <ListEmptyState
                         query={query}
-                        onClearSearch={() => setQuery("")}
                         archivedView={showArchived}
                         scene="time-off"
                         title={t("leaveTypes.list.emptyTitle")}
                         description={t("leaveTypes.list.emptyDescription")}
-                        noResultsHint={t("leaveTypes.list.noResultsHint")}
                         archivedDescription={t("leaveTypes.list.archivedDescription")}
                         onCreate={onCreateAction}
                         createLabel={t("leaveTypes.list.add")}

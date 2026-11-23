@@ -1,42 +1,32 @@
 "use client";
 
-import { createContext, CSSProperties, FC, useContext, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/desact/avatar";
 import { Skeleton } from "@/components/desact/skeleton";
-import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
-import type { CompanyCalendarAbsence, CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
-import { toTagColor } from "@/lib/theme/tags";
-import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
-import { useShortDates } from "@/lib/date";
-
-export const NAME_COL = 200;
-
-export const boardGridTemplate = (dayCount: number): string =>
-  `${NAME_COL}px repeat(${dayCount}, minmax(0, 1fr))`;
+import { cn } from "@/lib/cn";
+import type { CompanyCalendarAbsence, CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
+import { toISO } from "@/components/modules/calendar/lib/dateRange";
+import {
+  NAME_COL,
+  ROW_H,
+  indexOfISO,
+  pillTop,
+  rowHeightFor,
+} from "@/components/modules/calendar/lib/boardGeometry";
+import { alsoAway, pillSuffix, requestSpan } from "@/components/modules/calendar/lib/leaveText";
+import { LeavePill, usePillSuffixText } from "@/components/modules/calendar/components/LeavePill";
+import { LeaveCard } from "@/components/modules/calendar/components/LeaveCard";
+import { displayName, useBoard } from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
 
 /**
- * A holiday is a day off for the row, drawn quiet (SPEC § 13.13: weekends and holidays are a light ground,
- * the holiday named): Mist, a hairline, secondary text. A variable because the half-day fill is a gradient
- * stop, not a utility class.
+ * One leave on a row, cut to the loaded days and given a lane. Two leaves of one person that overlap — a request and
+ * its cancellation, two policies on one day — take two lanes, and the row grows; one lane keeps the row at 52.
  */
-const HOLIDAY_FILL = "var(--surface-mist)";
-
-/**
- * One bar on a row: a public holiday or a person's leave, clipped to the visible days and turned into a
- * column span and a lane.
- *
- * A holiday bar is **one holiday**, not a run of adjacent days: two different holidays that happen to
- * touch — Christmas Eve on the 24th and a Christmas Break spanning the 25th–26th — stay two bars, because
- * merging them would have to throw one of the names away. Leave is one bar per request.
- */
-export type CompanyCalendarBar =
-  | { kind: "holiday"; key: string; mark: CompanyCalendarMark; startDate: string; endDate: string }
-  | { kind: "leave"; key: string; absence: CompanyCalendarAbsence; startDate: string; endDate: string };
-
-type Segment = {
-  bar: CompanyCalendarBar;
+export type LeaveSegment = {
+  absence: CompanyCalendarAbsence;
+  key: string;
   startCol: number;
   endCol: number;
   lane: number;
@@ -44,41 +34,38 @@ type Segment = {
   continuesRight: boolean;
 };
 
-/** Height of one lane, and what the row keeps around its lanes. */
-const LANE_PX = 22;
-const ROW_PAD_PX = 12;
-const MIN_ROW_PX = 44;
-
 /**
- * Clips the bars to the window and packs them into lanes: each bar takes the first lane whose last bar
- * ended before it starts. Measured from the data, never from the DOM — a sticky name column over rows of
- * varying height is where this board's layout broke before.
+ * Cuts the leave to the loaded days and packs it into lanes: each pill takes the first lane whose last pill ended
+ * before it starts. Measured from the data, never from the DOM — a sticky name column over rows of varying height is
+ * where this board's layout broke before.
  */
-export const toSegments = (bars: CompanyCalendarBar[], dayISOs: string[]): Segment[] => {
-  if (dayISOs.length === 0) return [];
-  const first = dayISOs[0];
-  const last = dayISOs[dayISOs.length - 1];
-
-  const clipped = bars
-    .filter((b) => b.startDate <= last && b.endDate >= first)
-    .map((b) => {
-      const startISO = b.startDate < first ? first : b.startDate;
-      const endISO = b.endDate > last ? last : b.endDate;
+export const toLaneSegments = (
+  absences: readonly CompanyCalendarAbsence[],
+  rangeStart: Date,
+  dayCount: number,
+): { segments: LeaveSegment[]; lanes: number } => {
+  const firstISO = toISO(rangeStart);
+  const segments = absences
+    .map((a, i): LeaveSegment | null => {
+      const start = indexOfISO(rangeStart, a.startDate);
+      const end = indexOfISO(rangeStart, a.endDate);
+      if (end < 0 || start > dayCount - 1) return null;
+      const span = requestSpan(a);
       return {
-        bar: b,
-        startCol: dayISOs.indexOf(startISO),
-        endCol: dayISOs.indexOf(endISO),
+        absence: a,
+        key: `${a.requestId ?? i}-${a.startDate}`,
+        startCol: Math.max(0, start),
+        endCol: Math.min(dayCount - 1, end),
         lane: 0,
-        continuesLeft: b.startDate < first,
-        continuesRight: b.endDate > last,
+        continuesLeft: span.start < firstISO,
+        continuesRight: end > dayCount - 1,
       };
     })
-    .filter((s) => s.startCol !== -1 && s.endCol !== -1)
-    // Holidays first on a tie, so a row's holiday keeps its familiar top lane.
-    .sort((a, b) => a.startCol - b.startCol || (a.bar.kind === b.bar.kind ? 0 : a.bar.kind === "holiday" ? -1 : 1));
+    .filter((s): s is LeaveSegment => s !== null)
+    .sort((a, b) => a.startCol - b.startCol || a.endCol - b.endCol);
 
   const laneEnds: number[] = [];
-  for (const seg of clipped) {
+  for (const seg of segments) {
     let lane = laneEnds.findIndex((end) => end < seg.startCol);
     if (lane === -1) {
       lane = laneEnds.length;
@@ -88,362 +75,283 @@ export const toSegments = (bars: CompanyCalendarBar[], dayISOs: string[]): Segme
     }
     seg.lane = lane;
   }
-  return clipped;
+  return { segments, lanes: Math.max(1, laneEnds.length) };
 };
 
-/** One lane keeps the old row height, so most rows do not move when leave arrives. */
-export const rowHeight = (segments: Segment[]): number => {
-  const lanes = segments.reduce((max, s) => Math.max(max, s.lane + 1), 0);
-  return Math.max(MIN_ROW_PX, lanes * LANE_PX + ROW_PAD_PX);
-};
-
-const holidayTitle = (t: CalendarTranslator, m: CompanyCalendarMark): string => {
-  const parts = [m.name];
-  // The board draws half a day and leave counting charges a whole one. Both are deliberate — exact
-  // half-day arithmetic arrives with hourly absence, which does not exist — but the two screens were
-  // disagreeing in silence, and the person reading them is the one who loses the day.
-  if (m.dayPart === "HALF_DAY") parts.push(t("board.halfDayCountsWhole"));
-  // A substituted holiday is drawn exactly like any other and says nothing about where it moved from:
-  // decided, with the nominal date dropping out of the product (`nominalDate` stays on the DTO, unused).
-  return m.calendarName ? `${parts.join(" ")} · ${m.calendarName}` : parts.join(" ");
-};
-
-/** Leave whose type the reader may not see is "Away", with no type (SPEC § 13.13 "Hidden details"). */
-/** A bar is named by its policy — the colour is the policy's (D2) — or "Away" when the reader may not know it. */
-const leaveLabel = (t: CalendarTranslator, a: CompanyCalendarAbsence): string =>
-  a.policyName ?? a.leaveTypeName ?? t("board.away");
-
-/** The tooltip is the explanation — there is no legend (`COMPANY_CALENDAR.md` § 7). */
-export const leaveTitle = (t: CalendarTranslator, a: CompanyCalendarAbsence): string => {
-  const dates = a.startDate === a.endDate ? a.startDate : `${a.startDate} – ${a.endDate}`;
-  const parts = [leaveLabel(t, a), dates];
-  if (a.status === "PENDING") parts.push(a.awaitingYou ? t("board.pendingYourApproval") : t("board.pendingApproval"));
-  if (a.status === "CANCELLATION_PENDING") {
-    parts.push(a.awaitingYou ? t("board.cancellationAwaitingYou") : t("board.cancellationRequested"));
-  }
-  return parts.join(" · ");
-};
-
-/** The tooltip's lines under the policy's name: the dates in the short style, and a status that is not plain approved. */
-const leaveDetail = (
-  t: CalendarTranslator,
-  a: CompanyCalendarAbsence,
-  shortDates: ReturnType<typeof useShortDates>,
-): string => {
-  const parts = [shortDates.range(a.startDate, a.endDate, { weekday: true })];
-  if (a.status === "PENDING") parts.push(a.awaitingYou ? t("board.pendingYourApproval") : t("board.pendingApproval"));
-  if (a.status === "CANCELLATION_PENDING") {
-    parts.push(a.awaitingYou ? t("board.cancellationAwaitingYou") : t("board.cancellationRequested"));
-  }
-  return parts.join(" · ");
-};
-
-/**
- * The days being picked on the board, shared with its header: a row reports its drag here, and the header marks those
- * dates — in `accent` 600, the first and last in a soft circle (the designers' answer 1.5). Columns, not dates.
- */
-export const BoardPickContext = createContext<{
-  picked: { from: number; to: number } | null;
-  setPicked: (picked: { from: number; to: number } | null) => void;
-}>({ picked: null, setPicked: () => {} });
-
-/**
- * A leave bar (SPEC § 13.13), in its type's tag colour — and in gray when the type was not sent: a masked bar
- * tinted with its type's colour would still name the type to anyone who has learnt the colour.
- *
- *   approved   a solid bar in the tag's bar colour
- *   pending    a 1.5 px edge in the bar colour over the tag's light tint, with a 4 px dot pattern on top
- *
- * The difference is never the colour alone: the dots stay in a black-and-white print.
- */
-export const leaveStyle = (a: CompanyCalendarAbsence): CSSProperties => {
-  const tag = toTagColor(a.policyColor);
-  const bar = `var(--tag-${tag}-bar)`;
-  if (a.status === "APPROVED") {
-    return { backgroundColor: bar, borderColor: bar, color: "var(--text-inverse)" };
-  }
-  return {
-    backgroundColor: `var(--tag-${tag}-bg)`,
-    borderColor: bar,
-    color: `var(--tag-${tag}-text)`,
-    backgroundImage: `radial-gradient(${bar} 0.75px, transparent 1px)`,
-    backgroundSize: "4px 4px",
-  };
-};
-
-const byUser = <T extends { userId: string }>(items: T[]) => {
-  const map = new Map<string, T[]>();
-  for (const item of items) {
-    const list = map.get(item.userId) ?? [];
-    list.push(item);
-    map.set(item.userId, list);
-  }
-  return map;
-};
-
-/** Marks grouped by the row they belong to. */
-export const useMarksByUser = (marks: CompanyCalendarMark[]) => useMemo(() => byUser(marks), [marks]);
-
-/** Leave grouped by the row it belongs to. */
-export const useAbsencesByUser = (absences: CompanyCalendarAbsence[]) =>
-  useMemo(() => byUser(absences), [absences]);
-
-export type CompanyCalendarRowGeometry = {
-  days: Date[];
-  dayISOs: string[];
-  todayISO: string;
-  isNonWorkingDay: (d: Date) => boolean;
-  density: "month" | "week";
-  gridTemplateColumns: string;
-};
-
-type RowProps = CompanyCalendarRowGeometry & {
+type RowProps = {
   user: CompanyCalendarUser;
   marks: CompanyCalendarMark[];
   absences?: CompanyCalendarAbsence[];
   /**
-   * Set when the reader may ask for leave on this row — their own, or someone's they may file for. A
-   * click or a drag across days opens the request with those dates; the server decides whether it may
-   * be filed.
+   * Set when the reader may ask for leave on this row — their own, or someone's they may file for. A click or a drag
+   * across days opens the request with those dates; the server decides whether it may be filed.
    */
   onSelectRange?: (startISO: string, endISO: string) => void;
 };
 
 const NO_ABSENCES: CompanyCalendarAbsence[] = [];
 
-export const CompanyCalendarRow: FC<RowProps> = ({
-  user: u,
-  marks,
-  absences = NO_ABSENCES,
-  days,
-  dayISOs,
-  todayISO,
-  isNonWorkingDay,
-  density,
-  gridTemplateColumns,
-  onSelectRange,
-}) => {
-  // A drag across the row's days: where it started and where the pointer is now. Released anywhere —
-  // the pointer may leave the row while dragging — it opens the request for the days covered.
-  const t = useTranslations("calendar");
-  const shortDates = useShortDates();
+/**
+ * A person row (N01): avatar 28 and the name 14/20 500 in the people column, then the days. Every day is its own cell
+ * — the dividers, the weekends, the month starts and the today line are the board's, drawn once behind all rows —
+ * and on the row only what is the person's: their public holidays as a light tint of the company colour (accent 9 %,
+ * no flag; the week view names it in the cell), and their leave as pills, centred, over everything but the people
+ * column. Rows never shrink.
+ */
+export const CompanyCalendarRow: FC<RowProps> = ({ user: u, marks, absences = NO_ABSENCES, onSelectRange }) => {
+  const { geometry, setPicked } = useBoard();
+  const { rangeStart, dayCount, dayW, scale, columnHolidays } = geometry;
+  const suffixText = usePillSuffixText();
+  const dayArea = useRef<HTMLDivElement | null>(null);
+
+  const { segments, lanes } = useMemo(
+    () => toLaneSegments(absences, rangeStart, dayCount),
+    [absences, rangeStart, dayCount],
+  );
+  const height = rowHeightFor(segments.length === 0 ? 1 : lanes);
+
+  // The person's public holidays, cut to the loaded days. A day that is a holiday for everyone shown is drawn by
+  // the board across the whole column instead, so it is not tinted twice.
+  const holidays = useMemo(
+    () =>
+      marks
+        .map((m) => ({
+          mark: m,
+          startCol: Math.max(0, indexOfISO(rangeStart, m.startDate)),
+          endCol: Math.min(dayCount - 1, indexOfISO(rangeStart, m.endDate)),
+        }))
+        .filter((h) => h.endCol >= h.startCol && h.endCol >= 0 && h.startCol <= dayCount - 1),
+    [marks, rangeStart, dayCount],
+  );
+
+  // A drag across the row's days: where it started and where the pointer is now. Released anywhere — the pointer may
+  // leave the row while dragging — it opens the request for the days covered.
   const [drag, setDrag] = useState<{ from: number; to: number } | null>(null);
-  const { setPicked } = useContext(BoardPickContext);
   useEffect(() => {
     setPicked(drag ? { from: Math.min(drag.from, drag.to), to: Math.max(drag.from, drag.to) } : null);
   }, [drag, setPicked]);
   useEffect(() => {
     if (!drag || !onSelectRange) return;
+    const move = (e: MouseEvent) => {
+      const col = columnAt(e.clientX);
+      if (col !== null) setDrag((d) => (d && d.to !== col ? { from: d.from, to: col } : d));
+    };
     const finish = () => {
       const a = Math.min(drag.from, drag.to);
       const b = Math.max(drag.from, drag.to);
       setDrag(null);
-      onSelectRange(dayISOs[a], dayISOs[b]);
+      onSelectRange(dayISO(a), dayISO(b));
     };
+    window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", finish);
-    return () => window.removeEventListener("mouseup", finish);
-  }, [drag, onSelectRange, dayISOs]);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", finish);
+    };
+  });
 
-  const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email;
-  const segments = useMemo(
-    () =>
-      toSegments(
-        [
-          ...marks.map(
-            (m): CompanyCalendarBar => ({
-              kind: "holiday",
-              key: `h-${m.id}-${m.calendarId}-${m.startDate}`,
-              mark: m,
-              startDate: m.startDate,
-              endDate: m.endDate,
-            }),
-          ),
-          ...absences.map(
-            (a, i): CompanyCalendarBar => ({
-              kind: "leave",
-              key: `l-${a.requestId ?? i}-${a.startDate}`,
-              absence: a,
-              startDate: a.startDate,
-              endDate: a.endDate,
-            }),
-          ),
-        ],
-        dayISOs,
-      ),
-    [marks, absences, dayISOs],
-  );
-  const height = rowHeight(segments);
+  const dayISO = (col: number) => {
+    const d = new Date(rangeStart);
+    d.setDate(d.getDate() + col);
+    return toISO(d);
+  };
+  const columnAt = (clientX: number): number | null => {
+    const area = dayArea.current;
+    if (!area) return null;
+    const col = Math.floor((clientX - area.getBoundingClientRect().left) / dayW);
+    return Math.max(0, Math.min(dayCount - 1, col));
+  };
+
+  const name = displayName(u);
 
   return (
-    <div className="relative grid w-full text-body" style={{ gridTemplateColumns }}>
-      <div
-        className="sticky left-0 z-10 border-b border-r border-divider bg-card px-3 py-2"
-        style={{ minHeight: height }}
-      >
-        <UserChip
-          id={u.id}
-          name={fullName}
-          avatarUrl={u.avatarUrl}
-          firstName={u.firstName}
-          lastName={u.lastName}
-          email={u.email}
-        />
+    <div
+      data-test="calendar-row"
+      className="group/row relative flex border-b border-divider hover:bg-row-hover/60"
+      style={{ height, width: NAME_COL + dayCount * dayW }}
+    >
+      <div className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 bg-card pr-3 pl-4 group-hover/row:bg-row-hover" style={{ width: NAME_COL }}>
+        <Avatar className="size-7">
+          {u.avatarUrl ? <AvatarImage src={u.avatarUrl} alt="" /> : null}
+          <AvatarFallback name={name} />
+        </Avatar>
+        {/* The name 14/20 500 over the job 12/16 tertiary (B5); both cut with … and whole in the tooltip (N19). */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate text-body font-medium text-primary">{name}</span>
+              {u.jobName ? <span className="truncate text-hint text-tertiary">{u.jobName}</span> : null}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            {name}
+            {u.jobName ? <span className="block">{u.jobName}</span> : null}
+          </TooltipContent>
+        </Tooltip>
       </div>
 
-      {days.map((d, i) => {
-        const iso = dayISOs[i];
-        const today = iso === todayISO;
-        const weekend = isNonWorkingDay(d);
-        return (
+      <div
+        ref={dayArea}
+        data-test="calendar-row-days"
+        className={cn("relative flex-1", onSelectRange && "cursor-cell")}
+        onMouseDown={
+          onSelectRange
+            ? (e) => {
+                if (e.button !== 0) return;
+                const col = columnAt(e.clientX);
+                if (col === null) return;
+                e.preventDefault();
+                setDrag({ from: col, to: col });
+              }
+            : undefined
+        }
+      >
+        {holidays.map(({ mark, startCol, endCol }) => {
+          const everywhere = Array.from({ length: endCol - startCol + 1 }, (_, i) => startCol + i).every((c) =>
+            columnHolidays.has(c),
+          );
+          return (
+            <div
+              key={`${mark.id}-${mark.calendarId}-${mark.startDate}`}
+              data-holiday={mark.name}
+              className="absolute inset-y-0 flex items-center px-2"
+              style={{
+                left: startCol * dayW,
+                width: (endCol - startCol + 1) * dayW,
+                // A half day is tinted half — the day still reads as a day off without claiming the whole of it.
+                ...(everywhere
+                  ? null
+                  : mark.dayPart === "HALF_DAY"
+                    ? { backgroundImage: "linear-gradient(to top, var(--holiday-tint) 50%, transparent 50%)" }
+                    : { backgroundColor: "var(--holiday-tint)" }),
+              }}
+            >
+              {scale === "week" ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="min-w-0 truncate text-hint text-accent-text">{mark.name}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{mark.name}</TooltipContent>
+                </Tooltip>
+              ) : null}
+            </div>
+          );
+        })}
+
+        {/* The days being picked: one soft band over the cells, not a tint per day (the owner, 2026-11-05). */}
+        {drag !== null ? (
           <div
-            key={`${u.id}-${iso}`}
-            style={{ minHeight: height }}
-            data-day={iso}
-            onMouseDown={
-              onSelectRange
-                ? (e) => {
-                    e.preventDefault();
-                    setDrag({ from: i, to: i });
-                  }
-                : undefined
-            }
-            onMouseEnter={onSelectRange && drag ? () => setDrag({ from: drag.from, to: i }) : undefined}
-            className={[
-              "border-b border-r border-divider",
-              // Today is a thin accent line down the day (SPEC § 13.13); weekends a light ground.
-              today
-                  ? "relative before:absolute before:inset-y-0 before:left-1/2 before:w-px before:bg-accent before:content-['']"
-                  : weekend
-                    ? "bg-subtle"
-                    : "",
-              onSelectRange ? "cursor-cell" : "",
-            ].join(" ")}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-1 rounded-control bg-accent-subtle"
+            style={{
+              left: Math.min(drag.from, drag.to) * dayW + 4,
+              width: (Math.abs(drag.to - drag.from) + 1) * dayW - 8,
+            }}
           />
-        );
-      })}
+        ) : null}
 
-      {/* The days being picked: one soft band over the cells, not a tint per day (the owner, 2026-11-05). It sits
-          under the bars, and grows with the drag, unanimated. */}
-      {drag !== null ? (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 inset-y-1 grid"
-          style={{ gridTemplateColumns }}
-        >
-          <div
-            className="mx-1 rounded-control bg-accent-subtle"
-            style={{ gridColumn: `${Math.min(drag.from, drag.to) + 2} / ${Math.max(drag.from, drag.to) + 3}`, gridRow: 1 }}
-          />
-        </div>
-      ) : null}
-
-      {/* Bars, laid over the day cells in a grid with the same columns, one grid row per lane. The
-          name column is skipped by starting every span at column 2. */}
-      {segments.length > 0 ? (
-        <div
-          className="pointer-events-none absolute inset-x-0 top-1.5 grid gap-y-0.5"
-          style={{ gridTemplateColumns, gridAutoRows: `${LANE_PX - 2}px` }}
-        >
-          {segments.map((seg) => {
-            const edges = [
-              seg.continuesLeft ? "rounded-none border-l-0" : "ml-1 rounded-l-control",
-              seg.continuesRight ? "rounded-none border-r-0" : "mr-1 rounded-r-control",
-            ].join(" ");
-            const placement = { gridColumn: `${seg.startCol + 2} / ${seg.endCol + 3}`, gridRow: seg.lane + 1 };
-            // The name only where it fits. At month density a day column is a fraction of the row, so
-            // the tooltip carries it instead.
-            const showLabel = density === "week" && !seg.continuesLeft;
-
-            if (seg.bar.kind === "holiday") {
-              const mark = seg.bar.mark;
-              return (
-                <div
-                  key={seg.bar.key}
-                  title={holidayTitle(t, mark)}
-                  style={{
-                    ...placement,
-                    // A half day is painted half — the fill stops halfway up the bar, so
-                    // the day still reads as a day off without claiming the whole of it.
-                    ...(mark.dayPart === "HALF_DAY"
-                      ? { backgroundImage: `linear-gradient(to top, ${HOLIDAY_FILL} 50%, transparent 50%)` }
-                      : { backgroundColor: HOLIDAY_FILL }),
-                  }}
-                  className={`pointer-events-auto flex items-center overflow-hidden border border-divider text-hint leading-none text-secondary ${edges}`}
-                >
-                  {showLabel ? (
-                    <span className="truncate px-1.5">
-                      {mark.name}
-                      {/* The bar is painted half; the words say so where there is room for
-                          words, so the fill is not the only carrier of the fact. */}
-                      {mark.dayPart === "HALF_DAY" ? ` · ${t("board.halfDay")}` : null}
-                    </span>
-                  ) : null}
-                </div>
-              );
-            }
-
-            const absence = seg.bar.absence;
-            const className = [
-              "pointer-events-auto flex items-center overflow-hidden border-[1.5px] text-hint font-medium leading-none",
-              absence.requestId ? "cursor-pointer hover:brightness-95" : "",
-              edges,
-            ].join(" ");
-            const content = (
-              <>
-                {absence.awaitingYou ? (
-                  <span
-                    aria-label={t("board.waitingForYourApproval")}
-                    className="ml-1 h-1.5 w-1.5 shrink-0 rounded-pill bg-status-pending-fill"
-                  />
-                ) : null}
-                {showLabel ? <span className="truncate px-1.5">{leaveLabel(t, absence)}</span> : null}
-              </>
-            );
-            const style = { ...placement, ...leaveStyle(absence) };
-            // A bar is a link only for a reader the server gave the request id to. Its tooltip names the policy on the
-            // first line, then the dates and the status (the designers' answer 1.1).
-            const bar = absence.requestId ? (
-              <Link
-                href={`/time-off/requests/${absence.requestId}`}
-                aria-label={`${leaveLabel(t, absence)} · ${leaveDetail(t, absence, shortDates)}`}
-                data-status={absence.status}
-                style={style}
-                className={className}
-              >
-                {content}
-              </Link>
-            ) : (
-              <div aria-label={`${leaveLabel(t, absence)} · ${leaveDetail(t, absence, shortDates)}`} data-status={absence.status} style={style} className={className}>
-                {content}
-              </div>
-            );
-            return (
-              <Tooltip key={seg.bar.key}>
-                <TooltipTrigger asChild>{bar}</TooltipTrigger>
-                <TooltipContent title={leaveLabel(t, absence)}>{leaveDetail(t, absence, shortDates)}</TooltipContent>
-              </Tooltip>
-            );
-          })}
-        </div>
-      ) : null}
+        {segments.map((seg) => {
+          const width = (seg.endCol - seg.startCol + 1) * dayW - (seg.continuesLeft ? 0 : 2) - (seg.continuesRight ? 0 : 2);
+          return (
+            <LeavePillWithCard
+              key={seg.key}
+              segment={seg}
+              suffix={suffixText(pillSuffix(seg.absence, scale, geometry.isNonWorkingDay))}
+              left={seg.startCol * dayW + (seg.continuesLeft ? 0 : 2)}
+              top={pillTop(height, lanes, seg.lane)}
+              width={width}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-/** A placeholder row, the same height and columns as a real one. */
-export const CompanyCalendarSkeletonRow: FC<{ dayISOs: string[]; gridTemplateColumns: string }> = ({
-  dayISOs,
-  gridTemplateColumns,
-}) => (
-  <div className="grid w-full text-body" style={{ gridTemplateColumns }}>
-    <div className="sticky left-0 z-10 border-b border-r border-divider bg-card px-3 py-2">
-      <div className="flex items-center gap-2.5">
-        <Skeleton className="h-7 w-7 rounded-pill" />
-        <Skeleton className="h-4 w-28" />
+/** A pill and its card (N04, N05): the card pops up centred on the pill, 6 px from it, kept inside the board. */
+const LeavePillWithCard: FC<{ segment: LeaveSegment; suffix: string | null; left: number; top: number; width: number }> = ({
+  segment,
+  suffix,
+  left,
+  top,
+  width,
+}) => {
+  const { geometry, registry, decisions } = useBoard();
+  const [open, setOpen] = useState(false);
+  const a = segment.absence;
+  const decide = decisions.canDecide(a);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <LeavePill
+          absence={a}
+          suffix={suffix}
+          continuesLeft={segment.continuesLeft}
+          continuesRight={segment.continuesRight}
+          width={width}
+          className="absolute z-10"
+          style={{ left, top, width }}
+          onMouseDown={(e) => e.stopPropagation()}
+        />
+      </PopoverTrigger>
+      <PopoverContent side="bottom" align="center" sideOffset={6} collisionPadding={12} className="w-[300px] rounded-card p-4">
+        {open ? (
+          <LeaveCard
+            absence={a}
+            isNonWorkingDay={geometry.isNonWorkingDay}
+            alsoAway={a.status === "APPROVED" ? null : alsoAway(a, registry.absences(), (id) => registry.nameOf(id))}
+            openFull={decisions.openFull(a)}
+            onApprove={
+              decide
+                ? () => {
+                    setOpen(false);
+                    decisions.approve(a);
+                  }
+                : undefined
+            }
+            onDecline={
+              decide
+                ? () => {
+                    setOpen(false);
+                    decisions.decline(a, registry.nameOf(a.userId));
+                  }
+                : undefined
+            }
+          />
+        ) : null}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+/** A placeholder row while the people load (N16): avatar and two bars, and a skeleton pill or two. */
+export const CompanyCalendarSkeletonRow: FC<{ index: number }> = ({ index }) => {
+  const { geometry } = useBoard();
+  const { dayW, dayCount, todayIndex } = geometry;
+  // Deterministic placements around today, so the shimmer does not jump between renders.
+  const pills = [
+    { at: (index * 5) % 11, len: 2 + (index % 4) },
+    ...(index % 3 === 0 ? [{ at: 14 + (index % 6), len: 3 }] : []),
+  ];
+  const first = Math.max(0, todayIndex - 3);
+  return (
+    <div className="relative flex border-b border-divider" style={{ height: ROW_H, width: NAME_COL + dayCount * dayW }}>
+      <div className="sticky left-0 z-20 flex shrink-0 items-center gap-2.5 bg-card pr-3 pl-4" style={{ width: NAME_COL }}>
+        <Skeleton className="size-7 rounded-pill" />
+        <div className="flex flex-col gap-1.5">
+          <Skeleton className="h-3 w-28" />
+          <Skeleton className="h-2.5 w-20" />
+        </div>
+      </div>
+      <div className="relative flex-1">
+        {pills.map((p, i) => (
+          <Skeleton
+            key={i}
+            className="absolute h-7 rounded-pill"
+            style={{ left: (first + p.at) * dayW + 2, top: (ROW_H - 28) / 2, width: p.len * dayW - 4 }}
+          />
+        ))}
       </div>
     </div>
-    {dayISOs.map((iso) => (
-      <div key={iso} className="min-h-[44px] border-b border-r border-divider" />
-    ))}
-  </div>
-);
+  );
+};

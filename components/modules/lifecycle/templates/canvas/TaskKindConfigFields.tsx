@@ -10,6 +10,8 @@ import type { Material, ProcessType, Question, TaskKind } from "@/models/lifecyc
 import { MaterialsEditor } from "@/components/modules/lifecycle/shared/MaterialsEditor";
 import { QuestionsEditor } from "@/components/modules/lifecycle/shared/QuestionsEditor";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { Combobox } from "@/components/ui/Combobox";
+import { FieldError } from "@/components/desact/field-error";
 import { useDocumentTemplates } from "@/components/modules/signing/hooks/useDocumentsSection";
 import type { DocumentTemplateDTO } from "@/api/modules/signing/dto";
 
@@ -49,8 +51,11 @@ export function TaskKindConfigFields(props: Props) {
       {kind === "QUESTIONNAIRE" && (
         <QuestionsEditor idPrefix={idPrefix} questions={questions} disabled={disabled} onChange={(q) => onChange({ questions: q })} />
       )}
-      <MaterialsEditor idPrefix={idPrefix} materials={materials} disabled={disabled} required={kind === "ACKNOWLEDGE"}
-        onChange={(m) => onChange({ materials: m })} />
+      {/* A Sign task's material is its document (P01a): the block is not asked, unless the task already carries some. */}
+      {(kind !== "SIGN" || materials.length > 0) && (
+        <MaterialsEditor idPrefix={idPrefix} materials={materials} disabled={disabled} required={kind === "ACKNOWLEDGE"}
+          onChange={(m) => onChange({ materials: m })} />
+      )}
     </div>
   );
 }
@@ -60,7 +65,9 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, templateId
   // The attribute list is read through its sections: there is no flat `/attributes` list on either side of
   // the stack, and the hook that asked for one got a 404 (found by the live run).
   const { data: groups } = useAttributeGroups();
-  const { data: categories } = useDocumentCategories();
+  const { data: allCategories } = useDocumentCategories();
+  // A category deleted with "keep" is picked by nobody again (AQ-19) — but one already chosen stays readable.
+  const categories = allCategories?.filter((c) => c.isActive || c.id === categoryId);
   const attributes = (groups ?? []).flatMap((g) => g.attributes ?? [])
     .filter((a) => type !== "PREBOARDING" || !NOT_ON_PREBOARDING_PAGE.has(String(a.type)));
 
@@ -141,21 +148,42 @@ function KindFields({ idPrefix, kind, type, attributeIds, categoryId, templateId
   return null;
 }
 
-/** "The person → Their manager": a template's signers in their order, for the hint under the Document field. */
+/**
+ * Who signs a template, in its steps (process-sign-task P01a, P01d): "The person, then their manager" in a dropdown
+ * option, and "The person signs, then their manager." under the chosen one. People of one step are joined by "and".
+ */
 export function useSignersText() {
   const t = useTranslations("lifecycle");
-  return (template: Pick<DocumentTemplateDTO, "signers">) =>
-    t("kindConfig.signers", {
-      list: [...template.signers]
-        .sort((a, b) => (a.order ?? 1) - (b.order ?? 1))
-        .map((s) => (s.label?.trim() ? s.label : t(`kindConfig.signerKind.${s.kind}`)))
-        .join(" → "),
+  const stepsOf = (template: Pick<DocumentTemplateDTO, "signers">, first: "signerKind" | "signerKindFirst") => {
+    const byOrder = new Map<number, string[]>();
+    const sorted = [...template.signers].sort((a, b) => (a.order ?? 1) - (b.order ?? 1));
+    sorted.forEach((s, i) => {
+      const order = s.order ?? 1;
+      const head = i === 0 || order === (sorted[0].order ?? 1);
+      const form = head ? first : "signerKindMid";
+      const name = s.label?.trim() ? s.label : t(`kindConfig.${form}.${s.kind}`);
+      byOrder.set(order, [...(byOrder.get(order) ?? []), name]);
     });
+    return [...byOrder.values()].map((names) => names.join(t("kindConfig.andJoin")));
+  };
+  return Object.assign(
+    (template: Pick<DocumentTemplateDTO, "signers">) => stepsOf(template, "signerKind").join(t("kindConfig.thenJoin")),
+    {
+      sentence: (template: Pick<DocumentTemplateDTO, "signers">) => {
+        const [first, ...rest] = stepsOf(template, "signerKindFirst");
+        if (!first) return "";
+        return rest.length
+          ? t("kindConfig.signsThen", { first, rest: rest.join(t("kindConfig.thenJoin")) })
+          : t("kindConfig.signsSentence", { first });
+      },
+    },
+  );
 }
 
 /**
- * The Sign task's document (process-sign-task P01a, P01d): one template, the field its own search, each option with
- * who signs in grey; who signs is the template's, so nothing else is asked.
+ * The Sign task's document (process-sign-task P01a, P01d, P01e): one template, the field its own search, each option
+ * with who signs in grey; who signs is the template's, so nothing else is asked. With no templates yet the list says
+ * so (P01e); its "Open Document templates" link waits for the templates editor's screen and is not shown.
  */
 export function SignTemplateField({ idPrefix, templateId, disabled, onChange, error }: {
   idPrefix: string;
@@ -168,10 +196,11 @@ export function SignTemplateField({ idPrefix, templateId, disabled, onChange, er
   const { data: templates, isLoading } = useDocumentTemplates();
   const signersText = useSignersText();
   const chosen = (templates ?? []).find((x) => x.id === templateId) ?? null;
+  const none = templates !== undefined && templates.filter((x) => x.isActive).length === 0;
   return (
     <div className="space-y-1.5">
       <RequiredLabel htmlFor={`${idPrefix}-template`} required>{t("kindConfig.document")}</RequiredLabel>
-      <SearchableSelect
+      <Combobox
         id={`${idPrefix}-template`}
         options={(templates ?? [])
           .filter((x) => x.isActive || x.id === templateId)
@@ -179,12 +208,19 @@ export function SignTemplateField({ idPrefix, templateId, disabled, onChange, er
         value={templateId}
         onChange={onChange}
         placeholder={isLoading ? t("kindConfig.loadingTemplates") : t("kindConfig.pickDocument")}
-        emptyLabel={templates && templates.length === 0 ? t("kindConfig.noTemplates") : t("kindConfig.noDocumentMatch")}
+        emptyLabel={t("kindConfig.noDocumentMatch")}
+        listState={none ? (
+          <div className="flex flex-col gap-0.5 px-2.5 py-2">
+            <span className="text-body font-medium text-primary">{t("kindConfig.noTemplatesTitle")}</span>
+            <span className="text-hint text-tertiary">{t("kindConfig.noTemplatesBody")}</span>
+          </div>
+        ) : undefined}
         clearable={false}
         disabled={disabled}
+        invalid={Boolean(error)}
       />
-      {error && <p className="text-hint text-status-declined-text">{error}</p>}
-      {chosen && <p className="text-hint text-tertiary">{signersText(chosen)}</p>}
+      <FieldError>{error}</FieldError>
+      {chosen && !error && <p className="text-hint text-tertiary">{signersText.sentence(chosen)}</p>}
     </div>
   );
 }

@@ -22,6 +22,7 @@ import { NodRing } from "@/components/desact/nod";
 import { Skeleton } from "@/components/desact/skeleton";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { showError, showSuccess } from "@/lib/errors/errorToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { useDisplayLocale, useShortDates } from "@/lib/date";
 import { cn } from "@/lib/cn";
 import { unwrapAction } from "@/components/modules/automations/hooks";
@@ -183,7 +184,11 @@ const useTestRun = (automationId: string | null, definition: AutomationDefinitio
   });
 
   const start = () => {
-    if (!chosen) return;
+    // Pressed with no case to try it on, it says so rather than greying out (NEVER-DISABLED).
+    if (!chosen) {
+      explain(t("test.pickCase"));
+      return;
+    }
     run.mutate({ automationId, definition, caseId: chosen, decisions: decisionsFor(definition, picked) });
   };
 
@@ -338,7 +343,7 @@ const TestRunBody: React.FC<{ definition: AutomationDefinition; state: TestRunSt
       )}
 
       {/* F5: full width, no icon. */}
-      <Button type="button" className="w-full" onClick={state.start} disabled={!state.chosen} loading={state.run.isPending}>
+      <Button type="button" className="w-full" onClick={state.start} loading={state.run.isPending}>
         {state.run.isPending ? t("test.running") : t("test.run")}
       </Button>
 

@@ -12,15 +12,16 @@ const twMerge = extendTailwindMerge({
       // Every size `styles/globals.css` declares (`--text-*`). One missing is dropped beside a colour: `text-home-greeting`
       // with `text-primary` left Home's Light greeting at 14 px (the designers' fix L1, 2026-11-18).
       text: [
-        "greeting", "page-title", "section-title", "card-title", "body", "label", "hint", "number", "code", "avatar-xs", "avatar-s", "initials",
+        "greeting", "page-title", "section-title", "card-title", "body", "label", "hint", "number", "code", "avatar-xs", "avatar-s", "initials", "step-mark",
         "auth-display", "auth-lead", "auth-title", "deck-line", "widget-title",
         "hero-s", "hero-m", "hero-l", "hero-xl", "hero-xxl",
         "home-badge-day", "home-day", "home-greeting", "home-input", "home-micro", "home-pill",
         "home-sentence", "home-sentence-m", "home-sentence-l",
         "hub-celebration", "hub-cover", "hub-doc-title", "hub-heading", "hub-hero", "hub-reading", "hub-stat", "hub-title",
         "hub-pinned", "hub-card", "hub-tile", "hub-ask", "hub-small", "hub-lead",
+        "leave-balance", "leave-dates", "profile-name", "profile-job", "account-section",
       ],
-      radius: ["tag", "control", "popover", "card", "panel", "pill", "glyph"],
+      radius: ["tag", "control", "popover", "card", "panel", "pill", "glyph", "leave-dialog"],
       shadow: ["card", "raised", "popover", "dialog", "drag", "focus"],
       "font-weight": ["normal", "medium", "semibold"],
       font: ["sans", "heading", "mono"],

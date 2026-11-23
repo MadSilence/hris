@@ -67,3 +67,9 @@ None.
   - The common-password check is a starter list written by the code side (~80 entries) plus rules for runs, repeats
     and the person's own words — not a breach list yet (`SIGN_IN_PLAN.md` A1).
   - An emailed reset disconnects the person's Google / Microsoft accounts, and says so.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the colour pane grows with the window — 520 at 1280 × window ÷ 1280, never smaller, stopping at 1920 — and
+  everything in it (rings, wordmark, slogan or company name) scales with it (`--auth-grow` as the pane's `zoom`,
+  `styles/globals.css`; `technical_documentation/ui/DESIGN_SYSTEM.md` § 9).
+- Not seen in a browser.

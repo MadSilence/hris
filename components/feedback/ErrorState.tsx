@@ -35,10 +35,9 @@ export const ErrorState: React.FC<{
   const apiError = error instanceof ApiError ? error : undefined;
 
   // Worth showing only when the sentence above says nothing specific: then the code is the one
-  // thing support can match on. A recognised refusal explains itself and needs no reference.
-  const reference = isFallbackErrorMessage(message)
-    ? apiError?.requestId ?? apiError?.code
-    : apiError?.requestId;
+  // thing support can match on. A recognised refusal explains itself and needs no reference. The request id is never
+  // shown — it is noise for an ordinary person and stays in the log (ERRORS.md, the owner's call of 2026-11-20).
+  const reference = isFallbackErrorMessage(message) ? apiError?.code : undefined;
 
   const heading = title ?? t(defaultHeading(error));
 

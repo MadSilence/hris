@@ -75,3 +75,31 @@ describe("PersonalDocumentsFilesTable — grouped by folder", () => {
     expect(screen.queryByText("nested-1")).not.toBeInTheDocument();
   });
 });
+
+/** The owner's A11 (2026-11-20): one click opens a document; the star and the checkbox keep their own clicks. */
+describe("PersonalDocumentsFilesTable — one click", () => {
+  it("opens the preview from the row, not from its controls", () => {
+    const onPreview = jest.fn();
+    const onToggleStar = jest.fn();
+    render(
+      <PersonalDocumentsFilesTable
+        documents={[partialMock<DocumentDTO>({ id: "p", name: "contract.pdf", isStarred: false, sizeBytes: 10, createdAt: "2026-10-30T12:00:00", mimeType: "application/pdf" })]}
+        sort={{ field: "name", dir: "asc" }}
+        onSortChange={jest.fn()}
+        onToggleStar={onToggleStar}
+        onPreview={onPreview}
+        selectedIds={new Set()}
+        onToggleSelected={jest.fn()}
+        getDownloadUrl={(id) => `/d/${id}`}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Star" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /select contract\.pdf/i }));
+    expect(onPreview).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText("contract.pdf"));
+    expect(onPreview).toHaveBeenCalledWith(expect.objectContaining({ id: "p" }));
+    expect(onToggleStar).toHaveBeenCalledTimes(1);
+  });
+});

@@ -26,6 +26,8 @@ export type FolderOption = {
 export type CategoryOption = {
   id: string;
   name: string;
+  /** A file of this category cannot be filed without a date (documents-expiry X05b). */
+  requiresExpiry?: boolean;
 };
 
 export type UploadDocumentFormValues = {
@@ -56,6 +58,8 @@ export interface UploadDocumentFormProps {
   defaultVisibility?: DocumentVisibility;
   onCancelAction: () => void;
   onSubmitAction: (values: UploadDocumentFormValues) => void | Promise<void>;
+  /** "Hidden from Reza" / "Visible to Reza"; absent on one's own tab. */
+  personFirstName?: string | null;
 }
 
 const ROOT_FOLDER_ID = "root";
@@ -89,6 +93,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   defaultVisibility = "HR_ONLY",
   onCancelAction,
   onSubmitAction,
+  personFirstName,
 }) => {
   const t = useTranslations("organization");
   const tSigning = useTranslations("signing");
@@ -101,6 +106,8 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
   const [visibility, setVisibility] = useState<DocumentVisibility>(defaultVisibility);
   const [expiresOn, setExpiresOn] = useState("");
   const [tried, setTried] = useState(false);
+  const [dateError, setDateError] = useState<string | null>(null);
+  const needsDate = categories.find((c) => c.id === categoryId)?.requiresExpiry === true;
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming || incoming.length === 0) return;
@@ -131,6 +138,11 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
     if (isLoading) return;
     setTried(true);
     if (files.length === 0) return;
+    if (needsDate && !expiresOn) {
+      const category = categories.find((c) => c.id === categoryId);
+      setDateError(t("documents.upload.needsDate", { category: (category?.name ?? "").toLowerCase() }));
+      return;
+    }
 
     void onSubmitAction({
       files,
@@ -274,6 +286,7 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
           <FieldError>{tried && files.length === 0 ? t("documents.upload.chooseAtLeastOne") : null}</FieldError>
         </div>
 
+        {/* M3, X05 (X8): Folder · Category (optional) · Valid until · Who can see. */}
         <div className="flex flex-col gap-5">
         <div className="space-y-2">
           <Label>{t("documents.upload.folder")}</Label>
@@ -292,57 +305,83 @@ export const UploadDocumentForm: FC<UploadDocumentFormProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="upload-valid-until">{tSigning("expiry.validUntil")}</Label>
-          <DatePicker id="upload-valid-until" value={expiresOn} onChange={setExpiresOn} disabled={isLoading} />
-        </div>
-
-        <div className="space-y-2">
-          <Label>{t("documents.upload.visibility")}</Label>
-
-          {/* Who can see (M3): the two words the list says — Visible, Hidden. */}
-          <SegmentedControl
-            aria-label={t("documents.upload.visibility")}
-            value={visibility}
-            onChange={(v: DocumentVisibility) => setVisibility(v)}
-            disabled={isLoading}
-            options={[
-              { value: "VISIBLE_TO_EMPLOYEE", label: t("documents.table.visible") },
-              { value: "HR_ONLY", label: t("documents.table.hidden") },
-            ]}
-          />
-        </div>
-
+        {/* DS15: a company with no categories is not asked for one. */}
         {categories.length > 0 && (
           <div className="space-y-2">
-            <Label>{t("documents.upload.category")}</Label>
+            <Label>
+              {t("documents.upload.category")} <span className="font-normal text-tertiary">{tSigning("expiry.optional")}</span>
+            </Label>
 
             <SearchableSelect
               aria-label={t("documents.upload.category")}
               options={[
-                { value: NO_CATEGORY_ID, label: tCommon("values.none") },
+                { value: NO_CATEGORY_ID, label: t("documents.upload.noCategory") },
                 ...categories.map((category) => ({ value: category.id, label: category.name })),
               ]}
               value={categoryId || null}
-              onChange={(v) => setCategoryId(v ?? NO_CATEGORY_ID)}
+              onChange={(v) => {
+                setCategoryId(v ?? NO_CATEGORY_ID);
+                setDateError(null);
+              }}
               placeholder={t("documents.upload.selectCategory")}
               disabled={isLoading}
               clearable={false}
             />
           </div>
         )}
+
+        <div className="space-y-2">
+          <Label htmlFor="upload-valid-until">
+            {tSigning("expiry.validUntil")}
+            {!needsDate && <> <span className="font-normal text-tertiary">{tSigning("expiry.optional")}</span></>}
+          </Label>
+          <DatePicker
+            id="upload-valid-until"
+            value={expiresOn}
+            onChange={(v) => {
+              setExpiresOn(v);
+              setDateError(null);
+            }}
+            disabled={isLoading}
+          />
+          {/* X05b (X8): a category that needs a date says so under this field, not under the file. */}
+          <FieldError>{dateError}</FieldError>
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t("documents.upload.visibility")}</Label>
+
+          {/* Who can see (M3): the two words the list says — Visible, Hidden; with the person's name when it is theirs. */}
+          <SegmentedControl
+            aria-label={t("documents.upload.visibility")}
+            value={visibility}
+            onChange={(v: DocumentVisibility) => setVisibility(v)}
+            disabled={isLoading}
+            options={[
+              {
+                value: "VISIBLE_TO_EMPLOYEE",
+                label: personFirstName ? t("documents.table.visibleTo", { name: personFirstName }) : t("documents.table.visible"),
+              },
+              {
+                value: "HR_ONLY",
+                label: personFirstName ? t("documents.table.hiddenFrom", { name: personFirstName }) : t("documents.table.hidden"),
+              },
+            ]}
+          />
+          {personFirstName && visibility === "HR_ONLY" && (
+            <p className="text-hint text-tertiary">{t("documents.upload.onlyPeople", { name: personFirstName })}</p>
+          )}
+        </div>
         </div>
       </div>
 
       <DialogFooter className="mt-8">
-        <Button type="button" variant="secondary" disabled={isLoading} onClick={onCancelAction}>
+        <Button type="button" variant="secondary" onClick={onCancelAction}>
           {tCommon("actions.cancel")}
         </Button>
 
-        <Button
-          type="submit"
-          disabled={isLoading}
- >
+        <Button type="submit" loading={isLoading}>
+          <Icon icon={Upload01Icon} size="sm" />
           {t("documents.upload.submit", { count: files.length })}
         </Button>
       </DialogFooter>

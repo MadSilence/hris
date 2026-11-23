@@ -1,0 +1,1334 @@
+# Words — company-calendar
+
+Every string drawn on the boards of this screen, per frame, in reading order (from the export pages; sidebar left out; bare day numbers and weekday letters left out). Names, dates and numbers are sample data; the spec says which parts are data. Sentence case, US English, no period on toasts and field errors.
+
+## N01-Month
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+
+## N02-Week
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- Amel Belkacem
+- QA engineer
+- Away
+- · Wed 18 – Thu 19 Nov
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- Kavindi Fernando
+- Engineering manager
+- Personal day
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Annual leave
+- · Mon 16 – Fri 20 Nov
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Sick leave
+- Urs Baumann
+- Finance lead
+
+## N03-Hover
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+
+## N04-Open
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+- Approved
+- Mon 16 Nov – Fri 20 Nov
+- 5 working days · back Mon 23 Nov
+- Family trip to Madeira
+
+## N05-OpenPending
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+- Pending
+- Mon 14 Dec – Fri 18 Dec
+- 5 working days · back Mon 21 Dec
+- Urs Baumann is also away
+- 14–18 Dec
+- Decline
+- Approve
+
+## N06c-GroupedThick
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group:
+- Team
+- Today
+- Week
+- Month
+- November
+- December
+- Design
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- People
+- Platform
+- Amel Belkacem
+- QA engineer
+- Lucija Babić
+- Backend engineer
+- Sana Ahmed
+- Thijs Jansen
+- DevOps engineer
+- Web App Squad
+- Kavindi Fernando
+- Engineering manager
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Tanvir Chowdhury
+- Frontend engineer
+- Anouk Bakker
+- Account executive
+
+## N07-GroupMenu
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+- Group by
+- None
+- Department
+- Team
+- Office
+
+## N08-View
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+
+## N08b-ManyViews
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Platform
+- Edinburgh office
+- 14 more
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+- New joiners
+- Managers
+- Support
+- Marketing
+- Finance
+- Legal
+- Contractors
+- Interns
+- Web App Squad
+
+## N08c-ReorderViews
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Platform
+- Edinburgh office
+- 14 more
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+- New joiners
+- Support
+- Marketing
+- Finance
+- Legal
+- Contractors
+- Interns
+- Web App Squad
+- Managers
+
+## N09b-FilterWide
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Policy
+- Annual leave
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- is
+- and
+- Add a condition
+- Reset
+- Apply
+- Sick leave
+- Personal day
+- Parental leave
+
+## N09c-ManyFilters
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Policy
+- Annual leave
+- +9 more
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+
+## N09d-MoreOpen
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Policy
+- Annual leave
+- +9 more
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- is
+- and
+- Department
+- Product
+- Manager
+- Job title
+- contains
+- Designer
+- Location
+- Contract
+- Full time
+- Status
+- Active
+- Level
+- Senior
+- Country
+- Lithuania
+- Language
+- English
+- Add a condition
+- Reset
+- Apply
+
+## N10-SaveView
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- Name
+- Cancel
+- Save view
+
+## N10c-Share
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- Share this view
+- The link opens the calendar as you see it now:
+- Month ·
+- from 12 Nov
+- People see only what they have access to.
+- Copy link
+
+## N10d-LinkCopied
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- Link copied
+
+## N11-Scrolled
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- January
+- February
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+
+## N12-Search
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- ru
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+
+## N13-NoResults
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Zygmunt
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- No one found
+- Check the spelling or try another name.
+
+## N14-NoMatch
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Legal
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- No one matches these filters
+- Change a filter or clear them all.
+- Clear filters
+
+## N16-Loading
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+
+## N17-Error
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- We couldn’t load the calendar
+- Everyone’s time off is safe.
+- Try again
+
+## N18-NoAccess
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Not available to you
+- Ask an admin of your company for access.
+
+## N19-Long
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- Annual leave
+- · 5 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Maximiliane Alexandra von Hohenberg-Stauffenberg
+- Senior people operations partner, DACH and Nordics
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+
+## N20-ManyPeople
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Elif Yılmaz
+- Designer
+- Hiroshi Sato
+- Platform engineer
+- Annual leave
+- · 3 days
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- · 5 days
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Noah Weber
+- Sales manager
+- Ola Nordmann
+- Support specialist
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- Tomas Petrauskas
+- Urs Baumann
+- Finance lead
+- Zara Khan
+
+## N21-OnePerson
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Person
+- Rūta Jonaitė
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Product designer
+- Annual leave
+- · 5 days
+
+## N22-WeekHoliday
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- St Andrew's Day
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · Tue 24 Nov – Fri 4 Dec
+- Jonas Kim
+- Data analyst
+- Personal day
+- Karen Andersen
+- Head of people
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- · Thu 3 – Fri 4 Dec
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+
+## N23-LongHoliday
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- December
+- Amel Belkacem
+- QA engineer
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Day of Remembrance of All the Departed and St Andrew's Day
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · Tue 24 Nov – Fri 4 Dec
+- Jonas Kim
+- Data analyst
+- Personal day
+- Karen Andersen
+- Head of people
+- Kavindi Fernando
+- Engineering manager
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Sana Ahmed
+- Tanvir Chowdhury
+- Frontend engineer
+- Thijs Jansen
+- DevOps engineer
+- · Thu 3 – Fri 4 Dec
+- Tomas Petrauskas
+- Support specialist
+- Urs Baumann
+- Finance lead
+- Public holiday · Edinburgh office
+
+## N24-Air13
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Group
+- Today
+- Week
+- Month
+- November
+- Amel Belkacem
+- QA engineer
+- Away
+- · Wed 18 – Thu 19 Nov
+- Anouk Bakker
+- Account executive
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Jonas Kim
+- Data analyst
+- Karen Andersen
+- Head of people
+- Kavindi Fernando
+- Engineering manager
+- Personal day
+- Lena Novak
+- People partner
+- Lucija Babić
+- Backend engineer
+- Marius Vaitkus
+- Mobile engineer
+- Parental leave
+- · back Mon 4 Jan
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- Annual leave
+- · Mon 16 – Fri 20 Nov
+- Sana Ahmed
+
+## N25-OneOffice
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Office
+- Edinburgh
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Francesca Conti
+- Office manager
+- Inga Ruiz
+- Content designer
+- Annual leave
+- · 9 days
+- Karen Andersen
+- Head of people
+- · 5 days
+- Lucija Babić
+- Backend engineer
+- Sana Ahmed

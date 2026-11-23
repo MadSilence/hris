@@ -65,6 +65,7 @@
     "personName": "Имя"
   },
   "values": {
+    "moreCount": "+{count}",
     "yes": "Да",
     "no": "Нет",
     "none": "Нет",
@@ -112,9 +113,9 @@
     "active": "Активен"
   },
   "userStatus": {
-    "prospective": "Не приступил",
+    "prospective": "Ожидает выхода",
     "active": "Активен",
-    "archived": "В архиве"
+    "archived": "Неактивен"
   },
   "accountStatus": {
     "draft": "Черновик",
@@ -137,7 +138,10 @@
   "emptyState": {
     "nothingArchived": "В архиве пусто",
     "archivedDescription": "Здесь появятся записи из архива.",
-    "noResultsHint": "Попробуйте другой запрос."
+    "noResultsHint": "Попробуйте другое слово.",
+    "nothingCalled": "Ничего не нашлось по «{query}»",
+    "tryFewerFilters": "Уберите часть фильтров.",
+    "clearAll": "Сбросить всё"
   },
   "toggles": {
     "archived": "В архиве",
@@ -159,6 +163,12 @@
     "stepOf": "Шаг {current} из {total} · {label}"
   },
   "datePicker": {
+    "today": "Сегодня",
+    "clear": "Очистить",
+    "month": "Месяц",
+    "year": "Год",
+    "previousMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
     "pickDate": "Выберите дату",
     "pickRange": "Выберите период",
     "clearDate": "Очистить дату",
@@ -172,7 +182,6 @@
     "empty": "Ничего не найдено"
   },
   "searchField": {
-    "placeholder": "Поиск…",
     "searchIn": "Где искать",
     "noResults": "0 результатов",
     "matchOf": "{current} из {total}",

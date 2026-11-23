@@ -41,9 +41,7 @@ export function middleware(request: NextRequest) {
 
 const withPolicy = (respond: (requestHeaders: Headers) => NextResponse, request: NextRequest): NextResponse => {
   const nonce = createNonce();
-  const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development" ? "development" : "production", {
-    httpImages: (process.env.APP_SCHEME || "http") === "http",
-  });
+  const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development" ? "development" : "production");
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(NONCE_HEADER, nonce);
   requestHeaders.set("Content-Security-Policy", policy);
@@ -58,6 +56,7 @@ const publicOrigin = (request: NextRequest): string => {
 };
 
 export const config = {
-  // Everything but Next's own assets and files with an extension (icons, fonts, images).
-  matcher: ["/((?!_next/|.*\\..*).*)"],
+  // Everything but Next's own assets, uploaded files (`app/uploads` passes them to the backend on every host, signed in
+  // or not — R3) and files with an extension (icons, fonts, images).
+  matcher: ["/((?!_next/|uploads/|.*\\..*).*)"],
 };

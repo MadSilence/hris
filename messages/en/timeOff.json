@@ -8,69 +8,25 @@
     "approved": "Approved",
     "cancellationPending": "Cancellation requested",
     "rejected": "Rejected",
-    "cancelled": "Cancelled"
+    "cancelled": "Canceled"
   },
   "decision": {
-    "anEmployee": "An employee",
-    "answeringForDelegator": "You are answering for {name}, who delegated their approvals to you.",
-    "reachedAsFallback": "This reached you because nobody in the approval chain can answer it.",
-    "decidedAnyway": "Decided over the approval chain by an administrator.",
-    "balance": {
-      "title": "Balance on this policy",
-      "available": "Available",
-      "reserved": "Reserved by requests awaiting an answer",
-      "period": "Period",
-      "periodRange": "{start} – {end}",
-      "periodOpen": "{start} onwards",
-      "none": "No balance for the period this request falls in."
-    },
-    "otherLeave": {
-      "title": "Their other leave around these dates",
-      "none": "None within a month either side."
-    },
-    "peersAway": {
-      "title": "Also away over these dates",
-      "none": "Nobody they work with.",
-      "notYetApproved": "not yet approved"
-    },
-    "approveCancellation": "Approve cancellation",
-    "decline": "Decline",
-    "reason": "Reason",
-    "reject": "Reject",
-    "approve": "Approve",
-    "orDecideOverChain": "Or decide over the chain:",
-    "mayDecideOverChain": "You may decide over the approval chain.",
-    "steps": {
-      "title": "Approval",
-      "asked": "Asked:",
-      "answeredBy": "Answered by",
-      "notAnswered": "Not answered yet",
-      "fallbackRole": "the {role} role",
-      "fallbackRoleFor": "the {role} role (for {name})",
-      "noFallback": "nobody — no fallback is set",
-      "managerSeatEmpty": "the manager — nobody in that seat",
-      "nobody": "nobody",
-      "reassigned": "{asked}, reassigned to {name}",
-      "deletedPerson": "somebody since deleted",
-      "onBehalfOf": "{by} on behalf of {name}",
-      "asFallback": "{by}, as the fallback",
-      "approvingAnyway": "{by}, approving anyway"
-    },
     "anyway": {
       "thisPerson": "this person",
-      "reasonRequired": "Say why it is rejected.",
       "failed": "The request could not be decided.",
       "approve": "Approve anyway",
       "reject": "Reject anyway",
       "approveTitle": "Approve anyway?",
       "rejectTitle": "Reject anyway?",
       "approveDescription": "The request of {who} is approved now, whatever approval steps are still open. It is recorded as an override.",
-      "rejectDescription": "The request of {who} is rejected now, over the approvers who have not answered yet. It is recorded as an override."
+      "rejectDescription": "The request of {who} is rejected now, over the approvers who have not answered yet. It is recorded as an override.",
+      "comment": "Comment",
+      "optional": "Optional"
     }
   },
   "delegations": {
     "onLeave": {
-      "label": "Delegate My Approvals While I'm on Leave",
+      "label": "Delegate my approvals while I'm on leave",
       "hint": "When your own leave is approved, the requests waiting on you also go to your manager for those days."
     },
     "given": {
@@ -128,8 +84,8 @@
       }
     },
     "dialog": {
-      "set": "Holiday calendar set.",
-      "removed": "Holiday calendar removed.",
+      "set": "Holiday calendar set",
+      "removed": "Holiday calendar removed",
       "title": "Holiday Calendar for {place}",
       "description": "Everybody who works here gets this calendar, unless they have one of their own or a more specific place gives them another: the office comes before the legal entity, the legal entity before the company default. A change applies from today, and leave before today keeps its price.",
       "choiceAria": "Holiday calendar",
@@ -292,8 +248,7 @@
       "description": "Manage public holiday calendars and assign them to employees, locations or groups.",
       "exportAria": "Export calendars",
       "emptyTitle": "No public holiday calendars yet",
-      "emptyDescription": "Add a manual calendar or choose a template to start using public holidays in time off calculations.",
-      "noResultsHint": "Try a different calendar, country or region.",
+      "emptyDescription": "Pick a template and the holidays are added for you.",
       "archivedDescription": "Archived calendars will appear here.",
       "colCalendar": "Calendar",
       "colCountryRegion": "Country / Region",
@@ -380,8 +335,7 @@
       "heading": "Leave types",
       "headingHint": "Open a type to manage its policies (quotas, accrual, carryover and approvals).",
       "emptyTitle": "No leave types yet",
-      "emptyDescription": "A leave type is a category of time off — Vacation, Sick, Parental. Add the first one to start defining policies.",
-      "noResultsHint": "Try a different name or category.",
+      "emptyDescription": "Most teams start with Vacation and Sick day.",
       "archivedDescription": "Archived leave types will appear here.",
       "colType": "Type",
       "colCategory": "Category",
@@ -489,7 +443,6 @@
       "exportAria": "Export policies",
       "emptyTitle": "No time off policies yet",
       "emptyDescription": "A policy holds the rules — how much leave, how it accrues, who approves it. Add the first one to start managing time off.",
-      "noResultsHint": "Try a different policy name or unit.",
       "archivedDescription": "Archived policies will appear here.",
       "colPolicy": "Policy",
       "colUnit": "Unit",

@@ -17,6 +17,7 @@ export const QuickAdd: React.FC<{
 }> = ({ actions, onPick, onAllSteps }) => {
   const t = useTranslations("automationsEditor");
   const tShared = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const [query, setQuery] = React.useState("");
   const nameOf = (type: AutomationStepType) => tShared(`stepType.${type}`);
   const found = query.trim()
@@ -31,7 +32,7 @@ export const QuickAdd: React.FC<{
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
-          placeholder={t("addStep.search")}
+          placeholder={tCommon("actions.search")}
           aria-label={t("addStep.search")}
           className="h-8 pl-9"
         />

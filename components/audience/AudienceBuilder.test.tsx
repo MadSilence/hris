@@ -147,3 +147,43 @@ describe("AudienceBuilder — the field picker", () => {
     expect(screen.getByRole("combobox", { name: "Field" })).toHaveValue("Shirt size");
   });
 });
+
+describe("AudienceBuilder — the filter design (N09b)", () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
+
+  it("puts the popover's buttons in the foot, after the checkboxes", () => {
+    render(
+      <AudienceBuilder
+        fields={fields}
+        value={[{ field: "sys:first_name", op: "neq", value: "Ann" }]}
+        onChange={jest.fn()}
+        actions={<button type="button">Apply</button>}
+      />,
+    );
+    const checkbox = screen.getByText(/include people with no value/i);
+    const apply = screen.getByRole("button", { name: "Apply" });
+    expect(checkbox.compareDocumentPosition(apply) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("adds a condition with its field list open at once", () => {
+    render(<AudienceBuilder fields={fields} value={[{ field: "sys:first_name", op: "eq", value: "Ann" }]} onChange={jest.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Add a condition" }));
+    expect(screen.getAllByRole("combobox", { name: "Field" })).toHaveLength(2);
+    expect(screen.getByText("and")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "First name" })).toBeInTheDocument();
+  });
+
+  it("keeps a range in the value cell itself — no popover to edit it (AQ-17)", () => {
+    render(
+      <AudienceBuilder
+        fields={fields}
+        value={[{ field: "sys:first_name", op: "between", value: "A", valueTo: "M" }]}
+        onChange={jest.fn()}
+      />,
+    );
+    expect(screen.getByRole("textbox", { name: "From" })).toHaveValue("A");
+    expect(screen.getByRole("textbox", { name: "To" })).toHaveValue("M");
+  });
+});

@@ -99,7 +99,7 @@ function SidebarProvider({
   return (
     <SidebarContext.Provider value={value}>
       <TooltipProvider>
-        <div data-slot="sidebar-wrapper" className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)} {...props}>
+        <div data-slot="sidebar-wrapper" className={cn("group/sidebar-wrapper flex h-full min-h-0 w-full", className)} {...props}>
           {children}
         </div>
       </TooltipProvider>
@@ -130,7 +130,7 @@ function Sidebar({ className, children, ...props }: React.ComponentProps<"div">)
   }
 
   return (
-    <div className="group peer hidden text-sidebar-text md:block print:hidden" data-state={state} data-slot="sidebar">
+    <div className="group peer hidden text-sidebar-text md:block" data-state={state} data-slot="sidebar">
       <div
         data-slot="sidebar-gap"
         className="relative w-(--sidebar-width) transition-[width] duration-(--duration-dialog) ease-standard group-data-[state=collapsed]:w-(--sidebar-collapsed)"
@@ -138,7 +138,9 @@ function Sidebar({ className, children, ...props }: React.ComponentProps<"div">)
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 left-0 z-10 hidden h-svh w-(--sidebar-width) border-r border-sidebar-border bg-sidebar md:flex",
+          // Inside the shell's sidebar + main row (RC9): the row is `relative`, so the column fills the window under any
+          // banner instead of the whole window.
+          "absolute inset-y-0 left-0 z-10 hidden h-full w-(--sidebar-width) border-r border-sidebar-border bg-sidebar md:flex",
           "transition-[width] duration-(--duration-dialog) ease-standard group-data-[state=collapsed]:w-(--sidebar-collapsed)",
           className,
         )}

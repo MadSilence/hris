@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import type { AudienceField } from "@/components/audience/fieldCatalog";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
-import { ConditionGroup, ConditionJoiner } from "./chrome";
+import { ConditionGroup, ConditionJoiner } from "@/components/audience/ConditionChrome";
 import { useFilterValueText } from "./ConditionValue";
 
 /**

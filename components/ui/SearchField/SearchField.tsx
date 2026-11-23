@@ -23,7 +23,6 @@ export type SearchFieldMode = {
 type Props = {
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
   className?: string;
   /** Optional left-hand switch: what the query is searched against. */
   modes?: SearchFieldMode[];
@@ -38,12 +37,12 @@ type Props = {
 
 /**
  * Plain search box: optional mode switch, a counter and prev/next arrows. Knows nothing about what
- * is being searched — callers own the matching.
+ * is being searched — callers own the matching. **Escape and the × clear it**, as {@link SearchBox} (B10, C10): the
+ * canvas's "no match" pill offers no Clear search of its own.
  */
 export function SearchField({
   value,
   onChange,
-  placeholder,
   className,
   modes,
   mode,
@@ -87,7 +86,7 @@ export function SearchField({
         <Input
           value={value}
           onChange={(e) => onChange(e.currentTarget.value)}
-          placeholder={placeholder ?? t("searchField.placeholder")}
+          placeholder={t("actions.search")}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -135,7 +134,7 @@ export function SearchField({
           type="button"
           onClick={() => onChange("")}
           aria-label={t("searchField.clear")}
-          className="flex h-6 w-6 flex-none items-center justify-center rounded-tag text-tertiary hover:bg-mist hover:text-secondary"
+          className="flex h-6 w-6 flex-none items-center justify-center rounded-control text-tertiary outline-none hover:text-primary focus-visible:shadow-focus"
         >
           <Icon icon={Cancel01Icon} size="sm" />
         </button>

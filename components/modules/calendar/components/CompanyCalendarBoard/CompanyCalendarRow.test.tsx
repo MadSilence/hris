@@ -1,24 +1,21 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import type { ReactElement } from "react";
 import {
   CompanyCalendarRow,
-  leaveStyle,
-  leaveTitle,
-  rowHeight,
-  toSegments,
-  type CompanyCalendarBar,
+  toLaneSegments,
 } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
-import type { CompanyCalendarAbsence, CompanyCalendarMark } from "@/models/calendar";
-import { translatorFor } from "@/test/nextIntl";
-import type { CalendarTranslator } from "@/components/modules/calendar/lib/i18n";
+import {
+  BoardContext,
+  BoardRegistry,
+  type BoardContextValue,
+  type LeaveDecisions,
+} from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
+import type { CompanyCalendarAbsence, CompanyCalendarMark, CompanyCalendarUser } from "@/models/calendar";
 
-const t = translatorFor("calendar") as unknown as CalendarTranslator;
+const rangeStart = new Date(2026, 10, 2); // Mon 2 Nov 2026
+const DAY_W = 38;
 
-jest.mock("@/components/modules/settings/shared/UserChip/UserChip", () => ({
-  __esModule: true,
-  default: ({ name }: { name: string }) => <span>{name}</span>,
-}));
-
-const dayISOs = ["2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06"];
+const user: CompanyCalendarUser = { id: "u1", firstName: "Inga", lastName: "Ruiz", email: "inga@example.com", avatarUrl: null };
 
 const leave = (over: Partial<CompanyCalendarAbsence> = {}): CompanyCalendarAbsence => ({
   userId: "u1",
@@ -32,8 +29,8 @@ const holiday = (over: Partial<CompanyCalendarMark> = {}): CompanyCalendarMark =
   userId: "u1",
   id: "h1",
   name: "Founders Day",
-  startDate: "2026-11-03",
-  endDate: "2026-11-03",
+  startDate: "2026-11-05",
+  endDate: "2026-11-05",
   nominalDate: null,
   dayPart: "FULL_DAY",
   calendarId: "c1",
@@ -41,102 +38,172 @@ const holiday = (over: Partial<CompanyCalendarMark> = {}): CompanyCalendarMark =
   ...over,
 });
 
-const leaveBar = (a: CompanyCalendarAbsence, key: string): CompanyCalendarBar => ({
-  kind: "leave",
-  key,
-  absence: a,
-  startDate: a.startDate,
-  endDate: a.endDate,
+const decisionsWith = (over: Partial<LeaveDecisions> = {}): LeaveDecisions => ({
+  canDecide: () => false,
+  approve: jest.fn(),
+  decline: jest.fn(),
+  openFull: () => null,
+  ...over,
 });
 
-describe("toSegments — lanes", () => {
-  it("puts overlapping bars in separate lanes and reuses a lane once it is free", () => {
-    const segments = toSegments(
-      [
-        { kind: "holiday", key: "h", mark: holiday(), startDate: "2026-11-03", endDate: "2026-11-03" },
-        leaveBar(leave(), "a"),
-        leaveBar(leave({ startDate: "2026-11-05", endDate: "2026-11-06" }), "b"),
-      ],
-      dayISOs,
-    );
-    const lane = (key: string) => segments.find((s) => s.bar.key === key)?.lane;
-    expect(lane("h")).toBe(0);
-    expect(lane("a")).toBe(1);
-    expect(lane("b")).toBe(0);
-    expect(rowHeight(segments)).toBeGreaterThan(44);
-  });
-
-  it("keeps one lane at the old row height", () => {
-    expect(rowHeight(toSegments([leaveBar(leave(), "a")], dayISOs))).toBe(44);
-  });
-
-  it("clips a bar to the window and marks that it continues", () => {
-    const [seg] = toSegments([leaveBar(leave({ startDate: "2026-10-30", endDate: "2026-11-02" }), "a")], dayISOs);
-    expect(seg.startCol).toBe(0);
-    expect(seg.continuesLeft).toBe(true);
-  });
-});
-
-describe("a leave bar", () => {
-  it("says Away and stays gray when the type was not sent", () => {
-    const style = leaveStyle(leave());
-    expect(leaveTitle(t, leave())).toContain("Away");
-    expect(style.backgroundColor).toBe("var(--tag-gray-bar)");
-  });
-
-  it("is named by its policy, which its colour belongs to", () => {
-    expect(leaveTitle(t, leave({ leaveTypeName: "Vacation", policyName: "Annual Leave" }))).toMatch(/^Annual Leave/);
-  });
-
-  it("wears the policy's tag colour only when the policy was sent", () => {
-    expect(leaveStyle(leave({ leaveTypeName: "Vacation", policyColor: "ocean" })).backgroundColor).toBe(
-      "var(--tag-ocean-bar)",
-    );
-  });
-
-  it("is dotted over the light tint and says so while it is being decided", () => {
-    const pending = leave({ status: "PENDING", awaitingYou: true, policyColor: "ocean" });
-    expect(leaveStyle(pending).backgroundColor).toBe("var(--tag-ocean-bg)");
-    expect(leaveStyle(pending).backgroundImage).toContain("radial-gradient");
-    expect(leaveTitle(t, pending)).toContain("Pending your approval");
-    expect(leaveTitle(t, leave({ status: "PENDING" }))).toContain("Pending approval");
-  });
-
-  const geometry = {
-    days: dayISOs.map((iso) => new Date(`${iso}T00:00:00`)),
-    dayISOs,
-    todayISO: "2026-11-02",
-    isNonWorkingDay: () => false,
-    density: "week" as const,
-    gridTemplateColumns: "200px repeat(5, 1fr)",
+const renderInBoard = (ui: ReactElement, over: { decisions?: LeaveDecisions; scale?: "month" | "week"; registry?: BoardRegistry } = {}) => {
+  const value: BoardContextValue = {
+    geometry: {
+      rangeStart,
+      dayCount: 28,
+      dayW: DAY_W,
+      scale: over.scale ?? "month",
+      isNonWorkingDay: (d) => d.getDay() === 0 || d.getDay() === 6,
+      todayIndex: 2,
+      columnHolidays: new Map(),
+      headerHeight: 76,
+    },
+    registry: over.registry ?? new BoardRegistry(),
+    decisions: over.decisions ?? decisionsWith(),
+    picked: null,
+    setPicked: () => {},
   };
-  const user = { id: "u1", firstName: "Anna", lastName: "Berg", email: "anna@example.com", avatarUrl: null };
+  return render(<BoardContext.Provider value={value}>{ui}</BoardContext.Provider>);
+};
 
-  it("opens the request when the server sent its id", () => {
-    render(<CompanyCalendarRow user={user} marks={[]} absences={[leave({ requestId: "r1" })]} {...geometry} />);
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/time-off/requests/r1");
+describe("toLaneSegments", () => {
+  it("puts overlapping leave in separate lanes and reuses a lane once it is free", () => {
+    const { segments, lanes } = toLaneSegments(
+      [
+        leave({ requestId: "a", startDate: "2026-11-02", endDate: "2026-11-04" }),
+        leave({ requestId: "b", startDate: "2026-11-03", endDate: "2026-11-03" }),
+        leave({ requestId: "c", startDate: "2026-11-05", endDate: "2026-11-06" }),
+      ],
+      rangeStart,
+      28,
+    );
+    expect(lanes).toBe(2);
+    expect(segments.map((s) => [s.absence.requestId, s.startCol, s.endCol, s.lane])).toEqual([
+      ["a", 0, 2, 0],
+      ["b", 1, 1, 1],
+      ["c", 3, 4, 0],
+    ]);
   });
 
-  it("is not a link without the id", () => {
-    render(<CompanyCalendarRow user={user} marks={[]} absences={[leave()]} {...geometry} />);
-    expect(screen.queryByRole("link")).toBeNull();
-    expect(screen.getByText("Away")).toBeInTheDocument();
+  it("cuts leave to the loaded days and says where it goes on", () => {
+    const { segments } = toLaneSegments(
+      [leave({ startDate: "2026-11-02", endDate: "2026-12-31", requestStartDate: "2026-10-20", requestEndDate: "2026-12-31" })],
+      rangeStart,
+      28,
+    );
+    expect(segments[0]).toMatchObject({ startCol: 0, endCol: 27, continuesLeft: true, continuesRight: true });
+  });
+
+  it("leaves out what is wholly outside the loaded days", () => {
+    expect(toLaneSegments([leave({ startDate: "2027-01-04", endDate: "2027-01-05" })], rangeStart, 28).segments).toEqual([]);
+  });
+});
+
+describe("the name column", () => {
+  it("draws the job under the name when the row carries one (B5)", () => {
+    renderInBoard(<CompanyCalendarRow user={{ ...user, jobName: "Product designer" }} marks={[]} absences={[]} />);
+    expect(screen.getByText("Inga Ruiz")).toBeInTheDocument();
+    expect(screen.getByText("Product designer")).toBeInTheDocument();
+  });
+});
+
+describe("a leave pill", () => {
+  it("says Away and stays gray when the policy was not sent", () => {
+    renderInBoard(<CompanyCalendarRow user={user} marks={[]} absences={[leave()]} />);
+    const pill = screen.getByRole("button", { name: /^Away/ });
+    expect(pill.getAttribute("style")).toContain("--leave-gray-fill");
+  });
+
+  it("is named by its policy, coloured by it, with the length when the server sent it", () => {
+    renderInBoard(
+      <CompanyCalendarRow
+        user={user}
+        marks={[]}
+        absences={[leave({ policyName: "Annual leave", policyColor: "ocean", amount: 2, unit: "DAYS" })]}
+      />,
+    );
+    const pill = screen.getByRole("button", { name: "Annual leave · 2 days" });
+    expect(pill.getAttribute("style")).toContain("--leave-ocean-fill");
+  });
+
+  it("is white under a dashed edge while it is being decided", () => {
+    renderInBoard(<CompanyCalendarRow user={user} marks={[]} absences={[leave({ status: "PENDING", policyColor: "ocean", policyName: "Annual leave" })]} />);
+    const pill = screen.getByRole("button", { name: /Annual leave/ });
+    expect(pill).toHaveAttribute("data-status", "PENDING");
+    expect(pill.getAttribute("style")).toContain("dashed");
+  });
+
+  it("says where a long leave ends rather than how long it is", () => {
+    renderInBoard(
+      <CompanyCalendarRow
+        user={user}
+        marks={[]}
+        absences={[leave({ policyName: "Parental leave", startDate: "2026-11-02", endDate: "2026-12-31", amount: 44 })]}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /Parental leave · back/ })).toBeInTheDocument();
+  });
+});
+
+describe("the leave card", () => {
+  it("opens on a click with the dates, the length and the comment the server sent", () => {
+    renderInBoard(
+      <CompanyCalendarRow
+        user={user}
+        marks={[]}
+        absences={[leave({ policyName: "Annual leave", amount: 2, comment: "Family trip to Madeira", requestId: "r1" })]}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Annual leave/ }));
+    const card = screen.getByRole("dialog");
+    expect(within(card).getByText("Family trip to Madeira")).toBeInTheDocument();
+    expect(within(card).getByText(/2 days · back/)).toBeInTheDocument();
+    expect(within(card).getByText("Approved")).toBeInTheDocument();
+    expect(within(card).queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();
+  });
+
+  it("offers Decline and Approve to whoever can decide, and says who else is away", () => {
+    const decisions = decisionsWith({ canDecide: () => true });
+    const registry = new BoardRegistry();
+    const mine = leave({ status: "PENDING", policyName: "Annual leave", requestId: "r1", startDate: "2026-11-09", endDate: "2026-11-13" });
+    registry.set(
+      "flat",
+      [user, { id: "u2", firstName: "Urs", lastName: "Baumann", email: "urs@example.com", avatarUrl: null }],
+      [mine, leave({ userId: "u2", startDate: "2026-11-12", endDate: "2026-11-16" })],
+    );
+    renderInBoard(<CompanyCalendarRow user={user} marks={[]} absences={[mine]} />, { decisions, registry });
+
+    fireEvent.click(screen.getByRole("button", { name: /Annual leave/ }));
+    const card = screen.getByRole("dialog");
+    expect(within(card).getByText(/Urs Baumann is also away/)).toBeInTheDocument();
+
+    fireEvent.click(within(card).getByRole("button", { name: "Approve" }));
+    expect(decisions.approve).toHaveBeenCalledWith(mine);
+  });
+});
+
+describe("a row", () => {
+  it("tints the person's public holiday and names it in the week view", () => {
+    const { container, rerender } = renderInBoard(<CompanyCalendarRow user={user} marks={[holiday()]} />);
+    expect(container.querySelector("[data-holiday='Founders Day']")).not.toBeNull();
+    expect(screen.queryByText("Founders Day")).not.toBeInTheDocument();
+    rerender(<></>);
+    renderInBoard(<CompanyCalendarRow user={user} marks={[holiday()]} />, { scale: "week" });
+    expect(screen.getByText("Founders Day")).toBeInTheDocument();
   });
 
   it("opens a request for the days dragged across, in either direction", () => {
     const onSelectRange = jest.fn();
-    const { container } = render(
-      <CompanyCalendarRow user={user} marks={[]} onSelectRange={onSelectRange} {...geometry} />,
-    );
-    const day = (iso: string) => container.querySelector(`[data-day="${iso}"]`) as HTMLElement;
-    fireEvent.mouseDown(day("2026-11-05"));
-    fireEvent.mouseEnter(day("2026-11-03"));
+    renderInBoard(<CompanyCalendarRow user={user} marks={[]} onSelectRange={onSelectRange} />);
+    const days = screen.getByTestId("calendar-row-days");
+    fireEvent.mouseDown(days, { button: 0, clientX: 4 * DAY_W + 5 });
+    fireEvent.mouseMove(window, { clientX: 1 * DAY_W + 5 });
     fireEvent.mouseUp(window);
-    expect(onSelectRange).toHaveBeenCalledWith("2026-11-03", "2026-11-05");
+    expect(onSelectRange).toHaveBeenCalledWith("2026-11-03", "2026-11-06");
   });
 
   it("offers nothing on a row the reader may not request for", () => {
-    const { container } = render(<CompanyCalendarRow user={user} marks={[]} {...geometry} />);
-    expect(container.querySelector(".cursor-cell")).toBeNull();
+    renderInBoard(<CompanyCalendarRow user={user} marks={[]} />);
+    expect(screen.getByTestId("calendar-row-days").className).not.toContain("cursor-cell");
   });
 });

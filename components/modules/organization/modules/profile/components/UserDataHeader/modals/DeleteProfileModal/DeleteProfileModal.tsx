@@ -114,13 +114,16 @@ export const DeleteProfileModal: FC<Props> = ({
               {t("profile.delete.terminateInstead")}
             </Button>
           ) : null}
-          <Button type="button"
-            variant="destructive-confirm"
-            disabled={isBusy || isLoading || Boolean(refusal)}
-            onClick={onConfirm}
-          >
-            {isBusy ? tCommon("actions.deleting") : tCommon("actions.delete")}
-          </Button>
+          {/* Refused, the reason is on screen above and there is no Delete — hidden, not greyed (NEVER-DISABLED). */}
+          {!refusal && (
+            <Button type="button"
+              variant="destructive-confirm"
+              disabled={isBusy || isLoading}
+              onClick={onConfirm}
+            >
+              {isBusy ? tCommon("actions.deleting") : tCommon("actions.delete")}
+            </Button>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

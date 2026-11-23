@@ -1,6 +1,5 @@
 import {
   hrisApiCompanyCalendarClient,
-  type CompanyCalendarCapacityQuery,
   type CompanyCalendarExportRequest,
   type CompanyCalendarGroupsQuery,
   type CompanyCalendarMarksQuery,
@@ -8,15 +7,20 @@ import {
 } from "@/api/modules/calendar/clients";
 import type {
   CompanyCalendarAbsence,
-  CompanyCalendarCapacity,
+  CompanyCalendarAbsenceSummary,
   CompanyCalendarGroup,
   CompanyCalendarMark,
   CompanyCalendarPeoplePage,
 } from "@/models/calendar";
+import type { FilterDTO } from "@/models/user/fields";
 
 export class HrisCompanyCalendarService {
   public async people(params: CompanyCalendarPeopleQuery): Promise<CompanyCalendarPeoplePage> {
     return hrisApiCompanyCalendarClient.people(params);
+  }
+
+  public async count(params: { q?: string | null; filters?: FilterDTO[] | null }): Promise<{ total: number }> {
+    return hrisApiCompanyCalendarClient.count(params);
   }
 
   public async groups(params: CompanyCalendarGroupsQuery): Promise<CompanyCalendarGroup[]> {
@@ -31,12 +35,12 @@ export class HrisCompanyCalendarService {
     return hrisApiCompanyCalendarClient.export(body);
   }
 
-  public async capacity(params: CompanyCalendarCapacityQuery): Promise<CompanyCalendarCapacity[]> {
-    return hrisApiCompanyCalendarClient.capacity(params);
-  }
-
   public async absences(params: CompanyCalendarMarksQuery): Promise<CompanyCalendarAbsence[]> {
     return hrisApiCompanyCalendarClient.absences(params);
+  }
+
+  public async currentAndNext(userId: string): Promise<CompanyCalendarAbsenceSummary> {
+    return hrisApiCompanyCalendarClient.currentAndNext(userId);
   }
 }
 

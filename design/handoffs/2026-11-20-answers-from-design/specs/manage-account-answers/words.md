@@ -1,0 +1,65 @@
+# Words on these screens
+
+Every string as drawn, in order, English, sentence case. The code translates them. Grey captions on sheet boards describe behaviour and are not UI text — they are marked in the spec.
+
+## AQ06-08-ManageAccount
+
+- Sandbox · Profile · answers to Petya, 20 Nov
+- Manage account — reset, block, the ⋯ menu
+- AQ-06 · Reset two-step login: one window, your own password is enough
+- Confirm with your password
+- Reset Reza’s two-step login?
+- Reza sets it up again the next time they log in. Enter your password to go on.
+- Your password
+- Cancel
+- Reset
+- Opened from Reset in Manage account. Toast after: “Two-step login reset”. Someone who logs in with a code gets “Enter the code we sent to you” instead. A protected account: only the owner sees Reset.
+- Wrong password
+- That password doesn’t match
+- The field turns red with the line under it; Reset stays pressable.
+- AQ-07 · Block and unblock keep an optional reason (it goes to the journal)
+- Block
+- Block Reza’s account?
+- Reza won’t be able to log in. Their profile and data stay. You can unblock any time.
+- Reason Optional
+- For example: lost laptop
+- Block account
+- The red button blocks; the reason is optional.
+- Unblock
+- Unblock Reza’s account?
+- Reza can log in again right away.
+- For example: laptop found
+- Unblock account
+- Unblock asks for a reason the same way.
+- AQ-08 · The ⋯ menu on the real statuses
+- Draft
+- Not invited yet · Invite is the main button in the header
+- View in org chart
+- Start preboarding
+- Delete profile
+- Joining
+- Invited, start date ahead
+- Manage account
+- Cancel invitation
+- Active
+- Has an account (also with a last day ahead)
+- Log in as Reza
+- Start offboarding
+- Terminate employment
+- Set to inactive
+- Inactive
+- Set to inactive by hand, or after the last day
+- Set to active
+- A person is Active or Inactive (no “Archived”). Invite / Resend invitation is the header’s main button while the person has no account. Edit stays per tab. On Set to inactive a tooltip: “You can delete a profile once it’s inactive.” The account pill on the right of the header shows Invited, Sign-in paused or Blocked; the Sample chip stays beside the name. A bounced email lives in Manage account (below). Delete profile: a draft or an inactive person; always behind a confirm. No account is locked after wrong passwords — the login offers a reset link instead.
+- Manage account · email bounced
+- Reza Karimi · reza.karimi@example.com
+- Login
+- Email
+- Bounced on 12 Nov · reza.karimi@example.com
+- Try again
+- Password
+- Set · changed 12 Oct
+- Send reset link
+- Two-step login
+- On · authenticator app
+- The Email row appears at the top of Login only when an email bounced: Try again sends it again at once, toast “Email sent again”.

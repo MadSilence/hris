@@ -36,7 +36,7 @@ export default function OrganizationLayout({ children }: { children: React.React
   if (!activeTab) return <>{children}</>;
 
   return (
-    <div className="flex h-[calc(100dvh-96px)] min-h-0 flex-col gap-10">
+    <div className="flex h-[calc(100cqh-96px)] min-h-0 flex-col gap-10">
       <section className="flex flex-none flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-greeting">{t(activeTab.labelKey)}</h1>

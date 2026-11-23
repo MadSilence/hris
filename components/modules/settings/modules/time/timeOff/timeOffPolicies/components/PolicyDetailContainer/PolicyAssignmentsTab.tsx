@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@/components/desact/skeleton";
-import { FC, useState } from "react";
+import { FC, ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Cancel01Icon, UserAdd01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -21,6 +21,7 @@ import { TimeOffPolicyAssignmentStatus } from "@/api/modules/timeOff/timeOffPoli
 import type { TimeOffPolicyAssignment } from "@/models/timeOff";
 import { FieldError } from "@/components/desact/field-error";
 import { Illustration } from "@/components/illustrations";
+import { useDateFormatter } from "@/lib/date";
 
 type Props = {
   policyId: string;
@@ -40,7 +41,11 @@ function AssignmentRow({
   // The person arrives with the assignment. Fetching them per row meant one request per assignee
   // and the word "Loading…" where a name belongs — on a policy with fifty people, fifty requests.
   const t = useTranslations("timeOff");
+  const formatDate = useDateFormatter();
   const name = assignment.person?.name ?? t("policies.assignments.unnamed");
+  // The dates arrive as `yyyy-MM-dd`; written as they came, the row read "from 2026-11-23".
+  const from = formatDate(assignment.effectiveFrom, { style: "medium" });
+  const to = formatDate(assignment.effectiveTo, { style: "medium" });
 
   return (
     <div className="group flex items-center justify-between gap-2 rounded-control py-1 pl-3 pr-1 hover:bg-subtle">
@@ -52,8 +57,8 @@ function AssignmentRow({
         />
         <span className="hidden text-hint text-tertiary sm:inline">
           {assignment.effectiveTo
-            ? t("policies.assignments.fromTo", { from: assignment.effectiveFrom, to: assignment.effectiveTo })
-            : t("policies.assignments.from", { from: assignment.effectiveFrom })}
+            ? t("policies.assignments.fromTo", { from, to })
+            : t("policies.assignments.from", { from })}
         </span>
       </div>
 
@@ -176,10 +181,20 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
     );
   }
 
+  // The two modals sit at one place in the tree whichever branch draws the body. Inside each branch,
+  // the first assignment switched the empty state for the list, remounted the open Assign window
+  // and reset it to an empty picker — the result it had just shown was gone.
+  const withModals = (body: ReactNode) => (
+    <>
+      {body}
+      {assignModal}
+      {endModal}
+    </>
+  );
+
   if (!isLoading && !error && active.length === 0 && ended.length === 0) {
-    return (
-      <>
-        <div className="flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed px-6 py-12 text-center">
+    return withModals(
+      <div className="flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed px-6 py-12 text-center">
           <Illustration scene="people-s" size="s" className="mb-4" />
           <h3 className="text-body font-semibold text-primary">{t("policies.assignments.emptyTitle")}</h3>
           <p className="mt-2 max-w-md text-body text-tertiary">
@@ -187,13 +202,11 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
           </p>
           {assignButton && <div className="mt-5">{assignButton}</div>}
           <HistoryToggle showing={showHistory} onChange={setShowHistory} className="mt-3" />
-        </div>
-        {assignModal}
-      </>
+        </div>,
     );
   }
 
-  return (
+  return withModals(
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex flex-none items-center justify-between gap-2">
         <div className="flex items-center gap-3">
@@ -249,9 +262,6 @@ export const PolicyAssignmentsTab: FC<Props> = ({ policyId, policyName, isArchiv
           </div>
         )}
       </div>
-
-      {assignModal}
-      {endModal}
-    </div>
+    </div>,
   );
 };

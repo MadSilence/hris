@@ -2,9 +2,8 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
-import { Badge } from "@/components/desact/badge";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import {
   useCompanyCalendarAbsences,
@@ -12,28 +11,18 @@ import {
   useCompanyCalendarPeople,
 } from "@/components/modules/calendar/hooks/useCompanyCalendar";
 import {
-  CALENDAR_HEADER_HEIGHT_VAR,
   CALENDAR_SCROLL_SELECTOR,
+  groupByUser,
 } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarBoard";
 import {
   CompanyCalendarRow,
   CompanyCalendarSkeletonRow,
-  useAbsencesByUser,
-  useMarksByUser,
-  type CompanyCalendarRowGeometry,
 } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
-import {
-  groupKey,
-  groupTitle,
-  placeholderRowCount,
-} from "@/components/modules/calendar/lib/grouping";
-import type {
-  CompanyCalendarCapacity,
-  CompanyCalendarGroup,
-  CompanyCalendarGrouping,
-  CompanyCalendarUser,
-} from "@/models/calendar";
-import { CapacityDot } from "@/components/modules/calendar/components/CompanyCalendarBoard/CapacityDot";
+import { useBoard } from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
+import { groupKey, groupTitle, placeholderRowCount } from "@/components/modules/calendar/lib/grouping";
+import { BAND_H, NAME_COL } from "@/components/modules/calendar/lib/boardGeometry";
+import { cn } from "@/lib/cn";
+import type { CompanyCalendarGroup, CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/calendar";
 import type { FilterDTO } from "@/models/user/fields";
 
 type Shared = {
@@ -42,7 +31,6 @@ type Shared = {
   filters: FilterDTO[];
   from: string;
   to: string;
-  geometry: CompanyCalendarRowGeometry;
   /** See the flat board's `requestFor`. */
   requestFor?: (user: CompanyCalendarUser) => ((startISO: string, endISO: string) => void) | undefined;
 };
@@ -52,51 +40,39 @@ type Props = Shared & {
   isLoading: boolean;
   collapsed: ReadonlySet<string>;
   onToggle: (key: string) => void;
-  /** Days each team or department is at its limit of people away. */
-  capacity?: CompanyCalendarCapacity[];
 };
 
 /**
- * A grouped board's body: one section per group, each with its own header, count and rows.
+ * A grouped board's body (N06c): one band per group, each with its own rows.
  *
- * Every section pages **its own** rows. Paging the whole roster and sorting it into groups here
- * would slot each newly loaded page into groups above the reader — the page would grow above the
- * viewport and the scroll position would stop meaning anything. A section that is collapsed, or
- * has not yet come near the screen, fetches nothing.
+ * Every section pages **its own** rows. Paging the whole roster and sorting it into groups here would slot each newly
+ * loaded page into groups above the reader — the page would grow above the viewport and the scroll position would stop
+ * meaning anything. A section that is folded, or has not yet come near the screen, fetches nothing.
  */
-export const CompanyCalendarGroupedRows: FC<Props> = ({
-  groups,
-  isLoading,
-  collapsed,
-  onToggle,
-  capacity,
-  ...shared
-}) => {
+export const CompanyCalendarGroupedRows: FC<Props> = ({ groups, isLoading, collapsed, onToggle, ...shared }) => {
   if (isLoading && !groups) {
     return (
       <>
         {Array.from({ length: 12 }).map((_, r) => (
-          <CompanyCalendarSkeletonRow
-            key={`skel-${r}`}
-            dayISOs={shared.geometry.dayISOs}
-            gridTemplateColumns={shared.geometry.gridTemplateColumns}
-          />
+          <CompanyCalendarSkeletonRow key={`skel-${r}`} index={r} />
         ))}
       </>
     );
   }
 
+  const list = groups ?? [];
   return (
     <>
-      {(groups ?? []).map((group) => {
+      {list.map((group, i) => {
         const key = groupKey(group);
         return (
           <CompanyCalendarGroupSection
             key={key}
             group={group}
             collapsed={collapsed.has(key)}
+            // Two bands in a row share one line (N06c).
+            followsBand={i > 0 && collapsed.has(groupKey(list[i - 1]))}
             onToggle={() => onToggle(key)}
-            capacity={group.id === null ? undefined : capacity?.filter((c) => c.groupId === group.id)}
             {...shared}
           />
         );
@@ -108,8 +84,8 @@ export const CompanyCalendarGroupedRows: FC<Props> = ({
 type SectionProps = Shared & {
   group: CompanyCalendarGroup;
   collapsed: boolean;
+  followsBand: boolean;
   onToggle: () => void;
-  capacity?: CompanyCalendarCapacity[];
 };
 
 const scrollerOf = (node: HTMLElement | null): HTMLElement | null =>
@@ -122,19 +98,19 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
   filters,
   from,
   to,
-  geometry,
   collapsed,
+  followsBand,
   onToggle,
-  capacity,
   requestFor,
 }) => {
   const t = useTranslations("calendar");
   const tCommon = useTranslations("common");
+  const { geometry, registry } = useBoard();
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [nearScreen, setNearScreen] = useState(false);
 
-  // A section loads once it comes within a screen of the viewport, and stays loaded. Forty expanded
-  // groups would otherwise fire forty requests the moment the board is grouped.
+  // A section loads once it comes within a screen of the viewport, and stays loaded. Forty open groups would otherwise
+  // fire forty requests the moment the board is grouped.
   useEffect(() => {
     if (nearScreen) return;
     const node = sectionRef.current;
@@ -147,8 +123,7 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) setNearScreen(true);
       },
-      // The board scrolls inside its own box, so that box is the root: a margin on the viewport
-      // would not reach past the box's clipping.
+      // The board scrolls inside its own box, so that box is the root.
       { root: scrollerOf(node), rootMargin: "400px 0px" },
     );
     observer.observe(node);
@@ -174,26 +149,32 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
   const users = useMemo(() => (pages?.pages ?? []).flatMap((p) => p.users), [pages]);
   const userIds = useMemo(() => users.map((u) => u.id), [users]);
 
-  const {
-    data: marks,
-    isError: marksFailed,
-    error: marksError,
-    refetch: refetchMarks,
-  } = useCompanyCalendarMarks({ from, to, userIds });
-  const marksByUser = useMarksByUser(marks ?? []);
+  const { data: marks, isError: marksFailed, error: marksError, refetch: refetchMarks } = useCompanyCalendarMarks({
+    from,
+    to,
+    userIds,
+  });
+  const marksByUser = useMemo(() => groupByUser(marks ?? []), [marks]);
   const {
     data: absences,
     isError: absencesFailed,
     error: absencesError,
     refetch: refetchAbsences,
   } = useCompanyCalendarAbsences({ from, to, userIds });
-  const absencesByUser = useAbsencesByUser(absences ?? []);
+  const absencesByUser = useMemo(() => groupByUser(absences ?? []), [absences]);
+
+  // The leave card's "who else is away" reads every group the board has loaded.
+  const registryKey = `group:${groupKey(group)}`;
+  useEffect(() => {
+    registry.set(registryKey, users, absences ?? []);
+    return () => registry.delete(registryKey);
+  }, [registry, registryKey, users, absences]);
 
   // The next page of this group follows the scroll, like the flat board.
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const node = sentinelRef.current;
-    if (collapsed || !node || !hasNextPage || isFetchingNextPage) return;
+    if (collapsed || !node || !hasNextPage || isFetchingNextPage || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) void fetchNextPage();
@@ -204,17 +185,13 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
     return () => observer.disconnect();
   }, [collapsed, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Collapsing a group the reader is inside — its header stuck at the top, its rows scrolled past —
-  // would leave them wherever the next group's rows happen to fall. Bring the header back to the top
-  // first, so after the collapse they are looking at the group they just closed.
+  // Folding a group the reader is inside — its band stuck at the top, its rows scrolled past — would leave them
+  // wherever the next group's rows happen to fall. Bring the band back to the top first.
   const toggle = () => {
     const section = sectionRef.current;
     const scroller = scrollerOf(section);
     if (!collapsed && section && scroller) {
-      const headerHeight =
-        parseFloat(getComputedStyle(scroller).getPropertyValue(CALENDAR_HEADER_HEIGHT_VAR)) || 0;
-      const offset =
-        section.getBoundingClientRect().top - scroller.getBoundingClientRect().top - headerHeight;
+      const offset = section.getBoundingClientRect().top - scroller.getBoundingClientRect().top - geometry.headerHeight;
       if (offset < 0) scroller.scrollTop += offset;
     }
     onToggle();
@@ -223,67 +200,53 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
   const title = groupTitle(t, grouping, group);
   const failed = peopleFailed || marksFailed || absencesFailed;
   const waiting = !collapsed && (!nearScreen || (isLoading && users.length === 0));
+  const width = NAME_COL + geometry.dayCount * geometry.dayW;
 
   return (
     <div ref={sectionRef} role="group" aria-label={title}>
-      {/* Sticks under the day header while its rows scroll past, so the reader always knows whose
-          rows they are looking at; the next group's header pushes it out. */}
+      {/* The group band (N06c): white, 32 high, no day cells, a 2 px line on both sides; it sticks under the header
+          while its rows scroll past, and the today line runs through it. */}
       <div
-        className="sticky z-[15] border-b border-divider bg-subtle"
-        style={{ top: `var(${CALENDAR_HEADER_HEIGHT_VAR}, 0px)` }}
+        className={cn("sticky z-[15] border-y-2 border-divider bg-card", followsBand && "-mt-0.5")}
+        style={{ top: geometry.headerHeight, height: BAND_H, width }}
       >
+        {geometry.todayIndex >= 0 ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-accent"
+            style={{ left: NAME_COL + geometry.todayIndex * geometry.dayW + geometry.dayW / 2 }}
+          />
+        ) : null}
         <button
           type="button"
           aria-expanded={!collapsed}
           onClick={toggle}
-          className="flex w-full items-center gap-2 px-3 py-2 text-left text-body hover:bg-mist"
+          className="sticky left-0 flex h-full items-center gap-2 bg-card pr-3 pl-6 text-left outline-none focus-visible:shadow-focus"
+          style={{ width: NAME_COL }}
         >
           <Icon
-            icon={ArrowRight01Icon}
+            icon={ArrowDown01Icon}
             size="sm"
-            className={`text-tertiary transition-transform duration-(--duration-menu) ${collapsed ? "" : "rotate-90"}`}
+            className={cn("size-3.5 shrink-0 text-secondary transition-transform duration-(--duration-menu)", collapsed && "-rotate-90")}
           />
-          <span className="truncate font-medium text-primary">{title}</span>
-          <Badge variant="neutral" className="px-1.5" aria-label={tCommon("people.count", { count: group.count })}>
+          <span className="min-w-0 truncate text-body font-semibold text-accent-text">{title}</span>
+          <span className="text-label font-normal text-tertiary" aria-label={tCommon("people.count", { count: group.count })}>
             {group.count}
-          </Badge>
+          </span>
         </button>
-        {capacity && capacity.length > 0 ? (
-          // The marks sit on the header's day columns, over the button, without taking its clicks.
-          <div
-            className="pointer-events-none absolute inset-0 grid items-center"
-            style={{ gridTemplateColumns: geometry.gridTemplateColumns }}
-          >
-            {capacity.map((mark) => {
-              const col = geometry.dayISOs.indexOf(mark.date);
-              if (col === -1) return null;
-              return (
-                <span
-                  key={mark.date}
-                  className="pointer-events-auto flex justify-center"
-                  style={{ gridColumn: col + 2, gridRow: 1 }}
-                >
-                  <CapacityDot mark={mark} who={grouping === "TEAM" ? "team" : "department"} />
-                </span>
-              );
-            })}
-          </div>
-        ) : null}
       </div>
 
       {collapsed ? null : failed ? (
-        <ErrorState
-          compact
-          error={peopleFailed ? peopleError : marksFailed ? marksError : absencesError}
-          onRetry={() => void (peopleFailed ? refetchPeople() : marksFailed ? refetchMarks() : refetchAbsences())}
-        />
+        <div className="sticky left-0" style={{ width: Math.min(width, 720) }}>
+          <ErrorState
+            compact
+            error={peopleFailed ? peopleError : marksFailed ? marksError : absencesError}
+            onRetry={() => void (peopleFailed ? refetchPeople() : marksFailed ? refetchMarks() : refetchAbsences())}
+          />
+        </div>
       ) : waiting ? (
         Array.from({ length: placeholderRowCount(group.count) }).map((_, r) => (
-          <CompanyCalendarSkeletonRow
-            key={`skel-${r}`}
-            dayISOs={geometry.dayISOs}
-            gridTemplateColumns={geometry.gridTemplateColumns}
-          />
+          <CompanyCalendarSkeletonRow key={`skel-${r}`} index={r} />
         ))
       ) : (
         <>
@@ -294,12 +257,11 @@ const CompanyCalendarGroupSection: FC<SectionProps> = ({
               marks={marksByUser.get(u.id) ?? []}
               absences={absencesByUser.get(u.id)}
               onSelectRange={requestFor?.(u)}
-              {...geometry}
             />
           ))}
           {hasNextPage ? (
-            <div ref={sentinelRef} className="flex justify-center py-3 text-hint text-tertiary">
-              {isFetchingNextPage ? tCommon("states.loading") : ""}
+            <div ref={sentinelRef}>
+              {isFetchingNextPage ? <CompanyCalendarSkeletonRow index={1} /> : <div className="h-px" />}
             </div>
           ) : null}
         </>

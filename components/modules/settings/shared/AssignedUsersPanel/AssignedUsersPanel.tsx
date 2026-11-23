@@ -26,6 +26,7 @@ import { assignedUsersQueryKey } from "@/components/audience/assignment/hooks/us
 import { unassignUserAction } from "@/components/audience/assignment/actions/assignmentActions";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { showActionError } from "@/lib/errors/errorToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { ConfirmActionModal } from "@/components/ui/ConfirmActionModal";
 import { UserStatusBadge } from "@/components/ui/StatusBadge";
 import { SearchBox } from "@/components/ui/SearchBox";
@@ -77,7 +78,7 @@ export interface AssignedUsersPanelProps {
   };
 }
 
-const SCROLL_OFFSET = "calc(100svh - 390px)";
+const SCROLL_OFFSET = "calc(100cqh - 390px)";
 
 export default function AssignedUsersPanel({
   title,
@@ -156,17 +157,17 @@ export default function AssignedUsersPanel({
     setRemoveTarget(null);
   };
 
-  const assignButton = (
+  // Nothing is shown disabled: with no way to assign there is no button, and on an archived record it says why when
+  // pressed.
+  const assignButton = assign ? (
     <Button type="button"
       className="gap-1.5"
-      onClick={() => setAssignOpen(true)}
-      disabled={!assign || isArchived}
-      title={isArchived ? t("shared.assignedPanel.archived") : undefined}
+      onClick={() => (isArchived ? explain(t("shared.assignedPanel.archived")) : setAssignOpen(true))}
     >
       <Icon icon={Add01Icon} size="sm" />
       {t("shared.assignedPanel.assign")}
     </Button>
-  );
+  ) : null;
 
   const rootClass = fillParent
     ? "flex h-full min-h-0 flex-col gap-6"
@@ -249,13 +250,11 @@ export default function AssignedUsersPanel({
         <div style={emptyStyle}>
           <ListEmptyState
             query={searching ? q : ""}
-            onClearSearch={() => setQuery("")}
             scene="people"
             title={limited && (total ?? 0) > 0 ? t("shared.assignedPanel.emptyHiddenTitle") : t("shared.assignedPanel.emptyTitle")}
             description={limited && (total ?? 0) > 0
               ? t("shared.assignedPanel.emptyHiddenDescription")
               : t("shared.assignedPanel.emptyDescription")}
-            noResultsHint={t("shared.assignedPanel.noResultsHint")}
             /* An archived record takes no new people, so the block is a panel rather than a
                button — a control that cannot work is not offered. */
             onCreate={assign && !isArchived ? () => setAssignOpen(true) : undefined}

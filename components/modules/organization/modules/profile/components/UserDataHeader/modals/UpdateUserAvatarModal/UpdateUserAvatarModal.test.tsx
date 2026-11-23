@@ -67,7 +67,8 @@ describe("UpdateUserAvatarModal", () => {
 
     expect(screen.getByText("JS")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /upload photo/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /remove photo/i })).toBeDisabled();
+    // No photo, nothing to remove: the card is not offered (NEVER-DISABLED).
+    expect(screen.queryByRole("button", { name: /remove photo/i })).not.toBeInTheDocument();
   });
 
   it("asks for an image when Save is pressed before one is chosen", async () => {

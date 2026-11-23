@@ -8,6 +8,7 @@ import { Icon } from "@/components/desact/icon";
 import { fieldClasses } from "@/components/desact/input";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/desact/popover";
 import { cn } from "@/lib/cn";
+import { FittedNames } from "@/components/ui/FittedNames";
 
 export type ComboboxOption = {
   value: string;
@@ -195,6 +196,8 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
     displayLabel ?? (chosenOptions.length ? chosenOptions.map((o) => o.label).join(", ") : null);
   const single = !props.multiple ? (chosenOptions[0] ?? null) : null;
   const chips = props.multiple === true && props.chips === true && chosenOptions.length > 0;
+  // Several picks in a closed field: the names that fit, then "+N" (MULTI-VALUE); open, the field is the search again.
+  const fitted = props.multiple === true && !chips && !open && displayLabel == null && chosenOptions.length > 0;
   const unpick = (value: string) => {
     if (props.multiple) props.onChange(props.value.filter((v) => v !== value));
   };
@@ -326,6 +329,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
                 )}
               </span>
             ))}
+          {fitted && <FittedNames labels={chosenOptions.map((o) => o.label)} className="flex-1 text-primary" />}
           <input
             ref={inputRef}
             id={id}
@@ -341,9 +345,9 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
             aria-labelledby={labelledBy}
             aria-invalid={invalid || undefined}
             disabled={disabled}
-            value={open || chips ? query : (shown ?? "")}
+            value={open || chips || fitted ? query : (shown ?? "")}
             placeholder={
-              chips ? undefined : open ? (shown ?? placeholder ?? t("actions.select")) : (placeholder ?? t("actions.select"))
+              chips || fitted ? undefined : open ? (shown ?? placeholder ?? t("actions.select")) : (placeholder ?? t("actions.select"))
             }
             onChange={(e) => {
               setQuery(e.target.value);
@@ -363,6 +367,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
             className={cn(
               "h-full min-w-0 flex-1 truncate bg-transparent text-primary outline-none placeholder:text-tertiary",
               chips && "h-6 min-w-12",
+              fitted && "w-0 flex-none",
               "disabled:cursor-not-allowed disabled:text-disabled",
             )}
           />

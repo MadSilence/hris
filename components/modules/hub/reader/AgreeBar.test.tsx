@@ -53,7 +53,7 @@ describe("AgreeBar", () => {
 
     await act(async () => fireEvent.click(screen.getByRole("button", { name: /I agree/ })));
 
-    expect(toast.error).toHaveBeenCalledWith("Couldn't save your answer. Try again.", expect.objectContaining({ action: expect.objectContaining({ label: "Retry" }) }));
+    expect(toast.error).toHaveBeenCalledWith("Couldn't save your answer. Try again", expect.objectContaining({ action: expect.objectContaining({ label: "Retry" }) }));
     expect(screen.getByRole("button", { name: /I agree/ })).toBeEnabled();
   });
 });

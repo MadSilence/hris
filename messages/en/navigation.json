@@ -228,7 +228,7 @@
   "errorPages": {
     "serverTitle": "Something broke on our side",
     "serverLine": "Try again in a moment.",
-    "notFoundTitle": "We can't find this page",
+    "notFoundTitle": "We can’t find this page",
     "notFoundLine": "The link may be broken."
   },
   "preferences": {

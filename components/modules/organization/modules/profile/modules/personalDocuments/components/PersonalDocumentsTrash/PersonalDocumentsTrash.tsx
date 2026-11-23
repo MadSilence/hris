@@ -7,7 +7,7 @@ import { batchDocumentsAction } from "@/components/modules/organization/modules/
 import { FC, useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowTurnBackwardIcon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { ArrowTurnBackwardIcon, Delete02Icon, Folder01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
@@ -24,15 +24,14 @@ import {
 import {
   useInvalidateDocumentsContentQuery,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/useDocumentsContent";
-import { formatBytes } from "../../utils/formatBytes";
 import { useDateFormatter } from "@/lib/date";
-import { getDocumentFileIcon } from "../../utils/getDocumentFileIcon";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
+import { RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
+import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
+import { DocumentName, FileTypeTile } from "@/components/modules/signing/components/DocumentPieces";
 import {
   PurgeDocumentModal,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/PurgeDocumentModal";
-import {
-  PersonalDocumentsEmptyState,
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsEmptyState";
 import { NodRing } from "@/components/desact/nod";
 import { FormError } from "@/components/feedback/FormError";
 
@@ -44,8 +43,20 @@ const messageOf = (error: unknown): string | null =>
 /**
  * Deleted documents are kept — the stored file included — until someone purges them here. That is
  * what makes "Delete" recoverable and why purging is a separate, explicit action.
+ *
+ * T10 (DT18): the trail "Documents › Trash" with the count, a hint, then a frameless table — Name (the file tile) ·
+ * Was in · Moved to trash — with Restore on hover and Delete forever in ⋯ (confirmed). T11 (DT19): the empty trash
+ * is the illustration, centred, with no frame.
  */
-export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
+export const PersonalDocumentsTrash: FC<{
+  userId: string;
+  /** The toolbar's search — the trash is searched like a folder. */
+  search?: string;
+  /** "Documents › Trash", drawn here so the count can sit beside it. */
+  trail?: React.ReactNode;
+  /** Folder names by id, for "Was in". */
+  folderNames?: Map<string, string>;
+}> = ({ userId, search = "", trail, folderNames }) => {
   const t = useTranslations("organization");
   const formatDisplayDate = useDateFormatter();
   const tCommon = useTranslations("common");
@@ -132,22 +143,30 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
     return <ErrorState error={error} title={t("documents.trash.unavailable")} compact/>;
   }
 
-  const rows = data ?? [];
+  const all = data ?? [];
+  const query = search.trim().toLowerCase();
+  const rows = query ? all.filter((r) => r.name.toLowerCase().includes(query)) : all;
 
-  if (rows.length === 0) {
+  if (all.length === 0) {
     return (
-      <PersonalDocumentsEmptyState
-        scene="trash"
-        title={t("documents.trash.emptyTitle")}
-        description={t("documents.trash.emptyDescription")}
-      />
+      <div className="flex flex-col gap-6">
+        {trail}
+        <EmptyState scene="trash" title={t("documents.trash.emptyTitle")} description={t("documents.trash.emptyDescription")} />
+      </div>
     );
   }
 
   const pickedRows = rows.filter((r) => picked.has(r.id));
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+          {trail}
+          <span className="text-body text-tertiary">{t("documents.folderCard.files", { count: all.length })}</span>
+        </div>
+        <p className="text-body text-tertiary">{t("documents.trash.hint")}</p>
+      </div>
       {pickedRows.length > 0 && (
         <SelectionBar
           count={pickedRows.length}
@@ -161,51 +180,88 @@ export const PersonalDocumentsTrash: FC<{ userId: string }> = ({ userId }) => {
       {actionError && <FormError message={actionError} />}
       {batchError && <FormError message={batchError} />}
 
-      <div className="divide-y divide-divider rounded-control border border-divider">
-        {rows.map((document) => (
-          <div key={document.id} className={cn("flex items-center gap-3 px-4 py-3", picked.has(document.id) && "bg-accent-subtle")}>
-            <Checkbox
-              aria-label={t("documents.table.select", { name: document.name })}
-              checked={picked.has(document.id)}
-              onCheckedChange={() => togglePicked(document.id)}
-            />
-            <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">
-              {getDocumentFileIcon(document.mimeType)}
-            </span>
-
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-body font-medium">{document.name}</p>
-              <p className="text-hint text-tertiary">
-                {t("documents.trash.meta", { size: formatBytes(document.sizeBytes), date: formatDisplayDate(document.createdAt) })}
-              </p>
-            </div>
-
-            <Button type="button"
-              variant="ghost"
-              size="sm"
-              disabled={isBusy}
-              onClick={() => restore.mutate(document.id)}
-            >
-              <Icon icon={ArrowTurnBackwardIcon} size="sm" />
-              {tCommon("actions.restore")}
-            </Button>
-
-            <Button type="button"
-              variant="ghost"
-              size="sm"
-              className="text-tertiary hover:text-danger-text"
-              disabled={isBusy}
-              onClick={() => {
-                purge.reset();
-                setPendingPurge(document);
-              }}
-            >
-              <Icon icon={Delete02Icon} size="sm" />
-              {t("documents.trash.deleteForever")}
-            </Button>
-          </div>
-        ))}
-      </div>
+      {rows.length === 0 ? (
+        <NoResults title={t("documents.container.noResultsTitle", { query: search.trim() })} hint={t("documents.container.noResultsHint")} />
+      ) : (
+      <Table className="table-fixed">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-8">
+              <Checkbox
+                aria-label={t("documents.table.selectAll")}
+                checked={rows.every((r) => picked.has(r.id)) ? true : rows.some((r) => picked.has(r.id)) ? "indeterminate" : false}
+                onCheckedChange={() => setPicked(rows.every((r) => picked.has(r.id)) ? new Set() : new Set(rows.map((r) => r.id)))}
+              />
+            </TableHead>
+            <TableHead>{tCommon("fields.name")}</TableHead>
+            <TableHead className="w-48">{t("documents.trash.wasIn")}</TableHead>
+            <TableHead className="w-40">{t("documents.trash.movedToTrash")}</TableHead>
+            <TableHead className="w-36" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((document) => {
+            const folder = document.folderId ? folderNames?.get(document.folderId) : undefined;
+            return (
+              <TableRow key={document.id} className={cn("group/row h-12", picked.has(document.id) && "bg-accent-subtle")}>
+                <TableCell className="w-8">
+                  <Checkbox
+                    aria-label={t("documents.table.select", { name: document.name })}
+                    checked={picked.has(document.id)}
+                    onCheckedChange={() => togglePicked(document.id)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <FileTypeTile mimeType={document.mimeType} name={document.name} />
+                    <DocumentName name={document.name} className="group-hover/row:bg-transparent group-hover/row:shadow-none" />
+                  </div>
+                </TableCell>
+                <TableCell className="text-secondary">
+                  {folder ? (
+                    <span className="inline-flex min-w-0 items-center gap-1.5">
+                      <Icon icon={Folder01Icon} size="sm" className="text-tertiary" />
+                      <span className="truncate">{folder}</span>
+                    </span>
+                  ) : (
+                    <span className="text-tertiary">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="tabular-nums text-tertiary">
+                  {formatDisplayDate(document.deletedAt ?? document.createdAt, { style: "medium" })}
+                </TableCell>
+                <TableCell className="text-right">
+                  {/* Restore on hover (T10), and always to the keyboard; Delete forever in ⋯, confirmed. */}
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      className="opacity-0 focus-visible:opacity-100 group-hover/row:opacity-100 touch:opacity-100"
+                      disabled={isBusy}
+                      onClick={() => restore.mutate(document.id)}
+                    >
+                      {tCommon("actions.restore")}
+                    </Button>
+                    <RowActionsMenu label={t("documents.table.actions")}>
+                      <RowActionDestructive
+                        icon={<Icon icon={Delete02Icon} size="sm" />}
+                        onClick={() => {
+                          purge.reset();
+                          setPendingPurge(document);
+                        }}
+                      >
+                        {t("documents.trash.deleteForever")}
+                      </RowActionDestructive>
+                    </RowActionsMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      )}
 
       {/* Erasing is irreversible: a selection is confirmed like a single file. */}
       <PurgeDocumentModal

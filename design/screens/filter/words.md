@@ -1,0 +1,137 @@
+# Words — filter
+
+Every string drawn on the boards of this screen, per frame, in reading order (from the export pages; sidebar left out; bare day numbers and weekday letters left out). Names, dates and numbers are sample data; the spec says which parts are data. Sentence case, US English, no period on toasts and field errors.
+
+## N09b-FilterWide
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Policy
+- Annual leave
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- is
+- and
+- Add a condition
+- Reset
+- Apply
+- Sick leave
+- Personal day
+- Parental leave
+
+## N09c-ManyFilters
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Policy
+- Annual leave
+- +9 more
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+
+## N09d-MoreOpen
+
+- Calendar
+- See who is away, and which days are public holidays.
+- Share
+- Everyone
+- My team
+- Design in Vilnius
+- Sales
+- Save as a view
+- Search
+- Filter
+- Team
+- Design
+- Office
+- Vilnius
+- Policy
+- Annual leave
+- +9 more
+- Clear all
+- Group
+- Today
+- Week
+- Month
+- November
+- December
+- Inga Ruiz
+- Content designer
+- · 9 days
+- Meryem Alaoui
+- Senior product designer
+- Rūta Jonaitė
+- Product designer
+- · 5 days
+- is
+- and
+- Department
+- Product
+- Manager
+- Job title
+- contains
+- Designer
+- Location
+- Contract
+- Full time
+- Status
+- Active
+- Level
+- Senior
+- Country
+- Lithuania
+- Language
+- English
+- Add a condition
+- Reset
+- Apply

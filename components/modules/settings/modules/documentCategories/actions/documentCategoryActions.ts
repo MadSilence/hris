@@ -12,8 +12,6 @@ export type DocumentCategoryActionOutput = {
 export type SaveDocumentCategoryInput = {
   id?: string;
   name: string;
-  description?: string | null;
-  isActive?: boolean;
   /** documents-expiry X07: a date is required; remind N days before (0 = no reminder); who sees an upload by default. */
   requiresExpiry?: boolean;
   remindDaysBefore?: number | null;
@@ -28,8 +26,6 @@ export const saveDocumentCategoryAction = async (
   try {
     const body = {
       name: submission.name,
-      description: submission.description ?? null,
-      isActive: submission.isActive ?? true,
       // Sent only when the form gave them: an absent field is left as it is (DocumentCategorySettings is partial).
       ...(submission.requiresExpiry !== undefined ? { requiresExpiry: submission.requiresExpiry } : {}),
       ...(submission.remindDaysBefore !== undefined ? { remindDaysBefore: submission.remindDaysBefore ?? 0 } : {}),
@@ -49,11 +45,16 @@ export const saveDocumentCategoryAction = async (
   }
 };
 
+/**
+ * Deletes a category (AQ-19): KEEP — its documents keep the tag and nobody picks it again; MOVE — they move to
+ * `targetCategoryId` first. A category nobody uses is simply deleted.
+ */
 export const deleteDocumentCategoryAction = async (
-  id: string
+  id: string,
+  body: { strategy: "KEEP" | "MOVE"; targetCategoryId?: string | null } = { strategy: "KEEP" },
 ): Promise<DocumentCategoryActionOutput> => {
   try {
-    await hrisDocumentsService.deleteCategory(id);
+    await hrisDocumentsService.deleteCategory(id, body);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
     return toActionError(error, "documentCategoryActions");

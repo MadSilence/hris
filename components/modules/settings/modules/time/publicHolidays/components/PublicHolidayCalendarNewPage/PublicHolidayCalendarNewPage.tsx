@@ -236,7 +236,7 @@ export function PublicHolidayCalendarNewPage() {
 
   if (isFirstTemplateLoad) {
     return (
-      <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+      <div className="flex h-[calc(100cqh-6rem)] flex-col overflow-hidden">
         <div className="shrink-0 px-8 pt-2">
           <SettingsPageHeader
             title={t("publicHolidays.newCalendar.title")}
@@ -252,7 +252,7 @@ export function PublicHolidayCalendarNewPage() {
   }
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col overflow-hidden">
       {/* Everything above the day list stays put; only the list below scrolls. */}
       <div className="shrink-0 px-8 pt-2">
         <div className="flex items-center justify-between gap-4">

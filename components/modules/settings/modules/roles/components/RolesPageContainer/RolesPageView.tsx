@@ -89,6 +89,7 @@ export default function RolesPageView({
   assignRolesErrorMessage,
   onClearErrors,
 }: RolesPageViewProps) {
+  const [addOpen, setAddOpen] = React.useState(false);
   const t = useTranslations("settings");
   return (
     <Card className="flex h-full min-h-0 flex-col border-0 gap-3 px-8 pt-2">
@@ -128,6 +129,8 @@ export default function RolesPageView({
                 onExportRoles={onExportRoles}
                 isCreatingRole={isCreatingRole}
                 createRoleErrorMessage={createRoleErrorMessage}
+                addOpen={addOpen}
+                onAddOpenChange={setAddOpen}
               />
             }
           />
@@ -140,7 +143,6 @@ export default function RolesPageView({
             roleRows={roleRows}
             rolesLoading={rolesLoading}
             query={query}
-            onClearSearch={() => onQueryChange("")}
             showArchived={showArchived}
             onRenameRole={onRenameRole}
             onDuplicateRole={onDuplicateRole}
@@ -151,13 +153,13 @@ export default function RolesPageView({
             saveRoleNameErrorMessage={saveRoleNameErrorMessage}
             deleteRoleErrorMessage={deleteRoleErrorMessage}
             onClearErrors={onClearErrors}
+            onAddRole={() => setAddOpen(true)}
           />
         ) : (
           <UsersRolesTable
             userRows={userRows}
             usersLoading={usersLoading}
             query={query}
-            onClearSearch={() => onQueryChange("")}
             // Archived roles come through too: the form hides the ones nobody holds and keeps the
             // ones a person still has, so they can at least be taken off.
             allRoles={allRoles ?? roleRows ?? []}

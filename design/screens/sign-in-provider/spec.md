@@ -59,3 +59,9 @@ None.
   - E3 is on the root (the auth host is an alias of it); a refusal at any step returns to the page the button was on,
     naming the provider.
   - Not walked with Google or Microsoft for real (`(claude)/testing/CONFIGURATION_REQUIRED.md` § 8.G).
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the colour pane grows with the window — 520 at 1280 × window ÷ 1280, never smaller, stopping at 1920 — and
+  everything in it (rings, wordmark, slogan or company name) scales with it (`--auth-grow` as the pane's `zoom`,
+  `styles/globals.css`; `technical_documentation/ui/DESIGN_SYSTEM.md` § 9).
+- Not seen in a browser.

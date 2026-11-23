@@ -210,18 +210,20 @@ describe("AssignRolesForm", () => {
     expect(onSubmitAction).not.toHaveBeenCalled();
   });
 
-  it("disables apply when user is null", () => {
+  it("applies nothing when there is no user", () => {
+    const onSubmitAction = jest.fn();
     render(
       <AssignRolesForm
         user={null}
         allRoles={allRoles}
         onCancelAction={jest.fn()}
-        onSubmitAction={jest.fn()}
+        onSubmitAction={onSubmitAction}
       />,
     );
 
     fireEvent.click(screen.getByText(/hr/i));
+    fireEvent.click(screen.getByRole("button", { name: /apply/i }));
 
-    expect(screen.getByRole("button", { name: /apply/i })).toBeDisabled();
+    expect(onSubmitAction).not.toHaveBeenCalled();
   });
 });

@@ -153,7 +153,6 @@
       "reviewTitle": "Review field access changes",
       "columnField": "Field",
       "columnType": "Type",
-      "floorBlocked": "Whole company is set to \"{level}\". Lower it there to allow less access here.",
       "floorNote": "Options below “{level}” are set by Whole company access.",
       "sensitiveTitle": "Sensitive: access is never granted automatically; without it people see a placeholder",
       "sensitive": "Sensitive",
@@ -274,14 +273,13 @@
       "system": "System",
       "default": "Default",
       "emptyTitle": "No roles yet",
-      "emptyDescription": "A role is a set of permissions you can hand to people. Add the first one to start granting access.",
-      "noResultsHint": "Try a different role name.",
+      "emptyDescription": "Most teams start with an admin and a manager role.",
       "archivedDescription": "Archived roles will appear here.",
       "copyName": "{name} (copy)",
       "archiveTitle": "Archive {name}?",
       "archiveTitleUnnamed": "Archive role?",
-      "archiveHeld": "{count, plural, one {It will be taken from # person, and scheduled assignments of it are cancelled. Unarchiving brings the role back, not its holders.} other {It will be taken from # people, and scheduled assignments of it are cancelled. Unarchiving brings the role back, not its holders.}}",
-      "archiveNobody": "Nobody holds it. Scheduled assignments of it are cancelled, and it can be unarchived later.",
+      "archiveHeld": "{count, plural, one {It will be taken from # person, and scheduled assignments of it are canceled. Unarchiving brings the role back, not its holders.} other {It will be taken from # people, and scheduled assignments of it are canceled. Unarchiving brings the role back, not its holders.}}",
+      "archiveNobody": "Nobody holds it. Scheduled assignments of it are canceled, and it can be unarchived later.",
       "rowActions": "Role actions",
       "unarchive": "Unarchive"
     },
@@ -306,8 +304,7 @@
     "users": {
       "columnRoles": "Assigned roles",
       "emptyTitle": "No people yet",
-      "emptyDescription": "People appear here once they are added to the organization.",
-      "noResultsHint": "Try a different name or email."
+      "emptyDescription": "People appear here once they are added to the organization."
     }
   },
   "shared": {
@@ -338,7 +335,6 @@
       "emptyTitle": "No people assigned yet",
       "emptyHiddenDescription": "People are assigned here, but none of them is someone your access covers.",
       "emptyDescription": "Assign people to this record to see them here.",
-      "noResultsHint": "Try a different name or position.",
       "assignPeople": "Assign people",
       "user": "User",
       "loadMore": "Load more",
@@ -605,20 +601,34 @@
   "documentCategories": {
     "add": "Add category",
     "emptyTitle": "No categories yet",
-    "emptyDescription": "Until a category exists documents cannot be labelled, and the category picker stays hidden on upload.",
-    "noResultsHint": "Try a different category name.",
+    "emptyDescription": "Most teams start with Contract, ID and Certificate.",
     "system": "System",
-    "inactive": "Inactive",
     "systemLocked": "System categories can't be edited or deleted",
-    "editAria": "Edit {name}",
-    "deleteAria": "Delete {name}",
-    "deleteTitle": "Delete category",
-    "deleteDescription": "<b>{name}</b> will be removed. Documents already labelled with it keep the file but lose the label.",
+    "deleteTitle": "Delete “{name}”?",
     "editTitle": "Edit category",
     "newTitle": "New category",
     "formDescription": "Categories label a person's documents — contracts, certificates, payslips.",
-    "active": "Active",
-    "activeHint": "Inactive categories stay on existing documents but are not offered on upload."
+    "actionsAria": "Actions for {name}",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteCount": "{count, plural, =0 {No documents have this category} one {# document has this category} other {# documents have this category}}",
+    "deleteCountWithTrash": "{count, plural, =0 {{trashed, plural, one {# document in the trash has this category} other {# documents in the trash have this category}}} one {# document has this category, and {trashed, plural, other {# in the trash}}} other {# documents have this category, and {trashed, plural, other {# in the trash}}}}",
+    "keep": "Keep them as they are",
+    "keepHint": "They keep the “{name}” tag. Nobody can pick it for new files.",
+    "move": "Move them to another category",
+    "moveTo": "Choose a category",
+    "moveToRequired": "Choose the category to move them to.",
+    "deleteConfirm": "Delete category",
+    "deleteAndMove": "Delete and move",
+    "summary": {
+      "expiryRequired": "Expiry date required",
+      "expiryOptional": "Expiry date optional",
+      "noExpiry": "No expiry",
+      "remind": "remind {count, plural, one {# day} other {# days}} before",
+      "visible": "visible to the person",
+      "hidden": "hidden from the person",
+      "uploaderDecides": "uploader decides"
+    }
   },
   "logs": {
     "filters": {
@@ -644,8 +654,7 @@
       "aboutWhom": "About whom",
       "deletedPerson": "Deleted person",
       "emptyTitle": "Nothing recorded yet",
-      "emptyDescription": "Everything people do in this company shows up here.",
-      "noResultsHint": "Try a different name, period or module.",
+      "emptyDescription": "Every change people make will show up here.",
       "system": "System",
       "appliedBy": "applied by {source}",
       "impersonated": "while acting as somebody else"
@@ -727,7 +736,7 @@
   },
   "comingSoon": {
     "title": "{title} is not available yet",
-    "description": "This part of settings is planned and has not been built. Nothing here changes how the product works today."
+    "description": "We’re building it — nothing to set up yet."
   },
   "templates": {
     "description": "Ready-made roles, profile fields, onboarding checklists and review forms. Open one to see exactly what it would create in your company, adjust it, and apply it as a copy you can change afterwards.",
@@ -753,8 +762,7 @@
     },
     "catalogue": {
       "emptyTitle": "No templates to apply",
-      "emptyDescription": "Templates appear here for what you may set up: roles, profile fields or onboarding checklists.",
-      "noResultsHint": "Try a different name.",
+      "emptyDescription": "Start from one — it takes about five minutes.",
       "applied": "Applied v{version}",
       "appliedAt": "Applied v{version} · {date}",
       "available": "v{version} Available",
@@ -849,7 +857,7 @@
       }
     },
     "sso": {
-      "saved": "Single sign-on saved.",
+      "saved": "Single sign-on saved",
       "title": "Single sign-on",
       "provider": "Identity provider",
       "ownerOnlyHint": "Only a System Owner can change the provider, its address and whether its two-step login is trusted.",
@@ -883,7 +891,7 @@
       "trustEmail": "Trust the email this provider sends",
       "trustEmailHint": "For a provider that doesn't mark addresses as verified. The first login links people by this address, so turn it on only if your provider controls it.",
       "remove": "Remove",
-      "removed": "Single sign-on is removed.",
+      "removed": "Single sign-on is removed",
       "tileUrl": "Dashboard tile address",
       "changeTitle": "Change the provider?",
       "changeBody": "{count, plural, one {# person is} other {# people are}} linked to the current provider. The links go: everybody links again at their next login through the new one.",
@@ -955,6 +963,7 @@
     "logo": {
       "region": "Your logo",
       "current": "Your logo",
+      "named": "{company}’s logo",
       "empty": "Drop your logo here",
       "emptyHint": "or <choose>choose a file</choose>. Until then, the first letter of {company} stands in.",
       "replaceHint": "Drop a new one or <choose>choose a file</choose>.",
@@ -970,7 +979,7 @@
       "fromLogo": "From your logo",
       "ours": "Our colors",
       "yourOwn": "Your own",
-      "yourOwnPicked": "Your own · {hex}",
+      "yourOwnPicked": "Your own · <code>{hex}</code>",
       "picker": "Pick your own color",
       "square": "Saturation and brightness",
       "hue": "Hue",
@@ -1003,19 +1012,30 @@
       "draft": "Not saved yet",
       "foot": "Live — this is what {company} sees",
       "email": {
-        "from": "noddo",
-        "fromAddress": "no-reply@noddo.so",
-        "subject": "{code} is your {company} login code",
-        "title": "Here’s your<br></br><em>login code</em>",
-        "body": "Log in to {company} as <b>{email}</b> with this code, or with one click.",
-        "or": "or",
-        "action": "Log in with one click",
-        "browser": "The button works in the browser where you asked for the code.",
-        "note": "The code works for 10 minutes. If you didn’t ask for it, ignore this email — no one can log in without it.",
+        "title": "You’re invited<br></br><em>to join {company}</em>",
+        "body": "You’ll join as <b>{email}</b>. {company} uses noddo for time off, approvals and everything around them.",
+        "action": "Join {company}",
+        "note": "The invitation works once. If you weren’t expecting it, ignore this email.",
         "sentBy": "Sent by noddo on behalf of {company}",
-        "reason": "{company} · You get this because you have an account at {company}.",
-        "sampleEmail": "anna@example.com",
-        "sampleCode": "482913"
+        "reason": "You get this because {company} invited you to noddo.",
+        "sampleEmail": "anna@example.com"
+      },
+      "app": {
+        "requester": "Lena Novak",
+        "wants": "wants 3 days of vacation",
+        "dates": "Thu 12 → Sat 14 Nov",
+        "balance": "14.5",
+        "balanceUnit": "vacation days",
+        "countdown": "24",
+        "countdownUnit": "days to vacation",
+        "toSign": "2",
+        "toSignUnit": "pending",
+        "outRuta": "Rūta · vacation",
+        "outLena": "Lena · vacation",
+        "outMarius": "Marius · parental leave",
+        "birthday": "Marta’s birthday is today",
+        "anniversary": "Tomas · 5 years",
+        "joiner": "Ana · joins"
       }
     }
   },

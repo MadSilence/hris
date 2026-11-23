@@ -36,4 +36,6 @@ export type AdjustEmployeeTimeOffBalanceActionOutput = {
   status: ActionStatus;
   data?: UpdateResponse;
   errorMessage?: string;
+  /** The backend's error code — ETOBB00010 is the date's, said under it. */
+  code?: string;
 };

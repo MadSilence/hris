@@ -75,3 +75,7 @@ Column 400 (W2 560), greeting 112/104, logo tile 44, rings r 22 stroke 7 (deskto
   - W4's language is personal (Q-19, as recommended: it overrides the company's for screens and emails), and is also
     offered on My Preferences (with "Same as the company"), so a choice made here can be changed again.
   - The phone's welcome (Q-20) is the same steps; on W2 the drop zone carries one *Upload a photo*.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20 (W0g): the ring strip is 62.5 % of the window — 900 at 1440, never smaller, 1200 at 1920 — its rings, gaps and
+  hang below the page scaling with it; the nod is never cut. The greeting keeps its size. Not seen in a browser.

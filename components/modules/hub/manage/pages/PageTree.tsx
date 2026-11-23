@@ -63,7 +63,8 @@ export type PageTreeHandlers = {
   onSectionAppearance: (section: TreeSection) => void;
   onSectionAudience: (section: TreeSection) => void;
   onDeleteSection: (section: TreeSection) => void;
-  onMovePageTo: (page: TreePage) => void;
+  /** Absent with a single section: there is nowhere to move a page, so "Move to…" is not offered (NEVER-DISABLED). */
+  onMovePageTo?: (page: TreePage) => void;
   onDuplicatePage: (page: TreePage) => void;
   onUnpublishPage: (page: TreePage) => void;
   onDeletePage: (page: TreePage) => void;
@@ -86,7 +87,7 @@ const DragHandle: React.FC<{ sortable?: SortableBits; label: string }> = ({ sort
     <button
       type="button"
       aria-label={label}
-      className="absolute top-1/2 left-1 flex h-4 w-3.5 -translate-y-1/2 cursor-grab items-center justify-center text-disabled opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+      className="absolute top-1/2 left-1 flex h-4 w-3.5 -translate-y-1/2 cursor-grab items-center justify-center text-disabled opacity-0 group-hover:opacity-100 touch:opacity-100 focus-visible:opacity-100"
       {...sortable.attributes}
       {...sortable.listeners}
     >
@@ -157,9 +158,11 @@ const PageRow: React.FC<{ page: TreePage; handlers: PageTreeHandlers; sortable?:
                 {t("manage.menu.whoAgreed")}
               </RowAction>
             )}
-            <RowAction icon={<Icon icon={ArrowTurnBackwardIcon} size="sm" />} onClick={() => handlers.onMovePageTo(page)}>
-              {t("manage.menu.moveTo")}
-            </RowAction>
+            {handlers.onMovePageTo && (
+              <RowAction icon={<Icon icon={ArrowTurnBackwardIcon} size="sm" />} onClick={() => handlers.onMovePageTo?.(page)}>
+                {t("manage.menu.moveTo")}
+              </RowAction>
+            )}
             <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={() => handlers.onDuplicatePage(page)}>
               {t("manage.menu.duplicate")}
             </RowAction>

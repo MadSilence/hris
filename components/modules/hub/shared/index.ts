@@ -6,3 +6,4 @@ export * from "./NewsRow";
 export * from "./HubAskBox";
 export * from "./LoadingBlock";
 export * from "./HubStates";
+export * from "./NewSectionDialog";

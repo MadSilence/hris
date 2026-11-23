@@ -62,7 +62,7 @@ export const NewsRow: React.FC<{ post: PostCard; withSave?: boolean }> = ({ post
       {withSave ? (
         <span className="flex shrink-0 items-center gap-4">
           <span className="text-hint text-tertiary tabular-nums">{dates.short(post.publishedAt)}</span>
-          <span className={cn("relative z-10", post.saved ? "" : "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100")}>
+          <span className={cn("relative z-10", post.saved ? "" : "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 touch:opacity-100")}>
             <SaveButton type="POST" id={post.id} saved={post.saved} />
           </span>
         </span>

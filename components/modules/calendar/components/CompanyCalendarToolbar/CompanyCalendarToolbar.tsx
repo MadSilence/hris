@@ -1,33 +1,41 @@
 "use client";
 
-import { FC, useEffect, useState, ReactNode } from "react";
+import { FC, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft01Icon, ArrowRight01Icon, Bookmark01Icon, Delete02Icon, FilterHorizontalIcon, LayoutTable01Icon, Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, Cancel01Icon, LayoutTable01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
-
 import { Button } from "@/components/desact/button";
-import { Input } from "@/components/desact/input";
-import { FieldError } from "@/components/desact/field-error";
-import { Badge } from "@/components/desact/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/desact/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/desact/dialog";
-import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/desact/dropdown-menu";
+import { ChoiceMenuContent } from "@/components/desact/choice-menu";
+import { SearchBox } from "@/components/ui/SearchBox";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { FilterPopover } from "@/components/audience/FilterPopover";
+import { AppliedFilterChip } from "@/components/audience/AppliedFilterChips";
+import type { AudienceField } from "@/components/audience/fieldCatalog";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
-import type { CalendarView } from "@/models/calendarView";
 import type { CompanyCalendarGrouping } from "@/models/calendar";
 import { groupingLabel } from "@/components/modules/calendar/lib/grouping";
+import type { BoardScale } from "@/components/modules/calendar/lib/boardGeometry";
 
-type Density = "month" | "week";
+/**
+ * The person of `?person=` as a condition (N21): "Person **Rūta Jonaitė**", the name read the way a "Manager" filter
+ * reads it — through the people catalogue. Not a filter the server knows: the board shows that one person instead.
+ */
+export const usePersonField = (): AudienceField => {
+  const t = useTranslations("calendar");
+  return useMemo<AudienceField>(
+    () => ({ key: "person", label: t("toolbar.person"), operators: ["eq"], valueSource: "people", group: "System" }),
+    [t],
+  );
+};
+
+/**
+ * How many filter chips the toolbar shows before "+N more" (W3). The toolbar keeps one line at 1440: beside the 260
+ * search, Filter, Today and Week / Month there is room for one chip, and a picked Group pill or the person's chip
+ * takes it — so the conditions fold into "+N more" earlier here than the three of the shared rule.
+ */
+export const calendarChipsShown = ({ grouped, person }: { grouped: boolean; person: boolean }): number =>
+  Math.max(0, 1 - (grouped ? 1 : 0) - (person ? 1 : 0));
 
 type Props = {
   query: string;
@@ -37,299 +45,163 @@ type Props = {
   filters: FilterDTO[];
   onFiltersChange: (next: FilterDTO[]) => void;
 
+  /** One person's board (N21, `?person=`): their chip, which clears it. */
+  person: string | null;
+  onClearPerson: () => void;
+
   /** Null is a flat board. */
   grouping: CompanyCalendarGrouping | null;
   /** What this reader may group by — a company-wide read on the field. */
   groupingOptions: CompanyCalendarGrouping[];
   onGroupingChange: (next: CompanyCalendarGrouping | null) => void;
 
-  views: CalendarView[];
-  activeViewId: string | null;
-  viewsBusy?: boolean;
-  onApplyView: (view: CalendarView | null) => void;
-  onSaveView: (name: string) => void;
-  onDeleteView: (view: CalendarView) => void;
-
-  density: Density;
-  onDensityChange: (next: Density) => void;
-
-  periodLabel: string;
-  onPrev: () => void;
-  onNext: () => void;
+  scale: BoardScale;
+  onScaleChange: (next: BoardScale) => void;
   onToday: () => void;
-  /** Export and print, beside the period: what the board is, carried out or put on paper. */
-  actions?: ReactNode;
 };
 
+/**
+ * The board's toolbar (N01, N09b–N09d, N21): `SearchBox` 260 × 36 · **Filter** with its applied chips · on the right
+ * **Group** · **Today** · **Week / Month**. No period arrows: the board scrolls sideways without end (the owner's R5).
+ */
 export const CompanyCalendarToolbar: FC<Props> = ({
   query,
   onQueryChange,
   fields,
   filters,
   onFiltersChange,
+  person,
+  onClearPerson,
   grouping,
   groupingOptions,
   onGroupingChange,
-  views,
-  activeViewId,
-  viewsBusy = false,
-  onApplyView,
-  onSaveView,
-  onDeleteView,
-  density,
-  onDensityChange,
-  periodLabel,
-  onPrev,
-  onNext,
+  scale,
+  onScaleChange,
   onToday,
-  actions,
 }) => {
   const t = useTranslations("calendar");
+  const tAccess = useTranslations("access");
   const tCommon = useTranslations("common");
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [draft, setDraft] = useState<FilterDTO[]>(filters);
-  const [seed, setSeed] = useState(0);
-
-  const [groupOpen, setGroupOpen] = useState(false);
-  const [viewsOpen, setViewsOpen] = useState(false);
-  const [saveOpen, setSaveOpen] = useState(false);
-  const [saveName, setSaveName] = useState("");
-  const [saveTried, setSaveTried] = useState(false);
-
-  // Re-seeding the builder on open discards a half-typed row from the previous visit, which is what
-  // the people table does for the same reason.
-  useEffect(() => {
-    if (filterOpen) {
-      setDraft(filters);
-      setSeed((s) => s + 1);
-    }
-  }, [filterOpen, filters]);
-
-  const applyFilters = () => {
-    onFiltersChange(draft);
-    setFilterOpen(false);
-  };
-
-  const activeView = views.find((v) => v.id === activeViewId) ?? null;
-
-  const submitSave = () => {
-    setSaveTried(true);
-    if (!saveName.trim() || viewsBusy) return;
-    onSaveView(saveName.trim());
-    setSaveOpen(false);
-  };
+  const personField = usePersonField();
 
   return (
-    <div className="flex flex-none flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative w-[240px]">
-          <Icon icon={Search01Icon} size="sm" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-tertiary" />
-          <Input
-            value={query}
-            onChange={(e) => onQueryChange(e.currentTarget.value)}
-            className="h-9 w-[240px] pl-9"
-            placeholder={tCommon("actions.search")}
-            inputMode="search"
+    <div className="flex flex-none flex-wrap items-center gap-2">
+      <SearchBox size="md" fullWidth className="w-[260px]" value={query} onChange={onQueryChange} />
+
+      {/* The product's one filter (`hris/design/screens/filter`): the same builder and DSL as the people table, so
+          the calendar inherits the whole operator set — custom attributes included. Field access is enforced under
+          the seam: filtering on a field you cannot read is a way of reading it. */}
+      <FilterPopover
+        fields={fields ?? []}
+        value={filters}
+        onChange={onFiltersChange}
+        chipsShown={calendarChipsShown({ grouped: grouping !== null, person: person !== null })}
+      />
+
+      {person ? (
+        <>
+          <AppliedFilterChip
+            filter={{ field: "person", op: "eq", value: person }}
+            field={personField}
+            dto={null}
+            onRemove={onClearPerson}
           />
-        </div>
-
-        {/* The same builder and the same DSL as the people table, so the calendar inherits the whole
-            operator set — custom attributes included — instead of a second filter implementation.
-            Field access is enforced under the seam: filtering on a field you cannot read is a way of
-            reading it. */}
-        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="secondary" className="gap-1.5">
-              <Icon icon={FilterHorizontalIcon} size="sm" />
-              {t("toolbar.filter")}
-              {filters.length > 0 ? (
-                <Badge variant="neutral" className="ml-1 px-1.5">
-                  {filters.length}
-                </Badge>
-              ) : null}
+          {filters.length === 0 ? (
+            <Button type="button" variant="ghost" size="sm" onClick={onClearPerson}>
+              {tAccess("audience.filter.clearAll")}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
-            <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setDraft([])}>
-                {tCommon("actions.reset")}
-              </Button>
-              <Button type="button" size="sm" onClick={applyFilters}>
-                {tCommon("actions.apply")}
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
+          ) : null}
+        </>
+      ) : null}
 
-        {/* One dimension at a time, never nested. Offered only for a field the reader could filter
-            by: a header prints the field's value, so grouping by it is a way of reading it. */}
-        {groupingOptions.length > 0 || grouping !== null ? (
-          <Popover open={groupOpen} onOpenChange={setGroupOpen}>
-            <PopoverTrigger asChild>
-              <Button type="button" variant="secondary" className="gap-1.5">
-                <Icon icon={LayoutTable01Icon} size="sm" />
-                {grouping ? t("toolbar.groupBy", { grouping: groupingLabel(t, grouping) }) : t("toolbar.group")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-[200px] p-2">
-              {([null, ...groupingOptions] as (CompanyCalendarGrouping | null)[]).map((option) => (
-                <button
-                  key={option ?? "none"}
-                  type="button"
-                  onClick={() => {
-                    onGroupingChange(option);
-                    setGroupOpen(false);
-                  }}
-                  className={[
-                    "flex w-full items-center justify-between rounded-control px-2 py-1.5 text-left text-body hover:bg-subtle",
-                    option === grouping ? "font-medium text-primary" : "text-secondary",
-                  ].join(" ")}
-                >
-                  {option ? groupingLabel(t, option) : tCommon("values.none")}
-                  {option === grouping ? <Icon icon={Tick02Icon} size="sm" /> : null}
-                </button>
-              ))}
-            </PopoverContent>
-          </Popover>
-        ) : null}
+      <span className="flex-1" />
 
-        <Popover open={viewsOpen} onOpenChange={setViewsOpen}>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="secondary" className="gap-1.5">
-              <Icon icon={Bookmark01Icon} size="sm" />
-              {activeView ? activeView.name : t("toolbar.views")}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-[280px] p-2">
-            <button
-              type="button"
-              onClick={() => {
-                onApplyView(null);
-                setViewsOpen(false);
-              }}
-              className={[
-                "flex w-full items-center rounded-control px-2 py-1.5 text-left text-body hover:bg-subtle",
-                activeViewId === null ? "font-medium text-primary" : "text-secondary",
-              ].join(" ")}
-            >
-              {t("toolbar.allPeople")}
-            </button>
+      {groupingOptions.length > 0 || grouping !== null ? (
+        <GroupControl grouping={grouping} options={groupingOptions} onChange={onGroupingChange} />
+      ) : null}
 
-            {views.map((v) => (
-              <div key={v.id} className="group flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onApplyView(v);
-                    setViewsOpen(false);
-                  }}
-                  className={[
-                    "flex-1 truncate rounded-control px-2 py-1.5 text-left text-body hover:bg-subtle",
-                    v.id === activeViewId ? "font-medium text-primary" : "text-secondary",
-                  ].join(" ")}
-                >
-                  {v.name}
-                </button>
-                <Button type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-label={t("toolbar.deleteView", { name: v.name })}
-                  disabled={viewsBusy}
-                  onClick={() => onDeleteView(v)}
-                >
-                  <Icon icon={Delete02Icon} size="sm" />
-                </Button>
-              </div>
-            ))}
+      <Button type="button" variant="secondary" size="sm" onClick={onToday}>
+        {tCommon("values.today")}
+      </Button>
 
-            <div className="mt-1 border-t border-divider pt-1">
-              <Button type="button"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start"
-                disabled={viewsBusy}
-                onClick={() => {
-                  setSaveName("");
-                  setSaveTried(false);
-                  setSaveOpen(true);
-                  setViewsOpen(false);
-                }}
-              >
-                {t("toolbar.saveCurrentAsView")}
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="flex items-center rounded-control border border-divider p-0.5">
-          {(["week", "month"] as Density[]).map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => onDensityChange(d)}
-              className={[
-                "rounded-control px-3 py-1 text-body capitalize transition-colors",
-                density === d ? "bg-accent-muted font-medium text-accent-text" : "text-tertiary hover:bg-subtle hover:text-primary",
-              ].join(" ")}
-            >
-              {t(`toolbar.density.${d}`)}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Button type="button" variant="secondary" size="icon" aria-label={t("toolbar.previous")} onClick={onPrev}>
-            <Icon icon={ArrowLeft01Icon} size="sm" />
-          </Button>
-          <Button type="button" variant="secondary" onClick={onToday}>
-            {tCommon("values.today")}
-          </Button>
-          <Button type="button" variant="secondary" size="icon" aria-label={tCommon("actions.next")} onClick={onNext}>
-            <Icon icon={ArrowRight01Icon} size="sm" />
-          </Button>
-        </div>
-
-        <div className="flex h-9 min-w-[190px] items-center justify-center rounded-control border border-divider px-3 text-body font-medium text-primary">
-          {periodLabel}
-        </div>
-        {actions}
-      </div>
-
-      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
-            <DialogTitle>{t("toolbar.saveViewTitle")}</DialogTitle>
-          </DialogHeader>
-          <Input
-            autoFocus
-            value={saveName}
-            onChange={(e) => setSaveName(e.currentTarget.value)}
-            onKeyDown={(e) => {
-              // i18n-exempt: a key name, not text
-              if (e.key === "Enter") submitSave();
-            }}
-          />
-          <FieldError>{saveTried && !saveName.trim() ? tCommon("validation.enterName") : null}</FieldError>
-          <p className="text-hint text-tertiary">
-            {t("toolbar.saveViewHint")}
-          </p>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setSaveOpen(false)}>
-              {tCommon("actions.cancel")}
-            </Button>
-            <Button type="button"
-              disabled={viewsBusy}
-              onClick={submitSave}
-            >
-              {tCommon("actions.save")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SegmentedControl<BoardScale>
+        aria-label={t("toolbar.scale")}
+        fill={false}
+        value={scale}
+        onChange={onScaleChange}
+        options={[
+          { value: "week", label: t("toolbar.week") },
+          { value: "month", label: t("toolbar.month") },
+        ]}
+      />
     </div>
+  );
+};
+
+/**
+ * Group (N06c, N07). Ungrouped: a ghost **Group ▾**. Grouped: a picked pill — accent-subtle, a 1 px accent ring, 32
+ * high — "Group:" and the dimension in accent with ▾ (the menu), a short divider and × (ungroups). The menu opens
+ * right under it, right edges aligned, 220 wide: "Group by" over None · Department · Team · Office, the picked one in
+ * accent with a tick. One dimension at a time, offered only where the reader could filter by it.
+ */
+const GroupControl: FC<{
+  grouping: CompanyCalendarGrouping | null;
+  options: CompanyCalendarGrouping[];
+  onChange: (next: CompanyCalendarGrouping | null) => void;
+}> = ({ grouping, options, onChange }) => {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
+  const menu = (
+    <ChoiceMenuContent
+      align="end"
+      className="w-55"
+      label={t("toolbar.groupBy")}
+      options={([null, ...options] as (CompanyCalendarGrouping | null)[]).map((option) => ({
+        value: option,
+        label: option ? groupingLabel(t, option) : tCommon("values.none"),
+      }))}
+      value={grouping}
+      onChange={onChange}
+    />
+  );
+
+  if (grouping === null) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="ghost" className="text-secondary">
+            <Icon icon={LayoutTable01Icon} size="sm" />
+            {t("toolbar.group")}
+            <Icon icon={ArrowDown01Icon} size="sm" />
+          </Button>
+        </DropdownMenuTrigger>
+        {menu}
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <span className="inline-flex h-8 items-center gap-1.5 rounded-pill bg-accent-subtle px-3 ring-1 ring-accent-ring">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className="inline-flex items-center gap-1.5 text-label outline-none focus-visible:underline">
+            <Icon icon={LayoutTable01Icon} size="sm" className="size-3.5 text-accent-text" />
+            <span className="font-normal text-secondary">{t("toolbar.groupPicked")}</span>
+            <span className="font-medium text-accent-text">{groupingLabel(t, grouping)}</span>
+            <Icon icon={ArrowDown01Icon} size="sm" className="size-3.5 text-accent-text" />
+          </button>
+        </DropdownMenuTrigger>
+        {menu}
+      </DropdownMenu>
+      <span aria-hidden className="h-3.5 w-px bg-accent-ring" />
+      <button
+        type="button"
+        aria-label={t("toolbar.ungroup")}
+        onClick={() => onChange(null)}
+        className="flex rounded-pill text-accent-text outline-none focus-visible:shadow-focus"
+      >
+        <Icon icon={Cancel01Icon} size="sm" className="size-3.5" />
+      </button>
+    </span>
   );
 };

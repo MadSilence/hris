@@ -20,6 +20,7 @@ export default async function GuestSignPage({ params }: Props) {
   const { token } = await params;
   const { brand } = await companyAuthBrand();
   const companyName = brand.kind === "company" ? brand.name : null;
+  const logoUrl = brand.kind === "company" ? brand.logoUrl : null;
   try {
     const view = await hrisApiSigningService.guestView(token);
     return (
@@ -30,10 +31,10 @@ export default async function GuestSignPage({ params }: Props) {
         senderName={view.envelope.sentByName ?? view.companyName ?? companyName ?? ""}
         backHref={null}
         backLabel=""
-        brand={{ companyName: view.companyName ?? companyName }}
+        brand={{ companyName: view.companyName ?? companyName, logoUrl }}
       />
     );
   } catch {
-    return <DeadLink company={companyName} />;
+    return <DeadLink company={companyName} logoUrl={logoUrl} />;
   }
 }

@@ -85,3 +85,22 @@ None blocking. Backend points for C10 (lifetime, single use, link bound to the b
 - **A code for an address that can't log in here** (C14): nothing is sent, but the screen answers as for a real code — "That code doesn’t match. Try again." for each try, "Too many attempts. Try again later." at the fifth, "This code has expired. Send a new one." after ten minutes. "Expired" never appears for an address that was never sent a code.
 - **The boxes** (C12) keep the 3 px muted-accent ring around the accent border of the box in focus, as `CodeInput` in sign-in-registration § Values.
 - **The back arrow** (C11) returns to the form with the email still typed.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the colour pane grows with the window — 520 at 1280 × window ÷ 1280, never smaller, stopping at 1920 — and
+  everything in it (rings, wordmark, slogan or company name) scales with it (`--auth-grow` as the pane's `zoom`,
+  `styles/globals.css`; `technical_documentation/ui/DESIGN_SYSTEM.md` § 9).
+- E and DQ-17: a wrong emailed code reads "That code doesn’t match. Check your email or get a new code." in plain text with a separate *Send a new code* under it; the fifth wrong try reads "Too many wrong codes. Send a new one." with its link, and the spent code keeps saying so (never "expired") until a new one is sent.
+- Not seen in a browser.
+
+## Built from sign-in-company-login-no-lock (U2 — 2026-11-23)
+*`hris/design/handoffs/2026-11-20-answers-from-design/specs/sign-in-company-login-no-lock`, plan
+`DESIGN_ANSWERS_2026_11_20_PLAN.md` item 6. Code: `components/modules/auth/components/LoginContainer` (test C9-3r). Not
+walked yet.*
+- **C9-3r:** when the login's 401 carries `offerPasswordReset` (the 3rd wrong password in a row for the address), the
+  alert reads "That email and password don’t match. Forgot your password? **Email me a link to reset it**" — the link
+  in the alert, 600, underlined (offset 2), in the alert's colour. Pressing it sends the reset (`POST
+  /auth/password/forgot`, the forgot form's own action) and opens **F2 "Check your email"** with the address, skipping
+  F1; the back arrow returns to the form with the address. A refusal to send shows in the alert.
+- **Differs from Ulia's rule:** the lock stays (owner U2) — "Too many failed attempts" and an admin's Unlock still come
+  after it; F6 stays. The System Owner's own login (`/login/owner`) shows the plain alert: it has no F2 to open.

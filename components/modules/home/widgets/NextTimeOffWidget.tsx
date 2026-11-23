@@ -8,7 +8,7 @@ import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
-import { useDisplayLocale, useShortDates } from "@/lib/date";
+import { threeLetterMonths, useDisplayLocale, useShortDates } from "@/lib/date";
 import { dayAmountArgs, type TimeOffPolicy } from "@/models/timeOff";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { useTimeOffRequestsByUser } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useTimeOffRequestsByUser";
@@ -24,6 +24,7 @@ import {
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
 import type { HomeWidgetProps } from "./catalogue";
+import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
 
 /** A type's name reads in the countdown only while it is short: "days to your parental leave", not a sentence. */
 const MAX_TYPE_NAME = 24;
@@ -43,7 +44,7 @@ const CalendarLeaf: React.FC<{ date: string }> = ({ date }) => {
   return (
     <span className="flex h-[46px] w-[42px] shrink-0 flex-col items-center overflow-hidden rounded-tint border border-divider bg-card" aria-hidden>
       <span className="w-full bg-accent-subtle text-center text-home-micro text-accent-text">
-        {new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }).format(d)}
+        {threeLetterMonths(new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }).format(d))}
       </span>
       <span className="text-home-badge-day text-primary">{d.getUTCDate()}</span>
     </span>
@@ -56,6 +57,7 @@ const CalendarLeaf: React.FC<{ date: string }> = ({ date }) => {
  */
 export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const t = useTranslations("home");
+  const leaveHref = useLeaveRequestHref();
   const tTimeOff = useTranslations("timeOff");
   const dates = useShortDates();
   const locale = useDisplayLocale();
@@ -94,7 +96,7 @@ export const NextTimeOffWidget: React.FC<HomeWidgetProps> = ({ size, preview }) 
         // The leave type's name, never the policy's (A9): "days to your vacation".
         name: policyMap.get(r.policyId)?.leaveTypeName ?? policyMap.get(r.policyId)?.name ?? null,
         amount: r.requestedAmount,
-        href: `/time-off/requests/${r.id}`,
+        href: leaveHref(r.id),
       })),
     ...(holidays.data ?? [])
       .filter((h) => (h.endDate ?? h.holidayDate) >= today)

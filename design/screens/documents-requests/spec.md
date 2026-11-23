@@ -84,3 +84,21 @@ Q-41 (the company-wide requests list, for D04) blocks nothing here.
   person's own tab (the boxes, R07–R08); Home's card (R09); People table → tick people → Request documents (R10,
   `RequestManyDialog`). Built 2026-11-18, walked in the built-in browser the same day (`(claude)/HISTORY.md` § "Documents" → "The second part").
 - **Differs from the design:** R10 names who was not asked by reason and count, not one by one.
+
+- **The designers' package of 2026-11-19, built 2026-11-20**, not yet seen in a browser:
+  - **R7:** the request boxes show to whoever is asked to upload, on the tab of the person it is about (not only on
+    one's own tab), and Home's card lands there with `?request=` and opens the upload at once.
+  - **R7d:** after the upload the whole list refreshes and the toast says "Medical certificate.pdf uploaded".
+  - **R3 (R1, R2, R4):** the request dialog is 560 and keeps its 512: "What should Reza upload" (first name), the list
+    as the tab — a header row, file tile, name, ExpiryCell — with the expiring and expired ticked; Something else typed
+    in its own row; the note written from what is ticked until edited ("Your passport expires on 26 Nov 2026. Please
+    upload the new one.", "Please upload the new ones." for several, "Please upload your medical certificate."); Due by
+    (optional) 250; the hint with its icon; Send request with its icon; the subtitle "Passport.pdf · expires 26 Nov
+    2026". The toast is "Request sent to Reza" with Undo (R2).
+  - **R7b, R7c:** a box per request with the white 40 tile, "Upload: Passport" 15/22, avatar + "Asked by", the due date
+    in amber, Upload with its icon; the request's upload is 800 — "Upload documents" / "To your documents", the strip
+    naming the request, the drop zone, Valid until (optional).
+- **Not built this round:** the people field with chips and several uploaders (R3, R5 — the one-person picker stays;
+  no shared chip field exists yet); the Home card's own look (R6, Home's widget); hiding a folder whose files are all
+  hidden from the person (R10 — needs the backend's folder listing to know it); R7c's "Saved with your Identity
+  documents" strip (the task carries no category name).

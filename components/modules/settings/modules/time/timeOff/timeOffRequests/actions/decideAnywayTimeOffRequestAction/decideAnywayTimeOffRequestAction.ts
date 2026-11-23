@@ -10,8 +10,8 @@ export type DecideAnywayDecision = "APPROVE" | "REJECT";
 export type DecideAnywayActionInput = {
   requestId: string;
   decision: DecideAnywayDecision;
-  /** Required for REJECT, as for any rejection. */
-  rejectionReason?: string;
+  /** REJECT's optional comment, which the person is shown (AQ-13). */
+  comment?: string;
 };
 
 /**
@@ -24,7 +24,7 @@ export async function decideAnywayTimeOffRequestAction(
   try {
     return {
       status: ActionStatus.SUCCESS,
-      data: await hrisTimeOffRequestsService.decideAnyway(input.requestId, input.decision, input.rejectionReason),
+      data: await hrisTimeOffRequestsService.decideAnyway(input.requestId, input.decision, input.comment),
     };
   } catch (error) {
     return toActionError(error, "decideAnywayTimeOffRequestAction");

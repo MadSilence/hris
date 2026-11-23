@@ -44,13 +44,13 @@ export const Field: React.FC<{
     {label != null &&
       (labelAction ? (
         <div className="flex items-center justify-between gap-2">
-          <Label htmlFor={htmlFor} className="text-label">
+          <Label htmlFor={htmlFor} className="mb-0 text-label">
             <span id={labelId}>{label}</span>
           </Label>
           {labelAction}
         </div>
       ) : (
-        <Label htmlFor={htmlFor} className="text-label">
+        <Label htmlFor={htmlFor} className="mb-0 text-label">
           <span id={labelId}>{label}</span>
         </Label>
       ))}

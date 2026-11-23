@@ -7,6 +7,8 @@ import {
   DocumentFolderDeleteStrategy,
   DocumentFolderContentDTO,
   DocumentCategoryDTO,
+  DocumentCategoryDeleteImpactDTO,
+  DeleteDocumentCategoryRequest,
   MoveDocumentRequest,
   RenameDocumentFolderRequest,
   RenameDocumentRequest,
@@ -119,8 +121,12 @@ export class HrisDocumentsService {
     return hrisApiDocumentsClient.updateCategory(id, body);
   }
 
-  public async deleteCategory(id: string): Promise<void> {
-    return hrisApiDocumentsClient.deleteCategory(id);
+  public async getCategoryDeleteImpact(id: string): Promise<DocumentCategoryDeleteImpactDTO> {
+    return hrisApiDocumentsClient.getCategoryDeleteImpact(id);
+  }
+
+  public async deleteCategory(id: string, body?: DeleteDocumentCategoryRequest): Promise<void> {
+    return hrisApiDocumentsClient.deleteCategory(id, body);
   }
 
   public async batch(

@@ -11,7 +11,9 @@ describe("PersonalDocumentsBreadcrumbs", () => {
         onNavigate={onNavigate}
       />,
     );
-    expect(screen.getByRole("button", { name: "Trash" })).toBeDisabled();
+    // The last hop is where one stands: its name, not a button (T01, DT29).
+    expect(screen.getByText("Trash")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Trash" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Documents" }));
     expect(onNavigate).toHaveBeenCalledWith(0);
   });

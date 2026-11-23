@@ -191,12 +191,10 @@ export const OfficeComponent: FC<Props> = ({
       ) : filteredSorted.length === 0 ? (
         <ListEmptyState
           query={query}
-          onClearSearch={() => setQuery("")}
           archivedView={showArchived}
           scene="office"
           title={t("list.emptyTitle")}
           description={t("list.emptyDescription")}
-          noResultsHint={t("list.noResultsHint")}
           archivedDescription={t("list.archivedDescription")}
           onCreate={openCreate}
           createLabel={t("list.add")}

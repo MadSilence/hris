@@ -140,6 +140,6 @@ describe("TaskList — done where shown", () => {
     } as unknown as import("@/api/modules/signing/dto").EnvelopeDTO;
     render(<TaskList tasks={[task({ kind: "SIGN", status: "CANCELLED", envelopeId: "env-1" })]} signingOf={(id) => (id === "env-1" ? signing : undefined)} />);
     expect(screen.getByText("Maria Santos declined to sign: “Wrong salary”")).toBeInTheDocument();
-    expect(screen.queryByText("Cancelled")).not.toBeInTheDocument();
+    expect(screen.queryByText("Canceled")).not.toBeInTheDocument();
   });
 });

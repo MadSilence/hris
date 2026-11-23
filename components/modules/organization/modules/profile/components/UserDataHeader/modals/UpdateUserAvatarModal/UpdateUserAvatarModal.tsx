@@ -249,10 +249,12 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                 </span>
               </Button>
 
+              {/* No photo, nothing to remove: the card is not offered (NEVER-DISABLED). */}
+              {hasCurrentAvatar && (
               <Button
                 type="button"
                 variant="secondary"
-                disabled={isLoading || !hasCurrentAvatar}
+                disabled={isLoading}
                 onClick={() => setIsDeleteConfirmOpen(true)}
                 className="h-auto items-center justify-start gap-4 rounded-card px-5 py-5 text-danger-text hover:bg-status-declined-bg hover:text-status-declined-text"
               >
@@ -267,6 +269,7 @@ export const UpdateUserAvatarModal: FC<UpdateUserAvatarModalProps> = ({
                   </span>
                 </span>
               </Button>
+              )}
             </div>
 
             <input

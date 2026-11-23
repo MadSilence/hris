@@ -12,6 +12,7 @@ jest.mock("@/components/modules/signing/hooks/useDocumentsSection", () => ({
   }),
 }));
 jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
+jest.mock("@/components/ui/Combobox", () => ({ Combobox: jest.requireActual("@/test/searchableSelectMock").SearchableSelect }));
 
 describe("AddTaskDialog", () => {
   const setup = () => {
@@ -54,9 +55,9 @@ describe("AddTaskDialog", () => {
     fireEvent.click(screen.getByRole("radio", { name: /^Sign/ }));
     fireEvent.click(screen.getByRole("button", { name: "Add task" }));
     expect(onAdd).not.toHaveBeenCalled();
-    expect(screen.getByText("Pick a document", { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Pick a document");
     fireEvent.change(screen.getByLabelText(/Document/), { target: { value: "tpl-1" } });
-    expect(screen.getAllByText("Signs: The person → Their manager").length).toBeGreaterThan(0);
+    expect(screen.getByText("The person signs, then their manager.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Add task" }));
     expect(onAdd).toHaveBeenCalledWith({ title: "Sign: Employment contract", kind: "SIGN", templateId: "tpl-1" });
   });

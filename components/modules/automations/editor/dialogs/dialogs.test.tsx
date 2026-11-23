@@ -51,18 +51,22 @@ describe("TurnOnDialog", () => {
     expect(props.onTestFirst).toHaveBeenCalled();
   });
 
-  it("asks about the cases already waiting (V6), and holds Turn on until a big send is acknowledged", () => {
+  it("asks about the cases already waiting (V6), and Turn on says so under the box until a big send is acknowledged", () => {
     const props = turnOn({ check: check({ waitingCases: 6, messagesPerFiring: 40 }) });
     expect(screen.getByText("Who should it run for?")).toBeInTheDocument();
     expect(screen.queryByText(/This sends/)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("radio", { name: /^Also the 6\srequests already waiting$/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /^Also run it now for 6\swaiting requests$/ }));
     expect(screen.getByText("240 messages")).toBeInTheDocument();
     const confirm = screen.getByRole("button", { name: "Turn on" });
-    expect(confirm).toBeDisabled();
+    // Never disabled (NEVER-DISABLED): pressed too early it says why, and sends nothing.
+    expect(confirm).toBeEnabled();
+    fireEvent.click(confirm);
+    expect(screen.getByText("Tick the box to send them")).toBeInTheDocument();
+    expect(props.onConfirm).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("checkbox"));
-    expect(confirm).toBeEnabled();
+    expect(screen.queryByText("Tick the box to send them")).not.toBeInTheDocument();
     fireEvent.click(confirm);
     expect(props.onConfirm).toHaveBeenCalledWith("ALL", true);
   });

@@ -94,11 +94,11 @@ describe("UploadDocumentModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /add document/i }),
+      screen.getByRole("heading", { name: /upload documents/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/upload a document and place it into a folder/i),
+      screen.getByText(/to your documents/i),
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/file/i)).toBeInTheDocument();

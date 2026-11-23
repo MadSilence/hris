@@ -86,10 +86,10 @@ describe("MoveDocumentModal", () => {
     renderModal();
 
     expect(
-      screen.getByRole("heading", { name: /move document/i }),
+      screen.getByRole("heading", { name: /move contract\.pdf/i }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText(/contract\.pdf/i)).toBeInTheDocument();
+    expect(screen.getByText(/pick where they go/i)).toBeInTheDocument();
 
     expect(screen.getByLabelText(/destination folder/i)).toBeInTheDocument();
   });

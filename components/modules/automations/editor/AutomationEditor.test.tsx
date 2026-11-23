@@ -194,7 +194,7 @@ describe("AutomationEditor — turning on", () => {
 
     const dialog = await screen.findByRole("dialog", { name: "Turn on Long time off approval?" });
     expect(within(dialog).getByText("Who should it run for?")).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("radio", { name: /^Also the 6\srequests already waiting$/ }));
+    fireEvent.click(within(dialog).getByRole("radio", { name: /^Also run it now for 6\swaiting requests$/ }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Turn on" }));
 
     await waitFor(() =>

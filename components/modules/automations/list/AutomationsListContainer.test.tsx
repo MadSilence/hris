@@ -80,6 +80,15 @@ jest.mock("@/components/desact/dropdown-menu", () => ({
   ),
   DropdownMenuSeparator: () => <hr />,
 }));
+jest.mock("@/components/desact/choice-menu", () => ({
+  ChoiceMenu: ({ options, onChange }: { options: { value: unknown; label: React.ReactNode }[]; onChange: (v: unknown) => void }) => (
+    <div role="menu">
+      {options.map((o) => (
+        <button key={String(o.value)} type="button" role="menuitemradio" onClick={() => onChange(o.value)}>{o.label}</button>
+      ))}
+    </div>
+  ),
+}));
 
 const ok = (data: unknown = null): Envelope => ({ status: ActionStatus.SUCCESS, data });
 const mocked = <T extends (...args: never[]) => unknown>(fn: T) => fn as unknown as jest.Mock;
@@ -175,9 +184,10 @@ describe("the filters", () => {
     expect(screen.getAllByTestId("automation-card")).toHaveLength(1);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search" }), { target: { value: "laptop" } });
-    expect(screen.getByText("No automations match these filters")).toBeInTheDocument();
+    expect(screen.getByText("No automations match")).toBeInTheDocument();
+    expect(screen.getByText("Try fewer filters.")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear all" }));
     expect(screen.getAllByTestId("automation-card")).toHaveLength(5);
   });
 
@@ -188,7 +198,7 @@ describe("the filters", () => {
     ];
     renderList();
 
-    fireEvent.click(screen.getByRole("menuitem", { name: "Time off is requested" }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "Time off is requested" }));
 
     expect(screen.getAllByTestId("automation-card")).toHaveLength(1);
     expect(screen.getByRole("link", { name: "Leave heads-up" })).toBeInTheDocument();
@@ -315,14 +325,17 @@ describe("the dialogs", () => {
     expect(showSuccess).toHaveBeenCalledWith("You're the owner now");
   });
 
-  it("Change owner (O1 → O2) stays off until someone is picked", async () => {
+  it("Change owner (O1 → O2) pressed with nobody picked says so under the picker", async () => {
     mocked(actions.changeAutomationOwnerAction).mockResolvedValue(ok());
     renderList();
 
     fireEvent.click(within(cardOf("New hire: first week")).getByRole("menuitem", { name: "Change owner" }));
     expect(screen.getByText("Who should own New hire: first week?")).toBeInTheDocument();
     const confirm = screen.getByRole("button", { name: "Change owner" });
-    expect(confirm).toBeDisabled();
+    expect(confirm).toBeEnabled();
+    fireEvent.click(confirm);
+    expect(screen.getByText("Choose the new owner")).toBeInTheDocument();
+    expect(actions.changeAutomationOwnerAction).not.toHaveBeenCalled();
 
     fireEvent.focus(screen.getByRole("combobox"));
     // The owner now is not offered again.

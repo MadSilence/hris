@@ -25,6 +25,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useDateFormatter } from "@/lib/date";
 import { showActionError, showSuccess } from "@/lib/errors/errorToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { useRoles } from "@/components/modules/settings/modules/roles/hooks/useRoles";
 import type { IdentityConnectionDTO, IdpGroupDTO } from "@/api/modules/identity/dto";
 import {
@@ -510,8 +511,8 @@ const ProvisioningPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               ))}
             </ul>
           )}
-          <Button type="button" variant="secondary" disabled={live.length >= 2} onClick={() => setIssuing(true)}
-            title={live.length >= 2 ? t("identity.scim.twoLive") : undefined}>
+          {/* Two live at once is the most there can be: pressed then, it says so (NEVER-DISABLED). */}
+          <Button type="button" variant="secondary" onClick={() => (live.length >= 2 ? explain(t("identity.scim.twoLive")) : setIssuing(true))}>
             {t("identity.scim.issueToken")}
           </Button>
         </>

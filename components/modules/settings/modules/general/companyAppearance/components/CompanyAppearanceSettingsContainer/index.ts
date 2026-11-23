@@ -1,1 +1,1 @@
-export { default } from "./CompanyAppearanceSettingsContainer";
+export { default, AppearanceLoading } from "./CompanyAppearanceSettingsContainer";

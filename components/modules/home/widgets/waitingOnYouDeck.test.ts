@@ -58,8 +58,8 @@ describe("Waiting on you, the deck", () => {
     expect(deck.find((c) => c.kind === "AGREE")).toMatchObject({ key: cardKey.agreement("p1"), agreement });
   });
 
-  it("says 'was updated' only for a page the person agreed to before, 'to read and agree' for a new one (§ 42, W15)", () => {
-    expect(agreementLineKey({ what: "NEW", agreedVersion: null })).toBe("toReadAndAgree");
+  it("says 'was updated' only for a page the person agreed to before, nothing for a new one (DQ-22, W15)", () => {
+    expect(agreementLineKey({ what: "NEW", agreedVersion: null })).toBeNull();
     expect(agreementLineKey({ what: "CHANGED", agreedVersion: 1 })).toBe("wasUpdated");
     expect(agreementLineKey({ what: "OVERDUE", agreedVersion: 1 })).toBe("wasUpdated");
   });

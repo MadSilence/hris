@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FormError } from "@/components/feedback/FormError";
 import { FieldError } from "@/components/desact/field-error";
 import { showError } from "@/lib/errors/errorToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useDateFormatter } from "@/lib/date";
 import {
@@ -140,6 +141,11 @@ function TaskBody({ token, task, onPageAction, preview }: {
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [file, setFile] = useState<File | null>(null);
   const [tried, setTried] = useState(false);
+  // A preview tries the fields and sends nothing: a button says so when pressed (NEVER-DISABLED).
+  const previewed = () => {
+    if (preview) explain(t("preview.nothingSent"));
+    return Boolean(preview);
+  };
 
   const finish = (res: { status: ActionStatus; data?: PreboardingPage; errorMessage?: string }) => {
     if (res.status === ActionStatus.SUCCESS && res.data) onPageAction(res.data);
@@ -151,7 +157,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
     return (
       <div className="pl-8">
         {preview ? (
-          <Button type="button" size="sm" disabled>
+          <Button type="button" size="sm" onClick={() => explain(t("preview.nothingSent"))}>
             {t("taskKind.SIGN")}
           </Button>
         ) : (
@@ -166,7 +172,7 @@ function TaskBody({ token, task, onPageAction, preview }: {
   if (task.kind === "QUESTIONNAIRE") {
     return (
       <div className="pl-8">
-        <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} sendDisabled={preview}
+        <QuestionnaireForm taskId={task.id} questions={task.questions ?? []} preview={preview}
           onSubmit={async (answers) => {
             const res = await preboardingAnswerAction({ token, taskId: task.id, answers });
             if (res.status === ActionStatus.SUCCESS && res.data) {
@@ -185,8 +191,9 @@ function TaskBody({ token, task, onPageAction, preview }: {
       <div className="space-y-2 pl-8">
         <Button type="button"
           size="sm"
-          disabled={busy || preview}
+          disabled={busy}
           onClick={async () => {
+            if (previewed()) return;
             setBusy(true);
             setError(null);
             try { finish(await preboardingCompleteAction({ token, taskId: task.id })); } finally { setBusy(false); }
@@ -208,10 +215,10 @@ function TaskBody({ token, task, onPageAction, preview }: {
         <FieldError>{tried && !file ? t("shared.pickFile") : null}</FieldError>
         <Button type="button"
           size="sm"
-          disabled={busy || preview}
+          disabled={busy}
           onClick={async () => {
             setTried(true);
-            if (!file) return;
+            if (!file || previewed()) return;
             setBusy(true);
             setError(null);
             const form = new FormData();
@@ -237,10 +244,10 @@ function TaskBody({ token, task, onPageAction, preview }: {
       <FieldError>{tried && Object.keys(values).length === 0 ? t("shared.fillSomething") : null}</FieldError>
       <Button type="button"
         size="sm"
-        disabled={busy || preview}
+        disabled={busy}
         onClick={async () => {
           setTried(true);
-          if (Object.keys(values).length === 0) return;
+          if (Object.keys(values).length === 0 || previewed()) return;
           setBusy(true);
           setError(null);
           try { finish(await preboardingFieldsAction({ token, taskId: task.id, values })); } finally { setBusy(false); }

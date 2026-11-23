@@ -34,6 +34,15 @@ export async function updateCalendarViewAction(
   }
 }
 
+/** Drop saves the order at once (N08c): the views are personal, so there is nothing to confirm. */
+export async function reorderCalendarViewsAction(ids: string[]): Promise<CalendarViewActionResult<CalendarView[]>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisCalendarViewsService.reorder(ids) };
+  } catch (error) {
+    return toActionError(error, "calendarViewActions");
+  }
+}
+
 export async function deleteCalendarViewAction(id: string): Promise<CalendarViewActionResult<void>> {
   try {
     await hrisCalendarViewsService.remove(id);

@@ -12,8 +12,10 @@ import {
   formatTime,
   formatTimeOfDay,
   isoToDate,
+  parseTypedDate,
   resetDisplayPreferences,
   setDisplayPreferences,
+  threeLetterMonths,
   useDateFormatter,
   weekStartsOnOf,
 } from "@/lib/date";
@@ -221,6 +223,20 @@ describe("the short style (C1)", () => {
   it("is day first in Russian for a US company", () => {
     expect(formatShortDate("2026-11-18", { today, language: "ru", dateStyle: "US" })).toMatch(/^18 нояб/);
   });
+
+  it("writes September in three letters, never Sept (W7)", () => {
+    expect(formatShortDate("2026-09-14", en)).toBe("14 Sep");
+    expect(formatShortDate("2026-09-14", us)).toBe("Sep 14");
+    expect(formatShortRange("2026-09-14", "2026-09-18", en)).toBe("14–18 Sep");
+    expect(formatShortRange("2026-08-30", "2026-09-02", en)).toBe("30 Aug – 2 Sep");
+    expect(formatDisplayDate("2026-09-14", { language: "en", style: "medium" })).toBe("14 Sep 2026");
+    expect(formatDisplayDate("2026-09-14", { language: "en", style: "medium", dateStyle: "US" })).toBe("Sep 14, 2026");
+    expect(formatDisplayDate("2026-09-14", { language: "en", style: "long" })).toBe("14 September 2026");
+    expect(threeLetterMonths("14 Sept 2026")).toBe("14 Sep 2026");
+    // Typing either spelling still reads as September.
+    expect(parseTypedDate("14 Sept 2026", { language: "en" })).toEqual(new Date(2026, 8, 14));
+    expect(parseTypedDate("14 Sep 2026", { language: "en" })).toEqual(new Date(2026, 8, 14));
+  });
 });
 
 describe("the long style", () => {
@@ -314,5 +330,31 @@ describe("relative time (widgets A8)", () => {
     expect(at("2026-11-18T06:00:00")).toBe("Yesterday");
     expect(at("2026-11-16T12:00:00")).toBe("Mon");
     expect(at("2026-11-02T12:00:00")).toBe("2 Nov");
+  });
+});
+
+/** The date field takes a typed date (X5 / AQ-02) in the company's order (U9). */
+describe("parseTypedDate", () => {
+  const iso = (d: Date | null) => (d ? dateToISO(d) : null);
+  const today = new Date(2026, 10, 23);
+
+  it("reads the field's own words, in either order", () => {
+    expect(iso(parseTypedDate("14 Mar 2031", { language: "en" }))).toBe("2031-03-14");
+    expect(iso(parseTypedDate("Mar 14, 2031", { language: "en", dateStyle: "US" }))).toBe("2031-03-14");
+    expect(iso(parseTypedDate("14 March 2031", { language: "en" }))).toBe("2031-03-14");
+    expect(iso(parseTypedDate("14 марта 2031", { language: "ru" }))).toBe("2031-03-14");
+  });
+
+  it("reads numbers in the company's order", () => {
+    expect(iso(parseTypedDate("3/4/2031", { language: "en", dateStyle: "US" }))).toBe("2031-03-04");
+    expect(iso(parseTypedDate("3/4/2031", { language: "en", dateStyle: "EUROPEAN" }))).toBe("2031-04-03");
+    expect(iso(parseTypedDate("14.03.2031", { language: "en" }))).toBe("2031-03-14");
+    expect(iso(parseTypedDate("2031-03-14"))).toBe("2031-03-14");
+  });
+
+  it("takes this year when none is typed, and refuses a day that does not exist", () => {
+    expect(iso(parseTypedDate("14 Mar", { language: "en", today }))).toBe("2026-03-14");
+    expect(parseTypedDate("31.02.2031", { language: "en" })).toBeNull();
+    expect(parseTypedDate("soon", { language: "en" })).toBeNull();
   });
 });

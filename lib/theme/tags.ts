@@ -20,10 +20,13 @@ export type TagColor = (typeof TAG_COLORS)[number];
 export const AVATAR_COLORS: readonly TagColor[] = ["berry", "ocean", "indigo", "teal", "bronze", "plum"];
 
 /**
- * A time off policy's colours: every tag but gray, because a gray bar on the calendar is "Away" (the designers'
- * answer 2.2). Six to a row in the picker.
+ * A time off policy's colours, in K01's order (the leave palette, 2026-11-19): every name but gray, because gray is
+ * "Away" (the designers' answer 2.2). The order is the picker's and the one a new policy takes the first free colour
+ * in — the backend's `TagColor` follows the same. Leave is drawn from `lib/theme/leave.ts`, never from the tag classes.
  */
-export const POLICY_COLORS: readonly TagColor[] = TAG_COLORS.filter((c) => c !== "gray");
+export const POLICY_COLORS: readonly TagColor[] = [
+  "berry", "plum", "lilac", "indigo", "ocean", "teal", "olive", "mustard", "bronze", "orange", "cocoa",
+];
 
 export const DEFAULT_TAG_COLOR: TagColor = "gray";
 

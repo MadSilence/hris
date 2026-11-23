@@ -220,11 +220,9 @@ export function TeamPeopleTab({
         ) : items.length === 0 ? (
           <ListEmptyState
             query={query}
-            onClearSearch={() => setQuery("")}
             scene="people"
             title={t("people.empty")}
             description={tShared("assignHint")}
-            noResultsHint={tShared("tryDifferent")}
           />
         ) : (
           <div className="flex flex-col">

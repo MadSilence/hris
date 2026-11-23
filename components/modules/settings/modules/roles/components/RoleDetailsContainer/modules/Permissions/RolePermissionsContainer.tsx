@@ -171,7 +171,7 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
         </div>
       </CardHeader>
 
-      <CardContent className="px-0 pb-0 pt-0 max-h-[calc(100svh-328px)] overflow-y-auto">
+      <CardContent className="px-0 pb-0 pt-0 max-h-[calc(100cqh-328px)] overflow-y-auto">
         {isLoading ? (
           <PermissionsSkeleton/>
         ) : error ? (
@@ -182,7 +182,6 @@ export default function RolePermissionsContainer({ roleId }: { roleId: string })
             serverDraft={serverDraft}
             readOnly={readOnly}
             query={query}
-            onClearSearch={() => setQuery("")}
             openGroups={openGroups}
             onOpenGroupsChange={setOpenGroups}
             readOnlyReason={

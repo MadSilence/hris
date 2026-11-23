@@ -135,7 +135,7 @@ describe("HolidayCalendarBindingSection", () => {
     await waitFor(() => expect(setHolidayCalendarBindingAction).toHaveBeenCalledWith({
       kind: "OFFICE", refId: "berlin", calendarId: "cal-de",
     }));
-    await waitFor(() => expect(showSuccess).toHaveBeenCalledWith("Holiday calendar set."));
+    await waitFor(() => expect(showSuccess).toHaveBeenCalledWith("Holiday calendar set"));
   });
 
   it("keeps the dialog open with the refusal when the apply is refused", async () => {

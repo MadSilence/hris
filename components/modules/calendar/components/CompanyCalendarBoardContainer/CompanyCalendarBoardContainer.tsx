@@ -1,85 +1,130 @@
 "use client";
 
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { ArrowExpand01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/desact/icon";
+import { Button } from "@/components/desact/button";
+import { EmptyState } from "@/components/feedback/EmptyState";
+import { ForbiddenError } from "@/components/clients/exceptions";
 import { useDebouncedValue } from "@/components/modules/organization/modules/profile/hooks/useDebouncedValue";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
+import { useUser } from "@/components/hooks/useUser/useUser";
 import {
-  useCompanyCalendarGroups,
+  COMPANY_CALENDAR_ABSENCES_QUERY_KEY,
   useCompanyCalendarAbsences,
-  useCompanyCalendarCapacity,
+  useCompanyCalendarGroups,
+  useCompanyCalendarViewCounts,
   useCompanyCalendarMarks,
   useCompanyCalendarPeople,
 } from "@/components/modules/calendar/hooks/useCompanyCalendar";
-import {
-  useCalendarViewMutations,
-  useCalendarViews,
-} from "@/components/modules/calendar/hooks/useCalendarViews";
+import { useCalendarViewMutations, useCalendarViews } from "@/components/modules/calendar/hooks/useCalendarViews";
 import { CompanyCalendarBoard } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarBoard";
+import type { LeaveDecisions } from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
+import { displayName } from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
 import { CompanyCalendarGroupedRows } from "@/components/modules/calendar/components/CompanyCalendarGroupedRows/CompanyCalendarGroupedRows";
-import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
-import { useCanAccess } from "@/components/auth/useAccess";
-import { PermissionGate } from "@/components/auth/PermissionGate";
+import {
+  CompanyCalendarToolbar,
+  usePersonField,
+} from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarToolbar";
+import { CompanyCalendarViewsRow, type ViewPill } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarViewsRow";
+import { CompanyCalendarShare } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarShare";
+import { CompanyCalendarExport } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarExport";
 import {
   BoardRequestTimeOff,
   type BoardRequest,
 } from "@/components/modules/calendar/components/CompanyCalendarBoardContainer/BoardRequestTimeOff";
-import { AwaitingApprovalLine } from "@/components/modules/calendar/components/CompanyCalendarBoardContainer/AwaitingApprovalLine";
-import { CompanyCalendarExport } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarExport";
-import { boardGridTemplate } from "@/components/modules/calendar/components/CompanyCalendarBoard/CompanyCalendarRow";
-import { CompanyCalendarToolbar } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarToolbar";
-import { ErrorState } from "@/components/feedback/ErrorState";
+import { DeclineLeaveDialog, type DeclineTarget } from "@/components/modules/timeOff";
+import { REQUEST_PARAM } from "@/components/modules/timeOff/lib/requestLink";
+import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
+import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
+import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
+import { useCanAccess } from "@/components/auth/useAccess";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
-import { useWeekStartsOn } from "@/lib/date";
+import { showError } from "@/lib/errors/errorToast";
+import { showUndoToast } from "@/lib/feedback/undoToast";
+import { isoToDate, useWeekStartsOn } from "@/lib/date";
 import type { CalendarView } from "@/models/calendarView";
-import type { CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/calendar";
-import { availableGroupings, parseCalendarGrouping } from "@/components/modules/calendar/lib/grouping";
+import type { CompanyCalendarAbsence, CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/calendar";
 import type { FilterDTO } from "@/models/user/fields";
+import { availableGroupings, parseCalendarGrouping } from "@/components/modules/calendar/lib/grouping";
+import { addDays, nonWorkingDayTest, toISO } from "@/components/modules/calendar/lib/dateRange";
 import {
-  MONTH_KEYS,
-  addDays,
-  addMonths,
-  eachDay,
-  endOfMonth,
-  endOfWeek,
-  nonWorkingDayTest,
-  startOfMonth,
-  startOfWeek,
-  toISO,
-} from "@/components/modules/calendar/lib/dateRange";
+  extendRange,
+  initialRange,
+  landingDay,
+  rangeEnd,
+  rangeISO,
+  type BoardScale,
+} from "@/components/modules/calendar/lib/boardGeometry";
+import { BUILT_IN_VIEWS, calendarUrlQuery, parseCalendarUrl } from "@/components/modules/calendar/lib/calendarUrlState";
 
 const NO_COLLAPSED: ReadonlySet<string> = new Set();
+/** The export's window is a quarter at most (`COMPANY_CALENDAR.md` § 10). */
+const EXPORT_MAX_DAYS = 93;
 
-type Density = "month" | "week";
+/** "My team" (N01): the reader's own teams — not stored, so it follows them when they move. */
+const teamFilter = (teamIds: string[]): FilterDTO[] => [{ field: "sys:team", op: "has_any", values: teamIds }];
 
+/**
+ * The company calendar (`hris/design/screens/company-calendar`, N01–N25): the header with Share and Export, the views
+ * row, the toolbar and the board — and the state between them, which is also the page's address (F0.2): a link opens
+ * the same view, filters, grouping, scale and days, within the receiver's own access.
+ */
 export const CompanyCalendarBoardContainer: FC = () => {
   const t = useTranslations("calendar");
-  const [density, setDensity] = useState<Density>("month");
-  const [anchor, setAnchor] = useState(() => new Date());
+  const searchParams = useSearchParams();
+  // The address is read once, on load; from then on the board writes it.
+  const [initial] = useState(() => parseCalendarUrl(searchParams ?? new URLSearchParams()));
+  const weekStartsOn = useWeekStartsOn();
+  const todayISO = toISO(new Date());
+  const queryClient = useQueryClient();
+
+  const [scale, setScale] = useState<BoardScale>(initial.scale);
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<FilterDTO[]>([]);
-  const [activeViewId, setActiveViewId] = useState<string | null>(null);
-  const [grouping, setGrouping] = useState<CompanyCalendarGrouping | null>(null);
-  // Which groups are closed. Not saved with a view and reset whenever the grouping changes: a new
-  // dimension has different groups, and "closed" is a moment's reading, not a lens.
+  const [filters, setFilters] = useState<FilterDTO[]>(initial.filters);
+  const [grouping, setGrouping] = useState<CompanyCalendarGrouping | null>(initial.grouping);
+  const [person, setPerson] = useState<string | null>(initial.person);
+  const [activeView, setActiveView] = useState<string | null>(
+    initial.view ?? (initial.filters.length > 0 || initial.person ? null : BUILT_IN_VIEWS.everyone),
+  );
+  // Which groups are folded. Not saved with a view and reset whenever the grouping changes.
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(NO_COLLAPSED);
+
+  // ── The days: a run that grows at either end as the reader scrolls (the owner's R5) ──
+  const [range, setRange] = useState(() =>
+    initialRange(initial.from ? isoToDate(initial.from) : new Date(), weekStartsOn),
+  );
+  const [target, setTarget] = useState(() => ({
+    iso: initial.from ?? toISO(landingDay(new Date(), weekStartsOn)),
+    nonce: 0,
+  }));
+  const [visible, setVisible] = useState({ first: target.iso, last: target.iso });
+  const { from, to } = rangeISO(range);
+
+  const extend = useCallback((direction: "forward" | "back", days: number) => {
+    setRange((r) => extendRange(r, direction, days));
+  }, []);
+  const goToday = () => {
+    const landing = landingDay(new Date(), weekStartsOn);
+    if (landing < range.start || landing > rangeEnd(range)) setRange(initialRange(new Date(), weekStartsOn));
+    setTarget((t0) => ({ iso: toISO(landing), nonce: t0.nonce + 1 }));
+  };
+  const changeScale = (next: BoardScale) => {
+    setScale(next);
+    // The first day on screen stays first: a week from where the month was.
+    setTarget((t0) => ({ iso: visible.first, nonce: t0.nonce + 1 }));
+  };
+  const onVisibleChange = useCallback((first: string, last: string) => {
+    setVisible((v) => (v.first === first && v.last === last ? v : { first, last }));
+  }, []);
 
   const debounced = useDebouncedValue(query.trim(), 300);
   const q = debounced.length >= 2 ? debounced : "";
 
-  // A week view starts on the company's first day of the week, not on a hardcoded Monday.
-  const weekStartsOn = useWeekStartsOn();
-  const { from, to } = useMemo(() => {
-    if (density === "week") return { from: startOfWeek(anchor, weekStartsOn), to: endOfWeek(anchor, weekStartsOn) };
-    return { from: startOfMonth(anchor), to: endOfMonth(anchor) };
-  }, [density, anchor, weekStartsOn]);
-
-  const days = useMemo(() => eachDay(from, to), [from, to]);
-  const dayISOs = useMemo(() => days.map(toISO), [days]);
-  const todayISO = toISO(new Date());
-
-  // Shading follows the company's configured week, not a hardcoded Saturday/Sunday. The setting was
-  // introduced for this, and the backend's day counting has always used it.
+  // Shading follows the company's configured week, not a hardcoded Saturday/Sunday.
   const { company } = useCompanyData();
   const isNonWorkingDay = useMemo(() => nonWorkingDayTest(company?.workingDays), [company?.workingDays]);
 
@@ -87,9 +132,23 @@ export const CompanyCalendarBoardContainer: FC = () => {
   const groupingOptions = useMemo(() => availableGroupings(fields), [fields]);
   const { data: views } = useCalendarViews();
   const viewMutations = useCalendarViewMutations();
+  const { userId: me, user: meUser } = useCurrentUser();
+  const myTeamIds = useMemo(() => (meUser?.teams ?? []).map((team) => team.id), [meUser?.teams]);
 
-  // Two queries, deliberately. The roster is keyed on the search and the filters alone, so moving
-  // the window keeps every page already scrolled; the marks are keyed on the window and the rows.
+  // ── One person (N21): the board shows that person alone, read from their own record ──
+  const onePerson = person !== null;
+  const { data: personRecord, error: personError } = useUser(person ?? "");
+  const personUsers = useMemo<CompanyCalendarUser[]>(
+    () =>
+      person && personRecord
+        ? [{ id: person, firstName: personRecord.firstName, lastName: personRecord.lastName, email: personRecord.email ?? "", avatarUrl: personRecord.avatarUrl }]
+        : [],
+    [person, personRecord],
+  );
+  const effectiveGrouping = onePerson ? null : grouping;
+
+  // Two queries, deliberately: the roster is keyed on the search and the filters alone, so loading more days keeps
+  // every page already scrolled; the marks and the leave are keyed on the days and the rows.
   const {
     data: peoplePages,
     isLoading: peopleLoading,
@@ -99,82 +158,205 @@ export const CompanyCalendarBoardContainer: FC = () => {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useCompanyCalendarPeople({ q, filters, enabled: grouping === null });
+  } = useCompanyCalendarPeople({ q, filters, enabled: effectiveGrouping === null && !onePerson });
 
-  // A grouped board reads its headers here and each group's rows inside its own section. The flat
-  // roster query above is switched off meanwhile, so the two shapes never both load.
   const {
     data: groups,
     isLoading: groupsLoading,
     isError: groupsFailed,
     error: groupsError,
     refetch: refetchGroups,
-  } = useCompanyCalendarGroups({ q, filters, groupBy: grouping });
+  } = useCompanyCalendarGroups({ q, filters, groupBy: effectiveGrouping });
 
-  const users = useMemo(() => (peoplePages?.pages ?? []).flatMap((p) => p.users), [peoplePages]);
+  const users = useMemo(
+    () => (onePerson ? personUsers : (peoplePages?.pages ?? []).flatMap((p) => p.users)),
+    [onePerson, personUsers, peoplePages],
+  );
   const userIds = useMemo(() => users.map((u) => u.id), [users]);
+  const flatIds = effectiveGrouping === null ? userIds : [];
 
-  const {
-    data: marks,
-    isError: marksFailed,
-    error: marksError,
-    refetch: refetchMarks,
-  } = useCompanyCalendarMarks({
-    from: toISO(from),
-    to: toISO(to),
-    userIds: grouping === null ? userIds : [],
+  const { data: marks, isError: marksFailed, error: marksError, refetch: refetchMarks } = useCompanyCalendarMarks({
+    from,
+    to,
+    userIds: flatIds,
   });
   const {
     data: absences,
     isError: absencesFailed,
     error: absencesError,
     refetch: refetchAbsences,
-  } = useCompanyCalendarAbsences({
-    from: toISO(from),
-    to: toISO(to),
-    userIds: grouping === null ? userIds : [],
-  });
+  } = useCompanyCalendarAbsences({ from, to, userIds: flatIds });
 
-  // The capacity mark is a hint, not part of the board: a failed read draws no dot rather than
-  // replacing the board with an error, and the request form still decides.
-  const groupIds = useMemo(
-    () => (groups ?? []).map((g) => g.id).filter((id): id is string => id !== null),
-    [groups],
-  );
-  const { data: capacity } = useCompanyCalendarCapacity({
-    from: toISO(from),
-    to: toISO(to),
-    groupBy: grouping,
-    groupIds,
-  });
-
-  // Acting from the board (sitting 2, C7): anyone on their own row; on someone else's, a reader who may
-  // file leave for others. The server checks the person, row by row — this only decides what to offer.
-  const { userId: me } = useCurrentUser();
+  // ── Requesting from the board (C7): one's own row; any row for a reader who may file leave for others ──
   const mayFileForOthers = useCanAccess("PEOPLE.TIME_OFF_POLICIES", "EDIT");
   const [boardRequest, setBoardRequest] = useState<BoardRequest | null>(null);
   const requestFor = useCallback(
     (u: CompanyCalendarUser) =>
       u.id === me || mayFileForOthers
-        ? (start: string, end: string) =>
-            setBoardRequest({
-              userId: u.id,
-              name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
-              start,
-              end,
-            })
+        ? (start: string, end: string) => setBoardRequest({ userId: u.id, name: displayName(u), start, end })
         : undefined,
     [me, mayFileForOthers],
   );
 
-  const goPrev = () => setAnchor((a) => (density === "week" ? addDays(a, -7) : addMonths(a, -1)));
-  const goNext = () => setAnchor((a) => (density === "week" ? addDays(a, 7) : addMonths(a, 1)));
-  const goToday = () => setAnchor(new Date());
+  // ── Deciding from the card (N05; the owner reversed C7 on 2026-11-20) ──
+  const approve = useApproveTimeOffRequest();
+  const [declining, setDeclining] = useState<DeclineTarget | null>(null);
+  const router = useRouter();
+  const leaveHref = useLeaveRequestHref();
+  const held = useRef(new Map<string, () => void>());
+  const refreshLeave = useCallback(
+    () => void queryClient.invalidateQueries({ queryKey: [COMPANY_CALENDAR_ABSENCES_QUERY_KEY] }),
+    [queryClient],
+  );
+  const send = useCallback(
+    (requestId: string) => {
+      if (!held.current.delete(requestId)) return;
+      approve
+        .mutateAsync({ requestId })
+        .then(refreshLeave)
+        .catch((error: unknown) => showError(error));
+    },
+    [approve, refreshLeave],
+  );
+  // Approve is held back with Undo (the owner's D1): sent when the toast ends, or when the reader leaves the page.
+  useEffect(() => {
+    const flush = () => held.current.forEach((commit) => commit());
+    window.addEventListener("pagehide", flush);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      flush();
+    };
+  }, []);
+  const decisions = useMemo<LeaveDecisions>(
+    () => ({
+      canDecide: (a: CompanyCalendarAbsence) => Boolean(a.awaitingYou && a.status === "PENDING" && a.requestId),
+      approve: (a: CompanyCalendarAbsence) => {
+        const id = a.requestId;
+        if (!id) return;
+        held.current.set(id, () => send(id));
+        showUndoToast({
+          message: t("card.approvedToast"),
+          onUndo: () => {
+            held.current.delete(id);
+          },
+          onExpire: () => held.current.get(id)?.(),
+        });
+      },
+      // Decline is its own small window with an optional comment (AQ-13).
+      decline: (a: CompanyCalendarAbsence, name?: string) =>
+        a.requestId &&
+        setDeclining({
+          requestId: a.requestId,
+          startDate: a.requestStartDate ?? a.startDate,
+          endDate: a.requestEndDate ?? a.endDate,
+          policyName: a.policyName ?? a.leaveTypeName ?? null,
+          policyColor: a.policyColor ?? null,
+          firstName: name?.split(" ")[0] ?? null,
+        }),
+      openFull: (a: CompanyCalendarAbsence) =>
+        a.requestId ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="-mr-1.5 size-7 text-tertiary"
+            aria-label={t("card.openFull")}
+            // The request in full over the board (AQ-12 b): `?leaveRequest=` on this page, which the app shell opens.
+            onClick={() => router.push(leaveHref(a.requestId!), { scroll: false })}
+          >
+            <Icon icon={ArrowExpand01Icon} size="sm" />
+          </Button>
+        ) : null,
+    }),
+    [send, t, router, leaveHref],
+  );
+
+  // ── Views: "Everyone" and "My team" are built in; the reader's own are stored, in their order ──
+  const builtIns = useMemo<ViewPill[]>(
+    () => [
+      { id: BUILT_IN_VIEWS.everyone, name: t("views.everyone") },
+      ...(myTeamIds.length > 0 ? [{ id: BUILT_IN_VIEWS.myTeam, name: t("views.myTeam") }] : []),
+    ],
+    [t, myTeamIds.length],
+  );
+  const savedViews = useMemo(() => views ?? [], [views]);
+  // The count beside each view (B5): the people its filters show, within the reader's own scope.
+  const viewFilters = useMemo(
+    () => [
+      { id: BUILT_IN_VIEWS.everyone, filters: [] as FilterDTO[] },
+      ...(myTeamIds.length > 0 ? [{ id: BUILT_IN_VIEWS.myTeam, filters: teamFilter(myTeamIds) }] : []),
+      ...savedViews.map((v) => ({ id: v.id, filters: v.payload?.filters ?? [] })),
+    ],
+    [myTeamIds, savedViews],
+  );
+  const viewCounts = useCompanyCalendarViewCounts(viewFilters);
 
   const changeGrouping = useCallback((next: CompanyCalendarGrouping | null) => {
     setGrouping(next);
     setCollapsed(NO_COLLAPSED);
   }, []);
+
+  // A view reopens in the shape it was saved in; a view saved before grouping existed carries no key: flat.
+  const applyView = useCallback(
+    (id: string) => {
+      setPerson(null);
+      setActiveView(id);
+      if (id === BUILT_IN_VIEWS.everyone) {
+        setFilters([]);
+        return;
+      }
+      if (id === BUILT_IN_VIEWS.myTeam) {
+        setFilters(teamFilter(myTeamIds));
+        return;
+      }
+      const view = savedViews.find((v) => v.id === id);
+      if (!view) return;
+      setFilters(view.payload?.filters ?? []);
+      if (view.payload?.density && view.payload.density !== scale) changeScale(view.payload.density);
+      changeGrouping(parseCalendarGrouping(view.payload?.grouping));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [savedViews, myTeamIds, scale, changeGrouping],
+  );
+
+  // A link that names a view: "My team" once the reader's teams are known; one of their own once the views are.
+  const appliedFromLink = useRef(false);
+  useEffect(() => {
+    if (appliedFromLink.current || !initial.view || initial.filters.length > 0) return;
+    if (initial.view === BUILT_IN_VIEWS.myTeam && myTeamIds.length > 0) {
+      appliedFromLink.current = true;
+      setFilters(teamFilter(myTeamIds));
+    } else if (views && views.some((v) => v.id === initial.view)) {
+      appliedFromLink.current = true;
+      applyView(initial.view);
+    }
+  }, [initial, myTeamIds, views, applyView]);
+
+  const saveView = (name: string) =>
+    viewMutations.create.mutate(
+      { name, payload: { filters, density: scale, grouping } },
+      { onSuccess: (created) => setActiveView(created.id), onError: showError },
+    );
+  const renameView = (view: CalendarView, name: string) =>
+    viewMutations.update.mutate({ id: view.id, name, payload: view.payload }, { onError: showError });
+  const deleteView = (view: CalendarView) =>
+    viewMutations.remove.mutate(view.id, {
+      onSuccess: () => {
+        if (view.id === activeView) applyView(BUILT_IN_VIEWS.everyone);
+      },
+      onError: showError,
+    });
+  const reorderViews = (ids: string[]) => viewMutations.reorder.mutate(ids, { onError: showError });
+
+  // Editing the filters by hand detaches from the view whose filters they were.
+  const changeFilters = useCallback((next: FilterDTO[]) => {
+    setFilters(next);
+    setActiveView(next.length === 0 ? BUILT_IN_VIEWS.everyone : null);
+  }, []);
+  const clearPerson = () => {
+    setPerson(null);
+    if (filters.length === 0) setActiveView(BUILT_IN_VIEWS.everyone);
+  };
 
   const toggleGroup = useCallback((key: string) => {
     setCollapsed((current) => {
@@ -185,157 +367,199 @@ export const CompanyCalendarBoardContainer: FC = () => {
     });
   }, []);
 
-  // A view reopens in the shape it was saved in — a grouped view that reopened flat would read as a
-  // bug, and so would the reverse. A view saved before grouping existed carries no key: flat.
-  // "All people" (null) clears the filters and leaves the grouping as it is, like the density.
-  const applyView = useCallback(
-    (view: CalendarView | null) => {
-      setActiveViewId(view?.id ?? null);
-      setFilters(view?.payload?.filters ?? []);
-      if (view?.payload?.density) setDensity(view.payload.density);
-      if (view) changeGrouping(parseCalendarGrouping(view.payload?.grouping));
-    },
-    [changeGrouping],
+  // ── The address follows the board (F0.2): a link to what is on screen ──
+  const urlState = useMemo(
+    () => ({
+      view: activeView,
+      filters,
+      grouping: effectiveGrouping,
+      scale,
+      from: visible.first,
+      person,
+    }),
+    [activeView, filters, effectiveGrouping, scale, visible.first, person],
   );
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      // A request open over the board (`?leaveRequest=`) stays in the address while the board rewrites the rest.
+      const open = new URLSearchParams(window.location.search).get(REQUEST_PARAM);
+      const query = calendarUrlQuery(urlState);
+      const next = `${window.location.pathname}${query}${
+        open ? `${query ? "&" : "?"}${REQUEST_PARAM}=${encodeURIComponent(open)}` : ""
+      }`;
+      if (next !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(window.history.state, "", next);
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [urlState]);
 
-  const saveView = useCallback(
-    (name: string) => {
-      viewMutations.create.mutate(
-        { name, payload: { filters, density, grouping } },
-        { onSuccess: (created) => setActiveViewId(created.id) },
-      );
-    },
-    [viewMutations.create, filters, density, grouping],
-  );
-
-  const deleteView = useCallback(
-    (view: CalendarView) => {
-      viewMutations.remove.mutate(view.id, {
-        onSuccess: () => {
-          if (view.id === activeViewId) applyView(null);
-        },
-      });
-    },
-    [viewMutations.remove, activeViewId, applyView],
-  );
-
-  // Editing the filters by hand detaches from the view whose filters they were.
-  const changeFilters = useCallback((next: FilterDTO[]) => {
-    setFilters(next);
-    setActiveViewId(null);
-  }, []);
-
-  const periodLabel =
-    density === "week"
-      ? t("period.week", {
-          fromMonth: t(`months.short.${MONTH_KEYS[from.getMonth()]}`),
-          fromDay: String(from.getDate()),
-          toMonth: t(`months.short.${MONTH_KEYS[to.getMonth()]}`),
-          toDay: String(to.getDate()),
-          year: String(to.getFullYear()),
-        })
-      : t("period.month", {
-          month: t(`months.long.${MONTH_KEYS[anchor.getMonth()]}`),
-          year: String(anchor.getFullYear()),
-        });
-
-  const failed = grouping === null ? peopleFailed || marksFailed || absencesFailed : groupsFailed;
-  const failure =
-    grouping === null ? (peopleFailed ? peopleError : marksFailed ? marksError : absencesError) : groupsError;
+  // ── What the board says when it has no rows ──
+  const failed = onePerson
+    ? Boolean(personError) || marksFailed || absencesFailed
+    : effectiveGrouping === null
+      ? peopleFailed || marksFailed || absencesFailed
+      : groupsFailed;
+  const failure = onePerson
+    ? personError ?? (marksFailed ? marksError : absencesError)
+    : effectiveGrouping === null
+      ? peopleFailed
+        ? peopleError
+        : marksFailed
+          ? marksError
+          : absencesError
+      : groupsError;
   const retry = () =>
-    void (grouping !== null
+    void (effectiveGrouping !== null
       ? refetchGroups()
       : peopleFailed
         ? refetchPeople()
         : marksFailed
           ? refetchMarks()
           : refetchAbsences());
+  const loading = onePerson ? !personRecord && !personError : effectiveGrouping === null ? peopleLoading : groupsLoading;
+  const empty =
+    !loading && (effectiveGrouping === null ? users.length === 0 : (groups?.length ?? 0) === 0);
+
+  const overlay = failed ? (
+    failure instanceof ForbiddenError ? (
+      <EmptyState fill scene="policies" title={t("states.noAccessTitle")} description={t("states.noAccessHint")} />
+    ) : (
+      <EmptyState
+        fill
+        scene="something-broke"
+        title={t("states.errorTitle")}
+        description={t("states.errorHint")}
+        action={
+          <Button type="button" variant="secondary" onClick={retry}>
+            {t("states.tryAgain")}
+          </Button>
+        }
+      />
+    )
+  ) : empty ? (
+    q ? (
+      <EmptyState fill scene="no-results" title={t("states.noResultsTitle")} description={t("states.noResultsHint")} />
+    ) : filters.length > 0 ? (
+      <EmptyState
+        fill
+        scene="no-match"
+        title={t("states.noMatchTitle")}
+        description={t("states.noMatchHint")}
+        action={
+          <Button type="button" variant="secondary" onClick={() => changeFilters([])}>
+            {t("states.clearAll")}
+          </Button>
+        }
+      />
+    ) : (
+      <EmptyState fill scene="no-results" title={t("states.noResultsTitle")} description="" />
+    )
+  ) : undefined;
+
+  const personField = usePersonField();
+  const activeName =
+    activeView === null ? null : [...builtIns, ...savedViews].find((v) => v.id === activeView)?.name ?? null;
+  const exportTo = (() => {
+    const last = addDays(isoToDate(visible.first), EXPORT_MAX_DAYS - 1);
+    return visible.last < toISO(last) ? visible.last : toISO(last);
+  })();
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 print:h-auto">
-      <CompanyCalendarToolbar
-        query={query}
-        onQueryChange={setQuery}
-        fields={fields}
-        filters={filters}
-        onFiltersChange={changeFilters}
-        grouping={grouping}
-        groupingOptions={groupingOptions}
-        onGroupingChange={changeGrouping}
-        views={views ?? []}
-        activeViewId={activeViewId}
-        viewsBusy={viewMutations.create.isPending || viewMutations.remove.isPending}
-        onApplyView={applyView}
-        onSaveView={saveView}
-        onDeleteView={deleteView}
-        density={density}
-        onDensityChange={setDensity}
-        periodLabel={periodLabel}
-        onPrev={goPrev}
-        onNext={goNext}
-        onToday={goToday}
-        actions={<CompanyCalendarExport from={toISO(from)} to={toISO(to)} q={q} filters={filters} />}
-      />
+    <div className="flex h-full min-h-0 flex-col">
+      <section className="flex flex-none items-start gap-3">
+        <div className="flex min-w-0 flex-col gap-1">
+          <h1 className="text-page-title">{t("page.title")}</h1>
+          <p className="text-body text-secondary">{t("page.description")}</p>
+        </div>
+        <span className="flex-1" />
+        <CompanyCalendarShare
+          href={() => `${window.location.pathname}${calendarUrlQuery(urlState)}`}
+          viewName={activeName}
+          fields={fields}
+          filters={filters}
+          personField={personField}
+          person={person}
+          scale={scale}
+          from={visible.first}
+        />
+        <CompanyCalendarExport from={visible.first} to={exportTo} q={q} filters={filters} />
+      </section>
 
-      {/* A failed fetch is not an empty company. The board's empty state says "nobody matches the
-          current view", which is a claim about the data rather than a report about the request — so
-          the failure takes the board's place and the toolbar stays, which is how the reader retries,
-          clears a filter, or moves to another period. */}
-      <PermissionGate resource="PEOPLE.TIME_OFF" action="VIEW">
-        <AwaitingApprovalLine />
-      </PermissionGate>
+      <div className="flex-none pt-4">
+        <CompanyCalendarViewsRow
+          builtIns={builtIns}
+          views={savedViews}
+          activeId={activeView}
+          counts={viewCounts}
+          onPick={applyView}
+          onSave={saveView}
+          onRename={renameView}
+          onDelete={deleteView}
+          onReorder={reorderViews}
+          busy={viewMutations.create.isPending || viewMutations.remove.isPending || viewMutations.update.isPending}
+        />
+      </div>
 
-      {failed ? (
-        <ErrorState error={failure} onRetry={retry} />
-      ) : (
+      <div className="flex-none pt-5">
+        <CompanyCalendarToolbar
+          query={query}
+          onQueryChange={setQuery}
+          fields={fields}
+          filters={filters}
+          onFiltersChange={changeFilters}
+          person={person}
+          onClearPerson={clearPerson}
+          grouping={effectiveGrouping}
+          groupingOptions={onePerson ? [] : groupingOptions}
+          onGroupingChange={changeGrouping}
+          scale={scale}
+          onScaleChange={changeScale}
+          onToday={goToday}
+        />
+      </div>
+
+      <div className="mt-4 flex min-h-0 flex-1 flex-col">
         <CompanyCalendarBoard
-          days={days}
+          range={range}
+          scale={scale}
+          todayISO={todayISO}
+          isNonWorkingDay={isNonWorkingDay}
+          onExtend={extend}
+          scrollTarget={target}
+          onVisibleChange={onVisibleChange}
           users={users}
           marks={marks ?? []}
           absences={absences ?? []}
-          todayISO={todayISO}
-          isNonWorkingDay={isNonWorkingDay}
-          density={density}
-          animationKey={`${density}|${toISO(from)}`}
-          isLoading={peopleLoading}
-          hasMore={hasNextPage}
+          isLoading={loading}
+          hasMore={!onePerson && hasNextPage}
           isLoadingMore={isFetchingNextPage}
           onLoadMore={() => void fetchNextPage()}
-          scrollResetKey={grouping ?? "flat"}
           requestFor={requestFor}
-          capacity={grouping === null ? (capacity ?? []) : []}
-          {...(grouping !== null
+          decisions={decisions}
+          overlay={overlay}
+          scrollResetKey={effectiveGrouping ?? "flat"}
+          {...(effectiveGrouping !== null
             ? {
-                isEmpty: !groupsLoading && (groups?.length ?? 0) === 0,
                 grouped: (
                   <CompanyCalendarGroupedRows
-                    grouping={grouping}
+                    grouping={effectiveGrouping}
                     groups={groups}
                     isLoading={groupsLoading}
                     collapsed={collapsed}
                     onToggle={toggleGroup}
-                    capacity={capacity ?? []}
                     requestFor={requestFor}
                     q={q}
                     filters={filters}
-                    from={toISO(from)}
-                    to={toISO(to)}
-                    geometry={{
-                      days,
-                      dayISOs,
-                      todayISO,
-                      isNonWorkingDay,
-                      density,
-                      gridTemplateColumns: boardGridTemplate(days.length),
-                    }}
+                    from={from}
+                    to={to}
                   />
                 ),
               }
             : {})}
         />
-      )}
+      </div>
 
       {boardRequest ? <BoardRequestTimeOff request={boardRequest} onClose={() => setBoardRequest(null)} /> : null}
+      <DeclineLeaveDialog target={declining} onClose={() => setDeclining(null)} onDeclined={refreshLeave} />
     </div>
   );
 };

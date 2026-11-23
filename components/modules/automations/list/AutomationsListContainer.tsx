@@ -2,19 +2,13 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Add01Icon, GridViewIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, GridViewIcon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/desact/button";
 import { Checkbox } from "@/components/desact/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/desact/dropdown-menu";
 import { Icon } from "@/components/desact/icon";
+import { ChoiceMenu } from "@/components/desact/choice-menu";
 import { Skeleton } from "@/components/desact/skeleton";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -75,6 +69,7 @@ export const AutomationsListContainer: React.FC<{
 }> = ({ canManage, onOpenNew }) => {
   const t = useTranslations("automationsList");
   const tShared = useTranslations("automations");
+  const tCommon = useTranslations("common");
   const router = useRouter();
 
   const [filters, setFilters] = React.useState<ListFilters>(EMPTY_FILTERS);
@@ -210,7 +205,7 @@ export const AutomationsListContainer: React.FC<{
         description={canManage ? t("empty.description") : ""}
         // Centred in the page under the tabs (I1); the height is the viewport less the header, the tabs and the
         // page's padding, since the page itself has no height to fill.
-        className="min-h-[calc(100dvh-13rem)] py-0"
+        className="min-h-[calc(100cqh-13rem)] py-0"
         action={
           canManage ? (
             <div className="flex w-full max-w-[672px] flex-col items-center gap-4">
@@ -291,20 +286,23 @@ export const AutomationsListContainer: React.FC<{
             scene="archive"
             title={t("emptyArchive.title")}
             description={t("emptyArchive.description")}
-            className="min-h-[calc(100dvh-16rem)] py-0"
+            className="min-h-[calc(100cqh-16rem)] py-0"
           />
         ) : (
           // A12: in a card of its own from the toolbar to the page's bottom padding, the content centred (I1).
-          <div className="flex min-h-[calc(100dvh-16rem)] items-center justify-center rounded-card border border-divider bg-card shadow-card">
+          <div className="flex min-h-[calc(100cqh-16rem)] items-center justify-center rounded-card border border-divider bg-card shadow-card">
+            {/* The approved words of a miss (the designers' ES5): a search names what it looked for. */}
             <NoResults
               variant="page"
               scene={searchOnly ? "no-results-s" : "no-match-s"}
-              title={t("noResults.title")}
-              hint={t("noResults.hint")}
+              title={searchOnly ? tCommon("emptyState.nothingCalled", { query: filters.q.trim() }) : t("noResults.title")}
+              hint={searchOnly ? undefined : tCommon("emptyState.tryFewerFilters")}
               action={
-                <Button type="button" variant="secondary" onClick={() => setFilters(EMPTY_FILTERS)}>
-                  {t("noResults.clear")}
-                </Button>
+                searchOnly ? undefined : (
+                  <Button type="button" variant="secondary" onClick={() => setFilters(EMPTY_FILTERS)}>
+                    {tCommon("emptyState.clearAll")}
+                  </Button>
+                )
               }
             />
           </div>
@@ -419,26 +417,21 @@ const StartsWhenFilter: React.FC<{
   const t = useTranslations("automationsList");
   const tShared = useTranslations("automations");
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <ChoiceMenu
+      label={t("toolbar.startsWhen")}
+      options={[
+        { value: null, label: t("toolbar.startsWhenAny") },
+        ...keys.map((key) => ({ value: key as TriggerKey | null, label: tShared(`trigger.${key}`) })),
+      ]}
+      value={value}
+      onChange={onChange}
+      className="w-auto min-w-[210px]"
+      trigger={
         <FilterChip withArrow selected={value !== null}>
           {value ? t("toolbar.startsWhenPicked", { trigger: tShared(`trigger.${value}`) }) : t("toolbar.startsWhen")}
         </FilterChip>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[210px]">
-        <DropdownMenuItem onClick={() => onChange(null)}>
-          <Icon icon={Tick02Icon} size="sm" className={value === null ? "text-primary" : "invisible"} />
-          {t("toolbar.startsWhenAny")}
-        </DropdownMenuItem>
-        {keys.length > 0 && <DropdownMenuSeparator />}
-        {keys.map((key) => (
-          <DropdownMenuItem key={key} onClick={() => onChange(key)}>
-            <Icon icon={Tick02Icon} size="sm" className={value === key ? "text-primary" : "invisible"} />
-            {tShared(`trigger.${key}`)}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      }
+    />
   );
 };
 

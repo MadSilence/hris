@@ -8,7 +8,7 @@ import { Input } from "@/components/desact/input";
 import { cn } from "@/lib/cn";
 import type { SplitPath } from "@/models/automations";
 import { newPathId, OTHERWISE } from "../../model/tree";
-import { AddConditionButton } from "../conditions/chrome";
+import { AddConditionButton } from "@/components/audience/ConditionChrome";
 import { ConditionBuilder } from "../conditions/ConditionBuilder";
 import { Field, FieldStack, Hint } from "../parts/parts";
 import { errorFor } from "../parts/problems";

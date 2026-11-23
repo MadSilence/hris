@@ -29,6 +29,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { showSuccess } from "@/lib/errors/errorToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields/useUserFields";
 import { useUnsavedChangesGuard } from "@/components/hooks/useUnsavedChangesGuard";
@@ -106,6 +107,8 @@ export function CycleBuilderContainer({ cycle }: { cycle: Cycle | null }) {
   const readOnly = !canManage;
   const dirty = !sameCycleDraft(draft, baseline);
   const guard = useUnsavedChangesGuard(dirty && !readOnly);
+  // Launch and the copies work on what is saved: with changes unsaved they say so when pressed (NEVER-DISABLED).
+  const whenSaved = (go: () => void) => () => (dirty ? explain(t(isTemplate ? "builder.saveTemplateFirst" : "builder.saveDraftFirst")) : go());
   const problems = useMemo(() => draftProblems(draft, t), [draft, t]);
   const liveForms = (forms.data ?? []).filter((f) => !f.archivedAt);
 
@@ -155,7 +158,7 @@ export function CycleBuilderContainer({ cycle }: { cycle: Cycle | null }) {
                 {isTemplate ? t("builder.saveTemplate") : t("builder.saveDraft")}
               </Button>
               {cycle && !isTemplate && (
-                <Button type="button" className="gap-1.5" onClick={() => setLaunching(true)} disabled={dirty || saving}>
+                <Button type="button" className="gap-1.5" onClick={whenSaved(() => setLaunching(true))} disabled={saving}>
                   <Icon icon={Rocket01Icon} size="sm" />
                   {t("launch.launch")}
                 </Button>
@@ -164,23 +167,21 @@ export function CycleBuilderContainer({ cycle }: { cycle: Cycle | null }) {
                 <RowActionsMenu label={t("builder.actions")}>
                   {/* Copies are taken of what is saved: unsaved changes would not travel with them (11.1, 11.2). */}
                   {isTemplate ? (
-                    <RowAction icon={<Icon icon={Add01Icon} size="sm" className="text-tertiary" />} disabled={dirty || copies.busy}
-                      title={dirty ? t("builder.saveTemplateFirst") : undefined}
-                      onClick={() => void copies.startFromTemplate(cycle.id)}>
+                    <RowAction icon={<Icon icon={Add01Icon} size="sm" className="text-tertiary" />} disabled={copies.busy}
+                      onClick={whenSaved(() => void copies.startFromTemplate(cycle.id))}>
                       {t("builder.addCycleFromIt")}
                     </RowAction>
                   ) : (
                     <>
-                      <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} disabled={dirty || copies.busy}
-                        title={dirty ? t("builder.saveDraftFirst") : undefined} onClick={() => void copies.duplicate(cycle.id)}>
+                      <RowAction icon={<Icon icon={Copy01Icon} size="sm" className="text-tertiary" />} disabled={copies.busy}
+                        onClick={whenSaved(() => void copies.duplicate(cycle.id))}>
                         {tCommon("actions.duplicate")}
                       </RowAction>
-                      <RowAction icon={<Icon icon={CalendarAdd01Icon} size="sm" className="text-tertiary" />} disabled={dirty}
-                        title={dirty ? t("builder.saveDraftFirst") : undefined} onClick={() => setRepeating(true)}>
+                      <RowAction icon={<Icon icon={CalendarAdd01Icon} size="sm" className="text-tertiary" />} onClick={whenSaved(() => setRepeating(true))}>
                         {t("builder.repeat")}
                       </RowAction>
-                      <RowAction icon={<Icon icon={Layout01Icon} size="sm" className="text-tertiary" />} disabled={dirty || copies.busy}
-                        title={dirty ? t("builder.saveDraftFirst") : undefined} onClick={() => void copies.saveAsTemplate(cycle.id)}>
+                      <RowAction icon={<Icon icon={Layout01Icon} size="sm" className="text-tertiary" />} disabled={copies.busy}
+                        onClick={whenSaved(() => void copies.saveAsTemplate(cycle.id))}>
                         {t("builder.saveAsTemplate")}
                       </RowAction>
                     </>

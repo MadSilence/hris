@@ -9,6 +9,8 @@ export type EnvelopeSignerDTO = {
   label: string | null;
   userId: string | null;
   name: string;
+  /** The person's photo, drawn in the steps (B5); null for a guest or somebody with none. */
+  avatarUrl?: string | null;
   /** Hidden from other signers on a guest's page. */
   email: string | null;
   isGuest: boolean;
@@ -103,10 +105,12 @@ export type SectionDocumentRow = { document: DocumentDTO; personId: string; pers
 
 export type SectionDocumentsPage = { rows: SectionDocumentRow[]; total: number };
 
-export type SectionDocumentsQuery = {
-  q?: string;
-  personIds?: string[];
-  categoryIds?: string[];
+/** What every view of the Documents section is narrowed by (DS5). */
+export type SectionFilterQuery = { q?: string; personIds?: string[]; categoryIds?: string[] };
+
+export type SectionDocumentsQuery = SectionFilterQuery & {
+  /** Only PDFs — the files that can be sent for signature (D14, DS19). */
+  pdfOnly?: boolean;
   sort?: SectionSort;
   asc?: boolean;
   offset?: number;
@@ -137,6 +141,14 @@ export type SectionCounts = { all: number; expiring: number; signing: number; re
 
 export type ExpiringRow = { document: DocumentDTO; personId: string; personName: string };
 
+/** One choice of the Person or Category filter, with how many documents it holds (D05, DS7, DS8). */
+export type SectionFacet = { id: string; name: string; count: number };
+
+export type SectionFacets = { people: SectionFacet[]; categories: SectionFacet[] };
+
+/** An Expiring row of the section (D02): with the day it was asked for again, while that request is open (DS16). */
+export type SectionExpiringRow = ExpiringRow & { askedOn: string | null };
+
 // ── requests (R02–R10) ───────────────────────────────────────────────────────────────────────────────────────────
 
 export type DocumentRequestPayload = {
@@ -150,6 +162,8 @@ export type DocumentRequestPayload = {
   uploaderId?: string | null;
   /** The folder of the document it replaces. */
   folderId?: string | null;
+  /** The expiring document it replaces (R01) — the Expiring view then says "Asked on …" (DS16). */
+  replacesDocumentId?: string | null;
 };
 
 export type DocumentRequestResult = {

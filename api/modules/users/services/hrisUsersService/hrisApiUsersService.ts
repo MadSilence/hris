@@ -97,6 +97,14 @@ export class HrisApiUsersService {
     return hrisApiUsersClient.unblock(id, reason);
   }
 
+  public async setInactive(id: string): Promise<void> {
+    return hrisApiUsersClient.setInactive(id);
+  }
+
+  public async setActive(id: string): Promise<void> {
+    return hrisApiUsersClient.setActive(id);
+  }
+
   public async unlock(id: string): Promise<void> {
     return hrisApiUsersClient.unlock(id);
   }

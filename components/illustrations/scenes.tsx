@@ -1,5 +1,5 @@
 /*
- * The 61 ring illustrations of the noddo design system (SPEC § 10), generated from the package's
+ * The 62 ring illustrations of the noddo design system (SPEC § 10), generated from the package's
  * `assets/illustrations/*.svg` by `generate.mjs` beside this file — regenerate rather than edit by hand. The
  * provenance manifests the files carry are left out of the bundle; the package keeps them.
  *
@@ -417,6 +417,18 @@ export const SCENES = {
       <circle data-role="ring" cx="120" cy="72" r="14" strokeWidth="7" stroke="currentColor" style={{ fill: "none" }} strokeLinecap="round" strokeLinejoin="round"/>
     </>
   ),
+  "requests": (
+    <>
+      <path data-role="baseline" d="M30 136 H210" style={{ fill: "none", stroke: "var(--illustration-baseline)" }} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect data-role="support" x="48" y="12" width="76" height="98" rx="10" style={{ fill: "none", stroke: "var(--illustration-support)" }} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path data-role="knockout" d="M150 94 V58 Q150 54 147 51 L121 25 Q118 22 114 22 H86 Q72 22 72 36 V114 Q72 128 86 128 H114 L150 94 Z" style={{ fill: "var(--illustration-knockout)", stroke: "none" }}/>
+      <path data-role="ink" d="M150 94 V58 Q150 54 147 51 L121 25 Q118 22 114 22 H86 Q72 22 72 36 V114 Q72 128 86 128 H114" style={{ fill: "none", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <path data-role="ink" d="M118 24 V42 Q118 54 130 54 H148" style={{ fill: "none", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <path data-role="support" d="M88 48 H106 M88 66 H132 M88 84 H112" style={{ fill: "none", stroke: "var(--illustration-support)" }} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path data-role="ink" d="M132 112 H180 M167 100 Q177 108 180 112 Q177 116 167 124" style={{ fill: "none", stroke: "var(--illustration-ink)" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle data-role="ring" cx="100" cy="106" r="10" stroke="currentColor" style={{ fill: "none" }} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/>
+    </>
+  ),
   "review-cycle": (
     <>
       <path data-role="baseline" d="M30 136 H210" strokeWidth="3" style={{ stroke: "var(--illustration-baseline)", fill: "none" }} strokeLinecap="round" strokeLinejoin="round"/>
@@ -638,6 +650,7 @@ export const SCENE_LABELS: Record<Scene, string> = {
   "people-s": "People, simplified for S size: a ring person between two colleagues",
   "people": "People: a ring person in front of two colleagues",
   "policies": "Policies: a shield with an accent ring inside",
+  "requests": "Requests: a new document replacing the old one",
   "review-cycle": "Review cycle: people on a turning loop, one is the ring",
   "reviews-and-one-on-ones-s": "Reviews, simplified for S size: two people facing each other, one is the ring",
   "reviews-and-one-on-ones": "Reviews: two ring people facing each other",

@@ -1,24 +1,21 @@
 "use client";
 
-import { FC, useId, useState } from "react";
+import { FC, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
-import { Input } from "@/components/desact/input";
-import { FieldError } from "@/components/desact/field-error";
-import { RequiredLabel } from "@/components/ui/RequiredLabel";
 import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
 import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
-import { useRejectTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useRejectTimeOffRequest";
 import { useDecideCancellation } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useDecideCancellation";
 import { useInvalidateNotifications } from "@/components/modules/notifications/hooks/useNotifications";
 import { useMarkNotificationRead } from "@/components/modules/notifications/hooks/useNotificationMutations";
 import { showError } from "@/lib/errors/errorToast";
 import { PublicHolidayDriftActions } from "@/components/modules/notifications/components/PublicHolidayDriftActions";
 import { TASK_SOURCE_TYPES, TaskSourceActions } from "@/components/modules/notifications/components/TaskSourceActions";
+import { DeclineLeaveDialog } from "@/components/modules/timeOff/DeclineLeaveDialog";
 
 type OutcomeKey =
   | "actions.outcomes.approved"
@@ -69,17 +66,12 @@ const PUBLIC_HOLIDAY_DRIFT_TYPE = "PUBLIC_HOLIDAY_CALENDAR_SOURCE_DRIFT";
  */
 export const NotificationActions: FC<{ notification: Notification }> = ({ notification }) => {
   const t = useTranslations("notifications");
-  const tCommon = useTranslations("common");
   const invalidateNotifications = useInvalidateNotifications();
   const markRead = useMarkNotificationRead();
   const approve = useApproveTimeOffRequest();
-  const reject = useRejectTimeOffRequest();
   const decideCancellation = useDecideCancellation();
 
-  const [rejecting, setRejecting] = useState(false);
-  const [reason, setReason] = useState("");
-  const [rejectTried, setRejectTried] = useState(false);
-  const reasonId = useId();
+  const [declining, setDeclining] = useState(false);
 
   // A holiday drift asks a different question of a different domain; it has its own controls.
   if (notification.type === PUBLIC_HOLIDAY_DRIFT_TYPE) {
@@ -105,7 +97,7 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
     return <p className={cn("mt-2 text-hint font-medium", outcome.className)}>{t(outcome.labelKey)}</p>;
   }
 
-  const busy = approve.isPending || reject.isPending || decideCancellation.isPending;
+  const busy = approve.isPending || decideCancellation.isPending;
 
   const answered = () => {
     invalidateNotifications();
@@ -152,51 +144,35 @@ export const NotificationActions: FC<{ notification: Notification }> = ({ notifi
     );
   }
 
-  const handleReject = async () => {
-    setRejectTried(true);
-    if (!reason.trim()) return;
-    const ok = await run(() => reject.mutateAsync({ requestId: source.id, rejectionReason: reason.trim() }));
-    if (ok) {
-      setRejecting(false);
-      setReason("");
-    }
-  };
+  // Decline is the shared window (AQ-13), as on the leave cards and Home: an optional comment, the toast
+  // "Time off declined". It answers the notification only once the decline went through.
+  const params = notification.params ?? {};
+  const text = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
 
   return (
     <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-      {rejecting ? (
-        <div className="flex flex-col gap-1.5">
-          {/* Required: Reject without it says so under the field. */}
-          <RequiredLabel htmlFor={reasonId} required>{t("actions.reason")}</RequiredLabel>
-          <div className="flex items-center gap-2">
-            <Input
-              id={reasonId}
-              autoFocus
-              value={reason}
-              onChange={(e) => setReason(e.currentTarget.value)}
-              className="h-8 flex-1"
-              disabled={busy}
-            />
-            <Button type="button" size="sm" variant="destructive" onClick={handleReject} disabled={busy}>
-              {t("actions.reject")}
-            </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setRejecting(false)} disabled={busy}>
-              {tCommon("actions.cancel")}
-            </Button>
-          </div>
-          <FieldError>{rejectTried && !reason.trim() ? tCommon("validation.required") : null}</FieldError>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="approve" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
-            {t("actions.approve")}
-          </Button>
-          <Button type="button" size="sm" variant="secondary" onClick={() => { setRejectTried(false); setRejecting(true); }} disabled={busy}>
-            <Icon icon={Cancel01Icon} size="sm" />
-            {t("actions.reject")}
-          </Button>
-        </div>
-      )}
+      <div className="flex items-center gap-2">
+        <Button type="button" variant="approve" size="sm" onClick={() => run(() => approve.mutateAsync({ requestId: source.id }))} disabled={busy}>
+          {t("actions.approve")}
+        </Button>
+        <Button type="button" size="sm" variant="secondary" onClick={() => setDeclining(true)} disabled={busy}>
+          <Icon icon={Cancel01Icon} size="sm" />
+          {t("actions.decline")}
+        </Button>
+      </div>
+      <DeclineLeaveDialog
+        target={declining
+          ? {
+              requestId: source.id,
+              startDate: text(params.startDate) ?? "",
+              endDate: text(params.endDate) ?? text(params.startDate) ?? "",
+              policyName: text(params.policyName),
+              firstName: text(params.requesterName)?.split(/\s+/)[0] ?? null,
+            }
+          : null}
+        onClose={() => setDeclining(false)}
+        onDeclined={answered}
+      />
     </div>
   );
 };

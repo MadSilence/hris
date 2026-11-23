@@ -72,14 +72,6 @@ export const getTimeOffPolicyTenureRulesQueryKey = (policyId: string) => [
   "tenureRules",
 ];
 
-export const getBalanceAsOfQueryKey = (balanceId: string, date: string) => [
-  TIME_OFF_QUERY_KEY,
-  "balances",
-  balanceId,
-  "asOf",
-  date,
-];
-
 export const getTimeOffPolicyEditImpactQueryKey = (policyId: string) => [
   TIME_OFF_QUERY_KEY,
   "policies",

@@ -24,6 +24,7 @@ export const GET = apiRequestWrapper(async (req: Request, context: RouteContext)
           q,
           personIds,
           categoryIds,
+          pdfOnly: params.get("pdfOnly") === "true" || undefined,
           sort: sort && SORTS.includes(sort) ? sort : "UPLOADED",
           asc: params.get("asc") === "true",
           offset: Number(params.get("offset") ?? 0) || 0,
@@ -34,11 +35,13 @@ export const GET = apiRequestWrapper(async (req: Request, context: RouteContext)
     case "signings":
       return Response.json(await hrisApiSigningService.sectionSignings({ q, personIds, categoryIds }));
     case "requests":
-      return Response.json(await hrisApiSigningService.sectionRequests());
+      return Response.json(await hrisApiSigningService.sectionRequests({ q, personIds, categoryIds }));
     case "expiring":
-      return Response.json(await hrisApiSigningService.expiring());
+      return Response.json(await hrisApiSigningService.sectionExpiring({ q, personIds, categoryIds }));
+    case "facets":
+      return Response.json(await hrisApiSigningService.sectionFacets({ personIds, categoryIds }));
     case "counts":
-      return Response.json(await hrisApiSigningService.sectionCounts());
+      return Response.json(await hrisApiSigningService.sectionCounts({ q, personIds, categoryIds }));
     default:
       return new Response(null, { status: 404 });
   }

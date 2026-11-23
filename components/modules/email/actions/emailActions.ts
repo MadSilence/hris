@@ -30,12 +30,11 @@ export async function undoUnsubscribeEmailAction(token: string): Promise<ActionR
   }
 }
 
-/** Lets emails go to a person's address again after it bounced (§ 9.1). Journalled by the backend. */
-export async function liftEmailSuppressionAction(userId: string): Promise<ActionResult> {
+/** Manage account's "Try again" on a bounced address (AQ-08): the block lifted and the email sent again at once. */
+export async function tryEmailAgainAction(userId: string): Promise<ActionResult<{ lifted: boolean; resent: string | null }>> {
   try {
-    await hrisApiEmailService.liftSuppression(userId);
-    return { status: ActionStatus.SUCCESS };
+    return { status: ActionStatus.SUCCESS, data: await hrisApiEmailService.tryAgain(userId) };
   } catch (error) {
-    return toActionError(error, "liftEmailSuppressionAction");
+    return toActionError(error, "tryEmailAgainAction");
   }
 }

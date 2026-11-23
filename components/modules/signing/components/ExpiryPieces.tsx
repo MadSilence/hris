@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Cancel01Icon, HourglassIcon } from "@hugeicons/core-free-icons";
+import { CancelCircleIcon, HourglassIcon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/desact/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/desact/dialog";
@@ -18,36 +18,47 @@ import type { DocumentDTO } from "@/api/modules/documents/dto";
 import { updateDocumentExpiryAction } from "../actions";
 
 /**
- * The Expires cell (documents-expiry X01): just the date — amber with an hourglass when it is soon, red with a cross
- * when it is past, grey when valid, "—" with none.
+ * The Expires cell (documents-expiry X01, X1): just the date — 14/20 500 amber with an hourglass 14 when it is soon,
+ * red with a crossed circle 14 when it is past; grey 400 when valid; "—" with none.
  */
 export function ExpiryCell({ document }: { document: Pick<DocumentDTO, "expiresOn" | "expiryState"> }) {
   const formatDate = useDateFormatter();
   if (!document.expiresOn) return <span className="text-tertiary">—</span>;
   const state = document.expiryState;
+  const flagged = state === "EXPIRED" || state === "EXPIRING";
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 tabular-nums",
-        state === "EXPIRED" ? "text-status-declined-text" : state === "EXPIRING" ? "text-status-pending-text" : "text-secondary",
+        "inline-flex items-center gap-1.5 text-body tabular-nums",
+        flagged ? "font-medium" : "font-normal text-tertiary",
+        state === "EXPIRED" && "text-status-declined-text",
+        state === "EXPIRING" && "text-status-pending-text",
       )}
     >
-      {state === "EXPIRED" && <Icon icon={Cancel01Icon} size="sm" />}
-      {state === "EXPIRING" && <Icon icon={HourglassIcon} size="sm" />}
+      {state === "EXPIRED" && <Icon icon={CancelCircleIcon} size="sm" className="size-3.5 text-status-declined-icon" />}
+      {state === "EXPIRING" && <Icon icon={HourglassIcon} size="sm" className="size-3.5 text-status-pending-icon" />}
       {formatDate(document.expiresOn, { style: "medium" })}
     </span>
   );
 }
 
-/** Edit expiry date (X04): a date, or Remove date; a category that requires one refuses the removal (D00029). */
+/**
+ * Expiry date (X04, X3): a date, or Remove date; a category that requires one refuses the removal (D00029). The hint
+ * names the person by first name and the days from the category (30 without one, X11). Neither button is ever greyed:
+ * Remove date shows only while there is a date, and Save with the field cleared removes it.
+ */
 export function EditExpiryDialog({
   document,
   personName,
+  remindDaysBefore,
   onCloseAction,
   onSavedAction,
 }: {
   document: DocumentDTO;
+  /** The person's first name ("Reza and whoever manages their documents…"). */
   personName: string;
+  /** The category's reminder; null or absent is the default 30. */
+  remindDaysBefore?: number | null;
   onCloseAction: () => void;
   onSavedAction: () => void;
 }) {
@@ -72,24 +83,34 @@ export function EditExpiryDialog({
     <Dialog open onOpenChange={(next) => !next && onCloseAction()}>
       <DialogContent size="sm">
         <DialogHeader>
-          <DialogTitle>{t("expiry.edit")}</DialogTitle>
+          <DialogTitle>{t("expiry.title")}</DialogTitle>
           <DialogDescription>{document.name}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="expiry-date">{t("expiry.validUntil")}</Label>
+          <Label htmlFor="expiry-date">
+            {t("expiry.validUntil")} <span className="font-normal text-tertiary">{t("expiry.optional")}</span>
+          </Label>
           <DatePicker id="expiry-date" value={date} onChange={setDate} />
-          <p className="text-hint text-tertiary">{t("expiry.reminderHint", { name: personName })}</p>
+          <p className="text-hint text-tertiary">
+            {t("expiry.reminderHintDays", { name: personName, days: remindDaysBefore && remindDaysBefore > 0 ? remindDaysBefore : 30 })}
+          </p>
         </div>
         <FormError message={error} />
         <DialogFooter className="sm:justify-between">
-          <Button type="button" variant="ghost" disabled={!document.expiresOn} onClick={() => void save(null)}>
-            {t("expiry.removeDate")}
-          </Button>
+          {document.expiresOn ? (
+            <Button type="button" variant="ghost" className="text-secondary" onClick={() => void save(null)}>
+              {t("expiry.removeDate")}
+            </Button>
+          ) : <span />}
           <div className="flex gap-2">
             <Button type="button" variant="secondary" onClick={onCloseAction}>
               {t("expiry.cancel")}
             </Button>
-            <Button type="button" loading={busy} disabled={!date} onClick={() => void save(date)}>
+            <Button
+              type="button"
+              loading={busy}
+              onClick={() => (date ? void save(date) : document.expiresOn ? void save(null) : onCloseAction())}
+            >
               {t("expiry.save")}
             </Button>
           </div>

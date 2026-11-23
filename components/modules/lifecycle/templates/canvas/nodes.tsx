@@ -144,7 +144,7 @@ export function GridNode({ data }: NodeProps<GridFlowNode>) {
           style={{ left: c.x, top: lane.top, width: c.width, height: lane.height }}
           onClick={(e) => data.onCellClickAction(lane.id, c.id, e.clientX, e.clientY)}
         >
-          <Icon icon={Add01Icon} size="sm" className="text-disabled opacity-0 transition-opacity group-hover:opacity-100" />
+          <Icon icon={Add01Icon} size="sm" className="text-disabled opacity-0 transition-opacity group-hover:opacity-100 touch:opacity-100" />
         </div>
       )))}
     </div>

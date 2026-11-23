@@ -423,15 +423,17 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
         <SearchBox value={query} onChange={setQuery}/>
 
         <div className="flex items-center gap-2">
-          <Button type="button"
-            variant="ghost"
-            className="gap-1.5 text-secondary"
-            onClick={toggleAll}
-            disabled={display.length === 0}
-          >
-            {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
-            {allOpen ? t("collapseAll") : t("expandAll")}
-          </Button>
+          {/* Nothing to expand: hidden, not greyed (NEVER-DISABLED). */}
+          {display.length > 0 && (
+            <Button type="button"
+              variant="ghost"
+              className="gap-1.5 text-secondary"
+              onClick={toggleAll}
+            >
+              {allOpen ? <Icon icon={UnfoldLessIcon} size="sm" /> : <Icon icon={UnfoldMoreIcon} size="sm" />}
+              {allOpen ? t("collapseAll") : t("expandAll")}
+            </Button>
+          )}
 
           {/* A section with its fields, ready-made (TEMPLATES_DESIGN.md § 4.3): the field sets of the catalogue. */}
           <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
@@ -461,7 +463,7 @@ export const AttributeGroupsComponent: FC<AttributeGroupsComponentProps> = ({
       </div>
 
       {/* Reserve less than job-catalog's 380px: Person Information has no tabs row above the list. */}
-      <div className="-mx-1 max-h-[calc(100svh-300px)] overflow-y-auto px-1">
+      <div className="-mx-1 max-h-[calc(100cqh-300px)] overflow-y-auto px-1">
         {/* Column header lives inside the scroll box (same width context as the rows → aligned)
             and sticks to the top so it stays visible while the list scrolls. */}
         <div className={`${GRID} sticky top-0 z-10 bg-card px-3 pb-2 pt-1 text-body font-medium text-primary`}>
@@ -622,7 +624,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
               ({attributes.length})
             </span>
             {group.isSystem ? (
-              <Badge variant="neutral" className="font-normal normal-case">
+              <Badge variant="neutral" className="font-normal normal-case" title={t("systemSectionLocked")}>
                 {t("system")}
               </Badge>
             ) : null}
@@ -640,11 +642,10 @@ const SortableGroup: FC<SortableGroupProps> = ({
             {editing ? (
               <>
               {/* Section rename/delete live behind the edit affordance now. Preset sections ship with
-                  the product, so the menu is disabled rather than failing on save. */}
+                  the product: they have no menu (nothing is shown disabled), and their System badge says why. */}
+              {!group.isSystem && (
               <RowActionsMenu
                 label={t("sectionActions")}
-                disabled={group.isSystem}
-                title={group.isSystem ? t("systemSectionLocked") : undefined}
                 stopPropagation
               >
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
@@ -666,6 +667,7 @@ const SortableGroup: FC<SortableGroupProps> = ({
                   </RowActionDestructive>
                 </PermissionGate>
               </RowActionsMenu>
+              )}
 
               <Button type="button"
                 variant="ghost"
@@ -808,7 +810,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
             </span>
           )}
           {isPreset && (
-            <Badge variant="neutral" className="shrink-0 font-normal">
+            <Badge variant="neutral" className="shrink-0 font-normal" title={t("systemAttributeLocked")}>
               {t("system")}
             </Badge>
           )}
@@ -833,7 +835,8 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
         </div>
 
         <div className="flex items-center justify-end">
-          {editing && (
+          {/* A preset field has no menu (nothing is shown disabled); its System badge says why. Busy while saving. */}
+          {editing && !isPreset && (
             <PermissionGate
               anyOf={[
                 { resource: "PEOPLE.ATTRIBUTES", action: "EDIT" },
@@ -842,8 +845,7 @@ const SortableAttributeRow: FC<SortableAttributeRowProps> = ({
             >
               <RowActionsMenu
                 label={t("attributeActions")}
-                disabled={isPreset || isSavingAttribute}
-                title={isPreset ? t("systemAttributeLocked") : undefined}
+                disabled={isSavingAttribute}
               >
                 <PermissionGate resource="PEOPLE.ATTRIBUTES" action="EDIT">
                   <RowAction

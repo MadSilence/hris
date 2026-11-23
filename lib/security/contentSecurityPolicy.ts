@@ -17,24 +17,18 @@
  */
 export type CspMode = "production" | "development";
 
-export interface CspOptions {
-  /**
-   * The app itself is served over http (`APP_SCHEME=http` — a local machine). Its backend then serves logos and photos
-   * over http too, and `https:` alone refused every one of them (WALK_QUESTIONS § 51). Never true on https.
-   */
-  httpImages?: boolean;
-}
-
-export const contentSecurityPolicy = (nonce: string, mode: CspMode, options: CspOptions = {}): string => {
+export const contentSecurityPolicy = (nonce: string, mode: CspMode): string => {
   const development = mode === "development";
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     // React's development build evaluates code for its error overlay and fast refresh; production never does.
     "script-src": ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", ...(development ? ["'unsafe-eval'"] : [])],
     "style-src": ["'self'", "'unsafe-inline'"],
-    // Avatars, logos and the example people's portraits (`public/sample-avatars/`) come from the app itself; a company
-    // may later serve files from a storage host — so any https image, never a script.
-    "img-src": ["'self'", "data:", "blob:", "https:", ...(options.httpImages ? ["http:"] : [])],
+    // Every image is the app's own (the owner's R3, 2026-11-23): uploads — avatars, logos, the login page's picture —
+    // are `/uploads/…` on this same host (`app/uploads` passes them to the backend), the example people's portraits are
+    // `public/sample-avatars/`. `data:` is a QR code drawn in the page (two-step sign-in, the photo and signature
+    // hand-off) and a drawn signature; `blob:` is a picked photo previewed before it is sent.
+    "img-src": ["'self'", "data:", "blob:"],
     "font-src": ["'self'", "data:"],
     // The browser talks only to its own host (`/api/…` — hris/CLAUDE.md); development adds the reload socket.
     // `blob:` is the page reading back bytes it already holds: `PdfViewer` fetches the blob URL its caller made from

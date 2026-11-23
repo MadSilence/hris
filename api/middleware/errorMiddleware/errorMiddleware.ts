@@ -31,6 +31,8 @@ export type ErrorResponse = {
   /** The values the backend interpolated into its own message, so the dictionary can use them. */
   params?: string[];
   requestId?: string;
+  /** The login's refusal from the third wrong password in a row: the alert offers the reset link (U2). */
+  offerPasswordReset?: boolean;
 }
 
 export const withErrorMiddleware =
@@ -52,6 +54,7 @@ const getErrorResponse = (e: unknown): ErrorResponse => ({
   fieldErrors: e instanceof ApiError ? e.fieldErrors : undefined,
   params: e instanceof ApiError ? e.params : undefined,
   requestId: e instanceof ApiError ? e.requestId : undefined,
+  offerPasswordReset: e instanceof ApiError ? e.offerPasswordReset : undefined,
 });
 
 const getStatusCode = (e: unknown): HttpStatusCode => {

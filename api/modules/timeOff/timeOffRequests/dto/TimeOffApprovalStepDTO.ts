@@ -24,4 +24,26 @@ export interface TimeOffApprovalStepDTO {
   onBehalfOfUserId: string | null;
   onBehalfOfName: string | null;
   decidedAt: string | null;
+  /** Where the step stands, for the step list (AQ-04): signed, waiting now, its turn not come, declined, never needed. */
+  state?: TimeOffApprovalStepState;
+  /** The job title of the person the step names (C5) — null without one, or when the reader may not see Job. */
+  approverJobTitle?: string | null;
+}
+
+export type TimeOffApprovalStepState = "DONE" | "NOW" | "NOT_YET" | "DECLINED" | "SKIPPED";
+
+/**
+ * Where a request's approval stands (AQ-04). The requester gets the count and, once approved, every approver's name —
+ * never who has not decided; an approver gets the steps themselves, and `ordered` says how to draw them.
+ */
+export interface TimeOffChainDTO {
+  /** The policy's mode; null when the request needed no approval. */
+  mode: string | null;
+  /** Numbered and decided in turn; otherwise any `required` of `total`. */
+  ordered: boolean;
+  total: number;
+  required: number;
+  approved: number;
+  /** Once approved, the full name of everyone who signed it, in the order they signed. */
+  approvedByNames: string[];
 }

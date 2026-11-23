@@ -54,3 +54,9 @@ None.
 
 - **Where to see it:** N1 `/link-expired`, N3 `?reason=ended`. Built 2026-11-13 (`(claude)/development_plan/SIGN_IN_PLAN.md`), walked locally the same evening (`(claude)/HISTORY.md` § "Identity…" → "Logging in with Google, Microsoft and emailed codes").
 - **Differs from the design:** nothing known.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the colour pane grows with the window — 520 at 1280 × window ÷ 1280, never smaller, stopping at 1920 — and
+  everything in it (rings, wordmark, slogan or company name) scales with it (`--auth-grow` as the pane's `zoom`,
+  `styles/globals.css`; `technical_documentation/ui/DESIGN_SYSTEM.md` § 9).
+- Not seen in a browser.

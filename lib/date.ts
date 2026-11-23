@@ -25,6 +25,13 @@ export const partsToISO = (year: number, monthIndex: number, day: number): strin
   `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
 
 /**
+ * A short English month is always three letters (W7, the owner 2026-11-23): `en-GB` writes September "Sept", and
+ * every short month on a screen reads "Sep". Every formatter that can write a short month passes through here —
+ * those in this file and the few components that call `Intl` themselves. "September" is left alone.
+ */
+export const threeLetterMonths = (text: string): string => text.replace(/\bSept\b/g, "Sep");
+
+/**
  * How dates are written on this page, and in whose zone.
  *
  * <p><b>The order is the company's, by its country</b> (DECISIONS.md § "The designers' Home fixes, round 1"): a
@@ -186,21 +193,21 @@ export const formatDisplayDate: DateFormatter = (value, options) => {
   // An explicit locale from the caller still wins: it is the escape hatch for a screen that has a
   // reason, and there is exactly one such caller today.
   if (options?.locale) {
-    return new Intl.DateTimeFormat(options.locale, {
+    return threeLetterMonths(new Intl.DateTimeFormat(options.locale, {
       day: "2-digit",
       month: style === "numeric" ? "2-digit" : style === "long" ? "long" : "short",
       ...(options?.hideYear ? {} : { year: "numeric" }),
       ...(zone ? { timeZone: zone } : {}),
-    }).format(date);
+    }).format(date));
   }
 
   if (style !== "numeric") {
-    return new Intl.DateTimeFormat(wordsLocale(options?.dateStyle, options?.language), {
+    return threeLetterMonths(new Intl.DateTimeFormat(wordsLocale(options?.dateStyle, options?.language), {
       day: "numeric",
       month: style === "long" ? "long" : "short",
       ...(options?.hideYear ? {} : { year: "numeric" }),
       ...(zone ? { timeZone: zone } : {}),
-    }).format(date);
+    }).format(date));
   }
 
   const { day, month, year } = numericParts(date, zone);
@@ -319,7 +326,7 @@ const toCalendarDate = (value: string | Date): Date =>
   typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? isoToDate(value.trim()) : new Date(value);
 
 const monthName = (date: Date, locale: string, width: "short" | "long" = "short") =>
-  new Intl.DateTimeFormat(locale, { month: width }).format(date).replace(/\.$/, "");
+  threeLetterMonths(new Intl.DateTimeFormat(locale, { month: width }).format(date).replace(/\.$/, ""));
 const weekdayName = (date: Date, locale: string, width: "short" | "long" = "short") =>
   new Intl.DateTimeFormat(locale, { weekday: width }).format(date).replace(/\.$/, "");
 
@@ -591,5 +598,75 @@ export const useShortDates = () => {
         ),
     }),
     [language, dateStyle, weekStartsOn, t],
+  );
+};
+
+/**
+ * A date a person typed into the date field (X5 / AQ-02: "typing stays"), or null when it is not one. Read the way
+ * the field writes it — the company's order (U9), the page's words: "14 Mar 2031", "Mar 14, 2031", "14 March 2031",
+ * "14.03.2031", "3/14/2031" for a US company and "14/03/2031" for everybody else, and the API's own `2031-03-14`. A
+ * missing year is this year's. A day that does not exist ("31.02.2031") is not a date.
+ */
+export const parseTypedDate = (
+  text: string,
+  options?: { language?: string; dateStyle?: CompanyDateStyle; today?: Date },
+): Date | null => {
+  const raw = text.trim().toLowerCase().replace(/,/g, " ").replace(/\s+/g, " ");
+  if (!raw) return null;
+  const thisYear = (options?.today ?? new Date()).getFullYear();
+  const make = (y: number, m: number, d: number): Date | null => {
+    const year = y < 100 ? 2000 + y : y;
+    const date = new Date(year, m, d);
+    return date.getFullYear() === year && date.getMonth() === m && date.getDate() === d ? date : null;
+  };
+
+  const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(raw);
+  if (iso) return make(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+
+  const numeric = /^(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2}|\d{4}))?\.?$/.exec(raw);
+  if (numeric) {
+    const [a, b] = [Number(numeric[1]), Number(numeric[2])];
+    const year = numeric[3] ? Number(numeric[3]) : thisYear;
+    return monthFirst(options?.dateStyle, options?.language) ? make(year, a - 1, b) : make(year, b - 1, a);
+  }
+
+  // Words: a month's name in the page's language or in English, long or short, before or after the day.
+  const locale = wordsLocale(options?.dateStyle, options?.language);
+  const names: { name: string; month: number }[] = [];
+  for (const loc of new Set([locale, "en-GB"])) {
+    for (let m = 0; m < 12; m += 1) {
+      const d = new Date(2000, m, 1);
+      for (const width of ["long", "short"] as const) {
+        names.push({ name: monthName(d, loc, width).toLowerCase(), month: m });
+        // A language's genitive ("марта") is the form a written date takes.
+        const inDate = new Intl.DateTimeFormat(loc, { day: "numeric", month: width })
+          .formatToParts(d)
+          .find((p) => p.type === "month")
+          ?.value.replace(/\.$/, "")
+          .toLowerCase();
+        if (inDate) names.push({ name: inDate, month: m });
+      }
+    }
+  }
+  const words = raw.replace(/\./g, " ").replace(/\s+/g, " ").trim().split(" ");
+  const monthAt = words.findIndex((w) => /\D/.test(w));
+  if (monthAt < 0) return null;
+  const word = words[monthAt];
+  const found = names.find((n) => n.name === word) ?? (word.length >= 3 ? names.find((n) => n.name.startsWith(word)) : undefined);
+  if (!found) return null;
+  const numbers = words.filter((_, i) => i !== monthAt).filter((w) => w !== "г" && w !== "г.");
+  if (numbers.length < 1 || numbers.length > 2 || numbers.some((n) => !/^\d+$/.test(n))) return null;
+  const day = Number(numbers[0]);
+  const year = numbers[1] ? Number(numbers[1]) : thisYear;
+  return make(year, found.month, day);
+};
+
+/** {@link parseTypedDate} in the page's language and the company's order — for the date field. */
+export const useDateParser = () => {
+  const language = useDisplayLanguage();
+  const dateStyle = useCompanyDateStyle();
+  return useMemo(
+    () => (text: string) => parseTypedDate(text, { language, dateStyle }),
+    [language, dateStyle],
   );
 };

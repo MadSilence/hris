@@ -17,6 +17,7 @@ export type PickedPage = { pageId: string; title: string };
  */
 export const HandbookPagePicker: React.FC<{ onPick: (page: PickedPage) => void; excludeId?: string }> = ({ onPick, excludeId }) => {
   const t = useTranslations("hub");
+  const tCommon = useTranslations("common");
   const handbook = useHandbook();
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState(0);
@@ -55,7 +56,7 @@ export const HandbookPagePicker: React.FC<{ onPick: (page: PickedPage) => void; 
             }
           }}
           aria-label={t("editor.searchPages")}
-          placeholder={t("editor.searchPages")}
+          placeholder={tCommon("actions.search")}
           className="h-8 w-full rounded-control border border-field bg-card pr-2 pl-8 text-body outline-none focus:border-accent"
         />
       </div>

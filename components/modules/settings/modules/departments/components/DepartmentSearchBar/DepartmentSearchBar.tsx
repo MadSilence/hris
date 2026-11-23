@@ -65,7 +65,6 @@ export function DepartmentSearchBar({
       <SearchField
         value={query}
         onChange={onQueryChange}
-        placeholder={isPeople ? tShared("searchPeople") : t("search.placeholder")}
         modes={
           canSearchPeople
             ? [

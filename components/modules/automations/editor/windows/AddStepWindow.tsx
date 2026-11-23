@@ -33,7 +33,7 @@ export const AddStepWindow: React.FC<{
       </div>
       {groups.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
-          <NoResults scene="no-results-s" title={t("addStep.noMatchTitle")} hint={t("addStep.noMatchHint")} />
+          <NoResults variant="panel" scene="no-results-s" title={t("addStep.noMatchTitle")} hint={t("addStep.noMatchHint")} />
         </div>
       ) : (
         <div className="flex flex-col gap-0.5 px-3 py-2">

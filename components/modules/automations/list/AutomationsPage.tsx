@@ -77,12 +77,11 @@ export const AutomationsPage: React.FC = () => {
           )
         }
       >
-        {/* A3: a 30-high tab (the label, 8, the 2 px underline), 24 apart, over one hairline under the whole row. */}
-        <TabsList className="h-auto pb-px">
-          <TabsTrigger value="automations" className="pb-2">
+        <TabsList>
+          <TabsTrigger value="automations">
             {t("page.tabs.automations")}
           </TabsTrigger>
-          <TabsTrigger value="activity" className="pb-2">
+          <TabsTrigger value="activity">
             {t("page.tabs.activity")}
           </TabsTrigger>
         </TabsList>

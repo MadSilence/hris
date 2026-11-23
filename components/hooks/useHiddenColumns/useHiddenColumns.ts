@@ -10,12 +10,15 @@ import { showActionError } from "@/lib/errors/errorToast";
 
 /**
  * The columns a person hid in one table, remembered in their own settings (documents-tab T22–T23). The change shows at
- * once and is saved behind it; a refusal puts it back and says so.
+ * once and is saved behind it; a refusal puts it back and says so. `defaultHidden` is what a person who never chose
+ * sees hidden (documents DT10: Size is off until someone turns it on).
  */
-export const useHiddenColumns = (table: string) => {
+const NONE: string[] = [];
+
+export const useHiddenColumns = (table: string, defaultHidden: string[] = NONE) => {
   const { data } = useUserSettings();
   const queryClient = useQueryClient();
-  const hidden = React.useMemo(() => data?.hiddenColumns?.[table] ?? [], [data?.hiddenColumns, table]);
+  const hidden = React.useMemo(() => data?.hiddenColumns?.[table] ?? defaultHidden, [data?.hiddenColumns, table, defaultHidden]);
 
   const setHidden = React.useCallback(
     async (next: string[]) => {

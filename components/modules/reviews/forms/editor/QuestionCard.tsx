@@ -174,8 +174,8 @@ export function QuestionCard({
 
             {!readOnly && (
               <div className="ml-auto flex gap-1">
-                <IconButton label={t("editor.question.moveUp")} disabled={first} onClick={() => onMove(-1)}><Icon icon={ArrowUp02Icon} size="sm" /></IconButton>
-                <IconButton label={t("editor.question.moveDown")} disabled={last} onClick={() => onMove(1)}><Icon icon={ArrowDown02Icon} size="sm" /></IconButton>
+                <IconButton label={t("editor.question.moveUp")} hidden={first} onClick={() => onMove(-1)}><Icon icon={ArrowUp02Icon} size="sm" /></IconButton>
+                <IconButton label={t("editor.question.moveDown")} hidden={last} onClick={() => onMove(1)}><Icon icon={ArrowDown02Icon} size="sm" /></IconButton>
                 <IconButton label={tCommon("actions.duplicate")} onClick={onDuplicate}><Icon icon={Copy01Icon} size="sm" /></IconButton>
                 <IconButton label={tCommon("actions.remove")} onClick={onRemove}><Icon icon={Delete02Icon} size="sm" /></IconButton>
               </div>
@@ -187,15 +187,16 @@ export function QuestionCard({
   );
 }
 
-function IconButton({ label, disabled, onClick, children }: {
+/** `hidden` keeps its place: the first question has no Move up, the last no Move down — not greyed (NEVER-DISABLED). */
+function IconButton({ label, hidden, onClick, children }: {
   label: string;
-  disabled?: boolean;
+  hidden?: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <Button type="button" variant="ghost" size="icon" className="h-7 w-7" aria-label={label} title={label}
-      disabled={disabled} onClick={onClick}>
+    <Button type="button" variant="ghost" size="icon" className={cn("h-7 w-7", hidden && "invisible")} aria-label={label} title={label}
+      onClick={onClick}>
       {children}
     </Button>
   );

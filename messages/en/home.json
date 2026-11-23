@@ -40,7 +40,7 @@
       "inbox": "Inbox",
       "editHome": "Edit home"
     },
-    "notYet": "noddo’s assistant is on its way. Nothing was sent."
+    "notYet": "noddo’s assistant is on its way. Nothing was sent"
   },
   "widgets": {
     "waitingOnYou": {
@@ -195,12 +195,10 @@
     "workingDays": "{count, plural, one {{amount} working day} other {{amount} working days}}",
     "automation": "Automation",
     "didntRun": "didn’t run",
-    "selfReview": "your self-review",
     "reviewDue": "{hasDate, select, yes {{count, plural, =0 {Due today} one {Due tomorrow} other {Due in # days}}} other {No due date}}",
     "managerSeesAfter": "Your manager sees it after you send",
     "assignedBy": "Assigned by {name}",
     "wasUpdated": "was updated",
-    "toReadAndAgree": "to read and agree",
     "whatChanged": "What changed: {points}",
     "readAndAgree": "Read and agree",
     "toSignFrom": "{hasSender, select, yes {from {sender} · to sign} other {to sign}}"

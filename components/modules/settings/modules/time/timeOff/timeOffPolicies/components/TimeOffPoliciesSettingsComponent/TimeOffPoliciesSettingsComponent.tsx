@@ -117,7 +117,7 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
   );
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col overflow-hidden">
       <div className="shrink-0 px-8 pt-2">
         <div className="space-y-2">
           <SettingsPageHeader title={title ?? t("policies.list.title")} backHref={backHref ?? "/settings"} />
@@ -183,12 +183,10 @@ export const TimeOffPoliciesSettingsComponent: FC<Props> = ({
                     <TableCell colSpan={5}>
                       <ListEmptyState
                         query={query}
-                        onClearSearch={() => setQuery("")}
                         archivedView={showArchived}
                         scene="time-off"
                         title={t("policies.list.emptyTitle")}
                         description={t("policies.list.emptyDescription")}
-                        noResultsHint={t("policies.list.noResultsHint")}
                         archivedDescription={t("policies.list.archivedDescription")}
                         onCreate={onCreateAction}
                         createLabel={t("policies.list.add")}

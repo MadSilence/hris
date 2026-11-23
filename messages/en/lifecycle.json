@@ -9,7 +9,7 @@
     "IN_PROGRESS": "In progress",
     "COMPLETED": "Completed",
     "PARTIALLY_FAILED": "Partially failed",
-    "CANCELLED": "Cancelled"
+    "CANCELLED": "Canceled"
   },
   "taskKind": {
     "TODO": "To-do",
@@ -144,7 +144,7 @@
   },
   "processes": {
     "emptyTitle": "No processes yet",
-    "emptyDescription": "Start a preboarding, an onboarding or an offboarding from a person's profile.",
+    "emptyDescription": "Onboard your next joiner from their profile.",
     "columnPerson": "Person",
     "columnProcess": "Process",
     "columnStarts": "Starts",
@@ -175,9 +175,9 @@
     "driftChange": "{title} ({from} → {to})",
     "tasks": "Tasks",
     "noTasks": "This process has no tasks.",
-    "completeBody": "Tasks still open are cancelled, and nothing more is scheduled.",
-    "completeBodyPreboarding": "Tasks still open are cancelled, and nothing more is scheduled. The preboarding link stops working.",
-    "cancelBody": "The process ends without being completed. Tasks still open are cancelled; what was done stays done.",
+    "completeBody": "Tasks still open are canceled, and nothing more is scheduled.",
+    "completeBodyPreboarding": "Tasks still open are canceled, and nothing more is scheduled. The preboarding link stops working.",
+    "cancelBody": "The process ends without being completed. Tasks still open are canceled; what was done stays done.",
     "archiveTitle": "Archive process",
     "archiveBody": "It leaves the list of processes and keeps everything as it is. Unarchiving puts it back exactly as it was.",
     "revoke": "Revoke",
@@ -204,7 +204,7 @@
   },
   "taskList": {
     "waiting": "Waiting",
-    "cancelled": "Cancelled",
+    "cancelled": "Canceled",
     "open": "Open",
     "due": "Due",
     "waitingFor": "Waiting for {names}",
@@ -238,7 +238,7 @@
   "myTasks": {
     "showDone": "Show done",
     "emptyTitle": "Nothing to do",
-    "emptyDescription": "Tasks assigned to you by a preboarding, an onboarding or an offboarding appear here."
+    "emptyDescription": "You’re all caught up."
   },
   "comments": {
     "loadFailed": "The comments could not be loaded.",
@@ -256,7 +256,7 @@
   "forms": {
     "notAnswered": "Not answered",
     "emptyTitle": "No forms yet",
-    "emptyDescription": "Questionnaires answered in a preboarding, an onboarding or an offboarding appear here.",
+    "emptyDescription": "Answers from questionnaires land here.",
     "answered": "Answered {date}",
     "by": "by {name}"
   },
@@ -317,12 +317,13 @@
     "checking": "Checking…",
     "reviewTasks": "Review tasks",
     "starting": "Starting…",
-    "start": "Start"
+    "start": "Start",
+    "resolveAssignees": "Choose who does each task marked above, or remove it"
   },
   "templates": {
     "addTemplate": "Add template",
     "emptyTitle": "No {type, select, PREBOARDING {preboarding} ONBOARDING {onboarding} other {offboarding}} templates yet",
-    "emptyDescription": "A template is the list of tasks {type, select, PREBOARDING {a preboarding} ONBOARDING {an onboarding} other {an offboarding}} starts with.",
+    "emptyDescription": "{type, select, PREBOARDING {Send joiners their paperwork before day one.} ONBOARDING {A template is the list of tasks an onboarding starts with.} other {A template is the list of tasks an offboarding starts with.}}",
     "rowMeta": "{count, plural, one {# task} other {# tasks}} · Updated {date}",
     "rowMetaDescription": "{count, plural, one {# task} other {# tasks}} · Updated {date} · {description}",
     "hasProblems": "Names somebody who cannot take a task",
@@ -396,7 +397,25 @@
       "MANAGER": "Their manager",
       "USER": "A named person",
       "GUEST": "A guest"
-    }
+    },
+    "signsSentence": "{first} signs.",
+    "signsThen": "{first} signs, then {rest}.",
+    "noTemplatesTitle": "No document templates yet",
+    "noTemplatesBody": "Make one in Settings, then pick it here.",
+    "signerKindFirst": {
+      "PERSON": "The person",
+      "MANAGER": "Their manager",
+      "USER": "A named person",
+      "GUEST": "A guest"
+    },
+    "signerKindMid": {
+      "PERSON": "the person",
+      "MANAGER": "their manager",
+      "USER": "a named person",
+      "GUEST": "a guest"
+    },
+    "thenJoin": ", then ",
+    "andJoin": " and "
   },
   "sidePanel": {
     "label": "Task details",
@@ -453,7 +472,8 @@
     "untitledTemplate": "Untitled template",
     "sampleName": "Alex",
     "description": "{type, select, PREBOARDING {The page the new person opens from their link, before they have an account.} other {The person's Tasks, as they will see them in the app.}} Dates count from an example {type, select, OFFBOARDING {last working day} other {start day}}, {date}. Fields and questions can be tried; nothing is sent.",
-    "nothingForPerson": "Nothing here is the person's to do: every task is for somebody else. Add one in their row of the timeline."
+    "nothingForPerson": "Nothing here is the person's to do: every task is for somebody else. Add one in their row of the timeline.",
+    "nothingSent": "This is a preview: nothing is sent"
   },
   "listView": {
     "emptyTitle": "No tasks yet",

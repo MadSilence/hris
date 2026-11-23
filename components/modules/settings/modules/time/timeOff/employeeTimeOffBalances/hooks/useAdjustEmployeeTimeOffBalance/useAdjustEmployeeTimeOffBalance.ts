@@ -14,9 +14,10 @@ export const useAdjustEmployeeTimeOffBalance = () => {
       const result = await adjustEmployeeTimeOffBalanceAction(payload);
 
       if (result.status === ActionStatus.ERROR) {
-        throw new Error(
-          result.errorMessage || "Failed to adjust time off balance"
-        );
+        // The code rides along so the form can put a refusal under its field (ETOBB00010 — the date).
+        throw Object.assign(new Error(result.errorMessage || "Failed to adjust time off balance"), {
+          code: result.code,
+        });
       }
 
       return result;

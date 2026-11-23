@@ -8,11 +8,13 @@ import type {
   DrawingLink,
   DrawingPickup,
   EnvelopeDTO,
-  ExpiringRow,
   GuestSigningView,
   SectionCounts,
   SectionDocumentsPage,
   SectionDocumentsQuery,
+  SectionExpiringRow,
+  SectionFacets,
+  SectionFilterQuery,
   SectionSigningRow,
   SendForSignatureRequest,
   SignatureSubmission,
@@ -71,6 +73,10 @@ export class HrisApiSigningClient {
   sendCode(id: string, browserToken: string) {
     return hrisApiClient.post<void>(`${ENVELOPES}/${id}/code`, { browserToken });
   }
+  /** G0: the code checked on the code step, before the signature. */
+  checkCode(id: string, code: string, browserToken: string) {
+    return hrisApiClient.post<void>(`${ENVELOPES}/${id}/code/check`, { code, browserToken });
+  }
   sign(id: string, body: SignatureSubmission) {
     return hrisApiClient.post<EnvelopeDTO>(`${ENVELOPES}/${id}/sign`, body as Record<string, unknown>);
   }
@@ -97,6 +103,9 @@ export class HrisApiSigningClient {
   guestCode(token: string, browserToken: string) {
     return hrisApiClient.post<void>(`${PUBLIC}/code`, { token, browserToken });
   }
+  guestCheckCode(token: string, code: string, browserToken: string) {
+    return hrisApiClient.post<void>(`${PUBLIC}/code/check`, { token, code, browserToken });
+  }
   guestSign(token: string, body: SignatureSubmission) {
     return hrisApiClient.post<EnvelopeDTO>(`${PUBLIC}/sign`, { token, ...body });
   }
@@ -120,6 +129,9 @@ export class HrisApiSigningClient {
   joinerCode(token: string, taskId: string, browserToken: string) {
     return hrisApiClient.post<void>(`/public/preboarding/tasks/${taskId}/sign/code`, { token, browserToken });
   }
+  joinerCheckCode(token: string, taskId: string, code: string, browserToken: string) {
+    return hrisApiClient.post<void>(`/public/preboarding/tasks/${taskId}/sign/code/check`, { token, code, browserToken });
+  }
   joinerSign(token: string, taskId: string, body: SignatureSubmission) {
     return hrisApiClient.post<unknown>(`/public/preboarding/tasks/${taskId}/sign`, { token, ...body });
   }
@@ -142,17 +154,23 @@ export class HrisApiSigningClient {
   sectionDocuments(q: SectionDocumentsQuery) {
     return hrisApiClient.get<SectionDocumentsPage>(`${SECTION}/documents${query(q as Record<string, QueryValue>)}`);
   }
-  sectionSignings(q: Pick<SectionDocumentsQuery, "q" | "personIds" | "categoryIds">) {
+  sectionSignings(q: SectionFilterQuery) {
     return hrisApiClient.get<SectionSigningRow[]>(`${SECTION}/signings${query(q as Record<string, QueryValue>)}`);
   }
-  sectionRequests() {
-    return hrisApiClient.get<DocumentRequestRow[]>(`${SECTION}/requests`);
+  sectionRequests(q: SectionFilterQuery = {}) {
+    return hrisApiClient.get<DocumentRequestRow[]>(`${SECTION}/requests${query(q as Record<string, QueryValue>)}`);
   }
-  sectionCounts() {
-    return hrisApiClient.get<SectionCounts>(`${SECTION}/counts`);
+  /** What is expiring, filtered like the other views, with "Asked on" (D02, DS5, DS16). */
+  sectionExpiring(q: SectionFilterQuery = {}) {
+    return hrisApiClient.get<SectionExpiringRow[]>(`${SECTION}/expiring${query(q as Record<string, QueryValue>)}`);
   }
-  expiring() {
-    return hrisApiClient.get<ExpiringRow[]>(`/documents/expiring`);
+  /** The Person and Category menus with their counts (D05). */
+  sectionFacets(q: Pick<SectionFilterQuery, "personIds" | "categoryIds"> = {}) {
+    return hrisApiClient.get<SectionFacets>(`${SECTION}/facets${query(q as Record<string, QueryValue>)}`);
+  }
+  /** The view switch's counts, following the filters (DS5). */
+  sectionCounts(q: SectionFilterQuery = {}) {
+    return hrisApiClient.get<SectionCounts>(`${SECTION}/counts${query(q as Record<string, QueryValue>)}`);
   }
 
   /** A document's date and description (documents-expiry X04); `clearExpiresOn` removes the date. */

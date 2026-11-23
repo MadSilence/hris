@@ -9,6 +9,7 @@ import { Button } from "@/components/desact/button";
 import { useUnsavedChangesGuard } from "@/components/hooks/useUnsavedChangesGuard";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import { showUndoToast } from "@/lib/feedback/undoToast";
+import { explain } from "@/lib/feedback/explainToast";
 import { showError } from "@/lib/errors/errorToast";
 import { isFallbackErrorMessage, messageForError } from "@/lib/errors/errorMessages";
 import { useDateFormatter } from "@/lib/date";
@@ -329,7 +330,14 @@ export const AutomationEditor: React.FC<{
     setSelection(null);
     setMenuOpen(false);
   }, []);
-  const toggleTool = (next: BlockTool) => setTool((current) => (current === next ? null : next));
+  const toggleTool = (next: BlockTool) => {
+    // An automation never saved has no runs: the button says so rather than greying out (NEVER-DISABLED).
+    if (next === "runs" && !id) {
+      explain(t("toasts.noRunsYet"));
+      return;
+    }
+    setTool((current) => (current === next ? null : next));
+  };
   const openAddStep = React.useCallback((_target: InsertTarget | null) => setTool("add"), []);
   const openTriggerList = React.useCallback(() => setTool("trigger"), []);
   const openAi = React.useCallback(() => setTool("ai"), []);
@@ -705,6 +713,12 @@ export const AutomationEditor: React.FC<{
   };
 
   const onHeaderButton = (button: HeaderButton) => {
+    // Nothing to test or turn on until something starts it: the button says so and opens the list (NEVER-DISABLED).
+    if ((button === "testRun" || button === "turnOn") && !definition.trigger) {
+      explain(t("needs.trigger"));
+      openTriggerList();
+      return;
+    }
     switch (button) {
       case "testRun":
         if (testOpen) closeTestRun();
@@ -906,10 +920,6 @@ export const AutomationEditor: React.FC<{
 
   // ── the header ───────────────────────────────────────────────────────────────────────────
   const buttons = headerButtons({ status, readMode: readModeOwn, canManage, system });
-  const disabled: Partial<Record<HeaderButton, boolean>> = {
-    testRun: !definition.trigger,
-    turnOn: !definition.trigger,
-  };
 
   // ── F3's banner ──────────────────────────────────────────────────────────────────────────
   const problemOrder = React.useMemo(() => [...byStep.keys()], [byStep]);
@@ -1067,7 +1077,7 @@ export const AutomationEditor: React.FC<{
       const example = check?.examples.find((e) => e.stepId === selectedStep.id) ?? null;
       return (
         <>
-          <div ref={settingsRef} className="flex shrink-0 flex-col">
+          <div ref={settingsRef} className="flex max-h-full min-h-0 shrink-0 flex-col">
             <StepSettingsWindow
               eyebrow={t("settings.step", { number: stepNumbers[selectedStep.id] ?? "" })}
               title={type}
@@ -1109,7 +1119,7 @@ export const AutomationEditor: React.FC<{
     }
     if (selection?.kind === "trigger" && shown.trigger) {
       return (
-        <div ref={settingsRef} className="flex shrink-0 flex-col">
+        <div ref={settingsRef} className="flex max-h-full min-h-0 shrink-0 flex-col">
           <StepSettingsWindow
             eyebrow={t("settings.trigger")}
             title={triggerName(shown.trigger)}
@@ -1160,7 +1170,6 @@ export const AutomationEditor: React.FC<{
         trigger={definition.trigger}
         status={status}
         buttons={buttons}
-        disabled={disabled}
         busy={busy}
         canRename={!readMode}
         saveState={saveState}
@@ -1207,7 +1216,6 @@ export const AutomationEditor: React.FC<{
             <ToolBlock
               open={tool}
               readOnly={readMode}
-              disabled={{ runs: !id }}
               onToggle={toggleTool}
             />
           </div>

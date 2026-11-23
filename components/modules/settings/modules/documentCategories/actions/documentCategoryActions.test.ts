@@ -18,28 +18,21 @@ describe("saveDocumentCategoryAction", () => {
     const result = await saveDocumentCategoryAction({
       id: "cat-1",
       name: "Contracts",
-      description: null,
-      isActive: false,
       version: 4,
     });
 
     expect(result.status).toBe(ActionStatus.SUCCESS);
+    // AQ-19: no description and no Active switch go any more.
     expect(hrisDocumentsService.updateCategory).toHaveBeenCalledWith("cat-1", {
       name: "Contracts",
-      description: null,
-      isActive: false,
       version: 4,
     });
   });
 
   // The create body is strict on the backend and has no version, so it must not carry one.
   it("does not send a version on a create", async () => {
-    await saveDocumentCategoryAction({ name: "Payslips", description: "Monthly" });
+    await saveDocumentCategoryAction({ name: "Payslips" });
 
-    expect(hrisDocumentsService.createCategory).toHaveBeenCalledWith({
-      name: "Payslips",
-      description: "Monthly",
-      isActive: true,
-    });
+    expect(hrisDocumentsService.createCategory).toHaveBeenCalledWith({ name: "Payslips" });
   });
 });

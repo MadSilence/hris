@@ -6,14 +6,18 @@ import { cn } from "@/lib/cn";
 
 /**
  * Six one-digit boxes (documents-signing G03a, G05): typing moves on by itself, Backspace moves back, a pasted code
- * fills them all, and the sixth digit sends it. `invalid` turns them red.
+ * fills them all, and the sixth digit sends it. `invalid` turns them red and keeps the digits (G05, 2026-11-20): the
+ * signer sees what they typed; the first edit hands the boxes back (`onEditAction`).
  */
 export function CodeBoxes({
   onCompleteAction,
+  onEditAction,
   invalid,
   disabled,
 }: {
   onCompleteAction: (code: string) => void;
+  /** Any change to the digits — the screen clears its error on it. */
+  onEditAction?: () => void;
   invalid?: boolean;
   disabled?: boolean;
 }) {
@@ -26,14 +30,12 @@ export function CodeBoxes({
   }, []);
 
   React.useEffect(() => {
-    if (invalid) {
-      setDigits(["", "", "", "", "", ""]);
-      refs.current[0]?.focus();
-    }
+    if (invalid) refs.current[5]?.focus();
   }, [invalid]);
 
   const set = (next: string[]) => {
     setDigits(next);
+    onEditAction?.();
     if (next.every((d) => d !== "")) onCompleteAction(next.join(""));
   };
 
@@ -75,9 +77,9 @@ export function CodeBoxes({
           onChange={(e) => onChange(i, e.target.value)}
           onKeyDown={(e) => onKeyDown(i, e)}
           className={cn(
-            "h-14 w-full min-w-0 max-w-12 flex-1 rounded-control border bg-card text-center font-mono text-card-title text-primary outline-none",
+            "h-13 w-11 min-w-0 shrink rounded-control border bg-card text-center text-deck-line font-semibold outline-none",
             "focus:border-accent focus:ring-2 focus:ring-accent-ring",
-            invalid ? "border-danger-text" : "border-field",
+            invalid ? "border-danger text-danger" : "border-field text-primary",
           )}
         />
       ))}

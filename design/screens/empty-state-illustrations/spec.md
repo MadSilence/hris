@@ -225,3 +225,31 @@ Built 2026-11-06.
   - **#71 is every list's archived view** — `ListEmptyState` now always shows the archive box there.
 - **Images of the real screen:** none yet. The generated scenes were rendered side by side, light and dark,
   and match `images/all-scenes.png`; the screens themselves have not been walked in the running app.
+
+### The designers' fixes of 2026-11-19 (ES1 – ES7), built 2026-11-20
+
+- **ES1, the centring:** `EmptyState` and `NoResults` centre themselves in the free area — each measures the room
+  its scrolling box (the app's `<main>`, or a card, panel or dialog that scrolls on its own) leaves under it and
+  grows into it, following the window. The block is the drawing, 14, the title 18/26 600, 6, the line 14/20
+  secondary, 20, the action. `compact` and `NoResults variant="panel"` (quick search, the add-step and run-history
+  windows, the unassigned-people columns) keep their own size. `NoResults` is now the page block by default.
+- **ES2, ES3:** the nineteen lines are in the catalogues word for word (Russian beside them); the Inbox is
+  `EmptyState` all-caught-up, "Nothing to check" / "We’ll tell you when something needs your yes."; its other
+  views' titles lost their full stop; its search is `NoResults` with Clear search. The preboarding line is the
+  preboarding branch only; onboarding and offboarding keep theirs.
+- **ES4:** People's filtered screen is `ListEmptyState`'s filtered branch: no-match-s, "No people match" / "Try
+  fewer filters." and Clear all; nobody yet is people M, "No people yet".
+- **ES5:** every list's miss says "Nothing called “{query}”" / "Try a different word." with Clear search, and a
+  filter that left nothing "No {things} match" / "Try fewer filters." with Clear all — written once, in
+  `ListEmptyState`; the per-list hints are gone. Automations, Templates and the Attendance overview, which draw
+  `NoResults` themselves, say the same.
+- **ES6:** Roles' empty list offers Add role, behind `ROLES.ROLE` EDIT, opening the same dialog as the header.
+- **ES7:** "We can’t find this page" and "We’ll draft the steps." take the curly apostrophe.
+- **Not built here:** the Calendar's empty state (pushed to the bottom; its title 14/20) — the calendar is being
+  rebuilt in the same round (plan batch 5); Profile › Documents' own no-results stays with the documents work.
+- **Images of the real screen:** none — not walked in the running app.
+- **Clear search is gone from every "no results" block (C10, 2026-11-23):** the search field's × empties it, so
+  `NoResults` and `ListEmptyState` take no `onClearSearch` and `ClearSearchButton` is removed — the lists, the
+  Inbox, Run history (Show all stays for a chip), Edit Home's widget search, the hub's News and Pages, the
+  holiday calendar and the org canvases' "no match" pill. The canvas search (`ui/SearchField`) has the same ×.
+  Not walked.

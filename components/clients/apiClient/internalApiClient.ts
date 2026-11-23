@@ -193,6 +193,7 @@ export class InternalApiClient {
     let code: string | undefined;
     let fieldErrors: Record<string, string> | undefined;
     let params: string[] | undefined;
+    let offerPasswordReset: boolean | undefined;
     const ct = response.headers.get("content-type") || "";
     try {
       if (ct.includes("application/json")) {
@@ -201,6 +202,7 @@ export class InternalApiClient {
         code = data?.code ?? undefined;
         fieldErrors = data?.fieldErrors ?? undefined;
         params = Array.isArray(data?.params) ? data.params : undefined;
+        offerPasswordReset = data?.offerPasswordReset === true ? true : undefined;
       } else {
         const text = await response.text().catch(() => "");
         message = text?.trim();
@@ -216,6 +218,7 @@ export class InternalApiClient {
       fieldErrors,
       params,
       requestId: response.headers.get("X-Request-Id") ?? undefined,
+      offerPasswordReset,
     };
 
     switch (response.status) {

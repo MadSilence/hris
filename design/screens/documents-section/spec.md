@@ -88,6 +88,32 @@ None. These are the existing table, `FilterChip`, `SegmentedControl`, `EmptyStat
 ## Open questions
 Q-41 — the API for the company-wide lists and who gets the Documents item. Blocks nothing in the design; the code side says what the API needs.
 
+## Added 19 Nov 2026 — approved by Ulia (D09b, D09c, D14, D14b)
+
+### D09b · Out for signature, nothing there
+- Same frame as D09: toolbar stays; the view's count pill shows 0; EmptyState centred in the free area (min-height 560): illustration `signing` 200×125 (accent ring), title 18/26 600 Ink, line 14/20 400 #45454A, buttons 20 below.
+- Button: **secondary 36** "Send for signature" with the signature icon 16 (same icon as the view segment). It opens the document picker D14.
+
+### D09c · Requests, none open
+- Same frame. Illustration: the NEW scene `requests` (`illustrations/requests.svg`, add to SPEC § 10 scene index: "document requests, nothing to upload").
+- Button: **secondary 36** "Request" with the request icon 16 — the same flow as the toolbar Request.
+
+### D14 · Send for signature — pick the document
+- Opens from the D09b button (and from any "Send for signature" on this page that has no file yet). Next opens the usual Send dialog (S02) with the picked file.
+- Dialog `.dlg.sgd`, **560** wide, padding 24, gap 20, radius panel, shadow-3, on the scrim. Header like S02: icon tile 40 (accent-subtle, signature icon in accent-text) · h2 "Send for signature" · sub "Pick the document" · × on the right.
+- Search field full width (`.search2`, 36 high, radius control): the field itself is the search (product rule). Placeholder = the toolbar's string, word for word.
+- List (`.mvl`: 1 px divider border, radius card, rows 48, padding 0 14, gap 12): **checkbox 16 on the left** (`.cbx`; picked = accent fill + white tick, the product's normal selection) · file-type tile 28 (pdf = Berry) · file name 14/20 500, one line, cut with … · on the right "Person · Category" 12/16 #6B6B70 (`.k`), never wraps. Picked row: bg accent-subtle, name in accent-text. One file at a time (picking another moves the tick). Only PDFs are listed.
+- Footer `.ftr`: hint "Only PDFs can be sent for signature." 12/16 #6B6B70 on the left (`.exp`), Cancel (secondary) · Next (primary) on the right.
+
+### D14b · Searching
+- Field in focus (accent border + 3 px accent-muted ring) with the typed text in Ink. The list narrows at once; the matching part of each name is **600**, the rest of the name 400.
+
+Exact values for all four: `measurements/documents-section/D09b-SigningNone.md` … `D14b-PickTyping.md`.
+The list shows 6 rows, then scrolls inside. Next with nothing picked is never disabled (product rule).
+
+### D14c · Next pressed with nothing picked (approved 19 Nov)
+- The list border turns danger (#C42B1C); 8 under the list the FieldError (`.ferr`): warning icon 14 (danger) + "Pick a document." 12/16 danger-text. It goes away as soon as a file is picked. Values: `measurements/documents-section/D14c-PickNone.md`.
+
 ## Built
 *Filled by the code side when the screen is built.*
 
@@ -95,3 +121,36 @@ Q-41 — the API for the company-wide lists and who gets the Documents item. Blo
   DocumentsSection.tsx`). Built 2026-11-18, **not yet looked at in a browser**.
 - **Differs from the design:** the Person filter is the people picker without counts per person (the backend gives no
   counts per person or category yet).
+
+- **The designers' package of 2026-11-19, built 2026-11-20**, not yet seen in a browser:
+  - **The view follows the address** (DS4): the switch pushes `?view=`, so Back, Forward and a link land on it.
+  - **Every count follows the filters** (DS5): `/documents/section/counts`, `/requests` and the new
+    `/documents/section/expiring` take `q`, `personIds`, `categoryIds` like the lists (`DocumentsSectionService.Filters`).
+    The counts stay while a list loads or fails.
+  - Switch as wide as its labels, radius 6, icons on three views, every count in a pill (DS1). Search
+    "Search documents or people" 260 (a `placeholder` prop added to `SearchBox`); Person and Category are
+    `FilterChip`s whose menus tick and count, from the new `/documents/section/facets` (each counted under the other's
+    pick), with no search row; Category hides in a company with none (DS2, DS7, DS8, DS15); Request on the right —
+    for the one person picked, or a person first (DS2).
+  - All documents per D01: checkbox (Download as the selection's action), file tile, the green signature mark,
+    Person with avatar 22, Category chip, ExpiryCell, Who can see with its icon, Uploaded sorted in Ink with its
+    chevron, Download · Star · ⋯ on hover; rows 48; a fixed-width table where the name cuts with … (DS3, DS10, DS10b).
+  - Expiring per D02: a secondary 32 "Request the new one" on hover; once asked, "Asked on 19 Nov" with a green tick
+    (DS16 — a request now records the file it replaces, `TaskConfig.replacesDocumentId`, and the row reads the open
+    one's day); Expires drawn sorted.
+  - Requests per D04: the request tile, "Upload: Passport" without the extension, avatars, the due date with "in 6
+    days" / "2 days ago" amber (DS17). Out for signature: avatars, a guest's icon in a Mist circle.
+  - One person picked: the quiet strip with Open profile right after the name (DS9).
+  - Empty, no results, error and loading per D09–D12 — the shared EmptyState and ErrorState; the header row stays while
+    loading (DS6, DS11–DS13). D09b and D09c with their buttons (DS14); `requests` is a new scene, copied from the
+    package into `styles/noddo/assets/illustrations/` and generated into `components/illustrations/scenes.tsx`.
+  - **D14, D14b, D14c** — `PickDocumentDialog`: PDFs only (`pdfOnly` on the paged list, DS19), the field is the
+    search, the typed part in 600, one file, Next never greyed and "Pick a document." under a red list; Next opens
+    the Send dialog (S02) with the file.
+- **Not built this round:** the strip's "Senior product designer · Design" (the section has no job or department per
+  person); a person's photo in the rows (the rows carry the name only — initials on their colour); the Requests row's
+  ⋯ (D04 draws one, its items are not designed); the hover-only Download also sits in ⋯ (AQ-15).
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-18 accepted as built: Expiring is always in the switch, "0" included, for every reader (a person on their own
+  documents too, `documents-tab`), and with none it shows D09's empty state — nothing changed in code.

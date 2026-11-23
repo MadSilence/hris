@@ -127,7 +127,7 @@
   "confirm": {
     "noErrors": "{fileName} has no errors.",
     "willBeCreated": "<b>{count, plural, one {# person} other {# people}}</b> will be created, each as a draft profile.",
-    "startLater": "{count, plural, one {# person has} other {# people have}} a hire date after today, so they are <b>Not started</b> until then.",
+    "startLater": "{count, plural, one {# person has} other {# people have}} a hire date after today, so they are <b>Joining</b> until then.",
     "withoutEmail": "{count, plural, one {# person has} other {# people have}} no email: they cannot be invited, and uploading this file again would create them again.",
     "nobodyNotified": "Nobody is notified. Onboarding does not start by itself.",
     "inviteLabel": "Invite everybody with an email once the import is done",

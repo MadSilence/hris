@@ -121,6 +121,8 @@ function CodeStep({ email, onVerified }: { email: string; onVerified: () => void
   const service = useTrialService();
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState<CodeError>(null);
+  // The code was spent by wrong tries: until a new one is sent, it is never called "expired" (DQ-17).
+  const usedUp = React.useRef(false);
   const [busy, setBusy] = React.useState(false);
 
   const verify = async (value: string = code) => {
@@ -133,7 +135,9 @@ function CodeStep({ email, onVerified }: { email: string; onVerified: () => void
       onVerified();
     } catch (err) {
       // A wrong code reads its sentence; an expired one offers "Send a new one" (C1).
-      setError(codeErrorOf(err));
+      const refusal = codeErrorOf(err, usedUp.current);
+      if (refusal?.kind === "tooMany") usedUp.current = true;
+      setError(refusal);
       setBusy(false);
     }
   };
@@ -141,6 +145,7 @@ function CodeStep({ email, onVerified }: { email: string; onVerified: () => void
   const sendAgain = async (): Promise<string | null> => {
     try {
       await service.sendCode(email);
+      usedUp.current = false;
       return null;
     } catch (err) {
       return messageForError(err);
@@ -267,7 +272,7 @@ function ProviderDetailsStep({ draft, onExpired }: { draft: ProviderDraft; onExp
   const [busy, setBusy] = React.useState(false);
   const providerName = draft.provider === "GOOGLE" ? "Google" : "Microsoft";
   const fullName = [draft.firstName, draft.lastName].filter(Boolean).join(" ");
-  const initials = (fullName || draft.email).split(/s+/).map((w) => w.charAt(0)).join("").slice(0, 2).toUpperCase();
+  const initials = (fullName || draft.email).split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2).toUpperCase();
 
   const set = (name: keyof typeof values) => (value: string) => {
     setValues((v) => ({ ...v, [name]: value }));

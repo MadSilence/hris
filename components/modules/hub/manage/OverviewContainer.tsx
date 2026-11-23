@@ -129,6 +129,7 @@ export const OverviewContainer: React.FC = () => {
             <Icon icon={FileAddIcon} size="sm" />
             {t("manage.newPage")}
           </Button>
+          {newPage.dialog}
         </>
       }
     >

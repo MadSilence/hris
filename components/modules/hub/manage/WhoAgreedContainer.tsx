@@ -11,10 +11,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/pop
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/tooltip";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import { FilterChip } from "@/components/ui/FilterChip";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { SelectionBar } from "@/components/ui/SelectionBar";
 import type { AgreedPerson, AgreementTab } from "@/models/hub";
 import { cn } from "@/lib/cn";
+import { dateToISO } from "@/lib/date";
 import { useWhoAgreed } from "../hooks";
 import { HubBreadcrumbs, HubLoadError, HubPage, HubSegmented, HubTitle, LoadingBlock, PersonAvatar, ProgressBar, SkeletonRows, TruncatedTitle, useHubDates } from "../shared";
 import { useRemind } from "./remind";
@@ -133,9 +135,18 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
           <HubTitle>{t("agreed.title")}</HubTitle>
           {data && (
             <p className="text-body text-secondary">
-              {data.dueOn
-                ? t("agreed.subtitle", { page: data.title, version: data.versionNo, date: dates.short(data.dueOn) })
-                : t("agreed.subtitleNoDue", { page: data.title, version: data.versionNo })}
+              {/* DQ-10 (variant 3): past its date, Overdue shows once, here, as the shared pending pill; the rows carry no
+                  mark of their own. */}
+              {data.dueOn && data.notYet > 0 && data.dueOn < dateToISO(new Date())
+                ? t.rich("agreed.subtitleOverdue", {
+                    page: data.title,
+                    version: data.versionNo,
+                    date: dates.short(data.dueOn),
+                    pill: (chunks) => <StatusBadge status="pending" label={React.Children.toArray(chunks).join("")} className="align-middle" />,
+                  })
+                : data.dueOn
+                  ? t("agreed.subtitle", { page: data.title, version: data.versionNo, date: dates.short(data.dueOn) })
+                  : t("agreed.subtitleNoDue", { page: data.title, version: data.versionNo })}
             </p>
           )}
         </div>
@@ -250,7 +261,6 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
               <NoResults
                 title={t("manage.nothingMatches", { text: filters.q.trim() })}
                 hint=""
-                onClearSearch={() => setFilters({ department: null, office: null, q: "" })}
               />
             ) : (
               // In a card: white, a hairline, radius 16, level 0; the header 12/16 500 and 37 high, cells 0 12, rows 45 (P8).
@@ -332,15 +342,22 @@ export const WhoAgreedContainer: React.FC<{ id: string }> = ({ id }) => {
                 <span className="tabular-nums">
                   {t("agreed.range", { from: pageIndex * PAGE_SIZE + 1, to: Math.min(rows.length, (pageIndex + 1) * PAGE_SIZE), total: rows.length })}
                 </span>
-                <Button type="button" variant="secondary" size="sm" disabled={pageIndex === 0} onClick={() => setPageIndex((p) => p - 1)}>
+                {/* Nothing is shown disabled: on the first page there is no Previous, on the last no Next — hidden in place (`invisible` also takes it out of the tab order). */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className={cn(pageIndex === 0 && "invisible")}
+                  onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+                >
                   {t("agreed.previous")}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
-                  disabled={(pageIndex + 1) * PAGE_SIZE >= rows.length}
-                  onClick={() => setPageIndex((p) => p + 1)}
+                  className={cn((pageIndex + 1) * PAGE_SIZE >= rows.length && "invisible")}
+                  onClick={() => setPageIndex((p) => ((p + 1) * PAGE_SIZE < rows.length ? p + 1 : p))}
                 >
                   {t("agreed.next")}
                 </Button>

@@ -227,6 +227,16 @@ export class HrisApiUsersClient {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/password-reset`);
   }
 
+  /** *Set to inactive* (U8): archived without a termination, the sign-in ended. U00041 on yourself. */
+  public async setInactive(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/set-inactive`);
+  }
+
+  /** *Set to active* (U8): an inactive person back, the block their leaving placed lifted. */
+  public async setActive(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/set-active`);
+  }
+
   /** Lifts a sign-in lock or a temporary restriction; the password stays. */
   public async unlock(id: string): Promise<void> {
     await hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/unlock`);
@@ -246,7 +256,7 @@ export class HrisApiUsersClient {
       limit: args.limit ?? 100,
       cursor: args.cursor ?? null,
       q: args.q ?? null,
-      sortField: args.sortField ?? "last_name",
+      sortField: args.sortField ?? "first_name",
       sortDir: args.sortDir ?? "asc",
       filters: args.filters ?? [],
       selectedFields: args.selectedFields ?? [],

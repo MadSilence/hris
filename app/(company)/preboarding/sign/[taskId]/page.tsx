@@ -21,7 +21,8 @@ export default async function JoinerSignPage({ params, searchParams }: Props) {
   const t = await getTranslations("signing");
   const { brand } = await companyAuthBrand();
   const companyName = brand.kind === "company" ? brand.name : null;
-  if (!token) return <DeadLink company={companyName} />;
+  const logoUrl = brand.kind === "company" ? brand.logoUrl : null;
+  if (!token) return <DeadLink company={companyName} logoUrl={logoUrl} />;
   try {
     const envelope = await hrisApiSigningService.joinerView(token, taskId);
     return (
@@ -32,10 +33,10 @@ export default async function JoinerSignPage({ params, searchParams }: Props) {
         senderName={envelope.sentByName ?? companyName ?? ""}
         backHref={`/preboarding?token=${encodeURIComponent(token)}`}
         backLabel={t("signed.tasks")}
-        brand={{ companyName }}
+        brand={{ companyName, logoUrl }}
       />
     );
   } catch {
-    return <DeadLink company={companyName} />;
+    return <DeadLink company={companyName} logoUrl={logoUrl} />;
   }
 }

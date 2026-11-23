@@ -59,7 +59,7 @@ jest.mock("@/components/modules/firstRun/hooks", () => ({
   useUserSettings: () => ({
     data: {
       timeZone: null,
-      companyTimeZone: "UTC",
+      companyTimeZone: "Europe/Warsaw",
       language: null,
       companyLanguage: "en",
       welcomeCompletedAt: null,
@@ -164,6 +164,8 @@ describe("WelcomeContainer", () => {
     expect(screen.getByText("We’ve used Acme’s settings. Change them if they don’t fit you.")).toBeInTheDocument();
     expect(screen.queryByText("Date format")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Language")).toHaveValue("en");
+    // W4: the company's zone, as the line above promises — never an empty "Select".
+    expect(screen.getByLabelText("Time zone")).toHaveValue("Europe/Warsaw");
 
     fireEvent.change(screen.getByLabelText("Language"), { target: { value: "ru" } });
     fireEvent.click(screen.getByRole("button", { name: "Finish" }));

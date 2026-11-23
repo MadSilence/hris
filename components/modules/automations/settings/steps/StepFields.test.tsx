@@ -113,7 +113,7 @@ describe("StepFields", () => {
     const seen = renderStep(wait, { definition: definitionFixture({ steps: [sign, wait] }) });
     fireEvent.change(screen.getByLabelText("Task"), { target: { value: "g1" } });
     expect(seen.step.taskStepId).toBe("g1");
-    expect(screen.getByText(/Declined or cancelled counts as not signed/)).toBeInTheDocument();
+    expect(screen.getByText(/Declined or canceled counts as not signed/)).toBeInTheDocument();
   });
 
   it("Wait until: a task step above it is offered, and Stop and tell someone opens Tell", () => {

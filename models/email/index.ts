@@ -16,11 +16,17 @@ export interface EmailSuppression {
   since: string;
 }
 
-/** A person's last emails and the state of their address (EM10). */
+/**
+ * A page of a person's emails, newest first, and the state of their address (EM10). `total` is every email ever
+ * logged to them (Manage account's "Emails sent · {n}"); `page` is zero-based.
+ */
 export interface PersonEmails {
   address: string | null;
   suppression: EmailSuppression | null;
   emails: EmailLine[];
+  total: number;
+  page: number;
+  size: number;
 }
 
 /** What an unsubscribe link is about, and whether it has acted. */

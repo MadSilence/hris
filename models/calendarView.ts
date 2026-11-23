@@ -19,6 +19,8 @@ export type CalendarView = {
   id: string;
   name: string;
   payload: CalendarViewPayload;
+  /** Its place in its owner's row, 0 first — the list comes back in that order (N08c). */
+  position?: number;
   createdAt?: string;
   updatedAt?: string;
 };

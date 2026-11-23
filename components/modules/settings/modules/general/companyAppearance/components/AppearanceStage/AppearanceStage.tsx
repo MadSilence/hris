@@ -3,27 +3,20 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { cn } from "@/lib/cn";
 import { accentAttributes } from "@/lib/theme/accent";
 import { AppPreview, EmailPreview, LoginPreview, type PreviewProps } from "./AppearancePreviews";
 
 export type StageTab = "app" | "login" | "email";
 
-const TABS: StageTab[] = ["app", "login", "email"];
+export const STAGE_TABS: StageTab[] = ["app", "login", "email"];
 
-/** The quiet ring grid behind the previews (#DADADF, the nodding ring in the accent) — neutral, so the colour on
- * the previews is the only colour. */
-function StageRings() {
-  const rings = [];
-  for (let row = 0; row < 12; row++) {
-    for (let col = 0; col < 14; col++) {
-      const hot = row === 1 && col === 11;
-      rings.push(<circle key={`${col}-${row}`} className={hot ? "hot" : undefined} cx={36 + col * 74} cy={36 + row * 74 + (hot ? 7 : 0)} r={17} strokeWidth={6} />);
-    }
-  }
+/** One quiet row of rings at the stage's bottom right (L1): five rings 44, the second in the accent, nodding. */
+export function StageRings() {
   return (
-    <svg aria-hidden className="appearance-stage-rings pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="xMinYMin slice">
-      {rings}
+    <svg aria-hidden className="appearance-stage-rings pointer-events-none" viewBox="0 0 420 128">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <circle key={i} className={i === 1 ? "hot" : undefined} cx={42 + i * 84} cy={i === 1 ? 49 : 42} r={19} strokeWidth={6} />
+      ))}
     </svg>
   );
 }
@@ -33,13 +26,17 @@ type Props = PreviewProps & {
   accent: string | null;
   draft: boolean;
   address: string;
+  /** The reader's first name, for Home's greeting. */
+  viewerName?: string;
 };
 
 /**
- * The stage (sign-in-appearance § Layout): Mist, radius 32 on its left corners, a quiet ring grid; pills on top —
- * Inside noddo · Login page · Email — "Not saved yet" while there is a draft, the picked preview centred, and the foot.
+ * The stage (sign-in-appearance § Layout, L1): Mist from the column's gap to the window's right and bottom edges,
+ * radius 32 on its left corners, one quiet row of rings in its corner; pills on top — Inside noddo · Login page · Email —
+ * "Not saved yet" while there is a draft, the picked preview centred (it scrolls if the window is too small for it),
+ * and the foot.
  */
-export function AppearanceStage({ accent, draft, address, ...preview }: Props) {
+export function AppearanceStage({ accent, draft, address, viewerName, ...preview }: Props) {
   const t = useTranslations("settings.appearance.stage");
   const [tab, setTab] = React.useState<StageTab>("app");
   const island = accentAttributes(accent);
@@ -51,42 +48,42 @@ export function AppearanceStage({ accent, draft, address, ...preview }: Props) {
       data-accent={island["data-accent"]}
       data-accent-tone={island["data-accent-tone"]}
       style={island.style as React.CSSProperties | undefined}
-      className="appearance-stage flex min-h-0 flex-col"
+      className="appearance-stage flex flex-col"
     >
       <StageRings />
 
-      <div className="relative flex items-center justify-between gap-4 px-8 pt-7">
+      <div className="relative flex items-center justify-between gap-4 px-10 pt-7">
         <div role="tablist" aria-label={t("region")} className="flex gap-1.5">
-          {TABS.map((key) => (
+          {STAGE_TABS.map((key) => (
             <button
               key={key}
               type="button"
               role="tab"
               aria-selected={tab === key}
               onClick={() => setTab(key)}
-              className={cn(
-                "h-[34px] rounded-pill px-4 text-label transition-colors duration-(--duration-hover)",
-                tab === key ? "bg-accent text-on-accent" : "bg-card text-secondary hover:text-primary",
-              )}
+              className="appearance-stage-tab transition-colors duration-(--duration-hover)"
             >
               {t(`tabs.${key}`)}
             </button>
           ))}
         </div>
         {draft ? (
-          <span className="rounded-pill bg-card px-3 py-1 text-label text-secondary shadow-raised">{t("draft")}</span>
+          <span className="appearance-draft">
+            <i aria-hidden />
+            {t("draft")}
+          </span>
         ) : null}
       </div>
 
-      <div role="tabpanel" aria-label={t(`tabs.${tab}`)} className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-8">
-        <div aria-hidden className="pointer-events-none select-none">
-          {tab === "app" && <AppPreview {...preview} address={address} />}
+      <div role="tabpanel" aria-label={t(`tabs.${tab}`)} className="relative flex min-h-0 flex-1 overflow-auto px-10 py-8">
+        <div aria-hidden className="pointer-events-none m-auto select-none">
+          {tab === "app" && <AppPreview {...preview} address={address} viewerName={viewerName} />}
           {tab === "login" && <LoginPreview {...preview} address={address} />}
           {tab === "email" && <EmailPreview {...preview} />}
         </div>
       </div>
 
-      <p className="relative m-0 pb-6 text-center text-label font-normal text-tertiary">{t("foot", { company: preview.companyName })}</p>
+      <p className="relative m-0 px-10 pb-8 text-body font-semibold text-tertiary">{t("foot", { company: preview.companyName })}</p>
     </section>
   );
 }

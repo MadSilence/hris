@@ -69,6 +69,24 @@ export async function unlockUserAction(submission: { userId: string }): Promise<
   }
 }
 
+/** *Set to inactive* (U8): archives without a termination — a person who never worked, or was added by mistake. */
+export async function setInactiveAction(submission: { userId: string }): Promise<ActionResult<void>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisApiUsersService.setInactive(submission.userId) };
+  } catch (error) {
+    return toActionError(error, "setInactiveAction");
+  }
+}
+
+/** *Set to active* (U8): an inactive person back. */
+export async function setActiveAction(submission: { userId: string }): Promise<ActionResult<void>> {
+  try {
+    return { status: ActionStatus.SUCCESS, data: await hrisApiUsersService.setActive(submission.userId) };
+  } catch (error) {
+    return toActionError(error, "setActiveAction");
+  }
+}
+
 export type LifecycleActionOutput = {
   status: ActionStatus;
   errorMessage?: string;

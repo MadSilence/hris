@@ -4,14 +4,21 @@ import type { Notification, NotificationSourceProjection } from "@/models/notifi
 import { NotificationActions } from "./NotificationActions";
 
 const approveMutateAsync = jest.fn();
-const rejectMutateAsync = jest.fn();
 const decideMutateAsync = jest.fn();
 const invalidateNotifications = jest.fn();
 const markRead = jest.fn();
 const showError = jest.fn();
 
-/** Which of the three mutations reports itself in flight. */
-const pending = { approve: false, reject: false, decide: false };
+/** Which of the two mutations reports itself in flight. */
+const pending = { approve: false, decide: false };
+
+/** The shared Decline window, as a stand-in: what it was opened for, and a way to finish it. */
+type DeclineProps = {
+  target: { requestId: string; startDate: string; endDate: string; policyName?: string | null; firstName?: string | null } | null;
+  onClose: () => void;
+  onDeclined?: () => void;
+};
+const declineOpenedFor = jest.fn();
 
 jest.mock(
   "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest",
@@ -22,15 +29,18 @@ jest.mock(
     }),
   }),
 );
-jest.mock(
-  "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useRejectTimeOffRequest",
-  () => ({
-    useRejectTimeOffRequest: () => ({
-      mutateAsync: (...args: unknown[]) => rejectMutateAsync(...args),
-      isPending: pending.reject,
-    }),
-  }),
-);
+jest.mock("@/components/modules/timeOff/DeclineLeaveDialog", () => ({
+  DeclineLeaveDialog: ({ target, onClose, onDeclined }: DeclineProps) => {
+    if (!target) return null;
+    declineOpenedFor(target);
+    return (
+      <div role="dialog" aria-label="Decline window">
+        <button type="button" onClick={() => { onDeclined?.(); onClose(); }}>Confirm decline</button>
+        <button type="button" onClick={onClose}>Close window</button>
+      </div>
+    );
+  },
+}));
 jest.mock(
   "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useDecideCancellation",
   () => ({
@@ -70,7 +80,13 @@ const notification = (over: Partial<Notification> = {}): Notification => ({
   id: "n-1",
   type: "TIMEOFF_APPROVAL_REQUESTED",
   category: "APPROVALS",
-  params: { requesterId: "user-7", requesterName: "Anna Smith" },
+  params: {
+    requesterId: "user-7",
+    requesterName: "Anna Smith",
+    startDate: "2026-11-30",
+    endDate: "2026-12-04",
+    policyName: "Annual leave",
+  },
   targetType: "TIME_OFF_REQUEST",
   targetId: "req-1",
   sourceType: "TIME_OFF_REQUEST",
@@ -88,8 +104,8 @@ const cancellation = (over: Partial<Notification> = {}) =>
 
 beforeEach(() => {
   pending.approve = false;
-  pending.reject = false;
   pending.decide = false;
+  declineOpenedFor.mockReset();
 });
 
 describe("NotificationActions — which controls a line gets", () => {
@@ -129,7 +145,7 @@ describe("NotificationActions — a closed question shows its outcome", () => {
     ["APPROVED_BY_YOU", "You approved · waiting for the rest of the chain"],
     ["CANCELLATION_PENDING", "Approved"],
     ["REJECTED", "Rejected"],
-    ["CANCELLED", "Cancelled"],
+    ["CANCELLED", "Canceled"],
   ])("an approval request in %s reads as %s", (status, text) => {
     render(<NotificationActions notification={notification({ source: source({ open: false, status }) })} />);
 
@@ -155,7 +171,7 @@ describe("NotificationActions — a closed question shows its outcome", () => {
   });
 });
 
-describe("NotificationActions — approving and rejecting a request", () => {
+describe("NotificationActions — approving and declining a request", () => {
   it("approves, refreshes the inbox and marks the line read", async () => {
     approveMutateAsync.mockResolvedValue(undefined);
     render(<NotificationActions notification={notification()} />);
@@ -189,51 +205,41 @@ describe("NotificationActions — approving and rejecting a request", () => {
     expect(markRead).not.toHaveBeenCalled();
   });
 
-  it("asks for a reason before it rejects", async () => {
+  it("Decline opens the shared Decline window for the request — no reason is asked for here", async () => {
     render(<NotificationActions notification={notification()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
-    expect(screen.queryByText("This field is required")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reject" })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Decline" }));
 
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-
-    expect(screen.getByText("This field is required")).toBeInTheDocument();
-    expect(rejectMutateAsync).not.toHaveBeenCalled();
-  });
-
-  it("rejects with the trimmed reason and closes the field", async () => {
-    rejectMutateAsync.mockResolvedValue(undefined);
-    render(<NotificationActions notification={notification()} />);
-
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-    await userEvent.type(screen.getByRole("textbox"), "  Team is short that week  ");
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-
-    expect(rejectMutateAsync).toHaveBeenCalledWith({ requestId: "req-1", rejectionReason: "Team is short that week" });
-    await waitFor(() => expect(screen.queryByRole("textbox")).not.toBeInTheDocument());
-    expect(markRead).toHaveBeenCalledWith("n-1");
-  });
-
-  it("keeps the reason on screen when the rejection is refused", async () => {
-    rejectMutateAsync.mockRejectedValue(new Error("refused"));
-    render(<NotificationActions notification={notification()} />);
-
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-    await userEvent.type(screen.getByRole("textbox"), "No");
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-
-    await waitFor(() => expect(showError).toHaveBeenCalled());
-    expect(screen.getByRole("textbox")).toHaveValue("No");
-  });
-
-  it("Cancel goes back to the two buttons", async () => {
-    render(<NotificationActions notification={notification()} />);
-
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-
+    expect(screen.getByRole("dialog", { name: "Decline window" })).toBeInTheDocument();
+    expect(declineOpenedFor).toHaveBeenCalledWith({
+      requestId: "req-1",
+      startDate: "2026-11-30",
+      endDate: "2026-12-04",
+      policyName: "Annual leave",
+      firstName: "Anna",
+    });
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("marks the line read once the decline went through", async () => {
+    render(<NotificationActions notification={notification()} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Decline" }));
+    await userEvent.click(screen.getByRole("button", { name: "Confirm decline" }));
+
+    expect(markRead).toHaveBeenCalledWith("n-1");
+    expect(invalidateNotifications).toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("closing the window answers nothing", async () => {
+    render(<NotificationActions notification={notification()} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Decline" }));
+    await userEvent.click(screen.getByRole("button", { name: "Close window" }));
+
+    expect(markRead).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Approve" })).toBeInTheDocument();
   });
 
@@ -242,7 +248,7 @@ describe("NotificationActions — approving and rejecting a request", () => {
     render(<NotificationActions notification={notification()} />);
 
     expect(screen.getByRole("button", { name: "Approve" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Reject" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Decline" })).toBeDisabled();
   });
 });
 

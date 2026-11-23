@@ -4,6 +4,48 @@ Newest first. One line per change a designer should know about: a new shared com
 rule in `rules/`, a deviation from SPEC (it is also in `rules/DESIGN_SYSTEM.md` § 7), a new package
 version taken in.
 
+- **2026-11-23** — **The walk's small calls** (Q-72): a person's status reads *Active / Joining / Inactive*
+  everywhere ("Archived" and "Not started" gone from the screen); months are three letters ("Sep"); "Back {first
+  working day}" on the status pill; *Edit dates* titled "Edit dates" with "Save"; the calendar toolbar keeps one line
+  (chips fold to "+N" earlier); the request window's count loads instead of guessing; sixteen folder icons and eight
+  colour dots (DT6, DT20); uploads served from the company's own address. Open for you: the comma after a weekday.
+- **2026-11-23** — **Your answers of 20 Nov built**, with Petya's U1 – U11 where they differ from them
+  (`handoffs/2026-11-20-answers-from-design/`; `rules/` synced). The differences:
+  - **the lock stays** beside your reset offer (U2);
+  - **the two-step reset keeps one tick** — "I checked it’s really {first}, another way than email" (U3);
+  - **dates follow the company's country** (U9);
+  - **Russian stays in the code for now** (U1).
+  New shared pieces:
+  - **the one date field** (X5, typing kept, DATE-RANGE in range mode, `components/ui/DatePicker`);
+  - **`ChoiceMenu`** for every single-choice menu (RC12);
+  - **`FittedNames`** ("+N");
+  - **`StepList`** (STEPS — signing and approval chains). A step a finished chain never needed is drawn as a grey
+    dot, "Not needed"; please draw it;
+  - **the search field's ×**;
+  - **`LeaveRequestHost`** — the request in full opens over any page; the request page is gone.
+  Rules now in `rules/`: nothing disabled (README 2), single-choice menu, touch, multi-value, date range, "Search",
+  first-name order, growing on wide windows (§ 9).
+  Choices of ours to look at:
+  - Set to inactive and Set to active ask first, as every archive does;
+  - Start onboarding stays in the Joining and Active menus;
+  - Reason carries no "Optional" (our forms mark the required ones);
+  - the hub's "New section" dialog is new, since there was no usual one;
+  - the decline email's icon is ALERT.
+  Nothing of it has been looked at in a browser yet.
+- **2026-11-20** — **The three packages of 19 Nov built, as far as they go without your answers** (what waits is
+  `handoffs/2026-11-20-answers-to-design/ANSWERS-2026-11-20.md`, AQ-01 – AQ-20). For the package:
+  - **toasts have no full stop at the end** — now a rule (`rules/NAMING.md` § 1), applied when a toast is shown;
+  - **tabs are your segmented track everywhere** — SPEC § 13.6 still draws the underline (`rules/DESIGN_SYSTEM.md` § 7);
+  - **leave has its own palette** (K01, `--leave-*`) and the policy marker is the dot on a tint; the dark values are
+    ours until you send yours (`rules/DESIGN_SYSTEM.md` §§ 1, 2, 7);
+  - **one filter look** for every condition builder — `ConditionChrome`, `AppliedFilterChips`, `FilterPopover` in
+    `components/audience/` (§ 5); the four controls AQ-17 asks about sit in the popover's foot for now;
+  - **empty states centre themselves in the free area** (`EmptyState`, `NoResults` with a `panel` variant);
+  - new shared pieces: `LeaveRequestDialog` (Q30), `LeavePill`, `LeaveCard`, `ManageAccountDialog`,
+    `DocumentPieces`, `PickDocumentDialog`; `AuthBack` has a `circle` variant;
+  - **print is gone from the calendar**, and the error toast shows no request id.
+  New specs, now `built` with their "Built" sections: `company-calendar`, `profile-time-off`, `profile-header`,
+  `filter`, `leave-colours`, `manage-account`. Nothing of it has been looked at in a browser yet.
 - **2026-11-19** — **The design leftovers built and walked.** For the package: **every email from the local and the
   deployed sandbox now goes to Petya and Ulia** (the subject starts `[to: …]`; Ulia is on her noddo address); **50 wrong
   passwords from one IP in an hour hold that IP's password logins for 30 minutes** (Q-54's table); **D3 "Set up again"**

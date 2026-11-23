@@ -4,6 +4,7 @@ import type { TimeOffOverlapDTO } from "@/api/modules/timeOff/timeOffRequests/dt
 import type {
   TimeOffApprovalStepDTO,
   TimeOffApprovalVia,
+  TimeOffChainDTO,
 } from "@/api/modules/timeOff/timeOffRequests/dto/TimeOffApprovalStepDTO";
 
 /**
@@ -26,4 +27,8 @@ export interface TimeOffDecisionContext {
   leaveTypeName?: string | null;
   /** The policy counts working days: "3 working days" (widgets W14). */
   workingDays?: boolean;
+  /** Where the approval stands (AQ-04): the requester's count and names, how an approver's steps are drawn. */
+  chain: TimeOffChainDTO | null;
+  /** Cancelling it goes to the approver ("Ask to cancel") rather than taking effect at once ("Cancel time off"). */
+  cancelNeedsApproval: boolean;
 }

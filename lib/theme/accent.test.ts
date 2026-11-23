@@ -66,6 +66,12 @@ describe("the workspace accent", () => {
     expect(properties["--accent-on-light"]).toBe("#2A2A2E");
   });
 
+  it("says nothing about a dark colour darkened for the tints — Basil, a deep green (the designers' AP3)", () => {
+    expect(deriveAccentInputs(ACCENT_PRESETS.basil).adjusted).toBe(false);
+    expect(deriveAccentInputs("#1E7A4F").adjusted).toBe(false);
+    expect(deriveAccentInputs(ACCENT_PRESETS.sunflower).adjusted).toBe(true);
+  });
+
   it("reads a stored preset, a custom HEX and nothing at all", () => {
     expect(resolveAccent("ocean")).toEqual({ kind: "preset", preset: "ocean" });
     expect(resolveAccent("#2f63c4")).toEqual({ kind: "custom", hex: "#2F63C4" });

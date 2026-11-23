@@ -30,6 +30,8 @@ type Props = {
   logoUrl: string | null;
   /** The company's address, for the previews' browser bar. */
   address: string;
+  /** The reader's first name, for the Home preview's greeting. */
+  viewerName?: string;
   /** SETTINGS.GENERAL EDIT: without it the page is view only (the stage still works). */
   canEdit: boolean;
   /** SETTINGS.GENERAL MANAGE: the logo's own right, as on its endpoints. */
@@ -54,6 +56,7 @@ export function AppearancePage({
   companyName,
   logoUrl,
   address,
+  viewerName,
   canEdit,
   canChangeLogo,
   onSave,
@@ -126,6 +129,8 @@ export function AppearancePage({
   };
 
   const upload = async (file: File) => {
+    // A logo saves itself: the stale "Saved. Everyone at … sees it now." goes back to the plain status (AP13).
+    setJustSaved(false);
     try {
       await onUploadLogo(file);
       setFileName(file.name);
@@ -138,7 +143,7 @@ export function AppearancePage({
   const saveIsland = accentAttributes(accent);
 
   const status = (() => {
-    if (saving) return <span className="text-secondary">{t("status.saving")}</span>;
+    if (saving) return <span className="whitespace-nowrap text-tertiary">{t("status.saving")}</span>;
     if (saveError && dirty) {
       return (
         <span role="alert" className="flex items-start gap-1.5 text-status-declined-text">
@@ -157,22 +162,16 @@ export function AppearancePage({
         </span>
       );
     }
-    if (dirty) return <span className="text-secondary">{t("status.dirty")}</span>;
-    if (justSaved) return <span className="text-secondary">{t("status.justSaved", { company: companyName })}</span>;
-    return <span className="text-tertiary">{t("status.saved")}</span>;
+    if (dirty) return <span className="whitespace-nowrap text-tertiary">{t("status.dirty")}</span>;
+    if (justSaved) return <span className="whitespace-nowrap text-tertiary">{t("status.justSaved", { company: companyName })}</span>;
+    return <span className="whitespace-nowrap text-tertiary">{t("status.saved")}</span>;
   })();
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] min-h-0 gap-14 pl-12">
-      <div className="flex w-[420px] shrink-0 flex-col">
-        <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto pb-2">
-          <div className="flex flex-col gap-4">
-            <AuthBack href="/settings" />
-            <h1 className="appearance-heading text-primary" style={{ "--appearance-tried": tried } as React.CSSProperties}>
-              {t.rich("heading", { company: companyName, br: () => <br />, em: (chunks) => <em>{chunks}</em> })}
-            </h1>
-            <p className="m-0 text-auth-lead text-secondary">{t("lead")}</p>
-          </div>
+    <div className="appearance-page">
+      <div className="appearance-column">
+        <div className="appearance-steps">
+          <AppearanceIntro companyName={companyName} tried={tried} />
 
           {!canEdit ? <Banner>{t("readOnly")}</Banner> : null}
 
@@ -187,6 +186,7 @@ export function AppearancePage({
               onFile={(file) => void upload(file)}
               onRemove={() => {
                 setFileName(null);
+                setJustSaved(false);
                 void onRemoveLogo().catch(() => undefined);
               }}
             />
@@ -214,7 +214,7 @@ export function AppearancePage({
               onChange={setBackground}
               disabled={!canEdit}
               fill={false}
-              className="h-9 rounded-pill p-[3px] [&_button]:rounded-pill [&_button]:px-4"
+              className="h-9 rounded-pill p-[3px] [&_button]:rounded-pill [&_button]:px-3.5 [&_button[aria-checked=true]]:font-semibold"
               options={[
                 { value: "COLOR", label: t("background.color") },
                 { value: "LIGHT", label: t("background.light") },
@@ -224,13 +224,13 @@ export function AppearancePage({
         </div>
 
         {canEdit ? (
-          <div className="flex items-center gap-4 border-t border-divider pb-8 pt-6">
+          <div className="appearance-save">
             <span data-theme="light" data-accent={saveIsland["data-accent"]} style={saveIsland.style as React.CSSProperties | undefined} className="inline-flex">
               <Button type="button" size="lg" onClick={() => void save()} loading={saving} loadingLabel={t("status.saving")}>
                 {t("save")}
               </Button>
             </span>
-            <p className="m-0 text-label font-normal" aria-live="polite">{status}</p>
+            <p className="m-0 min-w-0 text-body" aria-live="polite">{status}</p>
           </div>
         ) : null}
       </div>
@@ -239,11 +239,33 @@ export function AppearancePage({
         accent={accent}
         draft={dirty}
         address={address}
+        viewerName={viewerName}
         companyName={companyName}
         logoUrl={logoUrl}
         background={background}
         logoColors={appearance.logoColors}
       />
+    </div>
+  );
+}
+
+/** The back button, the heading — its second line in the colour being tried — and the lead; the loading state's too. */
+export function AppearanceIntro({ companyName, tried }: { companyName: string; tried?: string }) {
+  const t = useTranslations("settings.appearance");
+  return (
+    <div className="appearance-intro">
+      <AuthBack href="/settings" variant="circle" />
+      <h1
+        className="appearance-heading text-primary"
+        style={tried ? ({ "--appearance-tried": tried } as React.CSSProperties) : undefined}
+      >
+        {t.rich("heading", {
+          company: companyName,
+          br: () => <br />,
+          em: (chunks) => (tried ? <em>{chunks}</em> : <span>{chunks}</span>),
+        })}
+      </h1>
+      <p className="m-0 text-auth-lead text-secondary">{t("lead")}</p>
     </div>
   );
 }

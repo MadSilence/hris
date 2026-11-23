@@ -68,15 +68,15 @@ describe("PolicyWizardModal — the colour", () => {
   it("opens a new policy on the first colour nobody uses, and marks the used ones", () => {
     render(<PolicyWizardModal isOpen mode="create" onSubmitAction={jest.fn()} onCancelAction={jest.fn()} />);
     const picked = screen.getAllByRole("radio").find((r) => r.getAttribute("aria-checked") === "true");
-    expect(picked).toHaveAccessibleName("Indigo");
+    expect(picked).toHaveAccessibleName("Lilac"); // K01's order: Berry and Plum are taken
     expect(screen.getByRole("radio", { name: /^Berry, Used by Annual Leave/ })).toBeInTheDocument();
   });
 
   it("moves the choice with the arrow keys", () => {
-    render(<PolicyWizardModal isOpen mode="edit" initialValues={{ ...values, color: "ocean" }} onSubmitAction={jest.fn()} onCancelAction={jest.fn()} />);
-    fireEvent.keyDown(screen.getByRole("radio", { name: "Ocean" }), { key: "ArrowRight" });
-    expect(screen.getByRole("radio", { name: "Teal" })).toHaveAttribute("aria-checked", "true");
-    fireEvent.keyDown(screen.getByRole("radio", { name: "Teal" }), { key: "ArrowDown" });
-    expect(screen.getByRole("radio", { name: "Olive" })).toHaveAttribute("aria-checked", "true");
+    render(<PolicyWizardModal isOpen mode="edit" initialValues={{ ...values, color: "lilac" }} onSubmitAction={jest.fn()} onCancelAction={jest.fn()} />);
+    fireEvent.keyDown(screen.getByRole("radio", { name: "Lilac" }), { key: "ArrowRight" });
+    expect(screen.getByRole("radio", { name: "Indigo" })).toHaveAttribute("aria-checked", "true");
+    fireEvent.keyDown(screen.getByRole("radio", { name: "Indigo" }), { key: "ArrowDown" });
+    expect(screen.getByRole("radio", { name: "Orange" })).toHaveAttribute("aria-checked", "true");
   });
 });

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Add01Icon, Delete02Icon, FolderAddIcon, Upload01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Delete02Icon, FileImportIcon, FolderAddIcon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/desact/dropdown-menu";
@@ -53,6 +53,7 @@ export const PersonalDocumentsToolbar: React.FC<PersonalDocumentsToolbarProps> =
         )}
         {onRequest && (
           <Button type="button" variant="secondary" onClick={onRequest}>
+            <Icon icon={FileImportIcon} size="sm" />
             {tSigning("section.request")}
           </Button>
         )}

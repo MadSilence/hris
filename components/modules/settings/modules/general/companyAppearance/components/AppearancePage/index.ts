@@ -1,1 +1,1 @@
-export { AppearancePage } from "./AppearancePage";
+export { AppearancePage, AppearanceIntro } from "./AppearancePage";

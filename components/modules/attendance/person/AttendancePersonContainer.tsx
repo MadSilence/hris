@@ -193,7 +193,15 @@ export const AttendancePersonContainer: React.FC<Props> = ({ userId }) => {
                               <TableCell className="tabular-nums">{formatTime.ofDay(entry.startTime)}</TableCell>
                               <TableCell className="tabular-nums">{formatTime.ofDay(entry.endTime)}</TableCell>
                               <TableCell className="text-right tabular-nums">{formatMinutes(entry.minutes)}</TableCell>
-                              <TableCell className="truncate" title={entry.description ?? undefined}>{entry.description ?? ""}</TableCell>
+                              <TableCell className="truncate" title={entry.description ?? undefined}>
+                                {entry.description ?? ""}
+                                {/* U4: somebody else wrote it. */}
+                                {entry.loggedBy && entry.loggedBy.id !== entry.userId && (
+                                  <span className="block truncate text-label font-normal text-tertiary">
+                                    {t("log.loggedBy", { name: entry.loggedBy.fullName ?? t("log.loggedByUnknown") })}
+                                  </span>
+                                )}
+                              </TableCell>
                               {index === 0 ? noteCell : <TableCell/>}
                             </TableRow>
                           ))}

@@ -186,7 +186,7 @@ export const ActivityTab: React.FC<{
         title={t("activity.empty.title")}
         description={t("activity.empty.description")}
         // Centred in the space under the chips (H4, I1): the page has no height of its own to fill.
-        className="min-h-[calc(100dvh-20rem)] py-0"
+        className="min-h-[calc(100cqh-20rem)] py-0"
         action={
           <Button type="button" variant="secondary" onClick={onGoToAutomations}>
             {t("activity.empty.action")}

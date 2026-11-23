@@ -4,6 +4,8 @@ export interface CompanyCalendarUser {
   lastName: string | null;
   email: string;
   avatarUrl: string | null;
+  /** The job title under the name, as the board draws it (B5); null when there is none or it is not to be seen. */
+  jobName?: string | null;
 }
 
 export interface CompanyCalendarPeoplePage {
@@ -50,19 +52,18 @@ export interface CompanyCalendarAbsence {
   requestId?: string;
   /** The request's current step can be signed by the reader. */
   awaitingYou?: boolean;
-}
-
-/**
- * A day on which a group — or, ungrouped, the company — is at its limit of people away: the next request
- * for that day would be refused (`BLOCK`) or warned (`WARN`). `away` and `cap` come only to a reader whose
- * scope covers the whole group; without them the mark says a limit is reached, never who reached it.
- */
-export interface CompanyCalendarCapacity {
-  groupId?: string;
-  date: string;
-  behavior: "BLOCK" | "WARN";
-  away?: number;
-  cap?: number;
+  /**
+   * The leave card's comment and length (N04): only for the person and a holder of `PEOPLE.TIME_OFF` over them (the
+   * owner's R4, 2026-11-20). `amount` is the whole request's, in `unit`.
+   */
+  comment?: string;
+  amount?: number;
+  unit?: "DAYS" | "HOURS";
+  /** The request's own dates, not cut to the window — `startDate`/`endDate` are the bar's. */
+  requestStartDate?: string;
+  requestEndDate?: string;
+  /** Beside `amount`, under the same rule: WORKING_DAYS reads "5 working days", CALENDAR_DAYS "5 days" (B5). */
+  countingMode?: "WORKING_DAYS" | "CALENDAR_DAYS";
 }
 
 /**

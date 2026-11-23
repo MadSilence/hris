@@ -76,7 +76,7 @@ describe("/inbox/open/[id]", () => {
   it("marks the notification read and opens the request an approval asks about", async () => {
     markRead.mockResolvedValue(notification());
 
-    expect(await open("n-1")).toBe("/time-off/requests/req-1");
+    expect(await open("n-1")).toBe("/dashboard?leaveRequest=req-1");
     expect(markRead).toHaveBeenCalledWith("n-1");
     expect(redirect).toHaveBeenCalledTimes(1);
   });
@@ -89,14 +89,16 @@ describe("/inbox/open/[id]", () => {
     expect(await open("n-2")).toBe("/tasks");
   });
 
-  it("opens the person's time off for an approved request", async () => {
+  it("opens the request in full over Home for an approved request", async () => {
     markRead.mockResolvedValue(notification({ type: "TIMEOFF_REQUEST_APPROVED" }));
 
-    expect(await open("n-3")).toBe("/organization/people/user-7/time-off");
+    expect(await open("n-3")).toBe("/dashboard?leaveRequest=req-1");
   });
 
   it("lands in the inbox when the type has nowhere to go", async () => {
-    markRead.mockResolvedValue(notification({ type: "TIMEOFF_REQUEST_APPROVED", params: {} }));
+    markRead.mockResolvedValue(
+      notification({ type: "TIMEOFF_REQUEST_APPROVED", params: {}, targetType: null, targetId: null, sourceType: null, sourceId: null }),
+    );
 
     expect(await open("n-4")).toBe("/inbox");
   });

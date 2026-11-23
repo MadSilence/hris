@@ -9,7 +9,8 @@ import { buildAudienceFields, type AudienceField, type AudienceOperator } from "
 import { useUserFields } from "@/components/modules/organization/hooks/useUserFields";
 import type { FieldDTO } from "@/models/user/fields";
 import type { ConditionBuilderProps } from "../../contracts";
-import { AddConditionButton, CompactPick, ConditionCard, ConditionGroup, ConditionJoiner, PendingPick, type PickOption } from "./chrome";
+import { CompactPick, type PickOption } from "./chrome";
+import { AddConditionButton, ConditionCard, ConditionGroup, ConditionJoiner, PendingPick } from "@/components/audience/ConditionChrome";
 import { ConditionValue } from "./ConditionValue";
 import { ConditionSummaryList } from "./ConditionSummary";
 import { MatchCount } from "./MatchCount";

@@ -1,7 +1,7 @@
 import type { EmployeeTimeOffBalanceDTO } from "@/api/modules/timeOff/employeeTimeOffBalances/dto";
 import type { TimeOffOverlapDTO } from "./TimeOffOverlapDTO";
 import type { TimeOffRequestDTO } from "./TimeOffRequestDTO";
-import type { TimeOffApprovalStepDTO, TimeOffApprovalVia } from "./TimeOffApprovalStepDTO";
+import type { TimeOffApprovalStepDTO, TimeOffApprovalVia, TimeOffChainDTO } from "./TimeOffApprovalStepDTO";
 
 /**
  * What an approver needs to answer one request (`GET /time-off/requests/{id}/decision-context`,
@@ -26,4 +26,11 @@ export interface TimeOffDecisionContextDTO {
   leaveTypeName?: string | null;
   /** The policy counts working days. */
   workingDays?: boolean;
+  /** Where the approval stands (AQ-04). */
+  chain?: TimeOffChainDTO | null;
+  /**
+   * Cancelling it goes to the approver rather than taking effect at once: the reader's own approved leave, on a policy
+   * whose edit rules ask for re-approval.
+   */
+  cancelNeedsApproval?: boolean;
 }

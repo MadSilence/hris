@@ -22,6 +22,8 @@ export interface MoveDocumentModalProps {
   errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: MoveDocumentFormValues) => void;
+  /** T06's "New folder" in the footer. */
+  onNewFolderAction?: () => void;
 }
 
 export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
@@ -34,6 +36,7 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
   errorMessage,
   onCancelAction,
   onConfirmAction,
+  onNewFolderAction,
 }) => {
   const t = useTranslations("organization");
 
@@ -52,13 +55,13 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
     >
       <DialogContent hideClose className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("documents.moveDocument.title", { count })}</DialogTitle>
-          <DialogDescription>
-            {t.rich("documents.moveDocument.description", {
-              name: documentName ?? t("documents.moveDocument.thisDocument"),
-              b: (chunks) => <strong>{chunks}</strong>,
-            })}
-          </DialogDescription>
+          {/* T06: "Move 3 files" / "Pick where they go"; one file says its own name. */}
+          <DialogTitle className="truncate">
+            {count === 1 && documentName
+              ? t("documents.moveDocument.titleOne", { name: documentName })
+              : t("documents.moveDocument.titleFiles", { count })}
+          </DialogTitle>
+          <DialogDescription>{t("documents.moveDocument.pick")}</DialogDescription>
         </DialogHeader>
 
         <FormError message={errorMessage} />
@@ -69,6 +72,7 @@ export const MoveDocumentModal: FC<MoveDocumentModalProps> = ({
           currentFolderId={currentFolderId}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}
+          onNewFolderAction={onNewFolderAction}
         />
       </DialogContent>
     </Dialog>

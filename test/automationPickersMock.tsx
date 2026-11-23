@@ -5,16 +5,12 @@
  *
  *   jest.mock("@/components/modules/automations/settings/conditions/chrome", () => jest.requireActual("@/test/automationPickersMock"));
  *
- * Everything else of the module is the real one. A pinned row ("Pick a date") is a button beside the select.
+ * The module holds only these two (the condition card and the rest moved to `components/audience/ConditionChrome`,
+ * which stays real). A pinned row ("Pick a date") is a button beside the select.
  */
 import * as React from "react";
 
-const real = jest.requireActual<typeof import("@/components/modules/automations/settings/conditions/chrome")>(
-  "@/components/modules/automations/settings/conditions/chrome",
-);
-
-export const { ConditionGroup, ConditionCard, ConditionJoiner, AddConditionButton, PendingPick, compactTrigger } = real;
-export type { PickOption, Joiner } from "@/components/modules/automations/settings/conditions/chrome";
+export type { PickOption } from "@/components/modules/automations/settings/conditions/chrome";
 
 const NONE = "__none__";
 

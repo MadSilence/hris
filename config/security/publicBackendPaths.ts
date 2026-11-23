@@ -43,6 +43,10 @@ export const PUBLIC_BACKEND_PREFIX_PATHS = [
   // A phone uploading its owner's photo after scanning a QR code. The token is the credential, the
   // phone has no session, and a session belonging to whoever else is signed in on it must not travel.
   "/public/avatar/",
+  // A guest's signing page and the phone page a signing QR code opens (documents-signing G03f, G09). The link's token
+  // is the credential. A session that happened to be on the phone travelled along, and an expired one was refused
+  // with a 401 before the token was read — the phone said "This link has expired" at once (G7, 2026-11-19).
+  "/public/sign/",
   // A company's login page, painted before sign-in. Whoever else is signed in on this browser has
   // nothing to do with it.
   "/public/company-appearance/",

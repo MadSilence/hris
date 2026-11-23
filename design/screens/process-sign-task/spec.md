@@ -78,3 +78,17 @@ None blocks the window. The running-process states wait for the processes design
   is not the person's is flagged by the draft's problems rather than refused in the window. Sign in a running
   process is built (documents batch 11, A6): offered in Add task with the template field and no assignee; the
   envelope is sent when the task opens (`SignTaskStarter`, as whoever added it).
+- **The designers' round of 19 Nov, built 2026-11-20 (PT1–PT4, P01e; not yet seen in a browser):**
+  - **PT1, PT3:** the kind stays the dropdown with all six kinds, as Ulia settled.
+  - **PT2:** the Document field is the shared `Combobox` (the field is the search, typed letters bold), each option
+    with who signs in grey — "The person, then their manager" — and under the chosen one "The person signs, then their
+    manager." (a template's own label wins over the kind's word; people of one step are joined by "and"). "Pick a
+    document" shows as a `FieldError` under the field. **Material is not asked for a Sign task** (the document is the
+    material), unless the task already carries some.
+  - **P01e:** with no active document templates the list says "No document templates yet" / "Make one in Settings,
+    then pick it here."; there is no hint line under the field.
+- **Not done in this round:**
+  - **"Open Document templates" is hidden** (P01e): the templates editor's screen does not exist yet, so the link
+    would lead nowhere (`ANSWERS-2026-11-20.md` § D).
+  - **When stays the side panel's "[n] + days before / on / after / by the start date" select**, not a Before | After
+    switch: the template's timing is the cell clicked, for every kind (see above).

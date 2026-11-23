@@ -32,7 +32,7 @@ describe("companyMapper", () => {
       id: "company-id",
       name: "My Company",
       subdomain: "my-company",
-      companyLogo: "http://localhost:8080/uploads/logo.png",
+      companyLogo: "/uploads/logo.png",
       description: "A modern HR platform",
       website: "https://my-company.com",
     });
@@ -61,10 +61,11 @@ describe("companyMapper", () => {
     expect(result).toBe("https://cdn.example.com/logo.png");
   });
 
-  it("adds slash before relative path", () => {
+  // R3: every company host serves /uploads itself, so the path stays relative — never the backend's address.
+  it("keeps an upload relative, with its leading slash", () => {
     const result = companyMapper.resolveBackendAssetUrl("uploads/logo.png");
 
-    expect(result).toBe("http://localhost:8080/uploads/logo.png");
+    expect(result).toBe("/uploads/logo.png");
   });
 
   it("carries the working week through", () => {

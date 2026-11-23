@@ -9,8 +9,11 @@ import * as React from "react";
  * the app sidebar folds to 64 px and opens *over* the page on hover without pushing it, and the page gets the whole
  * area with no page padding. Leaving the page unfolds the sidebar again; a manual unfold while there is not
  * remembered.
+ *
+ * `full`: the page fills the area under the banners edge to edge, with no page padding, and the sidebar stays as it is
+ * (Appearance, `design/screens/sign-in-appearance`: the stage runs to the window's right and bottom edges).
  */
-export type AppFrameMode = "page" | "canvas";
+export type AppFrameMode = "page" | "canvas" | "full";
 
 type AppFrameContextValue = { mode: AppFrameMode; setMode: (mode: AppFrameMode) => void };
 

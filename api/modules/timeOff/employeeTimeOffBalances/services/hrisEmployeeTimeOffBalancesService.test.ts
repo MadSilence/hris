@@ -32,6 +32,7 @@ describe("HrisEmployeeTimeOffBalancesService", () => {
     carriedOverBalance: 3,
     currentBalance: 16,
     pendingBalance: 0,
+    availableBalance: 0,
     remainingCarryover: 0,
     createdAt: "2026-01-01T10:00:00",
     updatedAt: "2026-06-01T10:00:00",
@@ -48,6 +49,7 @@ describe("HrisEmployeeTimeOffBalancesService", () => {
     policyVersionId: null,
     createdAt: "2026-06-01T10:00:00",
     createdBy: "admin-id",
+    createdByName: "Ada Admin",
   };
 
   beforeEach(() => {

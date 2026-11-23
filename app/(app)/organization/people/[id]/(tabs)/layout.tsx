@@ -4,7 +4,7 @@ import { ProfileShell } from "@/components/modules/organization/modules/profile/
 import { getUserServer } from "@/server/users/users";
 import { AccessDenied } from "@/components/auth/AccessDenied";
 import { ForbiddenError, UnauthorizedError } from "@/components/clients/exceptions";
-import { redirect } from "next/navigation";
+import { RenewSession } from "@/components/auth/RenewSession";
 
 export default async function UserTabsLayout({
   children,
@@ -22,10 +22,10 @@ export default async function UserTabsLayout({
     user = await getUserServer(id);
   } catch (e) {
     if (e instanceof ForbiddenError) return <AccessDenied/>;
-    // An expired or invalidated token (changing someone's roles or field access rotates the
-    // perm-hash and cuts their session) surfaced here as a raw Next error page. Send them to log
-    // in again instead.
-    if (e instanceof UnauthorizedError) redirect("/login");
+    // An expired or invalidated token (the 30-minute access token running out, or a rotated perm-hash) is not
+    // a session that is over: a server component cannot renew it, so the browser does, and only goes to the
+    // login if the renewal is refused. A plain redirect here signed the owner out mid-walk (2026-11-23).
+    if (e instanceof UnauthorizedError) return <RenewSession/>;
     throw e;
   }
 

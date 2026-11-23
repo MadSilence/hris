@@ -91,15 +91,15 @@ export class HrisTimeOffRequestsService {
     return hrisApiTimeOffRequestsClient.reject(id, body);
   }
 
-  /** An administrator's decision over the chain — Approve Anyway, or Reject Anyway with a reason. */
+  /** An administrator's decision over the chain — Approve Anyway, or Reject Anyway with an optional comment (AQ-13). */
   public async decideAnyway(
     id: string,
     decision: "APPROVE" | "REJECT",
-    rejectionReason?: string,
+    comment?: string,
   ): Promise<UpdateResponse> {
     return decision === "APPROVE"
       ? hrisApiTimeOffRequestsClient.approveAnyway(id)
-      : hrisApiTimeOffRequestsClient.rejectAnyway(id, { rejectionReason: rejectionReason ?? "" });
+      : hrisApiTimeOffRequestsClient.rejectAnyway(id, comment ? { comment } : {});
   }
 }
 

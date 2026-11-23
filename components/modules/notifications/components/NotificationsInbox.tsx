@@ -29,7 +29,7 @@ import {
 } from "@/components/modules/notifications/components/notificationPresenter";
 import { NotificationActions } from "@/components/modules/notifications/components/NotificationActions";
 import { SearchBox } from "@/components/ui/SearchBox";
-import { Illustration } from "@/components/illustrations";
+import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import {
   INBOX_FILTERS,
   INBOX_FILTER_LABEL_KEYS,
@@ -38,6 +38,8 @@ import {
   parseInboxFilter,
   type InboxFilter,
 } from "@/components/modules/notifications/utils/inboxFilters";
+import { requestIdOf } from "@/components/modules/timeOff/lib/requestLink";
+import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
 
 const ALL_CATEGORIES = "__all__";
 
@@ -74,7 +76,7 @@ const NotificationRow: FC<{
           <p className="truncate font-medium text-primary">{title}</p>
           {!notification.read && <span className="h-2 w-2 shrink-0 rounded-pill bg-accent" />}
         </div>
-        {message && <p className="mt-0.5 text-body text-tertiary">{message}</p>}
+        {message && <p className="mt-0.5 text-body whitespace-pre-line text-tertiary">{message}</p>}
         <div className="mt-1 flex items-center gap-2">
           <p className="text-hint text-tertiary">{timeAgo(notification.createdAt, t, language)}</p>
           {notification.category && (
@@ -111,9 +113,11 @@ const NotificationRow: FC<{
 };
 
 export const NotificationsInbox: FC = () => {
+  const tCommon = useTranslations("common");
   const t = useTranslations("notifications");
   const language = useDisplayLanguage();
   const router = useRouter();
+  const leaveHref = useLeaveRequestHref();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -241,17 +245,20 @@ export const NotificationsInbox: FC = () => {
       markRead.mutate(n.id);
     }
     const { href } = presentNotification(n, t);
-    if (href) {
+    // A request opens in full over the inbox, not over Home (AQ-12 b).
+    const requestId = requestIdOf(href);
+    if (requestId) {
+      router.push(leaveHref(requestId));
+    } else if (href) {
       router.push(href);
     }
   };
 
   const busy = setStarred.isPending || remove.isPending;
 
-  const emptyText =
-    query.trim()
-      ? t("inbox.empty.search")
-      : status === "unread"
+  // A view that holds nothing yet; a search that missed is NoResults below (the designers' ES2, ES5).
+  const emptyTitle =
+    status === "unread"
       ? t("inbox.empty.unread")
       : status === "starred"
         ? t("inbox.empty.starred")
@@ -262,7 +269,7 @@ export const NotificationsInbox: FC = () => {
           : t("inbox.empty.none");
 
   return (
-    <div className="mx-auto flex h-[calc(100svh-6rem)] w-full max-w-5xl flex-col gap-4 overflow-hidden">
+    <div className="mx-auto flex h-[calc(100cqh-6rem)] w-full max-w-5xl flex-col gap-4 overflow-hidden">
       <div className="shrink-0 space-y-4">
       <section className="flex items-end justify-between gap-4">
         <div>
@@ -277,15 +284,18 @@ export const NotificationsInbox: FC = () => {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => markAllRead.mutate()}
-            disabled={markAllRead.isPending || counts.unread === 0}
-          >
-            <Icon icon={TickDouble02Icon} size="sm" />
-            {t("inbox.markAllRead")}
-          </Button>
+          {/* With nothing unread there is nothing to mark: hidden, not greyed (NEVER-DISABLED) — the line says "caught up". */}
+          {counts.unread > 0 && (
+            <Button type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => markAllRead.mutate()}
+              disabled={markAllRead.isPending}
+            >
+              <Icon icon={TickDouble02Icon} size="sm" />
+              {t("inbox.markAllRead")}
+            </Button>
+          )}
           <Button variant="ghost" size="icon-sm" aria-label={t("inbox.preferences")} asChild>
             <Link href="/preferences">
               <Icon icon={Settings01Icon} size="sm" className="text-tertiary" />
@@ -352,15 +362,21 @@ export const NotificationsInbox: FC = () => {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex h-full flex-col items-center justify-center gap-3 rounded-card border border-dashed border-divider px-4 py-16 text-center">
-          {/* A search that missed is the magnifier; a search narrowed by a status or a category too, the funnel (I2). */}
-          {query.trim() ? (
-            <Illustration scene={status !== "all" || category !== ALL_CATEGORIES ? "no-match-s" : "no-results-s"} size="s" />
-          ) : (
-            <Illustration scene="all-caught-up" />
-          )}
-          <p className="text-body text-tertiary">{emptyText}</p>
-        </div>
+        // A search that missed is the magnifier; a search narrowed by a status or a category too, the funnel (I2).
+        query.trim() ? (
+          <NoResults
+            fill
+            scene={status !== "all" || category !== ALL_CATEGORIES ? "no-match-s" : "no-results-s"}
+            title={tCommon("emptyState.nothingCalled", { query: query.trim() })}
+          />
+        ) : (
+          <EmptyState
+            fill
+            scene="all-caught-up"
+            title={emptyTitle}
+            description={status === "all" && category === ALL_CATEGORIES ? t("inbox.empty.noneLine") : ""}
+          />
+        )
       ) : (
         <div className="flex flex-col gap-6">
           {groups.map(({ group, items }) => (

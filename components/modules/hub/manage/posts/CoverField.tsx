@@ -49,7 +49,7 @@ export const CoverField: React.FC<{ value: string | null; onChange: (fileId: str
       <div className="group relative h-[200px] overflow-hidden rounded-card">
         {/* eslint-disable-next-line @next/next/no-img-element -- a session-bound hub file */}
         <img src={hubFileUrl(value)} alt={t("news.photo")} className="size-full object-cover" />
-        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-scrim opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-scrim opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 touch:opacity-100">
           <Button type="button" variant="secondary" size="sm" loading={busy} onClick={() => input.current?.click()}>
             {t("post.replace")}
           </Button>

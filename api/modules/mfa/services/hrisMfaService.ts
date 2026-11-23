@@ -50,8 +50,12 @@ export class HrisMfaService {
     return hrisApiMfaClient.stepUpEmailCodeVerify(code, browserToken);
   }
 
-  public resetUser(userId: string, verifiedOutOfBand: boolean) {
-    return hrisApiMfaClient.resetUser(userId, verifiedOutOfBand);
+  public resetUser(
+    userId: string,
+    verifiedOutOfBand: boolean,
+    proof?: { password?: string; code?: string; backupCode?: string; emailCode?: string; browserToken?: string },
+  ) {
+    return hrisApiMfaClient.resetUser(userId, verifiedOutOfBand, proof);
   }
 
   public securitySettings() {

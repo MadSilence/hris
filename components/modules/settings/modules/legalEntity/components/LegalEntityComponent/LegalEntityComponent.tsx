@@ -193,12 +193,10 @@ export const LegalEntityComponent: React.FC<Props> = ({
         ) : filteredSorted.length === 0 ? (
           <ListEmptyState
             query={query}
-            onClearSearch={() => setQuery("")}
             archivedView={showArchived}
             scene="legal-entity"
             title={t("list.emptyTitle")}
             description={t("list.emptyDescription")}
-            noResultsHint={t("list.noResultsHint")}
             archivedDescription={t("list.archivedDescription")}
             onCreate={openCreate}
             createLabel={t("list.add")}

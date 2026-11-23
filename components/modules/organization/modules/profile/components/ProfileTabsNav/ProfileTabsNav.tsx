@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -78,6 +78,20 @@ export function ProfileTabsNav({ userId, capabilities, managerId }: Props) {
 
   const active =
     visibleTabs.find((tab) => pathname === `${base}/${tab.id}`)?.id ?? "personal";
+
+  // W11 (the owner, 2026-11-23): a tab the reader may not see, opened by its address, sends them to the first tab
+  // they may see — not to "This is private" under a highlighted Personal info. Only once the answer is in: without a
+  // capability map, or (for Reviews) before the viewer is known, a hidden tab may yet turn out to be theirs.
+  const requested = TABS.find((tab) => pathname === `${base}/${tab.id}`);
+  const hiddenByAddress =
+    requested !== undefined &&
+    capabilities !== undefined &&
+    (!requested.personAndManager || Boolean(viewer?.id)) &&
+    !visibleTabs.includes(requested);
+  const firstVisible = visibleTabs[0]?.id;
+  useEffect(() => {
+    if (hiddenByAddress && firstVisible) router.replace(`${base}/${firstVisible}`);
+  }, [hiddenByAddress, firstVisible, base, router]);
 
   return (
     <>

@@ -21,6 +21,11 @@ export class HrisApiCalendarViewsClient {
     return hrisApiClient.patch<CalendarView, CalendarViewUpsert>(`${this.BASE_PATH}/${id}`, body);
   }
 
+  /** Puts the caller's views in this order; answers the whole row in its new order. */
+  public reorder(ids: string[]): Promise<CalendarView[]> {
+    return hrisApiClient.post<CalendarView[]>(`${this.BASE_PATH}/reorder`, { ids });
+  }
+
   public remove(id: string): Promise<void> {
     return hrisApiClient.post<void>(`${this.BASE_PATH}/${id}/delete`);
   }

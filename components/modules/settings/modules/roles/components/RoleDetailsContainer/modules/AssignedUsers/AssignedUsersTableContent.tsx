@@ -49,7 +49,7 @@ export default function AssignedUsersTableContent({
   const hasData = rows.length > 0;
 
   return (
-    <div className="max-h-[calc(100svh-328px)] overflow-y-auto">
+    <div className="max-h-[calc(100cqh-328px)] overflow-y-auto">
       <table className="w-full caption-bottom text-body">
         <TableHeader className="[&_tr]:border-divider sticky top-0 z-10 bg-card">
           <TableRow>

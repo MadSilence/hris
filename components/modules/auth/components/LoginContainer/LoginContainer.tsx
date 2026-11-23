@@ -16,6 +16,8 @@ import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
 import { PasswordField } from "@/components/modules/auth/components/PasswordField";
 import { useLoginAction } from "@/components/modules/auth/hooks/useLoginAction";
 import { messageForError } from "@/lib/errors/errorMessages";
+import { ApiError } from "@/components/clients/exceptions";
+import { ForgotPasswordSent, sendPasswordResetLink } from "@/components/modules/passwordReset";
 import { isEmail } from "@/lib/email";
 import { APP_HOME } from "@/lib/companyAddress";
 import type { PublicSso } from "@/api/modules/sso/ssoService";
@@ -75,6 +77,8 @@ export function LoginCodeStep({ email, returnTo }: { email: string; returnTo: st
   const auth = useAuthService();
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState<CodeError>(null);
+  // The code was spent by wrong tries: until a new one is sent, it is never called "expired" (DQ-17).
+  const usedUp = React.useRef(false);
   const [busy, setBusy] = React.useState(false);
 
   const verify = async (value: string = code) => {
@@ -86,7 +90,9 @@ export function LoginCodeStep({ email, returnTo }: { email: string; returnTo: st
       const res = await auth.loginCodeVerify(email, value, returnTo);
       window.location.assign(res.next);
     } catch (err) {
-      setError(codeErrorOf(err));
+      const refusal = codeErrorOf(err, usedUp.current);
+      if (refusal?.kind === "tooMany") usedUp.current = true;
+      setError(refusal);
       setBusy(false);
     }
   };
@@ -94,6 +100,7 @@ export function LoginCodeStep({ email, returnTo }: { email: string; returnTo: st
   const sendAgain = async (): Promise<string | null> => {
     try {
       await auth.loginCodeSend(email);
+      usedUp.current = false;
       return null;
     } catch (err) {
       return messageForError(err);
@@ -135,6 +142,7 @@ export function LoginForm({
   showForgot = true,
   onCodeSent,
   onRefusal,
+  onResetSent,
 }: {
   returnTo?: string;
   initialEmail?: string;
@@ -145,7 +153,12 @@ export function LoginForm({
    * Where a refusal goes when the screen shows it above the provider buttons (C10). Without it the form shows it
    * itself, as its first line — the same place when nothing stands above the form.
    */
-  onRefusal?: (message: string | null) => void;
+  onRefusal?: (message: React.ReactNode) => void;
+  /**
+   * From the third wrong password in a row the alert offers "Email me a link to reset it" (U2): the link is sent at
+   * once and the screen opens F2 with this address. Absent where the screen cannot show F2.
+   */
+  onResetSent?: (email: string) => void;
 }) {
   const auth = useAuthService();
   const [sendingCode, setSendingCode] = React.useState(false);
@@ -154,7 +167,7 @@ export function LoginForm({
   const [email, setEmail] = React.useState(initialEmail);
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState<{ email?: string; password?: string }>({});
-  const [ownRefusal, setOwnRefusal] = React.useState<string | null>(null);
+  const [ownRefusal, setOwnRefusal] = React.useState<React.ReactNode>(null);
   const setRefusal = onRefusal ?? setOwnRefusal;
   const [busy, setBusy] = React.useState(false);
 
@@ -180,7 +193,14 @@ export function LoginForm({
       // cookie and paints the company's brand must render again from the server.
       window.location.assign(returnTo);
     } catch (error) {
-      setRefusal(messageForError(error));
+      const address = email.trim();
+      setRefusal(onResetSent && error instanceof ApiError && error.offerPasswordReset
+        ? <ResetOffer onSend={async () => {
+          const refused = await sendPasswordResetLink(address);
+          if (refused) setRefusal(refused);
+          else onResetSent(address);
+        }} />
+        : messageForError(error));
       setBusy(false);
     }
   };
@@ -251,6 +271,39 @@ export function LoginForm({
   );
 }
 
+/**
+ * C9-3r (sign-in-company-login-no-lock): the wrong-password alert from the third in a row, with the reset link inside
+ * it — 600, underlined, in the alert's own colour. Pressing it sends the link at once.
+ */
+function ResetOffer({ onSend }: { onSend: () => Promise<void> }) {
+  const t = useTranslations("auth");
+  const [sending, setSending] = React.useState(false);
+  return (
+    <>
+      {t.rich("company.wrongPasswordOfferReset", {
+        link: (chunks) => (
+          <button
+            type="button"
+            aria-busy={sending || undefined}
+            className="font-semibold text-inherit underline underline-offset-2"
+            onClick={async () => {
+              if (sending) return;
+              setSending(true);
+              try {
+                await onSend();
+              } finally {
+                setSending(false);
+              }
+            }}
+          >
+            {sending ? t("busy.sending") : chunks}
+          </button>
+        ),
+      })}
+    </>
+  );
+}
+
 export default function LoginContainer({
   brand,
   sso,
@@ -271,7 +324,9 @@ export default function LoginContainer({
   const [codeFor, setCodeFor] = React.useState<string | null>(null);
   // The back arrow (C11) returns to the form with the address the code went to, not an empty field (walk of 2026-11-19).
   const [typedEmail, setTypedEmail] = React.useState(email);
-  const [refusal, setRefusal] = React.useState<string | null>(null);
+  const [refusal, setRefusal] = React.useState<React.ReactNode>(null);
+  // F2 opened from the alert's reset link (U2); the back arrow returns to the form with the address.
+  const [resetSentTo, setResetSentTo] = React.useState<string | null>(null);
   const companyName = brand.name;
 
   const failureText =
@@ -305,6 +360,14 @@ export default function LoginContainer({
     return (
       <AuthSplit brand={brand} back={<AuthBack onClick={() => { setTypedEmail(codeFor); setCodeFor(null); }} />}>
         <LoginCodeStep email={codeFor} returnTo={returnTo} />
+      </AuthSplit>
+    );
+  }
+
+  if (resetSentTo) {
+    return (
+      <AuthSplit brand={brand} back={<AuthBack onClick={() => { setTypedEmail(resetSentTo); setResetSentTo(null); setRefusal(null); }} />}>
+        <ForgotPasswordSent email={resetSentTo} />
       </AuthSplit>
     );
   }
@@ -358,7 +421,13 @@ export default function LoginContainer({
         </div>
       )}
       {hasWays && <AuthOr />}
-      <LoginForm returnTo={returnTo} initialEmail={typedEmail} onCodeSent={setCodeFor} onRefusal={setRefusal} />
+      <LoginForm
+        returnTo={returnTo}
+        initialEmail={typedEmail}
+        onCodeSent={setCodeFor}
+        onRefusal={setRefusal}
+        onResetSent={setResetSentTo}
+      />
       {foot}
     </AuthSplit>
   );

@@ -1,36 +1,12 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { MoveDocumentForm } from "./MoveDocumentForm";
-
-beforeAll(() => {
-  Object.defineProperty(global, "ResizeObserver", {
-    writable: true,
-    configurable: true,
-    value: class ResizeObserver {
-      observe() {
-      }
-
-      unobserve() {
-      }
-
-      disconnect() {
-      }
-    },
-  });
-
-  Object.defineProperty(Element.prototype, "scrollIntoView", {
-    writable: true,
-    configurable: true,
-    value: jest.fn(),
-  });
-});
-
-jest.mock("@/components/ui/SearchableSelect", () => jest.requireActual("@/test/searchableSelectMock"));
 
 const folders = [
   {
     id: "folder-1",
     name: "Contracts",
+    fileCount: 4,
   },
   {
     id: "folder-2",
@@ -38,8 +14,9 @@ const folders = [
   },
 ];
 
+/** T06 (DT21): a list of where the files can go — no select with a search inside it. */
 describe("MoveDocumentForm", () => {
-  it("renders form content", () => {
+  it("lists Not in a folder and every folder, the current one picked", () => {
     render(
       <MoveDocumentForm
         folders={folders}
@@ -49,8 +26,10 @@ describe("MoveDocumentForm", () => {
       />,
     );
 
-    expect(screen.getByText(/destination folder/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^move$/i })).toBeEnabled();
+    expect(screen.getByRole("radio", { name: /not in a folder/i })).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("radio", { name: /contracts/i })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText("4 files")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^move here$/i })).toBeEnabled();
   });
 
   it("closes without moving when the folder is unchanged", () => {
@@ -66,7 +45,7 @@ describe("MoveDocumentForm", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /^move$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^move here$/i }));
 
     expect(onCancelAction).toHaveBeenCalledTimes(1);
     expect(onSubmitAction).not.toHaveBeenCalled();
@@ -89,73 +68,55 @@ describe("MoveDocumentForm", () => {
     expect(onCancelAction).toHaveBeenCalledTimes(1);
   });
 
-  it("disables actions while loading", () => {
+  it("submits the picked folder", () => {
+    const onSubmitAction = jest.fn();
+
     render(
       <MoveDocumentForm
-        isLoading
         folders={folders}
         currentFolderId="folder-1"
+        onCancelAction={jest.fn()}
+        onSubmitAction={onSubmitAction}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /payslips/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^move here$/i }));
+
+    expect(onSubmitAction).toHaveBeenCalledWith({ folderId: "folder-2" });
+  });
+
+  it("submits undefined for Not in a folder", () => {
+    const onSubmitAction = jest.fn();
+
+    render(
+      <MoveDocumentForm
+        folders={folders}
+        currentFolderId="folder-1"
+        onCancelAction={jest.fn()}
+        onSubmitAction={onSubmitAction}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /not in a folder/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^move here$/i }));
+
+    expect(onSubmitAction).toHaveBeenCalledWith({ folderId: undefined });
+  });
+
+  it("offers New folder when it may make one", () => {
+    const onNewFolderAction = jest.fn();
+
+    render(
+      <MoveDocumentForm
+        folders={folders}
         onCancelAction={jest.fn()}
         onSubmitAction={jest.fn()}
+        onNewFolderAction={onNewFolderAction}
       />,
     );
 
-    expect(screen.getByLabelText(/destination folder/i)).toBeDisabled();
-    expect(screen.getByRole("button", { name: /cancel/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /^move$/i })).toBeDisabled();
-  });
-
-  it("submits selected folder", async () => {
-    const onSubmitAction = jest.fn();
-
-    render(
-      <MoveDocumentForm
-        folders={folders}
-        currentFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={onSubmitAction}
-      />,
-    );
-
-    fireEvent.change(screen.getByLabelText(/destination folder/i), {
-      target: { value: "folder-2" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /^move$/i }));
-
-    await waitFor(() => {
-      expect(onSubmitAction).toHaveBeenCalledTimes(1);
-    });
-
-    expect(onSubmitAction.mock.calls[0][0]).toEqual({
-      folderId: "folder-2",
-    });
-  });
-
-  it("submits undefined for root folder", async () => {
-    const onSubmitAction = jest.fn();
-
-    render(
-      <MoveDocumentForm
-        folders={folders}
-        currentFolderId="folder-1"
-        onCancelAction={jest.fn()}
-        onSubmitAction={onSubmitAction}
-      />,
-    );
-
-    fireEvent.change(screen.getByLabelText(/destination folder/i), {
-      target: { value: "root" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /^move$/i }));
-
-    await waitFor(() => {
-      expect(onSubmitAction).toHaveBeenCalledTimes(1);
-    });
-
-    expect(onSubmitAction.mock.calls[0][0]).toEqual({
-      folderId: undefined,
-    });
+    fireEvent.click(screen.getByRole("button", { name: /new folder/i }));
+    expect(onNewFolderAction).toHaveBeenCalledTimes(1);
   });
 });

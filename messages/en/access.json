@@ -86,7 +86,11 @@
     },
     "peopleAttendance": {
       "label": "Attendance",
-      "description": "Timesheets. View reads them; Edit records your own days and exports; Manage records or corrects somebody else's."
+      "description": "Timesheets. View reads them; Edit records your own days; Manage opens the overview and exports it."
+    },
+    "peopleAttendanceForOthers": {
+      "label": "Log time for others",
+      "description": "Logging, correcting and removing somebody else's time — a forgotten day, say. The entry shows who logged it. The scope decides whose."
     },
     "reportsReport": {
       "label": "Reports",
@@ -223,10 +227,17 @@
       "noFields": "No fields you can filter on",
       "noMatchingField": "No matching field",
       "selectValues": "Select values",
-      "noOptions": "No options"
+      "noOptions": "No options",
+      "and": "and",
+      "addCondition": "Add a condition",
+      "range": "{from} – {to}",
+      "typedValues": "Values, separated by commas"
     },
     "filter": {
-      "button": "Filter"
+      "button": "Filter",
+      "clearAll": "Clear all",
+      "more": "+{count} more",
+      "removeChip": "Remove the filter: {field}"
     },
     "peoplePicker": {
       "columns": {

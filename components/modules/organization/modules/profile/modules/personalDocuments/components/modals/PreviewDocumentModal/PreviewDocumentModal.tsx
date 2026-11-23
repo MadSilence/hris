@@ -2,14 +2,14 @@
 
 import { FC, type ReactNode, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Delete02Icon, Download01Icon, StarIcon } from "@hugeicons/core-free-icons";
+import { CancelCircleIcon, Delete02Icon, Download01Icon, Folder01Icon, HourglassIcon, StarIcon, Tag01Icon, ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/desact/dialog";
 import { Icon } from "@/components/desact/icon";
 import { InlineRename, isEditingInline } from "@/components/ui/InlineRename";
 import { PdfViewer } from "@/components/ui/PdfViewer";
 import { cn } from "@/lib/cn";
 import { useDateFormatter } from "@/lib/date";
-import { getDocumentFileIcon } from "../../../utils/getDocumentFileIcon";
+import { FileTypeTile } from "@/components/modules/signing/components/DocumentPieces";
 import { Button } from "@/components/desact/button";
 import type { DocumentDTO } from "@/api/modules/documents/dto";
 import { messageForError } from "@/lib/errors/errorMessages";
@@ -32,6 +32,12 @@ export interface PreviewDocumentModalProps {
   showVisibility?: boolean;
   /** The right column beside the document — the signing panel while it has one (documents-send-for-signature S07). */
   aside?: ReactNode;
+  /** Beside Download, left of it — Cancel signing while the document is out for signature (S07). */
+  footerAction?: ReactNode;
+  /** "Visible to Reza" / "Hidden from Reza" in the meta line (DT16); without it, "Visible" / "Hidden". */
+  personFirstName?: string | null;
+  /** "In the Identity folder" (X06); without it the meta line starts with the category. */
+  folderName?: string | null;
 }
 
 /**
@@ -50,6 +56,9 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
   onTrashAction,
   showVisibility = true,
   aside,
+  footerAction,
+  personFirstName,
+  folderName,
 }) => {
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
@@ -93,23 +102,43 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
 
   const isImage = document?.mimeType?.startsWith("image/") ?? false;
 
-  // The meta line (V2-Preview; documents-expiry X06 adds the date): category · who can see.
-  const metaOf = (d: DocumentDTO) => {
-    const visibility = d.visibility === "HR_ONLY" ? t("documents.table.hidden") : t("documents.table.visible");
-    const until = d.expiresOn ? t("documents.preview.validUntil", { date: formatDate(d.expiresOn, { style: "medium" }) }) : null;
-    const parts = [d.categoryName, showVisibility ? visibility : null, until].filter(Boolean) as string[];
-    return parts.length ? parts.join(" · ") : t("documents.preview.readOnly");
+  /*
+   * The meta line (V2-Preview, X06; DT16, X7): 12/16 grey, each part with its icon — the folder or the category, who
+   * can see it, the day it was uploaded. The expiry is not in it any more: it has its own strip under the header.
+   */
+  const metaOf = (d: DocumentDTO): ReactNode => {
+    const hidden = d.visibility === "HR_ONLY";
+    const visibility = personFirstName
+      ? hidden ? t("documents.table.hiddenFrom", { name: personFirstName }) : t("documents.table.visibleTo", { name: personFirstName })
+      : hidden ? t("documents.table.hidden") : t("documents.table.visible");
+    const parts: { key: string; icon?: typeof ViewIcon; text: string }[] = [];
+    if (folderName) parts.push({ key: "folder", icon: Folder01Icon, text: t("documents.preview.inFolder", { folder: folderName }) });
+    else if (d.categoryName) parts.push({ key: "category", icon: Tag01Icon, text: d.categoryName });
+    if (showVisibility) parts.push({ key: "visibility", icon: hidden ? ViewOffSlashIcon : ViewIcon, text: visibility });
+    if (!folderName) parts.push({ key: "date", text: formatDate(d.createdAt, { style: "medium" }) });
+    return (
+      <span className="flex flex-wrap items-center gap-x-1.5 text-hint text-secondary">
+        {parts.map((p, i) => (
+          <span key={p.key} className="inline-flex items-center gap-1">
+            {i > 0 && <span aria-hidden className="mr-0.5 text-tertiary">·</span>}
+            {p.icon && <Icon icon={p.icon} size="sm" className="size-3.5 text-tertiary" />}
+            {p.text}
+          </span>
+        ))}
+      </span>
+    );
   };
+  const expiry = document?.expiresOn && (document.expiryState === "EXPIRING" || document.expiryState === "EXPIRED")
+    ? { expired: document.expiryState === "EXPIRED", date: formatDate(document.expiresOn, { style: "medium" }) }
+    : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCloseAction()}>
-      <DialogContent size="lg" className="sm:max-w-[960px]" onEscapeKeyDown={(e) => { if (isEditingInline()) e.preventDefault(); }}>
+      <DialogContent size="lg" className={cn(aside ? "sm:max-w-[1240px]" : "sm:max-w-[960px]")} onEscapeKeyDown={(e) => { if (isEditingInline()) e.preventDefault(); }}>
         {/* V2-Preview: the file's tile, its name (renamed in place, T26), the star, and the meta line. */}
         <DialogHeader>
           <div className="flex min-w-0 items-center gap-2 pr-8">
-            {document && (
-              <span className="shrink-0 text-tertiary [&_svg]:h-5 [&_svg]:w-5">{getDocumentFileIcon(document.mimeType)}</span>
-            )}
+            {document && <FileTypeTile mimeType={document.mimeType} name={document.name} />}
             <DialogTitle className="flex min-w-0 items-center gap-1">
               {document ? <InlineRename name={document.name} onRename={onRenameAction} /> : tCommon("actions.preview")}
             </DialogTitle>
@@ -125,13 +154,26 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
               </button>
             )}
           </div>
-          <DialogDescription>
-            {document ? metaOf(document) : t("documents.preview.readOnly")}
+          <DialogDescription asChild>
+            <div>{document ? metaOf(document) : t("documents.preview.readOnly")}</div>
           </DialogDescription>
         </DialogHeader>
 
+        {/* X06 (X7): the expiry as its own strip — amber while it is soon, red once it is past. */}
+        {expiry && (
+          <div
+            className={cn(
+              "flex h-10 items-center gap-2 rounded-popover px-3 text-body font-medium",
+              expiry.expired ? "bg-status-declined-bg text-status-declined-text" : "bg-status-pending-bg text-status-pending-text",
+            )}
+          >
+            <Icon icon={expiry.expired ? CancelCircleIcon : HourglassIcon} size="sm" />
+            {expiry.expired ? t("documents.preview.expired", { date: expiry.date }) : t("documents.preview.expires", { date: expiry.date })}
+          </div>
+        )}
+
         <div className={cn("flex gap-4", aside ? "flex-col lg:flex-row" : "flex-col")}>
-        <div className="flex min-h-[24rem] min-w-0 flex-1 items-center justify-center overflow-hidden rounded-control border border-divider bg-subtle">
+        <div className="flex min-h-[24rem] min-w-0 flex-1 items-center justify-center overflow-hidden rounded-card bg-subtle">
           {isLoading && <NodRing size="md" />}
 
           {!isLoading && error && (
@@ -163,23 +205,27 @@ export const PreviewDocumentModal: FC<PreviewDocumentModalProps> = ({
             )
           )}
         </div>
-        {aside && <aside className="w-full shrink-0 lg:w-80">{aside}</aside>}
+        {/* S5: with the signing panel the preview is 1240 wide, the panel 340 on the right. */}
+        {aside && <aside className="w-full shrink-0 lg:w-[340px]">{aside}</aside>}
         </div>
 
         {document && (
           <DialogFooter className="sm:justify-between">
             {onTrashAction ? (
-              <Button type="button" variant="ghost" onClick={onTrashAction}>
+              <Button type="button" variant="destructive" onClick={onTrashAction}>
                 <Icon icon={Delete02Icon} size="sm" />
                 {t("documents.table.moveToTrash")}
               </Button>
             ) : <span />}
-            <Button type="button" variant="secondary" asChild>
-              <a href={getDownloadUrl(document.id)} download>
-                <Icon icon={Download01Icon} size="sm" />
-                {tCommon("actions.download")}
-              </a>
-            </Button>
+            <div className="flex items-center gap-2">
+              {footerAction}
+              <Button type="button" variant="secondary" asChild>
+                <a href={getDownloadUrl(document.id)} download>
+                  <Icon icon={Download01Icon} size="sm" />
+                  {tCommon("actions.download")}
+                </a>
+              </Button>
+            </div>
           </DialogFooter>
         )}
       </DialogContent>

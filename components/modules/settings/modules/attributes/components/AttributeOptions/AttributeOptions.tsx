@@ -344,9 +344,12 @@ export const AttributeOptions: React.FC<AttributeOptionsProps> = ({
         <Button type="button" variant="secondary" onClick={cancel} disabled={isSaving}>
           {tCommon("actions.cancel")}
         </Button>
-        <Button type="button" onClick={save} disabled={isPreset || isSaving}>
-          {tCommon("actions.save")}
-        </Button>
+        {/* A preset field cannot be changed: no Save, rather than a grey one (NEVER-DISABLED). */}
+        {!isPreset && (
+          <Button type="button" onClick={save} disabled={isSaving}>
+            {tCommon("actions.save")}
+          </Button>
+        )}
       </div>
     </div>
   );

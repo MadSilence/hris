@@ -7,12 +7,14 @@ import type { CalendarView, CalendarViewPayload } from "@/models/calendarView";
 import {
   createCalendarViewAction,
   deleteCalendarViewAction,
+  reorderCalendarViewsAction,
   updateCalendarViewAction,
   type CalendarViewActionResult,
 } from "@/components/modules/calendar/actions/calendarViewActions";
 
 export const CALENDAR_VIEWS_QK = ["CALENDAR_VIEWS"];
 
+/** The reader's own views, in the order they put them (N08c). */
 export const useCalendarViews = () =>
   useQuery<CalendarView[]>({
     queryKey: CALENDAR_VIEWS_QK,
@@ -49,5 +51,27 @@ export const useCalendarViewMutations = () => {
     onSuccess: invalidate,
   });
 
-  return { create, update, remove };
+  /**
+   * Drop saves the order at once (N08c). The row moves before the answer — a pill that jumps back while the request
+   * is out reads as a refusal — and a real refusal puts the old order back.
+   */
+  const reorder = useMutation({
+    mutationFn: (ids: string[]) => reorderCalendarViewsAction(ids).then(unwrap),
+    onMutate: async (ids: string[]) => {
+      await queryClient.cancelQueries({ queryKey: CALENDAR_VIEWS_QK });
+      const previous = queryClient.getQueryData<CalendarView[]>(CALENDAR_VIEWS_QK);
+      if (previous) {
+        const byId = new Map(previous.map((v) => [v.id, v]));
+        const next = ids.map((id) => byId.get(id)).filter((v): v is CalendarView => v !== undefined);
+        queryClient.setQueryData(CALENDAR_VIEWS_QK, [...next, ...previous.filter((v) => !ids.includes(v.id))]);
+      }
+      return { previous };
+    },
+    onError: (_error, _ids, context) => {
+      if (context?.previous) queryClient.setQueryData(CALENDAR_VIEWS_QK, context.previous);
+    },
+    onSuccess: (views) => queryClient.setQueryData(CALENDAR_VIEWS_QK, views),
+  });
+
+  return { create, update, remove, reorder };
 };

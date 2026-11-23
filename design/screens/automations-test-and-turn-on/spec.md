@@ -38,7 +38,12 @@ The editor header: "Test run", "Turn on", "Save changes" (`automations-editor`).
 - Footer: "Test run first" (link-style, play icon) on the left; Cancel (ghost) and Turn on (primary).
 
 **Turn on dialog**, requests already waiting (V6):
-- **Who should it run for?**: radio Only new requests ("From now on.") / Also the {n} requests already waiting ("Sent before today and not yet decided. They start right away.").
+- **Who should it run for?** (DQ-02, 2026-11-20 — the five word sets; no option carries "They start right away."):
+  - requests: Only new requests / Also run it now for {n} waiting requests — no hint;
+  - hires: Only new hires / Also run it now for {n} recent hires — hint "First day still ahead";
+  - dates: Only dates still to come / Also run it now for {n} people it missed — no hint ("missed" looks back 30 days — the owner's default, `DECISIONS.md` § "The designers' answers of 2026-11-20");
+  - people: Only people who start to match / Also run it now for {n} people who match — no hint;
+  - cases: Only new cases / Also run it now for {n} waiting cases — no hint.
 - If the choice sends more than 200 messages, a pending `InlineAlert` appears: "This sends **{n} messages** right away." + ☐ "I understand, send them". Turn on stays disabled until it is ticked.
 
 **Live automation** (F5):
@@ -129,3 +134,7 @@ Answered by the owner, 2026-11-06 (`(claude)/DECISIONS.md` § "The automations r
 The package `hris/design/handoffs/2026-11-18-fixes-automations/FIXES-automations.md` is built as written; where the text above disagrees, it wins. What differs from it:
 - V6: the nouns for date, person and other triggers are the code's (Q-46).
 - F6: for a made-up case with no recipient, line 1 falls back to the step's name.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- DQ-02: the five word sets as above, `automationsEditor.json › turnOnDialog.waiting`; the "From now on." hint under
+  the first option is gone too (the frame DQ02 draws none); only a hire's second option keeps a hint. Not walked.

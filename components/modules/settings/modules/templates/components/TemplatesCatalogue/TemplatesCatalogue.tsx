@@ -45,6 +45,7 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
   const { data, isLoading, error, refetch } = useTemplates();
   const [query, setQuery] = React.useState("");
   const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
 
   const visible = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -70,7 +71,7 @@ export const TemplatesCatalogue: React.FC<TemplatesCatalogueProps> = ({ kind }) 
           description={t("templates.catalogue.emptyDescription")}
         />
       ) : visible.length === 0 ? (
-        <NoResults hint={t("templates.catalogue.noResultsHint")} onClearSearch={() => setQuery("")}/>
+        <NoResults title={tCommon("emptyState.nothingCalled", { query: query.trim() })}/>
       ) : (
         kinds.map((k) => {
           const rows = visible.filter((template) => template.kind === k);

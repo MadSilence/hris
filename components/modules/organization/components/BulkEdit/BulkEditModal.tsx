@@ -298,11 +298,14 @@ export default function BulkEditModal({ isOpen, onClose, target, count, fields, 
               <Button type="button" variant="ghost" onClick={() => setOutOfScope(null)} disabled={bulkEdit.isPending}>
                 {t("bulkEdit.backToSelection")}
               </Button>
-              <Button type="button" onClick={() => doSubmit(true)} disabled={bulkEdit.isPending || !outOfScope.allowedCount}>
-                {bulkEdit.isPending
-                  ? t("bulkEdit.applying")
-                  : t("bulkEdit.applyAllowed", { count: outOfScope.allowedCount ?? 0 })}
-              </Button>
+              {/* Nobody left to apply it to: no "Apply to 0" — the alert above says why (NEVER-DISABLED). */}
+              {(outOfScope.allowedCount ?? 0) > 0 && (
+                <Button type="button" onClick={() => doSubmit(true)} disabled={bulkEdit.isPending}>
+                  {bulkEdit.isPending
+                    ? t("bulkEdit.applying")
+                    : t("bulkEdit.applyAllowed", { count: outOfScope.allowedCount ?? 0 })}
+                </Button>
+              )}
             </>
           ) : (
             <>

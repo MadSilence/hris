@@ -64,6 +64,8 @@ describe("WaitingOnYou", () => {
     await user.click(screen.getAllByRole("button", { name: "Approve" })[0]);
     expect(screen.getByRole("heading", { name: /Waiting on you\s*2/ })).toBeInTheDocument();
     expect(mutateAsync).not.toHaveBeenCalled();
+    // Not "Anna's off …": an approval may be one step of a chain (walk of 2026-11-23).
+    expect(await screen.findByText("Time off approved")).toBeInTheDocument();
 
     await user.click(await screen.findByRole("button", { name: /undo/i }));
     expect(screen.getByRole("heading", { name: /Waiting on you\s*3/ })).toBeInTheDocument();

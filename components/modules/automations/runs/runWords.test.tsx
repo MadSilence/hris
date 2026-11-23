@@ -28,7 +28,7 @@ describe("a reason as a sentence", () => {
     const w = words();
     expect(w.reason("NO_ASSIGNEE: Marta left the team")).toBe("We couldn't create the task: there is nobody to give it to.");
     expect(w.reason("CONDITION_NOT_MET")).toBe("It was skipped: its “Only if” didn't hold for this person.");
-    expect(w.reason("RULE_PAUSED")).toBe("It was cancelled: the automation was paused.");
+    expect(w.reason("RULE_PAUSED")).toBe("It was canceled: the automation was paused.");
     expect(w.reason("NO_APPROVER: nobody to approve this for Anna")).toBe("It failed: there is nobody to approve it.");
     expect(w.reason("TIMED_OUT")).toBe("It waited as long as it may.");
   });

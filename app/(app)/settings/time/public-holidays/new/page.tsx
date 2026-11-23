@@ -7,7 +7,7 @@ import { PageGate } from "@/components/auth/PageGate";
 
 function PageFallback() {
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col gap-6 px-8 pt-2">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col gap-6 px-8 pt-2">
       <Skeleton className="h-10 w-64" />
       <Skeleton className="h-64 w-full" />
     </div>

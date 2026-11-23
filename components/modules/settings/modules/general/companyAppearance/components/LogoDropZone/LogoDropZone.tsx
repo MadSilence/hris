@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Alert02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 
 import { Icon } from "@/components/desact/icon";
 import { NodRing } from "@/components/desact/nod";
@@ -52,25 +52,32 @@ export function LogoDropZone({ companyName, logoUrl, fileName, uploading, refuse
 
   const letter = (companyName.trim()[0] ?? "").toUpperCase();
 
+  // The tile (L1, L1-NoLogo, L6b): white 56, radius 12, a hairline. Without a logo it shows the upload icon where a
+  // file can be dropped, and the company's first letter where it cannot (view only).
   const tile = (
-    <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-control border border-divider bg-card text-section-title text-accent-text">
+    <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-tint border border-divider bg-card appearance-logo-letter text-accent-text">
       {uploading ? (
         <NodRing />
       ) : logoUrl ? (
         // A backend-hosted upload of unknown size; next/image would need a remote pattern for the API origin.
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="" className="max-h-10 max-w-10 object-contain" />
-      ) : (
+      ) : readOnly ? (
         letter
+      ) : (
+        <Icon icon={Upload01Icon} size="lg" className="text-tertiary" />
       )}
     </span>
   );
 
+  // View only (L6-ReadOnly, L6b): the tile and the logo's name — nothing to drop, no hint.
   if (readOnly) {
     return (
       <div className="flex items-center gap-4 rounded-card border border-divider p-4">
         {tile}
-        <p className="m-0 text-body font-medium text-primary">{logoUrl ? fileName ?? t("current") : t("empty")}</p>
+        <p className="m-0 text-body font-semibold text-primary">
+          {logoUrl ? fileName ?? t("current") : t("named", { company: companyName })}
+        </p>
       </div>
     );
   }
@@ -101,13 +108,13 @@ export function LogoDropZone({ companyName, logoUrl, fileName, uploading, refuse
         }}
         className={cn(
           "flex items-center gap-4 rounded-card border-[1.5px] border-dashed p-4 transition-colors",
-          refused ? "border-status-declined-fill bg-status-declined-bg" : over ? "border-accent bg-accent-subtle" : "border-strong",
+          refused ? "border-status-declined-fill" : over ? "border-accent bg-accent-subtle" : "border-strong",
         )}
       >
         {tile}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="m-0 truncate text-body font-medium text-primary">{title}</p>
-          <p className="m-0 text-label font-normal text-secondary">{hint}</p>
+          <p className="m-0 truncate text-body font-semibold text-primary">{title}</p>
+          <p className="m-0 text-body text-tertiary">{hint}</p>
         </div>
         {logoUrl && !uploading && !over ? (
           <button type="button" onClick={onRemove} className="shrink-0 text-body font-medium text-danger-text hover:underline">

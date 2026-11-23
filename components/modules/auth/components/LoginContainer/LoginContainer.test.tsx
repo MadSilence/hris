@@ -9,6 +9,11 @@ import { ApiError } from "@/components/clients/exceptions";
 
 jest.mock("@/components/modules/auth/hooks/useLoginAction");
 jest.mock("@/components/modules/auth/hooks/useAuthService");
+const forgotPasswordAction = jest.fn();
+jest.mock("@/components/modules/passwordReset/actions/passwordResetActions", () => ({
+  forgotPasswordAction: (...args: unknown[]) => forgotPasswordAction(...args),
+  resetPasswordAction: jest.fn(),
+}));
 
 import { useAuthService } from "@/components/modules/auth/hooks/useAuthService";
 const loginCodeSend = jest.fn();
@@ -178,6 +183,28 @@ describe("LoginContainer (sign-in-company-login)", () => {
     await user.click(screen.getByRole("button", { name: "Email me a login code" }));
     await user.click(await screen.findByRole("button", { name: "Back" }));
 
+    expect(screen.getByLabelText("Email")).toHaveValue("anna@acme.com");
+  });
+
+  it("C9-3r: from the third wrong password the alert sends a reset link and opens F2 with the address (U2)", async () => {
+    forgotPasswordAction.mockResolvedValue({ status: "SUCCESS" });
+    loginAction(jest.fn().mockRejectedValue(
+      new ApiError("Invalid email or password", { status: 401, code: "AUTH00001", offerPasswordReset: true })));
+    const user = userEvent.setup();
+    render(<LoginContainer {...base} />);
+
+    await user.type(screen.getByLabelText("Email"), "anna@acme.com");
+    await user.type(screen.getByLabelText("Password"), "wrong");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("That email and password don’t match. Forgot your password? Email me a link to reset it");
+    await user.click(screen.getByRole("button", { name: "Email me a link to reset it" }));
+
+    expect(forgotPasswordAction).toHaveBeenCalledWith({ email: "anna@acme.com" });
+    expect(await screen.findByRole("heading", { name: "Check your email" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByLabelText("Email")).toHaveValue("anna@acme.com");
   });
 });

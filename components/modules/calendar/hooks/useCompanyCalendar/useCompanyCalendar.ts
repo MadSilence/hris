@@ -1,13 +1,13 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
 import { companyCalendarService } from "@/components/modules/calendar/services/companyCalendarService";
 import type { CompanyCalendarGrouping } from "@/models/calendar";
 import type { FilterDTO } from "@/models/user/fields";
 
 export const COMPANY_CALENDAR_PEOPLE_QUERY_KEY = "company-calendar-people";
 export const COMPANY_CALENDAR_GROUPS_QUERY_KEY = "company-calendar-groups";
+export const COMPANY_CALENDAR_VIEW_COUNT_QUERY_KEY = "company-calendar-view-count";
 export const COMPANY_CALENDAR_MARKS_QUERY_KEY = "company-calendar-marks";
 export const COMPANY_CALENDAR_ABSENCES_QUERY_KEY = "company-calendar-absences";
-export const COMPANY_CALENDAR_CAPACITY_QUERY_KEY = "company-calendar-capacity";
 
 const PAGE_SIZE = 25;
 
@@ -57,6 +57,26 @@ export const useCompanyCalendarPeople = ({
     placeholderData: group ? undefined : keepPreviousData,
     enabled,
   });
+
+/**
+ * The count beside each saved view (B5): one read per view, keyed on its filters, so two views with the same filters
+ * share it. A count the server refuses is simply not shown.
+ */
+export const useCompanyCalendarViewCounts = (views: { id: string; filters: FilterDTO[] }[]): Record<string, number> => {
+  const results = useQueries({
+    queries: views.map((view) => ({
+      queryKey: [COMPANY_CALENDAR_VIEW_COUNT_QUERY_KEY, JSON.stringify(view.filters)],
+      queryFn: () => companyCalendarService.count({ filters: view.filters }),
+      staleTime: 60_000,
+    })),
+  });
+  const counts: Record<string, number> = {};
+  views.forEach((view, i) => {
+    const total = results[i]?.data;
+    if (typeof total === "number") counts[view.id] = total;
+  });
+  return counts;
+};
 
 /**
  * The headers of a grouped board with a count each. Off while the board is flat.
@@ -119,30 +139,5 @@ export const useCompanyCalendarAbsences = ({
     queryKey: [COMPANY_CALENDAR_ABSENCES_QUERY_KEY, from, to, userIds.join(",")],
     queryFn: () => companyCalendarService.absences({ from, to, userIds }),
     enabled: Boolean(from && to) && userIds.length > 0,
-    placeholderData: keepPreviousData,
-  });
-
-/**
- * The capacity mark for the window: company-wide on an ungrouped board (`groupBy` null), per team or
- * department on a grouped one. An office grouping has no limits, so it asks nothing.
- */
-export const useCompanyCalendarCapacity = ({
-  from,
-  to,
-  groupBy,
-  groupIds,
-  enabled = true,
-}: {
-  from: string;
-  to: string;
-  groupBy: CompanyCalendarGrouping | null;
-  groupIds: string[];
-  enabled?: boolean;
-}) =>
-  useQuery({
-    queryKey: [COMPANY_CALENDAR_CAPACITY_QUERY_KEY, from, to, groupBy ?? "", groupIds.join(",")],
-    queryFn: () => companyCalendarService.capacity({ from, to, groupBy, groupIds }),
-    enabled:
-      enabled && Boolean(from && to) && groupBy !== "OFFICE" && (groupBy === null || groupIds.length > 0),
     placeholderData: keepPreviousData,
   });

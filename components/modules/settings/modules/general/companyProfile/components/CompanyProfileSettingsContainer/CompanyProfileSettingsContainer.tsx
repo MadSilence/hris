@@ -23,7 +23,7 @@ export default function CompanyProfileSettingsContainer() {
 
   if (isLoading || !company || !settings) {
     return (
-      <div className="grid h-[calc(100svh-6rem)] grid-cols-2 gap-16 px-12">
+      <div className="grid h-[calc(100cqh-6rem)] grid-cols-2 gap-16 px-12">
         {[...Array(2)].map((_, i) => (
           <div key={i} className="h-full shimmer rounded-popover bg-subtle"/>
         ))}

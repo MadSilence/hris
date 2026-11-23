@@ -286,7 +286,7 @@ export const CompanyProfileSettingsComponent: FC<Props> = ({
   };
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] min-h-0 flex-col gap-6 overflow-hidden px-12">
+    <div className="flex h-[calc(100cqh-6rem)] min-h-0 flex-col gap-6 overflow-hidden px-12">
       <div className="flex flex-col gap-4">
         <SettingsPageHeader title={t("title")} backHref="/settings"/>
 

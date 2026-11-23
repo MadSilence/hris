@@ -73,3 +73,7 @@ Bars 28 × 4 gap 6; cards radius card, padding 16, chosen = accent border on acc
   - S3 lists *Setting your time zone* and *Building your public holiday calendar* for every company; without a country
     they pass straight to done.
   - "Full demo" is removed from the code, not hidden (Q-18 stays open for sales demos).
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the Wine card with the orbit is 600 at 1280 × window ÷ 1280, never smaller, stopping at 1920; the slogan, the
+  line and the orbit scale with it; the 12 margin stays (RB1g). Not seen in a browser.

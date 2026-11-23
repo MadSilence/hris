@@ -18,12 +18,21 @@ export class HrisApiEmailClient {
     return hrisApiClient.post<UnsubscribeResult>(`/public/email/unsubscribe/undo?token=${encodeURIComponent(token)}`);
   }
 
-  public async personEmails(userId: string): Promise<PersonEmails> {
-    return hrisApiClient.get<PersonEmails>(`/users/${userId}/emails`);
+  public async personEmails(userId: string, page?: number, size?: number): Promise<PersonEmails> {
+    const query = new URLSearchParams();
+    if (page != null) query.set("page", String(page));
+    if (size != null) query.set("size", String(size));
+    const qs = query.toString();
+    const suffix = qs ? `?${qs}` : "";
+    return hrisApiClient.get<PersonEmails>(`/users/${userId}/emails${suffix}`);
   }
 
-  public async liftSuppression(userId: string): Promise<void> {
-    await hrisApiClient.post<void>(`/users/${userId}/email-suppression/lift`);
+  /**
+   * "Try again" on a bounced address (AQ-08): lifts the block and sends again at once. `resent` is INVITATION for
+   * somebody still invited, else null — no other email body is kept.
+   */
+  public async tryAgain(userId: string): Promise<{ lifted: boolean; resent: string | null }> {
+    return hrisApiClient.post<{ lifted: boolean; resent: string | null }>(`/users/${userId}/email/try-again`);
   }
 }
 

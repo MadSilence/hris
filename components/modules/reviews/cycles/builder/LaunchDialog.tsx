@@ -33,7 +33,6 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const p = preview.data;
-  const blocked = !p || p.blockers.length > 0;
   const blockers = p ? reviewNoticeLines(t, p.blockers, p.blockerCodes) : [];
   const warnings = p ? reviewNoticeLines(t, p.warnings, p.warningCodes) : [];
 
@@ -132,9 +131,13 @@ export function LaunchDialog({ cycleId, open, onCloseAction, onLaunchedAction }:
         <FormError message={error} />
         <DialogFooter>
           <Button type="button" variant="secondary" onClick={onCloseAction} disabled={busy}>{tCommon("actions.cancel")}</Button>
-          <Button type="button" onClick={() => void launch()} disabled={busy || blocked}>
-            {busy ? t("launch.launching") : t("launch.launch")}
-          </Button>
+          {/* With a blocker there is no Launch — the alert above says what stops it (NEVER-DISABLED); while the check
+              loads, it waits. */}
+          {!(p && p.blockers.length > 0) && (
+            <Button type="button" onClick={() => void launch()} disabled={busy || preview.isLoading}>
+              {busy ? t("launch.launching") : t("launch.launch")}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

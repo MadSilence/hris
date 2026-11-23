@@ -22,6 +22,18 @@ export async function sendSigningCodeAction(party: SigningParty, browserToken: s
   }
 }
 
+/** G0: the code checked on its own, on the code step; a wrong one counts one of its five tries. */
+export async function checkSigningCodeAction(party: SigningParty, code: string, browserToken: string): Promise<ActionResult<void>> {
+  try {
+    if (party.kind === "member") await hrisApiSigningService.checkCode(party.envelopeId, code, browserToken);
+    else if (party.kind === "guest") await hrisApiSigningService.guestCheckCode(party.token, code, browserToken);
+    else await hrisApiSigningService.joinerCheckCode(party.token, party.taskId, code, browserToken);
+    return { status: ActionStatus.SUCCESS };
+  } catch (error) {
+    return toActionError(error, "checkSigningCodeAction");
+  }
+}
+
 /** The signature itself (G03 → G04): the code, the name, and the drawing when it was drawn. */
 /** Signs; `completed` says whether this was the last signature, so the screen can say the copy is on its way. */
 export async function signAction(party: SigningParty, body: SignatureSubmission): Promise<ActionResult<{ completed: boolean }>> {

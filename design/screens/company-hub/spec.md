@@ -306,3 +306,9 @@ Answered by the owner (2026-11-12, `(claude)/DECISIONS.md` § "The company hub �
 ### Built from the fixes of 2026-11-19
 
 Built from `design-fixes-company-hub-1` (2026-11-19, walked the same day); `spec-updates.md` is applied above. Differences: search boxes read "Search" (Q-50); 24-hour times are written "09:00"; the agree bar on a short page sits 32 above the viewport edge (the shell's padding), not 24.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- RC10: the empty Handbook state is centred in a fixed area 320 high, 16 under the heading row; switching News between
+  For me and Everyone no longer moves it.
+- RC9: with a banner on top the page is exactly the window; only the main area scrolls, and only when the hub is taller.
+- B8: Add a page in a hub with no section asks for the section first (`company-hub-manage` § Built). Not walked.

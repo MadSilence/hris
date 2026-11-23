@@ -21,7 +21,6 @@ export interface UsersRolesTableProps {
   usersLoading: boolean;
   /** The search text, so the empty screen can tell a miss from an empty list. */
   query?: string;
-  onClearSearch?: () => void;
   allRoles: Role[];
   onApplyRoles?: (
     userId: string,
@@ -39,7 +38,6 @@ export default function UsersRolesTable({
   userRows,
   usersLoading,
   query,
-  onClearSearch,
   allRoles,
   onApplyRoles,
   isApplyingRoles = false,
@@ -125,11 +123,9 @@ export default function UsersRolesTable({
                   */}
                   <ListEmptyState
                     query={query}
-                    onClearSearch={onClearSearch}
                     scene="people"
                     title={t("roles.users.emptyTitle")}
                     description={t("roles.users.emptyDescription")}
-                    noResultsHint={t("roles.users.noResultsHint")}
                   />
                 </TableCell>
               </TableRow>

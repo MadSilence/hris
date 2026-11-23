@@ -166,7 +166,7 @@ const MoveToDialog: React.FC<{ page: TreePage; sections: TreeSection[]; onClose:
           <Button type="button" variant="secondary" onClick={onClose}>
             {t("actions.cancel")}
           </Button>
-          <Button type="button" disabled={!target} onClick={() => onMove(target)}>
+          <Button type="button" onClick={() => target && onMove(target)}>
             {t("manage.move")}
           </Button>
         </DialogFooter>
@@ -253,7 +253,7 @@ export const PagesContainer: React.FC = () => {
     onSectionAppearance: (section) => setPending({ kind: "appearance", section }),
     onSectionAudience: (section) => setPending({ kind: "audience", section }),
     onDeleteSection: (section) => setPending({ kind: "deleteSection", section }),
-    onMovePageTo: (page) => setPending({ kind: "moveTo", page }),
+    onMovePageTo: sections.length > 1 ? (page) => setPending({ kind: "moveTo", page }) : undefined,
     onDuplicatePage: (page) => setPending({ kind: "duplicate", page }),
     onUnpublishPage: (page) =>
       // Held back, not taken back: there is no "publish again" that would not also publish the draft.
@@ -309,9 +309,12 @@ export const PagesContainer: React.FC = () => {
   return (
     <ManageFrame
       actions={
-        <Button type="button" loading={newPage.busy} onClick={() => void newPage.create()}>
-          {t("manage.newPage")}
-        </Button>
+        <>
+          <Button type="button" loading={newPage.busy} onClick={() => void newPage.create()}>
+            {t("manage.newPage")}
+          </Button>
+          {newPage.dialog}
+        </>
       }
     >
       {tree.isLoading ? (
@@ -347,11 +350,6 @@ export const PagesContainer: React.FC = () => {
               size="s"
               className="max-w-[1000px] py-12"
               title={t("manage.nothingMatches", { text: query.trim() })}
-              action={
-                <Button type="button" variant="secondary" onClick={() => setQuery("")}>
-                  {t("news.clearSearch")}
-                </Button>
-              }
             />
           ) : (
             <PageTree sections={shown} handlers={handlers} renamingId={renamingId} setRenamingId={setRenamingId} expandAll={Boolean(query.trim())} />

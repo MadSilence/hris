@@ -166,12 +166,10 @@ describe("JobFamilyComponent", () => {
 
     fireEvent.change(screen.getByPlaceholderText("Search"), { target: { value: "zzz" } });
 
-    // The shared no-results screen, which says "No results" and offers no create action -- the
+    // The shared no-results screen, in the approved words (ES5), and no create action -- the
     // records exist and the query missed them.
-    expect(screen.getByText("No results")).toBeInTheDocument();
-    expect(
-      screen.getByText("Try a different family, position or code."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Nothing called “zzz”")).toBeInTheDocument();
+    expect(screen.getByText("Try a different word.")).toBeInTheDocument();
   });
 
   it("counts positions on the family header", () => {

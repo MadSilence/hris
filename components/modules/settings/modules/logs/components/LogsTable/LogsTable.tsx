@@ -1,6 +1,6 @@
 "use client";
 
-import { displayLocale, twelveHourClock, useDisplayLocale } from "@/lib/date";
+import { displayLocale, threeLetterMonths, twelveHourClock, useDisplayLocale } from "@/lib/date";
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -40,8 +40,7 @@ export const LogsTable: React.FC<{
   hasMore: boolean;
   onLoadMore: () => void;
   query: string;
-  onClearSearch?: () => void;
-}> = ({ items, isLoading, isLoadingMore, hasMore, onLoadMore, query, onClearSearch }) => {
+}> = ({ items, isLoading, isLoadingMore, hasMore, onLoadMore, query }) => {
   const t = useTranslations("settings.logs.table");
   const locale = useDisplayLocale();
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
@@ -178,11 +177,9 @@ export const LogsTable: React.FC<{
                 {/* Nothing to create from a journal: it is written by the rest of the product. */}
                 <ListEmptyState
                   query={query}
-                  onClearSearch={onClearSearch}
                   scene="history"
                   title={t("emptyTitle")}
                   description={t("emptyDescription")}
-                  noResultsHint={t("noResultsHint")}
                 />
               </TableCell>
             </TableRow>
@@ -323,12 +320,12 @@ const humanise = (code: string | null): string => {
 const formatWhen = (iso: string, locale?: string): string => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(locale ?? displayLocale(), {
+  return threeLetterMonths(date.toLocaleString(locale ?? displayLocale(), {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
     // The company's clock: 12-hour in the US, 24-hour elsewhere (lib/date.ts `formatTime`).
     hourCycle: twelveHourClock({ language: locale }) ? "h12" : "h23",
-  });
+  }));
 };

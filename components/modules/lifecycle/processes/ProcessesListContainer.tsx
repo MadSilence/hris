@@ -52,7 +52,6 @@ export function ProcessesListContainer() {
         <ListEmptyState
           fill
           query={query}
-          onClearSearch={() => setQuery("")}
           archivedView={showArchived}
           scene="automations"
           title={t("processes.emptyTitle")}

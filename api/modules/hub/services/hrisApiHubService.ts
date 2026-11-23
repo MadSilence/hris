@@ -21,7 +21,7 @@ import type {
   SectionWrite,
 } from "@/models/hub";
 
-/** Every avatar in the product: the backend's `/uploads/…` path made absolute. */
+/** Every avatar in the product: the backend's `/uploads/…` path as a page writes it (relative — R3). */
 const person = (p: PersonRef | null | undefined): PersonRef | null =>
   p ? { ...p, avatarUrl: resolveBackendAssetUrl(p.avatarUrl) } : null;
 const card = (c: PostCard): PostCard => ({ ...c, author: person(c.author) });

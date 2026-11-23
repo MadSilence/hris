@@ -29,12 +29,15 @@ export default function RolesTableRowActions({
 }: RolesTableRowActionsProps) {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
+  // A locked (system) role offers only what works on it: no greyed Rename, Archive or Delete (NEVER-DISABLED).
   return (
     <RowActionsMenu label={t("roles.table.rowActions")}>
       <PermissionGate resource="ROLES.ROLE" action="EDIT">
-        <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onRename} disabled={locked}>
-          {tCommon("actions.rename")}
-        </RowAction>
+        {!locked && (
+          <RowAction icon={<Icon icon={PencilEdit02Icon} size="sm" />} onClick={onRename}>
+            {tCommon("actions.rename")}
+          </RowAction>
+        )}
 
         <RowAction icon={<Icon icon={Copy01Icon} size="sm" />} onClick={onDuplicate}>
           {tCommon("actions.duplicate")}
@@ -44,22 +47,23 @@ export default function RolesTableRowActions({
           <RowAction icon={<Icon icon={ArchiveArrowUpIcon} size="sm" />} onClick={onRestore}>
             {t("roles.table.unarchive")}
           </RowAction>
-        ) : (
-          <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={onArchive} disabled={locked}>
+        ) : !locked ? (
+          <RowAction icon={<Icon icon={Archive02Icon} size="sm" />} onClick={onArchive}>
             {tCommon("actions.archive")}
           </RowAction>
-        )}
+        ) : null}
       </PermissionGate>
 
-      <PermissionGate resource="ROLES.ROLE" action="MANAGE">
-        <RowActionDestructive
-          icon={<Icon icon={Delete02Icon} size="sm" />}
-          onClick={onDelete}
-          disabled={locked}
-        >
-          {tCommon("actions.delete")}
-        </RowActionDestructive>
-      </PermissionGate>
+      {!locked && (
+        <PermissionGate resource="ROLES.ROLE" action="MANAGE">
+          <RowActionDestructive
+            icon={<Icon icon={Delete02Icon} size="sm" />}
+            onClick={onDelete}
+          >
+            {tCommon("actions.delete")}
+          </RowActionDestructive>
+        </PermissionGate>
+      )}
     </RowActionsMenu>
   );
 }

@@ -78,7 +78,7 @@ describe("pendingSteps", () => {
       "sys:status",
       [{ id: "ACTIVE", name: "Active" }],
     );
-    expect(steps).toEqual([{ date: "2026-12-01", label: "Archived" }]);
+    expect(steps).toEqual([{ date: "2026-12-01", label: "Inactive" }]);
   });
 });
 

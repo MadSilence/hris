@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>noddo — manage account</title>
+
+</head>
+<body>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Inter+Tight:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.lab{display:flex;align-items:center;gap:8px;font-family:'Inter Tight',sans-serif;font-size:18px;font-weight:600;color:#0B0B0C}
+.tag{font-family:Inter,sans-serif;font-size:12px;font-weight:600;border-radius:999px;padding:3px 9px;background:#F6F1F3;color:#6E1630}
+.cap{font-size:14px;line-height:1.5;color:#45454A;max-width:800px}
+.stage{background:#F3F3F5;border-radius:16px;padding:32px;display:flex;justify-content:center;align-items:flex-start}
+.dlg{background:#FFFFFF;border-radius:20px;box-shadow:0 8px 32px rgba(11,11,12,0.14);display:flex;flex-direction:column}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px 0;gap:16px}
+.dt{font-family:'Inter Tight',sans-serif;font-size:18px;line-height:26px;font-weight:600;color:#0B0B0C}
+.ds{font-size:13px;line-height:18px;color:#6B6B70;margin-top:2px}
+.ib0{font-family:inherit;width:32px;height:32px;border:0;border-radius:8px;background:none;color:#6B6B70;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.df{display:flex;align-items:center;gap:8px;padding:16px 24px;border-top:1px solid #EAEAEC}
+.pri{font-family:inherit;height:36px;border:0;border-radius:8px;background:#6E1630;color:#FFFFFF;font-size:14px;font-weight:500;padding:0 14px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.sec{font-family:inherit;height:36px;border:1px solid #DADADF;border-radius:8px;background:#FFFFFF;color:#0B0B0C;font-size:14px;font-weight:500;padding:0 14px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.sm{height:32px;font-size:13px;padding:0 12px}
+.dng{color:#C42B1C;border-color:#F3C9C4}
+.mk{display:inline-block;width:16px;height:6px;border-radius:999px;flex-shrink:0}
+.row2{display:grid;grid-template-columns:repeat(2,864px);gap:56px;align-items:start}
+.sect{font-family:'Inter Tight',sans-serif;font-size:13px;font-weight:600;color:#6E1630;margin-bottom:-8px}
+.av{width:22px;height:22px;border-radius:50%;background:#F1E4EB;color:#661642;font-size:9px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.mb{display:flex;flex-direction:column;padding:12px 24px 20px}
+.mr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #EAEAEC}
+.mr.last{border-bottom:0}
+.mi{width:36px;height:36px;border-radius:10px;background:#F3F3F5;color:#45454A;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.mi.red{background:#FDEDEB;color:#C42B1C}
+.mt{flex:1;min-width:0}
+.mn{font-size:14px;line-height:20px;font-weight:500;color:#0B0B0C}
+.ml{font-size:13px;line-height:18px;color:#6B6B70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sep{height:8px}
+.blk{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;background:#FDEDEB;font-size:14px;margin-bottom:4px}
+.blk b{font-weight:600;color:#A12215}
+.er{display:flex;align-items:center;gap:12px;height:44px;border-bottom:1px solid #EAEAEC;font-size:14px}
+.es{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#0B0B0C}
+.ed{font-size:13px;color:#6B6B70;font-variant-numeric:tabular-nums}
+.more{padding-top:12px;font-size:13px;font-weight:500;color:#6E1630}
+.trk{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:#F3F3F5}
+.tb{height:28px;padding:0 12px;border-radius:999px;display:inline-flex;align-items:center;font-size:14px;font-weight:500;color:#6B6B70}
+.tb.on{background:#E9DCE0;color:#6E1630}
+.cb2{display:flex;flex-direction:column;gap:24px;padding:20px 24px 24px}
+.acc{display:flex;align-items:center;gap:16px;padding:14px 16px;border-radius:16px;background:#F7F7F8}
+.tg{width:36px;height:20px;border-radius:999px;background:#DADADF;position:relative;flex-shrink:0}
+.tg span{position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 2px rgba(11,11,12,.15)}
+.tg.on{background:#6E1630}.tg.on span{left:18px}
+.sx{display:flex;flex-direction:column}
+.sh{display:flex;align-items:baseline;justify-content:space-between;font-family:'Inter Tight',sans-serif;font-size:16px;line-height:24px;font-weight:600;padding-bottom:4px;border-bottom:1px solid #EAEAEC}
+.sh .lk{font-family:Inter,sans-serif;font-size:13px}
+.kv{display:grid;grid-template-columns:200px 1fr auto;align-items:center;gap:16px;min-height:40px;border-bottom:1px solid #EAEAEC;font-size:14px;line-height:20px}
+.kv .k{color:#0B0B0C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv .v{color:#6B6B70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk{font-size:13px;font-weight:500;color:#6E1630;text-decoration:none;white-space:nowrap}
+.lk.red{color:#C42B1C}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.two .kv{grid-template-columns:1fr auto;row-gap:0}
+.two .kv .v{grid-column:1;grid-row:2;font-size:13px;line-height:18px;padding-bottom:8px}
+.two .kv .k{padding-top:8px}
+.two .kv .lk{grid-column:2;grid-row:1 / span 2}
+.bz{display:flex;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #EAEAEC}
+.two > div{display:flex;flex-direction:column;gap:24px}
+</style>
+
+<div style="width: 1880px; height: 2780px; box-sizing: border-box; padding: 56px 64px; background: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; color: #0B0B0C; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end"><div style="display: flex; flex-direction: column; gap: 4px"><div style="font-family: 'Inter Tight', sans-serif; font-size: 13px; color: #6E1630; font-weight: 600">Sandbox · Profile · ⋯ menu</div><h1 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 44px; font-weight: 500; letter-spacing: -0.04em">Manage account</h1></div><p style="margin: 0; max-width: 680px; font-size: 15px; line-height: 1.55; color: #45454A">Seven account actions leave the ⋯ menu and live in one dialog: see the state, change it, set it up. Reza Karimi, an active person.</p></div>
+<div class="sect">C · chosen direction · everything open, no extra clicks</div>
+<div class="row2"><div class="col"><div class="lab">C · Manage account<span class="tag">Chosen</span></div><div class="stage"><div class="dlg" style="width: 800px"><div class="dh"><div><div class="dt">Manage account</div><div class="ds">Reza Karimi · reza.karimi@example.com</div></div><button class="ib0" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div><div class="cb2"><div class="sx"><div class="sh"><span>Login</span></div><div class="kv"><span class="k">Password</span><span class="v">Set · changed 12 Oct</span><a class="lk" href="#">Send reset link</a></div><div class="kv"><span class="k">Two-step login</span><span class="v">On · authenticator app</span><a class="lk" href="#">Reset</a></div><div class="kv"><span class="k">Google</span><span class="v">reza.karimi@example.com</span><a class="lk" href="#">Unlink</a></div></div><div class="sx"><div class="sh"><span>Sessions · 2 devices</span><a class="lk" href="#">Log out everywhere</a></div><div class="kv"><span class="k">MacBook · Chrome</span><span class="v">Vilnius · active now</span><a class="lk" href="#">Log out</a></div><div class="kv"><span class="k">iPhone · Safari</span><span class="v">Vilnius · today, 09:14</span><a class="lk" href="#">Log out</a></div></div><div class="sx"><div class="sh"><span>Emails sent · 14</span><a class="lk" href="#">Show all</a></div><div class="kv"><span class="k">Your time off is approved</span><span class="v">18 Nov, 14:02</span></div><div class="kv"><span class="k">Reset your password</span><span class="v">17 Nov, 10:41</span></div><div class="kv"><span class="k">Your mid-year review is due Fri 20 Nov</span><span class="v">13 Nov, 09:00</span></div></div><div class="sx"><div class="sh"><span>Personal data</span></div><div class="kv"><span class="k">Everything noddo keeps about Reza</span><span class="v">One file</span><a class="lk" href="#">Export</a></div></div><div class="bz"><div style="flex: 1"><div class="mn">Block account</div><div class="ml">Reza can’t log in until you unblock. They’re logged out everywhere at once.</div></div><button class="sec sm dng">Block account</button></div></div></div></div><div class="cap">Strict and open: Login, Sessions, the last emails, Personal data — each action a quiet text link next to what it acts on. Block account is the last block, apart, with its own words and a red-outlined button, so it's plain that this blocks the account.</div></div><div class="col"><div class="lab">C · Account blocked</div><div class="stage"><div class="dlg" style="width: 800px"><div class="dh"><div><div class="dt">Manage account</div><div class="ds">Reza Karimi · reza.karimi@example.com</div></div><button class="ib0" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div><div class="cb2"><div class="blk" style="margin: 0"><span style="color: #C42B1C; display: inline-flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M6 6l12 12"></path></svg></span><b>Blocked</b><span style="flex: 1"></span><span style="color: #45454A">on 3 Nov · can’t log in</span></div><div class="sx"><div class="sh"><span>Login</span></div><div class="kv"><span class="k">Password</span><span class="v">Set · changed 12 Oct</span><a class="lk" href="#">Send reset link</a></div><div class="kv"><span class="k">Two-step login</span><span class="v">On · authenticator app</span><a class="lk" href="#">Reset</a></div><div class="kv"><span class="k">Google</span><span class="v">reza.karimi@example.com</span><a class="lk" href="#">Unlink</a></div></div><div class="sx"><div class="sh"><span>Sessions</span></div><div class="kv"><span class="k">No devices</span><span class="v">Logged out when the account was blocked</span></div></div><div class="sx"><div class="sh"><span>Emails sent · 14</span><a class="lk" href="#">Show all</a></div><div class="kv"><span class="k">Your time off is approved</span><span class="v">18 Nov, 14:02</span></div><div class="kv"><span class="k">Reset your password</span><span class="v">17 Nov, 10:41</span></div><div class="kv"><span class="k">Your mid-year review is due Fri 20 Nov</span><span class="v">13 Nov, 09:00</span></div></div><div class="sx"><div class="sh"><span>Personal data</span></div><div class="kv"><span class="k">Everything noddo keeps about Reza</span><span class="v">One file</span><a class="lk" href="#">Export</a></div></div><div class="bz"><div style="flex: 1"><div class="mn">Unblock account</div><div class="ml">Reza can log in again right away.</div></div><button class="sec sm">Unblock account</button></div></div></div></div><div class="cap">The red bar on top (as approved) says since when. Sessions are empty — Reza was logged out. The last block turns into Unblock account, a plain secondary button.</div></div></div>
+<div class="row2"><div class="col"><div class="lab">C · Emails sent › Show all<span class="tag">Liked</span></div><div class="stage"><div class="dlg" style="width: 800px"><div class="dh"><div><div style="display: flex; align-items: center; gap: 8px"><button class="ib0" aria-label="Back" style="margin-left: -8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button><div class="dt">Emails sent</div></div><div class="ds">14 emails to reza.karimi@example.com</div></div><button class="ib0" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div><div class="mb" style="padding-top: 12px"><div class="er"><span class="es">Your time off is approved</span><span class="ed">18 Nov, 14:02</span></div><div class="er"><span class="es">Reset your password</span><span class="ed">17 Nov, 10:41</span></div><div class="er"><span class="es">Your mid-year review is due Fri 20 Nov</span><span class="ed">13 Nov, 09:00</span></div><div class="er"><span class="es">Sign “Remote work agreement”</span><span class="ed">4 Nov, 16:20</span></div><div class="er"><span class="es">Your login code</span><span class="ed">2 Nov, 08:55</span></div><div class="er"><span class="es">You’re invited to Acme on noddo</span><span class="ed">19 Mar 2024, 11:12</span></div><div class="more">Show 8 more</div></div></div></div><div class="cap">Show all opens the full list in the same dialog, back arrow top left. Newest first, subject and when.</div></div><div class="col"><div class="lab">C · Block account, confirm<span class="tag">Liked</span></div><div class="stage"><div class="dlg" style="width: 400px"><div class="dh"><div class="dt">Block Reza’s account?</div></div><div style="padding: 8px 24px 20px; font-size: 14px; line-height: 20px; color: #45454A">Reza won’t be able to log in. Their profile and data stay. You can unblock any time.</div><div class="df" style="justify-content: flex-end; border-top: 0; padding-top: 0"><button class="sec">Cancel</button><button class="pri" style="background: #C42B1C">Block account</button></div></div></div><div class="cap">Block account and Log out everywhere ask first (dialog 400). Send reset link, Reset, Unlink, Log out and Export act at once with a toast: “Reset link sent”, “Two-step login reset”, “Google unlinked”, “Logged out of MacBook”, “Export started”.</div></div></div>
+</div>
+
+
+</body>
+</html>

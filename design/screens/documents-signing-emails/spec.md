@@ -83,3 +83,15 @@ None blocks this.
 - **Where to see it:** Mailpit, after sending for signature, signing, cancelling — the Document kind of
   email (`LoginEmail` Kind.DOCUMENT, the paper band from `design/email-images.mjs`). Built 2026-11-18, walked in Mailpit the same day.
 - **Differs from the design:** nothing known.
+
+**The designers' round of 19 Nov (2026-11-20, built, not yet seen in Mailpit):**
+- **G15:** the heading breaks "Here’s your code / to sign"; the document's name is regular; a guest's footer says
+  "You get this because {Company} asked you to sign a document." (a member keeps "you have an account at").
+- **G14, G16:** no year in the current year ("sign by 17 Dec", "signed by 2 people on 18 Nov", "until 18 Dec"); the
+  button sized to its label (48, 16/600, padding 0 24), not the full width.
+- **Not done:**
+  - **The company's address in the footer** waits on AQ-10 (the product has no postal address).
+  - **"4 pages"** in G14's meta waits on AQ-11.
+  - **The file-type tile and the "Sign here" / "✓ Signed" marks on the paper** are images (`design/email-images.mjs`):
+    they need the images regenerated, and the card's tile an icon image — not in this round. The button keeps its arrow
+    image, not a chevron.

@@ -60,8 +60,17 @@ export class HrisApiMfaClient {
     await hrisApiClient.post<void>("/auth/step-up/email-code/verify", { code, browserToken });
   }
 
-  public async resetUser(userId: string, verifiedOutOfBand: boolean): Promise<void> {
-    await hrisApiClient.post<void>(`/users/${userId}/mfa/reset`, { verifiedOutOfBand });
+  /**
+   * One window (AQ-06): the admin's own proof may ride on the reset — `password` (no factor), `code` / `backupCode`
+   * (a factor), or `emailCode` with the `__Host-code` browser token (signs in by code). Without it a fresh step-up is
+   * needed. `verifiedOutOfBand` must be true.
+   */
+  public async resetUser(
+    userId: string,
+    verifiedOutOfBand: boolean,
+    proof?: { password?: string; code?: string; backupCode?: string; emailCode?: string; browserToken?: string },
+  ): Promise<void> {
+    await hrisApiClient.post<void>(`/users/${userId}/mfa/reset`, { verifiedOutOfBand, ...(proof ?? {}) });
   }
 
   public async securitySettings(): Promise<SecuritySettingsDTO> {

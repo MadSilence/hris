@@ -153,7 +153,7 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
         </div>
       </CardHeader>
 
-      <CardContent className="px-0 pb-0 pt-0 max-h-[calc(100svh-328px)] overflow-y-auto">
+      <CardContent className="px-0 pb-0 pt-0 max-h-[calc(100cqh-328px)] overflow-y-auto">
         {isLoading ? (
           <FieldAccessSkeleton/>
         ) : error ? (
@@ -172,7 +172,6 @@ export default function FieldAccessContainer({ roleId }: { roleId: string }) {
                   : undefined
             }
             query={query}
-            onClearSearch={() => setQuery("")}
             openGroups={openGroups}
             onOpenGroupsChange={setOpenGroups}
             onChangeAction={handleChange}

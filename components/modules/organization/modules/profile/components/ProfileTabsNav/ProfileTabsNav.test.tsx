@@ -3,10 +3,12 @@ import { render, screen } from "@testing-library/react";
 import { ProfileTabsNav } from "./ProfileTabsNav";
 
 const push = jest.fn();
+const replace = jest.fn();
+let pathname = "/organization/people/u1/personal";
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/organization/people/u1/personal",
-  useRouter: () => ({ push }),
+  usePathname: () => pathname,
+  useRouter: () => ({ push, replace }),
 }));
 
 let viewerId = "someone-else";
@@ -23,7 +25,11 @@ jest.mock("@/components/providers/CurrentUserProvider", () => ({
 describe("ProfileTabsNav", () => {
   // Radix puts `role="tab"` on the anchor it renders through `asChild`, so the trigger is a tab
   // rather than a link as far as the accessibility tree is concerned.
-  beforeEach(() => { viewerId = "someone-else"; });
+  beforeEach(() => {
+    viewerId = "someone-else";
+    pathname = "/organization/people/u1/personal";
+    replace.mockReset();
+  });
 
   // Public profile, Salary, Forms, Tasks and Notes are UI only and carry no resource yet.
   const UNGATED = ["Public profile", "Personal info", "Salary", "Forms", "Tasks", "Notes"];
@@ -93,5 +99,35 @@ describe("ProfileTabsNav", () => {
     unmount();
     render(<ProfileTabsNav userId="u1" managerId="boss"/>);
     expect(tabNames()).not.toContain("Reviews");
+  });
+
+  // W11: a hidden tab opened by its address sends the reader to the first tab they may see.
+  it("sends a reader who typed a hidden tab's address to their first visible tab", () => {
+    pathname = "/organization/people/u1/attendance";
+    render(<ProfileTabsNav userId="u1" capabilities={{ "PEOPLE.DOCUMENTS": ["VIEW"] }}/>);
+
+    expect(replace).toHaveBeenCalledWith("/organization/people/u1/public-profile");
+  });
+
+  it("leaves a reader on a tab they may see where they are", () => {
+    pathname = "/organization/people/u1/time-off";
+    render(<ProfileTabsNav userId="u1" capabilities={{ "PEOPLE.TIME_OFF": ["VIEW"] }}/>);
+
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("does not move anybody before the capability map has arrived", () => {
+    pathname = "/organization/people/u1/time-off";
+    render(<ProfileTabsNav userId="u1"/>);
+
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("sends nobody away from Reviews who may read it as the person", () => {
+    viewerId = "u1";
+    pathname = "/organization/people/u1/reviews";
+    render(<ProfileTabsNav userId="u1" capabilities={{}}/>);
+
+    expect(replace).not.toHaveBeenCalled();
   });
 });

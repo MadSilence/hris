@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
 import { useShortDates } from "@/lib/date";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useSectionExpiring } from "@/components/modules/signing/hooks/useDocumentsSection";
+import { NO_SECTION_FILTERS, useSectionExpiring } from "@/components/modules/signing/hooks/useDocumentsSection";
 import {
   BigNumber,
   CounterPill,
@@ -31,7 +31,7 @@ const FULL_LIST = "/documents?view=expiring";
 export const ExpiringDocumentsWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const t = useTranslations("home");
   const dates = useShortDates();
-  const query = useSectionExpiring(true);
+  const query = useSectionExpiring(NO_SECTION_FILTERS, true);
   const rows = [...(query.data ?? [])].sort((a, b) =>
     (a.document.expiresOn ?? "").localeCompare(b.document.expiresOn ?? ""),
   );

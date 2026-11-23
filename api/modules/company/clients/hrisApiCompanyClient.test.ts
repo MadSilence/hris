@@ -30,7 +30,7 @@ describe("HrisApiCompanyClient", () => {
       id: "company-id",
       name: "My Company",
       subdomain: "my-company",
-      companyLogo: "http://localhost:8080/uploads/logo.png",
+      companyLogo: "/uploads/logo.png",
       description: null,
       website: null,
     });

@@ -10,6 +10,8 @@ import {
   DocumentFolderContentDTO,
   DocumentFolderDTO,
   DocumentCategoryDTO,
+  DocumentCategoryDeleteImpactDTO,
+  DeleteDocumentCategoryRequest,
   MoveDocumentRequest,
   RenameDocumentFolderRequest,
   RenameDocumentRequest,
@@ -148,8 +150,13 @@ export class HrisApiDocumentsClient {
     );
   }
 
-  public async deleteCategory(id: string): Promise<void> {
-    await hrisApiClient.post<void>(`${this.BASE_PATH}/categories/${id}/delete`);
+  public async getCategoryDeleteImpact(id: string): Promise<DocumentCategoryDeleteImpactDTO> {
+    return hrisApiClient.get<DocumentCategoryDeleteImpactDTO>(`${this.BASE_PATH}/categories/${id}/delete-impact`);
+  }
+
+  /** AQ-19: no body is KEEP; a category no document carries is deleted whatever the body says. */
+  public async deleteCategory(id: string, body?: DeleteDocumentCategoryRequest): Promise<void> {
+    await hrisApiClient.post<void>(`${this.BASE_PATH}/categories/${id}/delete`, body ?? { strategy: "KEEP" });
   }
 
   /** Several documents at once (D2): each checked and journalled as one, all or none. */

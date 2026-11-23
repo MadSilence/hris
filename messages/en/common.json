@@ -65,6 +65,7 @@
     "personName": "Name"
   },
   "values": {
+    "moreCount": "+{count}",
     "yes": "Yes",
     "no": "No",
     "none": "None",
@@ -112,9 +113,9 @@
     "active": "Active"
   },
   "userStatus": {
-    "prospective": "Not started",
+    "prospective": "Joining",
     "active": "Active",
-    "archived": "Archived"
+    "archived": "Inactive"
   },
   "accountStatus": {
     "draft": "Draft",
@@ -137,7 +138,10 @@
   "emptyState": {
     "nothingArchived": "Nothing archived",
     "archivedDescription": "Archived records will appear here.",
-    "noResultsHint": "Try a different search."
+    "noResultsHint": "Try a different word.",
+    "nothingCalled": "Nothing called “{query}”",
+    "tryFewerFilters": "Try fewer filters.",
+    "clearAll": "Clear all"
   },
   "toggles": {
     "archived": "Archived",
@@ -159,6 +163,12 @@
     "stepOf": "Step {current} of {total} · {label}"
   },
   "datePicker": {
+    "today": "Today",
+    "clear": "Clear",
+    "month": "Month",
+    "year": "Year",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
     "pickDate": "Pick a date",
     "pickRange": "Pick a range",
     "clearDate": "Clear date",
@@ -172,7 +182,6 @@
     "empty": "Nothing found"
   },
   "searchField": {
-    "placeholder": "Search…",
     "searchIn": "Search in",
     "noResults": "0 results",
     "matchOf": "{current} of {total}",

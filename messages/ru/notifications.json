@@ -15,12 +15,12 @@
       "needsAction": "Требует действий"
     },
     "empty": {
-      "search": "Нет уведомлений по вашему запросу.",
-      "unread": "Нет непрочитанных уведомлений.",
-      "starred": "Нет уведомлений со звёздочкой.",
-      "needsAction": "Ничего не требует ваших действий.",
-      "category": "В этой категории ничего нет.",
-      "none": "Уведомлений пока нет."
+      "unread": "Нет непрочитанных уведомлений",
+      "starred": "Нет уведомлений со звёздочкой",
+      "needsAction": "Ничего не требует ваших действий",
+      "category": "В этой категории ничего нет",
+      "none": "Нечего проверять",
+      "noneLine": "Мы скажем, когда понадобится ваше согласие."
     },
     "dateGroup": {
       "today": "Сегодня",
@@ -67,8 +67,6 @@
   },
   "actions": {
     "approve": "Согласовать",
-    "reject": "Отклонить",
-    "reason": "Причина",
     "approveCancellation": "Согласовать отмену",
     "decline": "Отказать",
     "outcomes": {
@@ -186,8 +184,8 @@
       "message": "Ваша {hasPolicy, select, yes {заявка «{policy}»} other {заявка на отсутствие}} {dates} согласована{hasActor, select, yes { — согласовал(а) {actor}} other {}}."
     },
     "requestRejected": {
-      "title": "Отсутствие отклонено",
-      "message": "Ваша {hasPolicy, select, yes {заявка «{policy}»} other {заявка на отсутствие}} {dates} отклонена{hasActor, select, yes { — отклонил(а) {actor}} other {}}."
+      "title": "{hasActor, select, yes {{actor} отклонил(а) вашу заявку на отсутствие} other {Ваша заявка на отсутствие отклонена}}",
+      "message": "{hasPolicy, select, yes {{policy}} other {Отсутствие}}{hasDates, select, yes {, {dates}} other {}}{hasComment, select, yes {\nКомментарий: {comment}} other {}}"
     },
     "cancellationApproved": {
       "title": "Отмена согласована",

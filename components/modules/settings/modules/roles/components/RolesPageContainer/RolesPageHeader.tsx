@@ -18,6 +18,9 @@ export interface RolesPageHeaderProps {
   isExporting?: boolean;
   createRoleErrorMessage?: string;
   templates?: { id: string; name: string; description?: string }[];
+  /** The Add role dialog, when the page opens it from elsewhere too (the empty list, ES6). */
+  addOpen?: boolean;
+  onAddOpenChange?: (open: boolean) => void;
 }
 
 export default function RolesPageHeader({
@@ -29,9 +32,13 @@ export default function RolesPageHeader({
   isExporting = false,
   createRoleErrorMessage,
   templates = [],
+  addOpen: addOpenProp,
+  onAddOpenChange,
 }: RolesPageHeaderProps) {
   const t = useTranslations("settings");
-  const [addOpen, setAddOpen] = React.useState(false);
+  const [addOpenOwn, setAddOpenOwn] = React.useState(false);
+  const addOpen = addOpenProp ?? addOpenOwn;
+  const setAddOpen = onAddOpenChange ?? setAddOpenOwn;
   const [exportOpen, setExportOpen] = React.useState(false);
 
   return (

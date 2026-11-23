@@ -43,7 +43,6 @@
     "promoteToParent": "Promote to parent level",
     "promoteToParentNamed": "Promote to parent level ({parent})",
     "removeNamed": "Remove {name}",
-    "searchPeople": "Search people…",
     "searchPerson": "Search for a person",
     "searching": "Searching…",
     "showArchived": "Show archived",
@@ -131,7 +130,6 @@
       "none": "No team"
     },
     "search": {
-      "placeholder": "Search teams…",
       "unitsMode": "Teams",
       "unknown": "Unknown team"
     },
@@ -237,7 +235,6 @@
       "none": "No department"
     },
     "search": {
-      "placeholder": "Search departments…",
       "unitsMode": "Departments",
       "unknown": "Unknown department"
     },
@@ -321,7 +318,6 @@
       "add": "Add office",
       "emptyTitle": "No offices yet",
       "emptyDescription": "An office is a place people work from. Add the first one to start assigning people to it.",
-      "noResultsHint": "Try a different name, country or address.",
       "archivedDescription": "Archived offices will appear here.",
       "rowActions": "Office actions",
       "exportDescription": "Export all offices with their address, assigned people, and creation details.",
@@ -367,8 +363,7 @@
       "export": "Export legal entities",
       "add": "Add legal entity",
       "emptyTitle": "No legal entities yet",
-      "emptyDescription": "A legal entity is the company people are employed by. Add the first one to start assigning people to it.",
-      "noResultsHint": "Try a different name, country or registration number.",
+      "emptyDescription": "Add the company your people are employed by.",
       "archivedDescription": "Archived legal entities will appear here.",
       "rowActions": "Legal entity actions",
       "exportDescription": "Export all legal entities with their address, assigned people, and creation details.",
@@ -417,8 +412,7 @@
     },
     "empty": {
       "title": "No job families yet",
-      "description": "A job family groups related positions. Add the first one to start building the catalog.",
-      "noResultsHint": "Try a different family, position or code.",
+      "description": "Group roles into families to build career paths.",
       "archivedDescription": "Archived job families will appear here."
     },
     "export": {
@@ -519,8 +513,7 @@
     "intro": "Group job levels into career tracks and define the progression employees move through within each.",
     "empty": {
       "title": "No career tracks yet",
-      "description": "A track groups job levels into the progression somebody moves through. Add the first one to start placing jobs on it.",
-      "noResultsHint": "Try a different track or level name."
+      "description": "A track groups job levels into the progression somebody moves through. Add the first one to start placing jobs on it."
     },
     "card": {
       "trackActions": "Track actions",

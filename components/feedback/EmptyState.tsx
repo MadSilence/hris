@@ -30,6 +30,7 @@ export const EmptyState: React.FC<{
   /** Which ring illustration heads the block (`components/illustrations`). */
   scene: Scene;
   title: string;
+  /** One line under the title; an empty string leaves the line out. */
   description: string;
   /** The create action, as the block's primary button. Omit where nobody may create. */
   onCreate?: () => void;
@@ -41,96 +42,158 @@ export const EmptyState: React.FC<{
    */
   action?: React.ReactNode;
   /**
-   * Fills the height its parent gives it instead of sizing to its own content — for a **page** whose whole
-   * body is the empty state (Tasks, Processes, the Inbox). The parent has to have a height.
+   * Fills the height its parent gives it — for a box that has a height of its own and scrolls inside it (the
+   * Inbox's list, a tool window). On a page the block fills the free area by itself ({@link useFreeArea}).
    */
   fill?: boolean;
   /**
    * The small block, for a list that is one section of a page — "To write" on My reviews, the reviewers of a
    * cycle — where the full-size block would outweigh the sections around it. Same parts, the S illustration.
+   * It is never stretched over the free area.
    */
   compact?: boolean;
   className?: string;
-}> = ({ scene, title, description, onCreate, createLabel, action, fill, compact, className }) => (
-  <div
-    data-slot="empty-state"
-    className={cn(
-      "flex w-full flex-col items-center justify-center px-6 text-center",
-      compact ? "gap-3 py-6" : "gap-4 py-12",
-      fill && "h-full",
-      className,
-    )}
-  >
-    <Illustration scene={scene} size={compact ? "s" : "m"} />
-    <div className="flex flex-col gap-1">
-      <p className={compact ? "text-body font-medium text-primary" : "text-section-title text-primary"}>{title}</p>
-      <p className="mx-auto max-w-sm text-body whitespace-pre-line text-tertiary">{description}</p>
-    </div>
-    {action ??
-      (onCreate && createLabel ? (
-        <Button type="button" size={compact ? "sm" : "md"} onClick={onCreate}>
-          <Icon icon={Add01Icon} size="sm" />
-          {createLabel}
-        </Button>
-      ) : null)}
-  </div>
-);
-
-/** The one way out of a search that matched nothing (SPEC § 12). */
-export const ClearSearchButton: React.FC<{
-  onClick: () => void;
-  /** `link` for a no-match line of text; the block's button otherwise. */
-  variant?: "secondary" | "link";
-  className?: string;
-}> = ({ onClick, variant = "secondary", className }) => {
-  const t = useTranslations("common");
+}> = ({ scene, title, description, onCreate, createLabel, action, fill, compact, className }) => {
+  const ref = useFreeArea<HTMLDivElement>(!compact);
+  const control =
+    action ??
+    (onCreate && createLabel ? (
+      <Button type="button" size={compact ? "sm" : "md"} onClick={onCreate}>
+        <Icon icon={Add01Icon} size="sm" />
+        {createLabel}
+      </Button>
+    ) : null);
   return (
-    <Button type="button" variant={variant} size="sm" className={className} onClick={onClick}>
-      {t("searchField.clear")}
-    </Button>
+    <div
+      ref={ref}
+      data-slot="empty-state"
+      data-free-area={compact ? undefined : ""}
+      className={cn(
+        "flex w-full flex-col items-center justify-center px-6 text-center",
+        compact ? "py-6" : "py-12",
+        fill && "h-full",
+        className,
+      )}
+    >
+      <Illustration scene={scene} size={compact ? "s" : "m"} />
+      {/* SPEC § 12, the designers' D09: the drawing, 14, the title, 6, the line, 20, the action. */}
+      <div className={cn("flex flex-col gap-1.5", compact ? "mt-3" : "mt-3.5")}>
+        <p className={compact ? "text-body font-medium text-primary" : "text-section-title text-primary"}>{title}</p>
+        {description ? <p className="mx-auto max-w-md text-body whitespace-pre-line text-secondary">{description}</p> : null}
+      </div>
+      {control ? <div className={compact ? "mt-4" : "mt-5"}>{control}</div> : null}
+    </div>
   );
 };
 
 /**
- * The search matched nothing (SPEC § 13.5: "No one matches these filters", the S illustration).
+ * Empty, no-results and error states sit in the vertical centre of **the free area under the page's toolbar**
+ * (`rules/TABLES_AND_LISTS.md` § 3, the designers' ES1). A page has no height of its own — the app's `<main>`
+ * scrolls and the page inside it is as tall as its content — so no class can say "the rest of the window". This
+ * measures it: the block's minimum height becomes its own height plus the room left at the bottom of the box that
+ * scrolls around it — the app's `<main>`, or a card, a panel or a dialog that scrolls on its own — and the block's
+ * own centring does the rest. It follows the window and the content as they change size.
+ *
+ * Nothing scrolls around it (a dropdown, a test): it stays its own size. Two blocks in one box: the first one takes
+ * the room, so they never fight over it.
+ */
+function useFreeArea<T extends HTMLElement>(enabled: boolean) {
+  const ref = React.useRef<T>(null);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el || typeof ResizeObserver === "undefined") return;
+    let box: HTMLElement | null = el.parentElement;
+    while (box && box.tagName !== "MAIN" && !/^(auto|scroll)$/.test(getComputedStyle(box).overflowY)) {
+      box = box.parentElement;
+    }
+    if (!box || box.querySelector("[data-free-area]") !== el) return;
+    const scroller = box;
+
+    /** How tall the box's content is — its children in the flow, its padding and its gaps. */
+    const contentHeight = () => {
+      const style = getComputedStyle(scroller);
+      const children = Array.from(scroller.children).filter((child) => {
+        const position = getComputedStyle(child).position;
+        return position !== "absolute" && position !== "fixed";
+      });
+      const gap = /flex|grid/.test(style.display) ? (parseFloat(style.rowGap) || 0) * Math.max(0, children.length - 1) : 0;
+      return (
+        children.reduce((sum, child) => sum + child.getBoundingClientRect().height, 0) +
+        gap +
+        (parseFloat(style.paddingTop) || 0) +
+        (parseFloat(style.paddingBottom) || 0)
+      );
+    };
+
+    let frame = 0;
+    const fit = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const room = scroller.clientHeight - contentHeight();
+        const next = Math.max(0, Math.floor(el.getBoundingClientRect().height + room));
+        const now = parseFloat(el.style.minHeight) || 0;
+        if (Math.abs(next - now) >= 1) el.style.minHeight = `${next}px`;
+      });
+    };
+    const observer = new ResizeObserver(fit);
+    observer.observe(scroller);
+    for (const child of Array.from(scroller.children)) observer.observe(child);
+    fit();
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      el.style.minHeight = "";
+    };
+  }, [enabled]);
+  return ref;
+}
+
+/**
+ * The search matched nothing, or a filter left nothing (SPEC § 12, the designers' D10 and T15).
  *
  * **Offers no create action**, which is the entire reason it is a separate component: the records exist, the
  * query missed them, and inviting somebody to create a duplicate is the wrong answer to "I cannot find the
  * thing I know is there".
  */
 export const NoResults: React.FC<{
-  /** What was being looked for, for the second line: "Try a different name or email." */
+  /** The second line; "Try a different word." unless given, an empty string leaves it out. */
   hint?: string;
+  /** "No results" unless given; a list's search says "Nothing called “…”" ({@link ListEmptyState}). */
   title?: string;
-  /** A way out — "Clear filters". */
+  /** A way out — "Clear all". */
   action?: React.ReactNode;
-  /** Renders Clear search as the way out, when no `action` is given. */
-  onClearSearch?: () => void;
   /** `no-results-s` for a search that missed; `no-match-s`, the funnel, for a filter that left nothing. */
   scene?: Extract<Scene, "no-results-s" | "no-match-s">;
   /** See {@link EmptyState}'s `fill`. */
   fill?: boolean;
   /**
-   * `page` — a page's own no-results, drawn in a card of its own under the toolbar (the designers' Automations fixes
-   * A12, 2026-11-18): the title in the section style, the line in secondary grey. `panel`, the default, is the small
-   * block of a list inside a page, a panel or a dropdown.
+   * `page`, the default — the block of a page or a list, centred in the free area like {@link EmptyState}, its
+   * title 18/26 600 (the designers' ES1, ES2). `panel` — the small block inside a dropdown, a dialog or a tool
+   * window, where the page's title would outweigh what is around it.
    */
   variant?: "panel" | "page";
   className?: string;
-}> = ({ hint, title, action, onClearSearch, scene = "no-results-s", fill, variant = "panel", className }) => {
+}> = ({ hint, title, action, scene = "no-results-s", fill, variant = "page", className }) => {
   const t = useTranslations("common");
+  const page = variant === "page";
+  const ref = useFreeArea<HTMLDivElement>(page);
+  // No "Clear search" here (C10, 2026-11-23): the search field's own × empties it.
+  const control = action;
+  const line = hint ?? t("emptyState.noResultsHint");
   return (
-  <div className={cn("flex w-full flex-col items-center justify-center gap-3 px-6 py-8 text-center", fill && "h-full", className)}>
-    <Illustration scene={scene} size="s" />
-    <div className="flex flex-col gap-1">
-      <p className={variant === "page" ? "text-section-title text-primary" : "text-body font-medium text-primary"}>
-        {title ?? t("states.noResults")}
-      </p>
-      <p className={cn("mx-auto max-w-sm text-body", variant === "page" ? "text-secondary" : "text-tertiary")}>
-        {hint ?? t("emptyState.noResultsHint")}
-      </p>
+    <div
+      ref={ref}
+      data-free-area={page ? "" : undefined}
+      className={cn("flex w-full flex-col items-center justify-center px-6 text-center", page ? "py-12" : "py-8", fill && "h-full", className)}
+    >
+      <Illustration scene={scene} size="s" />
+      <div className={cn("flex flex-col gap-1.5", page ? "mt-3.5" : "mt-3")}>
+        <p className={page ? "text-section-title text-primary" : "text-body font-medium text-primary"}>
+          {title ?? t("states.noResults")}
+        </p>
+        {line ? <p className="mx-auto max-w-md text-body text-secondary">{line}</p> : null}
+      </div>
+      {control ? <div className={page ? "mt-5" : "mt-4"}>{control}</div> : null}
     </div>
-    {action ?? (onClearSearch && <ClearSearchButton onClick={onClearSearch} />)}
-  </div>
   );
 };

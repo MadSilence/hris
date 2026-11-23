@@ -22,7 +22,7 @@ export const HubPage: React.FC<{ children: React.ReactNode; width?: "full" | "co
   width = "full",
   className,
 }) => (
-  <div className={cn("flex min-h-[calc(100dvh_-_2_*_var(--page-padding))] flex-col xl:px-4", width === "column" && "max-w-[952px]", className)}>
+  <div className={cn("flex min-h-[calc(100cqh_-_2_*_var(--page-padding))] flex-col xl:px-4", width === "column" && "max-w-[952px]", className)}>
     {children}
   </div>
 );

@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/too
 import { Badge } from "@/components/desact/badge";
 import UserChip from "@/components/modules/settings/shared/UserChip/UserChip";
 import { PeopleTableSkeleton } from "@/components/modules/organization/components/PeopleTable/PeopleTableSkeleton";
-import { type DateFormatter, useDateFormatter, useDisplayLanguage, useDisplayLocale } from "@/lib/date";
+import { useDisplayLanguage, useDisplayLocale, useShortDates } from "@/lib/date";
 import { AttributeType } from "@/models/attribute/AttributeType";
 import { catalogLabel } from "@/models/attribute/managedCatalogs";
 import { optionValueLabel, parseCheckboxValue } from "@/models/attribute/attributeValue";
@@ -19,6 +19,7 @@ import { FieldMeta } from "@/components/modules/organization/components/PeopleTo
 import type { PersonRefDTO, RefDTO, UsersSearchItemDTO } from "@/models/user/fields";
 import { AccountStatusBadge, UserStatusBadge } from "@/components/ui/StatusBadge";
 import { sortKeyForColumn } from "@/components/modules/organization/components/PeopleTable/peopleSort";
+import { columnWidthClass } from "@/components/modules/organization/components/PeopleTable/peopleColumns";
 import { ListEmptyState } from "@/components/feedback/ListEmptyState";
 
 type SortDir = "asc" | "desc";
@@ -51,13 +52,16 @@ type PeopleTableProps = {
   visibleColumns: ColumnItem[];
   /** The search box's text and whether a filter is on — they decide which empty screen an empty page is. */
   query?: string;
-  onClearSearch?: () => void;
   filtered?: boolean;
+  /** Takes every filter off — the filtered empty screen's "Clear all". */
+  onClearFilters?: () => void;
 };
 
 // Was `toISOString().slice(0,10)`, which converts to UTC and therefore showed Created/Updated as a
 // different day to different readers.
-const formatDate = (iso: string | null | undefined, formatDisplayDate: DateFormatter) => (iso ? formatDisplayDate(iso) : "");
+// The short style, the month as a word and the order by the company's country, no year in the current one — "23 Jul
+// 2021", "19 Nov" (the designers' round 2, PE3).
+const formatDate = (iso: string | null | undefined, formatDisplayDate: (value: string) => string) => (iso ? formatDisplayDate(iso) : "");
 
 export default function PeopleTable({
   data = [],
@@ -71,15 +75,15 @@ export default function PeopleTable({
   onToggleOne,
   onToggleAllOnPage,
   query,
-  onClearSearch,
   filtered,
+  onClearFilters,
   fieldsMeta,
   visibleColumns,
 }: PeopleTableProps) {
   const active = sort;
 
   const t = useTranslations("organization");
-  const formatDisplayDate = useDateFormatter();
+  const formatDisplayDate = useShortDates().date;
   const locale = useDisplayLocale();
   const displayLanguage = useDisplayLanguage();
   const tCommon = useTranslations("common");
@@ -337,7 +341,7 @@ export default function PeopleTable({
                   key={column.id}
                   onClick={() => sortKey && toggleSort(sortKey)}
                   title={isSortable ? column.label : undefined}
-                  className={cn("truncate", isSortable && "cursor-pointer select-none")}
+                  className={cn("truncate", columnWidthClass(column.id), isSortable && "cursor-pointer select-none")}
                 >
                   <span className="inline-flex max-w-full items-center gap-1 align-middle text-primary">
                     <span className="truncate">{column.label}</span>
@@ -357,7 +361,7 @@ export default function PeopleTable({
           {data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={visibleColumns.length + 1}>
-                <PeopleEmptyState query={query} onClearSearch={onClearSearch} filtered={filtered} />
+                <PeopleEmptyState query={query} filtered={filtered} onClearFilters={onClearFilters} />
               </TableCell>
             </TableRow>
           ) : null}
@@ -400,17 +404,18 @@ export default function PeopleTable({
 
 
 /** Nobody yet, the search missed, or a filter left nobody — the shared ladder decides which. */
-const PeopleEmptyState: React.FC<{ query?: string; onClearSearch?: () => void; filtered?: boolean }> = ({
-  query,
-  onClearSearch,
-  filtered,
-}) => {
+const PeopleEmptyState: React.FC<{
+  query?: string;
+  filtered?: boolean;
+  onClearFilters?: () => void;
+}> = ({ query, filtered, onClearFilters }) => {
   const t = useTranslations("organization");
   return (
     <ListEmptyState
       query={query}
-      onClearSearch={onClearSearch}
       filtered={filtered}
+      noMatchTitle={t("table.empty.noMatch")}
+      onClearFilters={onClearFilters}
       scene="people"
       title={t("table.empty.title")}
       description={t("table.empty.description")}
@@ -422,6 +427,7 @@ function sysKeyFromId(id: string): string | null {
   if (!id.startsWith("sys:")) return null;
   return id.slice(4) || null;
 }
+
 
 /**
  * A person in a cell: chip with avatar and a link to the profile, like the Name column.

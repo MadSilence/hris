@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { AccessAction, ResourceCode } from "@/models/access";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { Button } from "@/components/desact/button";
 import { EmptyState, NoResults } from "@/components/feedback/EmptyState";
 import type { Scene } from "@/components/illustrations";
 
@@ -22,17 +23,23 @@ import type { Scene } from "@/components/illustrations";
  * The order is not arbitrary. **Search is checked first**, because a query that matches nothing is
  * true whether or not the underlying list is empty, and it is the more useful thing to say. A filter
  * that left nothing comes next, for the same reason — and gets the funnel rather than the magnifier.
+ *
+ * **The words of the two misses are the same in every list** (the designers' ES5, from Documents' T15 and D10):
+ * "Nothing called “{query}”" / "Try a different word.", and "No {things} match" / "Try fewer filters." with
+ * Clear all.
  */
 export const ListEmptyState: React.FC<{
   /** The current search text. Anything non-blank selects the no-results screen. */
   query?: string;
-  /** Empties the search box — the no-results screen's one action. */
-  onClearSearch?: () => void;
   /**
    * True when a filter (not the search box) is narrowing the list. A filter that leaves nothing is its own
-   * screen — the funnel, `no-match-s` — with the list's own title and sentence, and no create action.
+   * screen — the funnel, `no-match-s` — "No {things} match" / "Try fewer filters.", and no create action.
    */
   filtered?: boolean;
+  /** The filtered screen's title, naming the list's things: "No people match". */
+  noMatchTitle?: string;
+  /** Takes every filter off — the filtered screen's one action, "Clear all". */
+  onClearFilters?: () => void;
   /** True while the list is showing the archived view — the archive box, whatever the list's own scene. */
   archivedView?: boolean;
   /** The ring illustration of the nothing-yet screen. */
@@ -41,8 +48,6 @@ export const ListEmptyState: React.FC<{
   title: string;
   /** The nothing-yet sentence. Say what the thing is for, not that the list is empty. */
   description: string;
-  /** "Try a different name, country or registration number." */
-  noResultsHint?: string;
   /** The archived view's sentence. Defaults to a plain one. */
   archivedDescription?: string;
   onCreate?: () => void;
@@ -65,13 +70,13 @@ export const ListEmptyState: React.FC<{
   className?: string;
 }> = ({
   query,
-  onClearSearch,
   filtered,
   archivedView,
   scene,
   title,
   description,
-  noResultsHint,
+  noMatchTitle,
+  onClearFilters,
   archivedDescription,
   onCreate,
   createLabel,
@@ -82,11 +87,32 @@ export const ListEmptyState: React.FC<{
 }) => {
   const t = useTranslations("common");
   if (query?.trim()) {
-    return <NoResults hint={noResultsHint} onClearSearch={onClearSearch} fill={fill} className={className} />;
+    return (
+      <NoResults
+        title={t("emptyState.nothingCalled", { query: query.trim() })}
+        fill={fill}
+        className={className}
+      />
+    );
   }
 
   if (filtered) {
-    return <NoResults scene="no-match-s" title={title} hint={description} fill={fill} className={className} />;
+    return (
+      <NoResults
+        scene="no-match-s"
+        title={noMatchTitle}
+        hint={t("emptyState.tryFewerFilters")}
+        action={
+          onClearFilters ? (
+            <Button type="button" variant="secondary" size="sm" onClick={onClearFilters}>
+              {t("emptyState.clearAll")}
+            </Button>
+          ) : undefined
+        }
+        fill={fill}
+        className={className}
+      />
+    );
   }
 
   // No create action here on purpose: the archive is filled by archiving, never by creating.

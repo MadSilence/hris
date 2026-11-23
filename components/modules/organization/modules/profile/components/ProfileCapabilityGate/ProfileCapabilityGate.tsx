@@ -43,8 +43,12 @@ export function ProfileCapabilityGate({ userId, resource, action = "VIEW", child
   if (!user) return null;
 
   const allowed = (user.capabilities?.[resource] ?? []).includes(action);
+  if (allowed) return <>{children}</>;
+  // A tab the reader may not view is not in the tab row, and `ProfileTabsNav` sends whoever typed its address to
+  // their first visible tab (W11) — so nothing is drawn in the moment before that, not a refusal that flashes.
+  if (action === "VIEW") return null;
   // Compact, because this gate guards a **tab** and not a page. The smoke run of 2026-09-08 found
   // the full-page 403 rendering under the person's own header, offering "Back to dashboard" to
   // somebody who is standing on a profile with three other tabs they may read.
-  return allowed ? <>{children}</> : <AccessDenied compact/>;
+  return <AccessDenied compact/>;
 }

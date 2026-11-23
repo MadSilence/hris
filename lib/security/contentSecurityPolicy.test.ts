@@ -59,10 +59,9 @@ describe("createNonce", () => {
     expect(first).not.toEqual(second);
   });
 
-  // WALK_QUESTIONS § 51: a backend on http (a local machine) serves logos over http; on https they stay refused.
-  it("allows http images only when the app runs on http", () => {
-    expect(directive(contentSecurityPolicy("n", "production"), "img-src")).not.toContain("http:");
-    expect(directive(contentSecurityPolicy("n", "production", { httpImages: false }), "img-src")).not.toContain("http:");
-    expect(directive(contentSecurityPolicy("n", "production", { httpImages: true }), "img-src")).toContain("http:");
+  // R3 (2026-11-23): uploads are served on the company's own address, so no other host's image is allowed.
+  it("allows images only from this host, and the page's own data and blob images", () => {
+    expect(directive(contentSecurityPolicy("n", "production"), "img-src")).toEqual(["'self'", "data:", "blob:"]);
+    expect(directive(contentSecurityPolicy("n", "development"), "img-src")).toEqual(["'self'", "data:", "blob:"]);
   });
 });

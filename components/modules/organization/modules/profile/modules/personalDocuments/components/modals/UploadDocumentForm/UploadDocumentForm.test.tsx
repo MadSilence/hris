@@ -304,14 +304,14 @@ describe("UploadDocumentForm", () => {
     expect(onCancelAction).toHaveBeenCalledTimes(1);
   });
 
-  it("disables fields while loading", () => {
+  it("holds the fields while loading, and keeps Cancel live (DT15)", () => {
     renderForm({ isLoading: true });
 
     expect(screen.getByLabelText(/^files$/i)).toBeDisabled();
     expect(folderSelect()).toBeDisabled();
     expect(getInnerButton(/^choose files$/i)).toBeDisabled();
-    expect(screen.getByRole("button", { name: /^cancel$/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^cancel$/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^upload$/i })).toHaveAttribute("data-loading", "true");
   });
 
   it("opens with the files dropped on it, and a refused file says why (M3)", () => {

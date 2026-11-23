@@ -14,7 +14,7 @@ export function ProfileShell({ userId, user, children }: Props) {
   return (
     // The guard wraps tabs *and* content so a tab click can ask about an unsaved draft below it.
     <ProfileEditGuardProvider>
-      <div className="flex h-[calc(100svh-6rem)] min-h-0 w-full min-w-0 flex-col">
+      <div className="flex h-[calc(100cqh-6rem)] min-h-0 w-full min-w-0 flex-col">
         <div className="flex-none">
           <header>
             <UserDataHeader userId={userId} user={user}/>

@@ -1,7 +1,6 @@
 import { internalApiClient } from "@/components/clients/apiClient";
 import type {
   CompanyCalendarAbsence,
-  CompanyCalendarCapacity,
   CompanyCalendarGroup,
   CompanyCalendarGrouping,
   CompanyCalendarMark,
@@ -22,13 +21,6 @@ export type CompanyCalendarGroupsQuery = {
   q?: string;
   filters?: FilterDTO[];
   groupBy: CompanyCalendarGrouping;
-};
-
-export type CompanyCalendarCapacityQuery = {
-  from: string;
-  to: string;
-  groupBy: CompanyCalendarGrouping | null;
-  groupIds: string[];
 };
 
 export type CompanyCalendarMarksQuery = {
@@ -56,6 +48,15 @@ export class CompanyCalendarService {
   }
 
   /** The headers of a grouped board, each with its count — same search and filters as the rows. */
+  /** The count beside a saved view (B5), inside the reader's own calendar scope. */
+  public async count(params: { q?: string | null; filters?: FilterDTO[] | null }): Promise<number> {
+    const res = await internalApiClient.post<{ total: number }>("/calendar/company/people/count", {
+      q: params.q ?? null,
+      filters: params.filters?.length ? params.filters : null,
+    });
+    return res.total;
+  }
+
   public async groups(params: CompanyCalendarGroupsQuery): Promise<CompanyCalendarGroup[]> {
     return internalApiClient.post<CompanyCalendarGroup[]>("/calendar/company/groups", {
       q: params.q ?? null,
@@ -70,16 +71,6 @@ export class CompanyCalendarService {
       from: params.from,
       to: params.to,
       userIds: params.userIds,
-    });
-  }
-
-  /** The capacity mark: the days a group, or the company, is at its limit of people away. */
-  public async capacity(params: CompanyCalendarCapacityQuery): Promise<CompanyCalendarCapacity[]> {
-    return internalApiClient.post<CompanyCalendarCapacity[]>("/calendar/company/capacity", {
-      from: params.from,
-      to: params.to,
-      groupBy: params.groupBy,
-      groupIds: params.groupIds,
     });
   }
 

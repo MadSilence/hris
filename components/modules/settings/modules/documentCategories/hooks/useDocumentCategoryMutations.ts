@@ -33,8 +33,12 @@ export const useDeleteDocumentCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const result = await deleteDocumentCategoryAction(id);
+    mutationFn: async ({ id, strategy, targetCategoryId }: {
+      id: string;
+      strategy: "KEEP" | "MOVE";
+      targetCategoryId?: string | null;
+    }) => {
+      const result = await deleteDocumentCategoryAction(id, { strategy, targetCategoryId });
       if (result.status === ActionStatus.ERROR) {
         throw new Error(result.errorMessage || "Failed to delete category");
       }

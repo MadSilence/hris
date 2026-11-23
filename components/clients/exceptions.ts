@@ -19,6 +19,8 @@ export type ApiErrorInit = ErrorOptions & {
    * carry the placeholders and we write the wording.
    */
   params?: string[];
+  /** The login's wrong-password refusal from the third in a row for the address: offer the reset link (U2). */
+  offerPasswordReset?: boolean;
 };
 
 /** Base for every failure that came back from an API — ours or the backend's. */
@@ -28,6 +30,7 @@ export class ApiError extends Error {
   public readonly fieldErrors?: Record<string, string>;
   public readonly requestId?: string;
   public readonly params?: string[];
+  public readonly offerPasswordReset?: boolean;
 
   public constructor(message?: string, init: ApiErrorInit = {}) {
     super(message, init);
@@ -37,6 +40,7 @@ export class ApiError extends Error {
     this.fieldErrors = init.fieldErrors;
     this.requestId = init.requestId;
     this.params = init.params;
+    this.offerPasswordReset = init.offerPasswordReset;
   }
 }
 

@@ -1,24 +1,22 @@
+import { resolveBackendAssetUrl } from "./resolveBackendAssetUrl";
+
 describe("resolveBackendAssetUrl", () => {
-  // The module reads BACKEND_URL when it loads, so each test loads it afresh with the variable set.
-  const load = async () => {
-    jest.resetModules();
+  // R3 (2026-11-23): every company host serves /uploads itself, so an upload is never written with the backend's address.
+  it("keeps an upload relative, even with BACKEND_URL set", () => {
     process.env.BACKEND_URL = "http://backend:8081";
-    return (await import("./resolveBackendAssetUrl")).resolveBackendAssetUrl;
-  };
-
-  it("points an upload at the backend", async () => {
-    expect((await load())("/uploads/a/b.png")).toBe("http://backend:8081/uploads/a/b.png");
+    expect(resolveBackendAssetUrl("/uploads/a/b.png")).toBe("/uploads/a/b.png");
+    expect(resolveBackendAssetUrl("uploads/a/b.png")).toBe("/uploads/a/b.png");
   });
 
-  it("leaves the web app's own files on this origin", async () => {
-    expect((await load())("/sample-avatars/f-04.webp")).toBe("/sample-avatars/f-04.webp");
+  it("leaves the web app's own files on this origin", () => {
+    expect(resolveBackendAssetUrl("/sample-avatars/f-04.webp")).toBe("/sample-avatars/f-04.webp");
   });
 
-  it("leaves an absolute URL alone", async () => {
-    expect((await load())("https://cdn.example.com/x.png")).toBe("https://cdn.example.com/x.png");
+  it("leaves an absolute URL alone", () => {
+    expect(resolveBackendAssetUrl("https://cdn.example.com/x.png")).toBe("https://cdn.example.com/x.png");
   });
 
-  it("answers null for nothing", async () => {
-    expect((await load())(null)).toBeNull();
+  it("answers null for nothing", () => {
+    expect(resolveBackendAssetUrl(null)).toBeNull();
   });
 });

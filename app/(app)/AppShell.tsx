@@ -38,7 +38,9 @@ import UserSettingsProvider from "@/components/providers/UserSettingsProvider";
 import { useWelcome } from "@/components/modules/firstRun/hooks";
 import { QuickSearchDialog, useQuickSearchShortcut, type SearchPage } from "@/components/modules/search";
 import { StepUpDialog } from "@/components/modules/mfa/stepUp";
+import { LeaveRequestHost } from "@/components/modules/timeOff/LeaveRequestHost";
 import { AppFrameProvider, useAppFrameMode } from "@/components/layout/AppFrame";
+import { cn } from "@/lib/cn";
 
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const t = useTranslations("navigation");
@@ -46,7 +48,10 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   const { access } = useAccess();
   // A canvas page (the automation editor) folds the sidebar to 64 px; hovering opens it over the page. A manual
   // unfold there lasts while the page is open and is not remembered (AppFrame).
-  const canvas = useAppFrameMode() === "canvas";
+  const frameMode = useAppFrameMode();
+  const canvas = frameMode === "canvas";
+  // A canvas or a full page draws its own edges: no page padding, and the page itself decides what scrolls.
+  const bleed = frameMode !== "page";
   const [canvasUnfolded, setCanvasUnfolded] = useState(false);
   useEffect(() => {
     if (!canvas) setCanvasUnfolded(false);
@@ -154,7 +159,13 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   return (
-    <div className="grid min-h-dvh grid-cols-[auto_minmax(0,1fr)] bg-page print:block print:min-h-0">
+    // The shell is exactly the window (the designers' fix RC9): a banner on top, then the sidebar + main row filling
+    // the rest. Only `main` scrolls, and only when its page is taller — a banner never makes the window scroll.
+    <div className="flex h-dvh flex-col overflow-hidden bg-page">
+      <ImpersonationBanner/>
+      <OwnerEmailBanner/>
+      <DemoBanner/>
+      <div className="relative grid min-h-0 flex-1 grid-cols-[auto_minmax(0,1fr)] grid-rows-[minmax(0,1fr)]">
       <Sidebar
         collapsed={canvas ? !canvasUnfolded : collapsed}
         onToggle={() => (canvas ? setCanvasUnfolded((current) => !current) : setCollapsed((current) => !current))}
@@ -174,24 +185,20 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         showFinishProfile={Boolean(welcome?.outstanding) && !isImpersonating}
       />
 
-      <QuickSearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} appPages={appPages}/>
-
-      <ChangePasswordModal
-        open={isChangePasswordOpen}
-        onCloseAction={() => setIsChangePasswordOpen(false)}
-      />
-
-      {/* Printing a page (the company calendar's Print): the page alone, grown to its content. */}
-      <div className="flex h-dvh min-w-0 flex-col print:h-auto">
-        <ImpersonationBanner/>
-        <OwnerEmailBanner/>
-        <DemoBanner/>
-        <main className={canvas ? "min-h-0 min-w-0 flex-1 overflow-hidden" : "min-w-0 flex-1 overflow-auto print:overflow-visible"}>
+        {/* `main` is a size container: a page that fills the area under the banners measures it in `cqh`
+            (`h-[calc(100cqh-6rem)]`), never in `dvh`/`svh`, which counts the banner too and made the page scroll by its
+            height (RC9). */}
+        <main
+          className={cn(
+            "min-h-0 min-w-0 [container-type:size]",
+            bleed ? "overflow-hidden" : "overflow-auto",
+          )}
+        >
           {/* Page padding (SPEC § 6): 32 px, 24 below a 1280 px viewport; none on a canvas page. One element either
               way, so switching the mode never remounts the page. */}
           <div
             className={
-              canvas
+              bleed
                 ? "h-full"
                 : "px-(--page-padding-narrow) py-(--page-padding-narrow) xl:px-(--page-padding) xl:py-(--page-padding)"
             }
@@ -201,8 +208,18 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
         </main>
       </div>
 
+      <QuickSearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} appPages={appPages}/>
+
+      <ChangePasswordModal
+        open={isChangePasswordOpen}
+        onCloseAction={() => setIsChangePasswordOpen(false)}
+      />
+
       {/* "Confirm it is you" — one dialog for every sensitive operation (MFA_DESIGN.md § 3.5). */}
       <StepUpDialog/>
+
+      {/* A time off request opened over whatever page carries `?leaveRequest=` (AQ-12 b). */}
+      <LeaveRequestHost/>
 
       <Toaster/>
     </div>

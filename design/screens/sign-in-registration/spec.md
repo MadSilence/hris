@@ -56,6 +56,24 @@ First-experience base (`sign-in-root` § Common): form on the left, the Wine car
 ## Words
 Full list: `words.md`. Product copy: as quoted in Layout and States above, plus the orbit labels "Workflows · Approvals · Time off · Onboarding · Reviews" and the card "Every yes, handled." / "Approve once. noddo does everything that follows."
 
+**Slogans in other languages** (DQ-15, Ulia 2026-11-20; strings for later — no locale is added yet, and the owner's U1
+keeps Russian for now). Each keeps the meaning of "Every yes, handled."; the last word is in Rose, as "handled." is:
+
+| Language | Slogan |
+|---|---|
+| de | Jedes Ja, erledigt. |
+| fr | Chaque oui, réglé. |
+| es | Cada sí, resuelto. |
+| pt | Cada sim, resolvido. |
+| it | Ogni sì, sistemato. |
+| pl | Każde „tak” – załatwione. |
+| cs | Každé ano, vyřízeno. |
+| ro | Fiecare „da”, rezolvat. |
+| uk | Кожне «так» — вирішено. |
+| et | Iga jah, korras. |
+
+A native check runs before launch (`handoffs/2026-11-20-answers-from-design/7-product-wide/LANGUAGES.md`).
+
 ## Values
 Heading 40/44 Inter Tight 600 (Changes to SPEC, § Common), lead 15/22, controls lg 44, form max 400. `CodeInput`: six equal boxes filling the form width (max 400), 56 high, gap 8, radius control 8, 1 px `border-field` on `surface-card`; digits Inter Tight 600 24/32 tabular; the next box has the focus (accent border + 3 px `accent-muted` ring) and a caret; error = `status-declined-fill` border on all six.
 
@@ -85,3 +103,9 @@ Heading 40/44 Inter Tight 600 (Changes to SPEC, § Common), lead 15/22, controls
 - **Addresses** (B1): `/signup`, `/signup/verify`, `/signup/company` as above; `/trial` and anything under it redirect to `/signup`. The email being proved lives in the page, not the URL, so opening `/signup/verify` or `/signup/company` on its own (a reload) starts again at B1 — except `/signup/company` back from Google or Microsoft, which opens B3. The address follows the step without adding history entries: the browser's Back leaves the registration, the back arrow goes one step back.
 - **Provider buttons** (B2) show when the installation has the Google and Microsoft applications configured — the same list the company login reads; B1 is the email form alone without them.
 - **Terms and Privacy policy** (B3) are still plain words: the pages do not exist yet (the owner supplies the texts). They become 12/16 500 accent-text links when the pages do.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- DQ-15: the ten slogans are in § Words as strings for later; no code, no new locale.
+- E and DQ-17: a wrong emailed code reads "That code doesn’t match. Check your email or get a new code." in plain text with a separate *Send a new code* under it; the fifth wrong try reads "Too many wrong codes. Send a new one." with its link, and the spent code keeps saying so (never "expired") until a new one is sent.
+- AQ-20 (RB1g): the first-experience card is 600 at 1280 × window ÷ 1280, never smaller, stopping at 1920 (802 at 1710); the slogan, the line and the orbit scale with it; its 12 margin stays 12.
+- Not seen in a browser.

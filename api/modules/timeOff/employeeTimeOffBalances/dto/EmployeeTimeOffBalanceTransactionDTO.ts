@@ -11,4 +11,6 @@ export interface EmployeeTimeOffBalanceTransactionDTO {
   policyVersionId: string | null;
   createdAt: string;
   createdBy: string | null;
+  /** "Adjusted by {full name}" (B5); null for the system's own lines. */
+  createdByName: string | null;
 }

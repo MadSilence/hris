@@ -36,6 +36,8 @@ export type DocumentDTO = {
   envelopeId?: string | null;
   /** Set on the sealed result of a signing; such a document is final. */
   signedAt?: string | null;
+  /** When it went to the trash (T10's "Moved to trash"); null outside it. */
+  deletedAt?: string | null;
 };
 
 export type DocumentExpiryState = "VALID" | "EXPIRING" | "EXPIRED";
@@ -45,7 +47,10 @@ export type DocumentVisibility = "HR_ONLY" | "VISIBLE_TO_EMPLOYEE";
 export type DocumentCategoryDTO = {
   id: string;
   name: string;
-  description: string | null;
+  /**
+   * False for a category deleted with "keep" (AQ-19): its documents keep the tag, nobody picks it for a new file, and
+   * the settings list no longer shows it.
+   */
   isActive: boolean;
   isSystem: boolean;
   /** Sent back by the edit dialog; the backend refuses a save over a newer row (E00409). */
@@ -60,8 +65,6 @@ export type DocumentCategoryDTO = {
 
 export type SaveDocumentCategoryRequest = {
   name: string;
-  description?: string | null;
-  isActive?: boolean;
   requiresExpiry?: boolean;
   /** 0 clears the reminder. */
   remindDaysBefore?: number | null;
@@ -73,6 +76,21 @@ export type SaveDocumentCategoryRequest = {
 export type UpdateDocumentCategoryRequest = SaveDocumentCategoryRequest & {
   /** The version the dialog was opened with. */
   version?: number;
+};
+
+/** "{n} documents have this category" — what the delete dialog reads before it asks (AQ-19). */
+export type DocumentCategoryDeleteImpactDTO = {
+  name: string;
+  /** Live documents of the category. */
+  documents: number;
+  /** Documents of it in the trash — a move re-tags them too (W10). */
+  trashed: number;
+};
+
+/** KEEP retires the category and its documents keep the tag; MOVE moves them to `targetCategoryId` first. */
+export type DeleteDocumentCategoryRequest = {
+  strategy: "KEEP" | "MOVE";
+  targetCategoryId?: string | null;
 };
 
 export type DocumentFolderContentDTO = {

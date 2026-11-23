@@ -17,6 +17,10 @@ export class HrisCalendarViewsService {
     return hrisApiCalendarViewsClient.update(id, body);
   }
 
+  public reorder(ids: string[]): Promise<CalendarView[]> {
+    return hrisApiCalendarViewsClient.reorder(ids);
+  }
+
   public remove(id: string): Promise<void> {
     return hrisApiCalendarViewsClient.remove(id);
   }

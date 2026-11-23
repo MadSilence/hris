@@ -416,16 +416,21 @@ function PreferencesStep({
   const [seeded, setSeeded] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
 
+  // W4 (the owner, 2026-11-23): the line above says the company's settings were used, so the field shows the
+  // company's zone itself, not an empty "Select". Finishing without touching it writes nothing: the person keeps
+  // following the company's zone, wherever it moves.
+  const shownZone = settings?.timeZone || settings?.companyTimeZone || null;
+
   React.useEffect(() => {
     if (!settings || seeded) return;
-    setTimeZone(settings.timeZone);
+    setTimeZone(settings.timeZone || settings.companyTimeZone || null);
     setLanguage(effectiveLanguage);
     setSeeded(true);
   }, [settings, seeded, effectiveLanguage]);
 
   const finish = async () => {
     setBusy(true);
-    const zoneChanged = (settings?.timeZone ?? null) !== timeZone;
+    const zoneChanged = shownZone !== timeZone;
     const languageChanged = language !== null && language !== effectiveLanguage;
     if (zoneChanged || languageChanged) {
       const res = await updateUserSettingsAction({

@@ -61,6 +61,12 @@ export class DocumentsRoutes {
     return Response.json(data);
   }
 
+  /** What deleting a category touches (AQ-19), read by the dialog before it asks. */
+  public async getCategoryDeleteImpact(id: string) {
+    const data = await hrisDocumentsService.getCategoryDeleteImpact(id);
+    return Response.json(data);
+  }
+
   /** The selection as one zip (D2); the ids ride the query, as a browser navigation sends them. */
   public async downloadZip(req: Request) {
     const ids = new URL(req.url).searchParams.getAll("ids");

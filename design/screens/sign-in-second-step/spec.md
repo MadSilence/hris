@@ -80,3 +80,9 @@ None beyond § Common.
     so D4 here has its own lead — "Scan this with the authenticator app on your new phone. Your old phone keeps working
     until you turn the new one on." — instead of "{company} asks for a second step". A new set of backup codes replaces
     the old one on D5. It needs the backup code's step-up, which lasts 10 minutes: past that, D6.
+
+### Built from the designers' answers of 2026-11-20 (2026-11-23)
+- AQ-20: the colour pane grows with the window — 520 at 1280 × window ÷ 1280, never smaller, stopping at 1920 — and
+  everything in it (rings, wordmark, slogan or company name) scales with it (`--auth-grow` as the pane's `zoom`,
+  `styles/globals.css`; `technical_documentation/ui/DESIGN_SYSTEM.md` § 9).
+- Not seen in a browser.

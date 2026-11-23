@@ -146,7 +146,7 @@ describe("the run window", () => {
 
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Cancel this run" })));
     expect(actions.cancelAutomationRunAction).toHaveBeenCalledWith("run-1");
-    expect(showSuccess).toHaveBeenCalledWith("Run cancelled");
+    expect(showSuccess).toHaveBeenCalledWith("Run canceled");
     expect(showUndoToast).not.toHaveBeenCalled();
   });
 
@@ -176,7 +176,7 @@ describe("the run window", () => {
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Cancel this run" })));
     expect(showUndoToast).toHaveBeenCalledTimes(1);
     const { message, onUndo } = (showUndoToast as jest.Mock).mock.calls[0][0] as { message: string; onUndo: () => Promise<unknown> };
-    expect(message).toBe("Run cancelled");
+    expect(message).toBe("Run canceled");
     await act(async () => {
       await onUndo();
     });

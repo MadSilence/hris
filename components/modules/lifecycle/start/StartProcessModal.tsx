@@ -341,7 +341,11 @@ export function StartProcessModal({ open, type, userId, fullName, lineManager, o
               {busy ? t("start.checking") : t("start.reviewTasks")}
             </Button>
           ) : (
-            <Button type="button" onClick={start} disabled={busy || blocking}>{busy ? t("start.starting") : t("start.start")}</Button>
+            <Button type="button"
+              // A task nobody can do yet is marked in the list; Start pressed then says so (NEVER-DISABLED).
+              onClick={() => (blocking ? setError(t("start.resolveAssignees")) : void start())}
+              disabled={busy}
+            >{busy ? t("start.starting") : t("start.start")}</Button>
           )}
         </DialogFooter>
       </DialogContent>

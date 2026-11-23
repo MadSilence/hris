@@ -152,12 +152,13 @@ describe("AttributeOptions", () => {
     expect(screen.getByRole("switch", { name: /unique value/i })).toBeInTheDocument();
   });
 
-  it("locks every control for a system attribute", () => {
+  it("locks every field of a system attribute and offers no Save", () => {
     render(
       <AttributeOptions attribute={attribute({ isSystem: true })} onChange={jest.fn()} isPreset />
     );
 
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    // Nothing is shown disabled: a preset has no Save at all (NEVER-DISABLED); its fields stay read-only.
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
     expect(screen.getByRole("switch", { name: /sensitive/i })).toBeDisabled();
   });
 });

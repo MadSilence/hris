@@ -159,6 +159,8 @@ describe("TemplatePreview", () => {
 
     expect(screen.getByText("Name taken")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: /what to do with hr admin/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /nothing to create/i })).toBeDisabled();
+    // No grey button (NEVER-DISABLED): the place of Apply says there is nothing to create.
+    expect(screen.getByText(/nothing to create/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /nothing to create|apply/i })).not.toBeInTheDocument();
   });
 });

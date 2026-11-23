@@ -1,3 +1,5 @@
+/** Declining (AQ-13): an optional comment the person is shown. `rejectionReason` is the old name, still read. */
 export interface RejectTimeOffRequestRequest {
-  rejectionReason: string;
+  comment?: string;
+  rejectionReason?: string;
 }

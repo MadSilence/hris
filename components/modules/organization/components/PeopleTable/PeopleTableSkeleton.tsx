@@ -2,6 +2,8 @@
 
 import React from "react";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/desact/table";
+import { cn } from "@/lib/cn";
+import { columnWidthClass } from "@/components/modules/organization/components/PeopleTable/peopleColumns";
 
 type SkeletonColumn = { id: string; label?: string };
 
@@ -43,7 +45,7 @@ export const PeopleTableSkeleton: React.FC<Props> = ({ columns, rows = 10 }) => 
         <TableRow>
           <TableHead className="w-12" />
           {cols.map((column, i) => (
-            <TableHead key={column.id} className="truncate">
+            <TableHead key={column.id} className={cn("truncate", columnWidthClass(column.id))}>
               {column.label ? (
                 <span className="truncate text-primary">{column.label}</span>
               ) : (

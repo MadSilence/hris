@@ -127,7 +127,8 @@ describe("Appearance", () => {
 
     expect(screen.getByText("Enter a color as #rrggbb, like #2f63c4.")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Color code"), { target: { value: "047857" } });
-    expect(screen.getByText("Your own · #047857")).toBeInTheDocument();
+    // "Your own ·" quiet, the code in mono Ink (AP10).
+    expect(screen.getByText("#047857").closest("p")?.textContent).toBe("Your own · #047857");
     expect(screen.getByText(/Close to the color noddo uses for approvals/)).toBeInTheDocument();
   });
 
@@ -137,6 +138,23 @@ describe("Appearance", () => {
     expect(screen.getByText("Only people who can manage company settings can change Appearance.")).toBeInTheDocument();
     expect(ring("Wine")).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+  });
+
+  it("shows view only with no logo as the letter tile and the logo's name, nothing to drop (L6b)", () => {
+    renderPage({}, { canEdit: false, canChangeLogo: false });
+
+    expect(screen.getByText("Acme’s logo").previousElementSibling?.textContent).toBe("A");
+    expect(screen.queryByText("Drop your logo here")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Square PNG, JPEG or WebP/)).not.toBeInTheDocument();
+  });
+
+  it("says a light colour is adjusted, and Basil is not (AP3)", () => {
+    renderPage();
+
+    fireEvent.click(ring("Basil"));
+    expect(screen.queryByText("Text and links a little darker to stay readable")).not.toBeInTheDocument();
+    fireEvent.click(ring("Sunflower"));
+    expect(screen.getByText("Text and links a little darker to stay readable")).toBeInTheDocument();
   });
 
   it("says a refused logo in the drop zone", () => {

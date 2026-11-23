@@ -163,12 +163,14 @@ const CatalogRow: React.FC<{
 };
 
 /** The panel's search (E12): one 36-high field, the icon inside on the left, a plain × inside on the right. */
-const PanelSearch: React.FC<{ value: string; onChange: (value: string) => void; placeholder: string; clearLabel: string }> = ({
+const PanelSearch: React.FC<{ value: string; onChange: (value: string) => void; label: string; clearLabel: string }> = ({
   value,
   onChange,
-  placeholder,
+  label,
   clearLabel,
-}) => (
+}) => {
+  const tCommon = useTranslations("common");
+  return (
   <div
     className={cn(
       "flex h-9 w-full items-center gap-2 rounded-control border px-3",
@@ -186,8 +188,8 @@ const PanelSearch: React.FC<{ value: string; onChange: (value: string) => void; 
           onChange("");
         }
       }}
-      placeholder={placeholder}
-      aria-label={placeholder}
+      placeholder={tCommon("actions.search")}
+      aria-label={label}
       className="min-w-0 flex-1 bg-transparent text-body text-primary outline-none placeholder:text-tertiary [&::-webkit-search-cancel-button]:hidden"
     />
     {value && (
@@ -196,7 +198,8 @@ const PanelSearch: React.FC<{ value: string; onChange: (value: string) => void; 
       </button>
     )}
   </div>
-);
+  );
+};
 
 /** What is being dragged: a widget on the page, or one from the panel at the size its row picked. */
 type Drag = {
@@ -588,7 +591,7 @@ export const EditHome: React.FC<{
     <div
       ref={root}
       className={cn(
-        "relative -mx-(--page-padding-narrow) -mt-(--page-padding-narrow) min-h-dvh xl:-mx-(--page-padding) xl:-mt-(--page-padding)",
+        "relative -mx-(--page-padding-narrow) -mt-(--page-padding-narrow) min-h-[100cqh] xl:-mx-(--page-padding) xl:-mt-(--page-padding)",
         dragging && "cursor-grabbing select-none",
       )}
       style={{ paddingRight: PANEL }}
@@ -668,7 +671,7 @@ export const EditHome: React.FC<{
             <Icon icon={Cancel01Icon} size="sm" />
           </Button>
         </div>
-        <PanelSearch value={search} onChange={setSearch} placeholder={t("edit.search")} clearLabel={t("edit.clearSearch")} />
+        <PanelSearch value={search} onChange={setSearch} label={t("edit.search")} clearLabel={t("edit.clearSearch")} />
         {!term && (
           <div className="flex flex-wrap gap-2">
             {chip("ALL", t("edit.all"), available.length, category === "ALL", () => setCategory("ALL"))}
@@ -684,9 +687,6 @@ export const EditHome: React.FC<{
               <Illustration scene="no-results-s" size="s" />
               <p className="text-card-title text-primary">{t("edit.noResultsTitle", { text: search.trim() })}</p>
               <p className="text-label font-normal text-secondary">{t("edit.noResultsLine")}</p>
-              <Button type="button" variant="secondary" size="md" className="mt-1" onClick={() => setSearch("")}>
-                {t("edit.clearSearch")}
-              </Button>
             </div>
           ) : !term && category === "ALL" ? (
             HOME_CATEGORIES.map((c) => (

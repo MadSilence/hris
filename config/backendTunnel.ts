@@ -9,12 +9,12 @@
  *
  * It is sent only when `BACKEND_URL` is an ngrok address, so it does nothing anywhere else — but it
  * is a workaround for one hosting setup, not part of the product. Removing it: delete this file and
- * its four callers (`hrisApiClient.prepareHeaders`, `jwksClient`, `app/api/me/access/route.ts`,
- * `app/api/documents/users/[userId]/upload/route.ts`). Tracked in
+ * its five callers (`hrisApiClient.prepareHeaders`, `jwksClient`, `app/api/me/access/route.ts`,
+ * `app/api/documents/users/[userId]/upload/route.ts`, `lib/uploads/uploadProxy.ts`). Tracked in
  * `(claude)/technical_design/PRODUCTION_READINESS_DESIGN.md`.
  *
- * It does not help what the browser loads from the backend itself (an uploaded avatar or logo in an
- * `<img>`): a browser cannot be told to send the header, so those still get the warning page.
+ * Uploaded avatars and logos are covered too since R3 (2026-11-23): the browser asks the company's own address for
+ * `/uploads/…` and `lib/uploads` passes it on to the backend with this header.
  */
 const NGROK_HOST = /\.ngrok(-free)?\.(app|dev|io)$/i;
 

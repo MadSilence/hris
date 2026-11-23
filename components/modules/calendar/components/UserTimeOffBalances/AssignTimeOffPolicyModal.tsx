@@ -1,11 +1,11 @@
 "use client";
 
 import { useTimeOffAssignmentImpact } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useTimeOffAssignmentImpact";
-import { type DateFormatter, dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
+import { dateToISO } from "@/lib/date";
 
 import { FC, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Calendar03Icon, ShieldCheckIcon } from "@hugeicons/core-free-icons";
+import { ShieldCheckIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 
@@ -18,9 +18,7 @@ import {
 } from "@/components/desact/dialog";
 import { Button } from "@/components/desact/button";
 import { Label } from "@/components/desact/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
-import { Calendar } from "@/components/desact/calendar";
-import { cn } from "@/lib/cn";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 import { useCreateTimeOffPolicyAssignment } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicyAssignments/hooks/useCreateTimeOffPolicyAssignment";
 import { useInvalidateEmployeeTimeOffBalancesQuery } from "@/components/modules/settings/modules/time/timeOff/employeeTimeOffBalances/hooks/useEmployeeTimeOffBalancesByUser";
@@ -42,7 +40,6 @@ type Props = {
   onCloseAction: () => void;
 };
 
-const prettyISO = (iso: string, formatDisplayDate: DateFormatter) => formatDisplayDate(iso, { style: "medium" });
 
 /**
  * Assigning a policy from the person's card rather than from the policy's own settings page. The
@@ -57,14 +54,12 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
   onCloseAction,
 }) => {
   const t = useTranslations("calendar");
-  const formatDisplayDate = useDateFormatter();
   const tCommon = useTranslations("common");
   const createMutation = useCreateTimeOffPolicyAssignment();
   const invalidateBalances = useInvalidateEmployeeTimeOffBalancesQuery();
 
   const [policyId, setPolicyId] = useState("");
   const [effectiveFrom, setEffectiveFrom] = useState(dateToISO(new Date()));
-  const [fromPickerOpen, setFromPickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tried, setTried] = useState(false);
 
@@ -177,32 +172,13 @@ export const AssignTimeOffPolicyModal: FC<Props> = ({
 
               <div className="space-y-1.5">
                 <Label className="text-hint">{t("assign.effectiveFrom")}</Label>
-                <Popover open={fromPickerOpen} onOpenChange={setFromPickerOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      disabled={createMutation.isPending}
-                      className={cn("w-full justify-start font-normal")}
-                    >
-                      <Icon icon={Calendar03Icon} size="sm" />
-                      {prettyISO(effectiveFrom, formatDisplayDate)}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={isoToDate(effectiveFrom)}
-                      onSelect={(d) => {
-                        if (!d) return;
-                        setEffectiveFrom(dateToISO(d));
-                        setFromPickerOpen(false);
-                      }}
-                      defaultMonth={isoToDate(effectiveFrom)}
-                      numberOfMonths={1}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <DatePicker
+                  value={effectiveFrom}
+                  onChange={(iso) => iso && setEffectiveFrom(iso)}
+                  clearable={false}
+                  disabled={createMutation.isPending}
+                  ariaLabel={t("assign.effectiveFrom")}
+                />
               </div>
 
               <div className="flex items-center justify-between rounded-card border border-divider bg-subtle/40 px-4 py-3 text-body">

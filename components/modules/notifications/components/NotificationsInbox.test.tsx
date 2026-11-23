@@ -104,7 +104,7 @@ describe("NotificationsInbox — Needs action (sitting 2, H5)", () => {
     answer({ isLoading: false, data: [notification({ source: closed })] });
     render(<NotificationsInbox />);
 
-    expect(screen.getByText("Nothing needs your action.")).toBeInTheDocument();
+    expect(screen.getByText("Nothing needs your action")).toBeInTheDocument();
   });
 
   it("puts the chosen filter in the URL, and takes it out for All", () => {

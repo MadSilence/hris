@@ -12,7 +12,10 @@
     "decline": "Decline",
     "signingAs": "Signing as {name}",
     "loadingDocument": "Loading the document…",
-    "documentError": "We couldn’t show the document. Download it instead."
+    "documentError": "We couldn’t show the document. Download it instead.",
+    "asksFrom": "{name} from {company} asks you to sign",
+    "signBy": "Sign by {date}",
+    "hintTo": "You sign by typing or drawing your name. First we’ll send a code to <b>{email}</b> to make sure it’s you."
   },
   "code": {
     "title": "Check your email",
@@ -21,7 +24,9 @@
     "label": "Code",
     "digit": "Digit {n}",
     "resend": "Send a new code",
-    "sent": "A new code is on its way."
+    "sent": "A new code is on its way.",
+    "sentTo": "We sent a 6-digit code to <b>{email}</b>. It works for 10 minutes.",
+    "wrong": "That code doesn’t match. Check your email or get a new code."
   },
   "signature": {
     "confirmed": "Code confirmed",
@@ -41,7 +46,8 @@
     "newQr": "Make a new code",
     "needName": "Type your name.",
     "needDrawing": "Draw your signature first.",
-    "sign": "Sign"
+    "sign": "Sign",
+    "title": "Your signature"
   },
   "signed": {
     "title": "You signed",
@@ -62,14 +68,17 @@
     "needComment": "Say why you decline.",
     "submit": "Decline",
     "cancel": "Cancel",
-    "done": "You declined. {name} has been told."
+    "done": "You declined. {name} has been told.",
+    "declinedTitle": "You declined to sign",
+    "yourComment": "Your comment",
+    "quoted": "“{comment}”"
   },
   "states": {
     "notYourTurn": "It’s not your turn yet",
     "notYourTurnBody": "{name} signs first. We’ll email you when it’s your turn.",
     "notYourTurnSomebody": "Somebody signs first. We’ll email you when it’s your turn.",
     "closed": "This signing request is closed",
-    "closedBody": "It was cancelled, declined or it ran out of time. There’s nothing to sign now.",
+    "closedBody": "It was canceled, declined or it ran out of time. There’s nothing to sign now.",
     "deadLink": "This link doesn’t work",
     "deadLinkBody": "It may be out of date or already used. Open the newest email from {company}, or ask them for a new link.",
     "impersonating": "A signature is the person’s own act. Log in as yourself to sign."
@@ -113,11 +122,21 @@
     "remove": "Remove",
     "send": "Send",
     "cancel": "Cancel",
-    "sent": "Sent for signature.",
+    "sent": "Sent for signature",
     "pick": "Pick a person",
     "theirManager": "Their manager",
     "theirManagerName": "Their manager · {name}",
-    "demoNote": "In a demo only the owners get email, so a sample person can’t get their code. To try signing, send it to yourself or to a guest."
+    "demoNote": "In a demo only the owners get email, so a sample person can’t get their code. To try signing, send it to yourself or to a guest.",
+    "sentFirst": "Sent for signature. {names} {count, plural, one {signs} other {sign}} first",
+    "findPerson": "Find a person",
+    "people": "People",
+    "outside": "Someone outside the company",
+    "outsideHint": "They sign by a link in their email",
+    "noOneCalled": "No one called “{query}”",
+    "enterName": "Enter their name.",
+    "enterEmail": "Enter their email.",
+    "emailPlaceholder": "name@company.com",
+    "drag": "Drag to another box"
   },
   "panel": {
     "title": "Signing",
@@ -131,7 +150,7 @@
     "overdue": "Overdue",
     "reminders": "Reminders go out on day 3 and the day before it’s due",
     "remind": "Send a reminder now",
-    "reminded": "Reminder sent.",
+    "reminded": "Reminder sent",
     "cancel": "Cancel signing",
     "sendAgain": "Send again",
     "history": "Signing history",
@@ -140,21 +159,38 @@
     "endDeclined": "{name} declined",
     "endExpired": "Expired",
     "endExpiredBody": "Closed {date} · The due date passed",
-    "endCancelled": "Cancelled by {name}",
+    "endCancelled": "Canceled by {name}",
     "pill": "Signing · {done} of {total}",
     "pillExpired": "Expired",
     "pillDeclined": "Declined",
-    "pillCancelled": "Signing cancelled",
-    "pillSigned": "Signed"
+    "pillCancelled": "Signing canceled",
+    "pillSigned": "Signed",
+    "countSigned": "{done} of {total} signed",
+    "signedOn": "Signed {date}, {time}",
+    "declinedOn": "Declined {date}",
+    "notAsked": "Not asked any more",
+    "didntSign": "Didn’t sign",
+    "completedOn": "Completed {date}",
+    "inFolder": "In {folder}",
+    "declinedBody": "Nobody can sign it now.",
+    "closedOn": "Closed {date}",
+    "duePassed": "The due date passed",
+    "didntSignInTime": "{name} didn’t sign in time, so nobody can sign it now.",
+    "canceledOn": "Canceled {date}",
+    "pillCanceled": "Canceled",
+    "roleStatus": "{role} · {status}"
   },
   "cancel": {
     "title": "Cancel this signing?",
-    "body": "Nobody can sign it any more. Signatures already given are dropped; the document stays as it was.",
+    "body": "Nobody can sign it any more. The document stays as it was.",
     "comment": "Comment (optional)",
     "placeholder": "For example: sent the wrong version",
     "keep": "Keep it",
     "confirm": "Cancel signing",
-    "done": "Signing cancelled."
+    "done": "Signing canceled",
+    "bodySigned": "Nobody can sign it any more. {count, plural, one {{names}’s signature is dropped} other {The signatures of {names} are dropped}}; the document stays as it was.",
+    "commentLabel": "Comment",
+    "optional": "(optional)"
   },
   "history": {
     "title": "Signing history",
@@ -163,10 +199,21 @@
     "SENT_AGAIN": "Sent again by {who}",
     "SIGNED": "Signed by {who}",
     "DECLINED": "Declined by {who}",
-    "CANCELLED": "Cancelled by {who}",
+    "CANCELLED": "Canceled by {who}",
     "EXPIRED": "Expired — the due date passed",
     "COMPLETED": "Signed by everyone",
-    "guest": "guest"
+    "guest": "guest",
+    "back": "Back to signing",
+    "line": {
+      "SENT": "<b>{who}</b> sent it for signature",
+      "SENT_AGAIN": "<b>{who}</b> sent it again",
+      "SIGNED": "<b>{who}</b> signed",
+      "SIGNED_LAST": "<b>{who}</b> signed — signed by everyone",
+      "DECLINED": "<b>{who}</b> declined",
+      "CANCELLED": "<b>{who}</b> canceled it",
+      "EXPIRED": "The due date passed",
+      "COMPLETED": "Signed by everyone"
+    }
   },
   "menu": {
     "send": "Send for signature",
@@ -228,13 +275,16 @@
       "all": "No documents yet",
       "allBody": "Documents filed on people’s profiles show up here.",
       "signing": "Nothing is out for signature",
-      "signingBody": "Documents sent for signature show up here until they are signed.",
+      "signingBody": "Documents you send for signature wait here until everyone signs.",
       "requests": "No open requests",
-      "requestsBody": "Requests for documents show up here until they are uploaded.",
+      "requestsBody": "When you ask for a document, you’ll see it here until it’s uploaded.",
       "noMatch": "No documents match",
       "noMatchBody": "Try fewer filters."
     },
-    "error": "We couldn’t load the documents"
+    "error": "We couldn’t load the documents",
+    "askedOn": "Asked on {date}",
+    "errorBody": "Nothing is lost. Try again in a moment.",
+    "pickPerson": "Whom to ask first."
   },
   "requests": {
     "newOne": "Request the new one",
@@ -267,7 +317,8 @@
       "file": "File",
       "validUntil": "Valid until",
       "submit": "Upload",
-      "needFile": "Choose a file."
+      "needFile": "Choose a file.",
+      "forRequest": "For {name}’s request: {what}"
     },
     "many": {
       "title": "Request sent",
@@ -285,7 +336,16 @@
       "uploadLineDue": "Upload: {what} · due {date}",
       "reasonCount": "{reason} · {count}",
       "hint": "Each person gets a task and a notification; it closes when they upload."
-    }
+    },
+    "fileExpires": "{name} · expires {date}",
+    "noteExpires": "Your {what} expires on {date}. Please upload the new one.",
+    "noteExpired": "Your {what} expired on {date}. Please upload the new one.",
+    "noteMany": "Please upload the new ones.",
+    "noteOther": "Please upload your {what}.",
+    "hintThey": "{name} gets a task and a notification. The task closes by itself when they upload the file.",
+    "sentTo": "Request sent to {name}",
+    "withdrawnToast": "Request withdrawn",
+    "uploadedToast": "{name} uploaded"
   },
   "expiry": {
     "validUntil": "Valid until",
@@ -295,7 +355,10 @@
     "save": "Save",
     "cancel": "Cancel",
     "reminderHint": "{name} and whoever manages their documents get a reminder before it expires.",
-    "saved": "Expiry date saved."
+    "saved": "Expiry date saved",
+    "title": "Expiry date",
+    "optional": "(optional)",
+    "reminderHintDays": "{name} and whoever manages their documents get a reminder {days, plural, one {# day} other {# days}} before."
   },
   "category": {
     "requiresExpiry": "Requires an expiry date",
@@ -304,6 +367,23 @@
     "daysBefore": "days before it expires",
     "daysRange": "Between 1 and 365 days.",
     "visibleByDefault": "Visible to the person by default",
-    "uploaderDecides": "The uploader decides"
+    "uploaderDecides": "The uploader decides",
+    "needsExpiry": "Needs an expiry date",
+    "needsExpiryHint": "A file of this category can’t be uploaded without one.",
+    "remindBefore": "Remind before it expires",
+    "daysBeforeShort": "days before",
+    "dontRemind": "Don’t remind",
+    "remindHint": "The person and everyone who edits their documents get a notice and an email.",
+    "whoSeesNew": "Who can see new files",
+    "hiddenFromPerson": "Hidden from the person",
+    "visibleToPerson": "Visible to the person"
+  },
+  "pick": {
+    "title": "Send for signature",
+    "subtitle": "Pick the document",
+    "onlyPdf": "Only PDFs can be sent for signature.",
+    "needOne": "Pick a document.",
+    "none": "No PDFs to send.",
+    "next": "Next"
   }
 }

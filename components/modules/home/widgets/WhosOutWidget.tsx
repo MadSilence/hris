@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/desact/too
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { cn } from "@/lib/cn";
 import { useDisplayLocale, useShortDates, useWeekStartsOn } from "@/lib/date";
-import { TAG_CLASSES, toTagColor } from "@/lib/theme/tags";
+import { leaveClasses } from "@/lib/theme/leave";
 import type { WhosOutAudience, WhosOutPerson } from "@/models/home";
 import { useWhosOut } from "@/components/modules/home/hooks";
 import {
@@ -24,6 +24,7 @@ import {
   fullName,
 } from "@/components/modules/home/components/WidgetCard";
 import type { HomeWidgetProps } from "./catalogue";
+import { calendarPersonHref } from "@/components/modules/calendar/lib/calendarUrlState";
 
 const PENDING = new Set(["PENDING", "CANCELLATION_PENDING"]);
 const AUDIENCE_KEY = "home.whosOut.audience";
@@ -210,7 +211,7 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
                 return (
                   <li key={`${p.userId}-${p.startDate}`}>
                     <Link
-                      href={`/organization/people/${p.userId}/personal`}
+                      href={calendarPersonHref(p.userId)}
                       tabIndex={preview ? -1 : undefined}
                       className={TWO_LINE_ROW.row}
                     >
@@ -267,20 +268,20 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
               <li key={row.map(({ p }) => `${p.userId}-${p.startDate}`).join("|")} className="grid grid-cols-5 gap-1">
                 {row.map(({ p, first, last: lastIndex, runsOff }) => {
               const name = fullName(p.firstName, p.lastName) || t("card.unnamed");
-              const color = TAG_CLASSES[toTagColor(p.policyColor)];
+              const color = leaveClasses(p.policyColor);
               const pending = PENDING.has(p.status);
               const oneDay = first === lastIndex && !runsOff;
               return (
                   <Tooltip key={`${p.userId}-${p.startDate}`}>
                     <TooltipTrigger asChild>
                       <Link
-                        href={`/organization/people/${p.userId}/personal`}
+                        href={calendarPersonHref(p.userId)}
                         tabIndex={preview ? -1 : undefined}
                         style={{ gridColumn: `${first + 1} / ${lastIndex + 2}` }}
                         className={cn(
                           "flex h-8 min-w-0 items-center gap-1.5 px-[3px] text-label leading-5",
                           runsOff ? "rounded-l-pill" : "rounded-pill",
-                          pending ? cn("border border-dashed bg-card", color.border, color.text) : cn(color.chip),
+                          pending ? color.pending : color.approved,
                           runsOff && "[mask-image:linear-gradient(to_right,black_80%,transparent)]",
                         )}
                       >
@@ -317,11 +318,18 @@ export const WhosOutWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
                 {upcoming.map((p) => {
                   const name = fullName(p.firstName, p.lastName) || t("card.unnamed");
                   return (
-                    <li key={`${p.userId}-${p.startDate}`} className="flex min-w-0 items-center gap-2 text-label font-normal">
-                      <PersonFace name={name} avatarUrl={p.avatarUrl} size={24} />
-                      <span className="shrink-0 font-medium text-primary">{p.firstName ?? name}</span>
-                      <span className="min-w-0 truncate text-tertiary">{typeOf(p, away).toLocaleLowerCase()}</span>
-                      <span className="ml-auto shrink-0 text-secondary">{dates.range(p.startDate, p.endDate, { weekday: true, hideYear: true })}</span>
+                    <li key={`${p.userId}-${p.startDate}`}>
+                      {/* F0.2: a person opens the calendar on them, not their profile. */}
+                      <Link
+                        href={calendarPersonHref(p.userId)}
+                        tabIndex={preview ? -1 : undefined}
+                        className="flex min-w-0 items-center gap-2 rounded-control text-label font-normal hover:bg-row-hover"
+                      >
+                        <PersonFace name={name} avatarUrl={p.avatarUrl} size={24} />
+                        <span className="shrink-0 font-medium text-primary">{p.firstName ?? name}</span>
+                        <span className="min-w-0 truncate text-tertiary">{typeOf(p, away).toLocaleLowerCase()}</span>
+                        <span className="ml-auto shrink-0 text-secondary">{dates.range(p.startDate, p.endDate, { weekday: true, hideYear: true })}</span>
+                      </Link>
                     </li>
                   );
                 })}

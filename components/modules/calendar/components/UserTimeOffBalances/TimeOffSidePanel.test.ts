@@ -30,12 +30,12 @@ describe("panelOrder — the owner's order of a person's balances (C5)", () => {
     expect(order.map((s) => s.name)).toEqual(["Vacation B", "Vacation A"]);
   });
 
-  it("orders the rest by use, and keeps an unused unlimited policy out", () => {
+  it("orders the rest by use, and keeps every policy — an unused unlimited one last (Q24)", () => {
     const order = panelOrder([
       standing({ name: "Training", used: 1, left: 4 }),
       standing({ name: "Sick", used: 5, left: 5 }),
       standing({ name: "Parental", unlimited: true, used: 0 }),
     ]);
-    expect(order.map((s) => s.name)).toEqual(["Sick", "Training"]);
+    expect(order.map((s) => s.name)).toEqual(["Sick", "Training", "Parental"]);
   });
 });

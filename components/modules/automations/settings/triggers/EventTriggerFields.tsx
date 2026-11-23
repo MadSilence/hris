@@ -6,7 +6,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import type { AutomationEvent, EventAnchor } from "@/models/automations";
 import { CompactPick } from "../conditions/chrome";
 import { EventConditionBuilder } from "../conditions/EventConditionBuilder";
-import { AddConditionButton } from "../conditions/chrome";
+import { AddConditionButton } from "@/components/audience/ConditionChrome";
 import { Field, FieldStack, Hint, PartDivider } from "../parts/parts";
 import { errorFor } from "../parts/problems";
 import type { TriggerPartProps } from "./triggerPartProps";

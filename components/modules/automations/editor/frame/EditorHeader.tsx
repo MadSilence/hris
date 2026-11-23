@@ -27,7 +27,7 @@ export const EditorHeader: React.FC<{
   trigger: TriggerSpec | null;
   status: AutomationStatus;
   buttons: HeaderButton[];
-  disabled?: Partial<Record<HeaderButton, boolean>>;
+  /** A button busy while it sends; nothing here is otherwise disabled (NEVER-DISABLED). */
   busy?: Partial<Record<HeaderButton, boolean>>;
   canRename: boolean;
   /** B7: "All changes saved", "Unsaved changes", "Saving…"; null in read mode. */
@@ -37,7 +37,7 @@ export const EditorHeader: React.FC<{
   onRename: () => void;
   onClose: () => void;
   onButton: (button: HeaderButton) => void;
-}> = ({ name, icon, trigger, status, buttons, disabled = {}, busy = {}, canRename, saveState = null, testRunOpen = false, onRename, onClose, onButton }) => {
+}> = ({ name, icon, trigger, status, buttons, busy = {}, canRename, saveState = null, testRunOpen = false, onRename, onClose, onButton }) => {
   const t = useTranslations("automationsEditor");
 
   const title = (
@@ -90,7 +90,7 @@ export const EditorHeader: React.FC<{
             key={button}
             type="button"
             variant={PRIMARY.includes(button) ? "primary" : "secondary"}
-            disabled={disabled[button] || busy[button]}
+            disabled={busy[button]}
             aria-busy={busy[button] || undefined}
             aria-pressed={button === "testRun" ? testRunOpen : undefined}
             onClick={() => onButton(button)}

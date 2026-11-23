@@ -14,12 +14,12 @@ export class HrisApiEmailService {
     return hrisApiEmailClient.undoUnsubscribe(token);
   }
 
-  public personEmails(userId: string): Promise<PersonEmails> {
-    return hrisApiEmailClient.personEmails(userId);
+  public personEmails(userId: string, page?: number, size?: number): Promise<PersonEmails> {
+    return hrisApiEmailClient.personEmails(userId, page, size);
   }
 
-  public liftSuppression(userId: string): Promise<void> {
-    return hrisApiEmailClient.liftSuppression(userId);
+  public tryAgain(userId: string): Promise<{ lifted: boolean; resent: string | null }> {
+    return hrisApiEmailClient.tryAgain(userId);
   }
 }
 

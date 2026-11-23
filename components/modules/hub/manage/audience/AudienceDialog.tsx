@@ -157,7 +157,7 @@ export const AudienceDialog: React.FC<{
                 {/* "Also add" 13/18 500 Ink + " (optional)" 400 tertiary; the field 42, padding 6 8 (O6). */}
                 <label className="mt-3 text-label text-primary" htmlFor="hub-also-add">
                   {t("audience.alsoAdd")}
-                  <span className="font-normal text-tertiary">{t("audience.optional")}</span>
+                  {" "}<span className="font-normal text-tertiary">{t("audience.optional")}</span>
                 </label>
                 <div className="[&>div]:min-h-[42px] [&>div]:px-2 [&>div]:py-1.5">
                   <HubPeopleField

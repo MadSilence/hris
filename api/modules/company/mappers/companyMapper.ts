@@ -1,5 +1,6 @@
 import { Company } from "@/models/company/Company";
 import { CompanyDTO } from "@/api/modules/company/dto/CompanyDTO";
+import { resolveBackendAssetUrl } from "@/api/modules/users/mappers/userMapper/resolveBackendAssetUrl";
 
 export const companyMapper = {
   mapCompanyDTOtoCompany(dto: CompanyDTO): Company {
@@ -18,15 +19,8 @@ export const companyMapper = {
     };
   },
 
+  /** The upload path as a page writes it — relative, on the company's own address (R3, 2026-11-23). */
   resolveBackendAssetUrl(path?: string | null): string | null {
-    if (!path) return null;
-
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path;
-    }
-
-    const baseUrl = process.env.BACKEND_URL ?? "";
-
-    return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+    return resolveBackendAssetUrl(path);
   },
 };

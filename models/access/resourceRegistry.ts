@@ -176,6 +176,13 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         supportedScopes: PERSONAL_SCOPES,
       },
       {
+        // Mirrors ResourceRegistry: logging somebody else's time (U4), EDIT only.
+        code: "PEOPLE.ATTENDANCE_FOR_OTHERS",
+        messageKey: "peopleAttendanceForOthers",
+        supportedActions: ["EDIT"],
+        supportedScopes: PERSONAL_SCOPES,
+      },
+      {
         code: "REPORTS.REPORT",
         messageKey: "reportsReport",
         supportedActions: ALL_ACTIONS,

@@ -10,6 +10,7 @@ import { Button } from "@/components/desact/button";
 import { Separator } from "@/components/desact/separator";
 import { RowAction, RowActionDestructive, RowActionsMenu } from "@/components/ui/RowActionsMenu";
 import { PermissionGate } from "@/components/auth/PermissionGate";
+import { cn } from "@/lib/cn";
 
 type Props = {
   group: JobLevelGroup;
@@ -247,9 +248,10 @@ const LevelActions: FC<LevelActionsProps> = ({
     <Button type="button"
       variant="ghost"
       size="icon"
-      className="h-7 w-7 text-tertiary hover:bg-mist"
+      // The first has no Move up and the last no Move down: hidden in place, not greyed (NEVER-DISABLED).
+      className={cn("h-7 w-7 text-tertiary hover:bg-mist", first && "invisible")}
       aria-label={t("card.moveUp")}
-      disabled={first || disabled}
+      disabled={disabled}
       onClick={onUp}
     >
       <Icon icon={ArrowUp01Icon} size="sm" />
@@ -258,9 +260,9 @@ const LevelActions: FC<LevelActionsProps> = ({
     <Button type="button"
       variant="ghost"
       size="icon"
-      className="h-7 w-7 text-tertiary hover:bg-mist"
+      className={cn("h-7 w-7 text-tertiary hover:bg-mist", last && "invisible")}
       aria-label={t("card.moveDown")}
-      disabled={last || disabled}
+      disabled={disabled}
       onClick={onDown}
     >
       <Icon icon={ArrowDown01Icon} size="sm" />

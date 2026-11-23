@@ -11,7 +11,7 @@ import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Skeleton } from "@/components/desact/skeleton";
 import type { CSSProperties } from "react";
-import { toTagColor } from "@/lib/theme/tags";
+import { leaveVars } from "@/lib/theme/leave";
 
 export type CalendarHolidayEvent = {
   id: string;
@@ -112,19 +112,17 @@ type TimeOffSegment = {
 };
 
 /**
- * A leave bar as the company calendar draws one (SPEC § 13.13): approved is a solid bar in the leave type's tag
- * colour, pending its light tint under a 1.5 px edge and a 4 px dot pattern — so the two differ in print too.
+ * A leave bar as the company calendar draws one (K01, `lib/theme/leave.ts`): approved is the policy's leave fill with
+ * its text colour, pending white under a 1.5 px dashed edge — so the two differ in print too.
  */
 const timeOffStyle = (tone: CalendarTimeOffEvent["tone"], color?: string | null): CSSProperties => {
-  const tag = toTagColor(color);
-  const bar = `var(--tag-${tag}-bar)`;
-  if (tone === "approved") return { backgroundColor: bar, borderColor: bar, color: "var(--text-inverse)" };
+  const leave = leaveVars(color);
+  if (tone === "approved") return { backgroundColor: leave.fill, borderColor: leave.fill, color: leave.text };
   return {
-    backgroundColor: `var(--tag-${tag}-bg)`,
-    borderColor: bar,
-    color: `var(--tag-${tag}-text)`,
-    backgroundImage: `radial-gradient(${bar} 0.75px, transparent 1px)`,
-    backgroundSize: "4px 4px",
+    backgroundColor: "var(--surface-card)",
+    borderColor: leave.edge,
+    borderStyle: "dashed",
+    color: leave.text,
   };
 };
 
@@ -428,7 +426,9 @@ export const UserCalendar: FC<Props> = ({
                       <div className="relative z-10 flex items-center justify-between px-1.5 pt-1">
                         <span
                           className={[
-                            "inline-flex h-5 min-w-5 items-center justify-center rounded-pill px-1 text-hint",
+                            "inline-flex items-center justify-center rounded-pill text-hint",
+                            // A picked range's ends are a 24 circle (the designers' profile fixes A1, 2026-11-19).
+                            !cell.isToday && isRangeEnd(cell.iso, band) ? "-my-0.5 size-6" : "h-5 min-w-5 px-1",
                             cell.isToday
                               ? "bg-accent font-semibold text-on-accent"
                               : isRangeEnd(cell.iso, band)

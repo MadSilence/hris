@@ -1,15 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, type FC } from "react";
-import type { DateRange } from "react-day-picker";
-import { Calendar02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { useRef, useState, type FC } from "react";
+import { Calendar04Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
-import { dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
-import { Calendar } from "@/components/desact/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { dateToISO, isoToDate, useDateFormatter, useDateParser } from "@/lib/date";
+import { Calendar, type CalendarRange } from "@/components/desact/calendar";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/desact/popover";
 import { cn } from "@/lib/cn";
+import { dateFieldClasses } from "./DatePicker";
 
 export type IsoRange = { start: string; end: string };
 
@@ -25,20 +25,29 @@ type Props = {
   /** The longest range that may be picked, in days, both ends counted. */
   maxDays?: number;
   clearable?: boolean;
+  invalid?: boolean;
   ariaLabel?: string;
   className?: string;
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** "11 Jan – 22 Jan 2027", "28 Dec 2026 – 8 Jan 2027": the year once when both ends share it. */
+export const useRangeLabel = () => {
+  const format = useDateFormatter();
+  return (range: IsoRange) => {
+    const sameYear = range.start.slice(0, 4) === range.end.slice(0, 4);
+    return `${format(range.start, { style: "medium", hideYear: sameYear })} – ${format(range.end, { style: "medium" })}`;
+  };
+};
+
 /**
- * The app's range field — `DatePicker`'s twin for two dates: the same trigger dressed as an input, a
- * Desact `Calendar` in range mode in the popover. The range is committed only when both ends are
- * picked; a half-picked one is kept inside the popover and dropped when it closes, so the caller never
- * sees a range with one end.
- *
- * `RequestTimeOffModal` still draws its own range by hand; it is this component's second user when it
- * moves (`analysis/ui/FORMS_AND_FIELDS.md` § 1 predicted exactly this).
+ * The date field in range mode (AQ-02, `7-product-wide/DATE-RANGE.md`): the same field and the same {@link Calendar},
+ * one month, the range drawn by the one rule — accent circles at the ends, the band between them centre to centre.
+ * The first click starts a range and the band follows the pointer; the second ends it, earlier or later than the
+ * first. **Typing stays**: "11 Jan 2027 – 22 Jan 2027" (either end in any form the date field takes). The range is
+ * committed only when both ends are there; a half-picked one is kept inside the popover and dropped when it closes, so
+ * the caller never sees a range with one end.
  */
 export const DateRangePicker: FC<Props> = ({
   value,
@@ -48,95 +57,176 @@ export const DateRangePicker: FC<Props> = ({
   placeholder,
   maxDays,
   clearable = true,
+  invalid = false,
   ariaLabel,
   className,
 }) => {
   const t = useTranslations("common");
-  const formatDisplayDate = useDateFormatter();
+  const label = useRangeLabel();
+  const format = useDateFormatter();
+  const parse = useDateParser();
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<DateRange | undefined>(undefined);
+  const [draft, setDraft] = useState<Date | null>(null);
+  const [typed, setTyped] = useState<string | null>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const committed: DateRange | undefined = value
+  const typedRange = (() => {
+    if (typed === null) return null;
+    const [a, b] = typed.split(/\s+[–—-]\s*|\s*[–—]\s*/);
+    const from = a ? parse(a) : null;
+    const to = b ? parse(b) : null;
+    if (!from) return null;
+    return to ? (from <= to ? { from, to } : { from: to, to: from }) : { from };
+  })();
+
+  const committed: CalendarRange | undefined = value
     ? { from: isoToDate(value.start), to: isoToDate(value.end) }
     : undefined;
-  const shown = draft ?? committed;
+  const shown: CalendarRange | undefined = draft ? { from: draft } : typedRange ?? committed;
 
-  // Two clicks, always: the first starts a range, the second ends it — earlier or later than the first.
-  // The calendar's own range logic would stretch the committed range on a single click instead, and a
-  // reader re-picking a period expects to start over.
-  const handleSelect = (_range: DateRange | undefined, day: Date) => {
-    if (!draft?.from) {
-      setDraft({ from: day, to: undefined });
+  const tooLong = (from: Date, to: Date) =>
+    Boolean(maxDays && Math.round((to.getTime() - from.getTime()) / DAY_MS) + 1 > maxDays);
+
+  const commit = (next: IsoRange | null) => {
+    setDraft(null);
+    setTyped(null);
+    onChange(next);
+  };
+
+  const settle = () => {
+    if (typed === null) return;
+    if (typed.trim() === "" && clearable) commit(null);
+    else if (typedRange?.to && !tooLong(typedRange.from, typedRange.to))
+      commit({ start: dateToISO(typedRange.from), end: dateToISO(typedRange.to) });
+    else setTyped(null);
+  };
+
+  const pick = (day: Date) => {
+    if (!draft) {
+      setTyped(null);
+      setDraft(day);
       return;
     }
-    const [start, end] = day < draft.from ? [day, draft.from] : [draft.from, day];
-    setDraft(undefined);
-    onChange({ start: dateToISO(start), end: dateToISO(end) });
+    const [start, end] = day < draft ? [day, draft] : [draft, day];
+    commit({ start: dateToISO(start), end: dateToISO(end) });
     setOpen(false);
   };
 
   // With one end picked, the days too far from it cannot be the other end.
-  const tooFar = maxDays && draft?.from && !draft.to
-    ? [
-      { before: new Date(draft.from.getTime() - (maxDays - 1) * DAY_MS) },
-      { after: new Date(draft.from.getTime() + (maxDays - 1) * DAY_MS) },
-    ]
+  const isDisabled = maxDays && draft
+    ? (day: Date) => Math.abs(Math.round((day.getTime() - draft.getTime()) / DAY_MS)) > maxDays - 1
     : undefined;
+
+  const fieldText = typed ?? (draft ? `${format(draft, { style: "medium" })} – ` : value ? label(value) : "");
 
   return (
     <Popover
-      open={open}
+      open={open && !disabled}
       onOpenChange={(next) => {
         setOpen(next);
-        if (!next) setDraft(undefined);
+        if (!next) {
+          setDraft(null);
+          settle();
+        }
       }}
     >
-      <PopoverTrigger asChild>
-        <button
-          id={id}
-          type="button"
-          disabled={disabled}
-          aria-label={ariaLabel}
-          className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-control border border-field bg-card px-3 text-body outline-none transition-colors",
-            "hover:border-strong disabled:cursor-not-allowed disabled:opacity-50",
-            "focus-visible:border-accent focus-visible:ring-accent-ring/50 focus-visible:ring-[3px]",
-            className,
-          )}
+      <PopoverAnchor asChild>
+        <div
+          ref={anchorRef}
+          onMouseDown={(e) => {
+            if (disabled || e.target === inputRef.current) return;
+            e.preventDefault();
+            inputRef.current?.focus();
+            setOpen((o) => !o);
+          }}
+          className={cn(dateFieldClasses(invalid, className), disabled && "cursor-not-allowed bg-subtle text-disabled")}
         >
-          <Icon icon={Calendar02Icon} size="sm" className="shrink-0 text-tertiary" />
-
-          <span className={cn("min-w-0 flex-1 truncate text-left", !value && "text-tertiary")}>
-            {value
-              ? `${formatDisplayDate(value.start, { style: "medium" })} – ${formatDisplayDate(value.end, { style: "medium" })}`
-              : placeholder ?? t("datePicker.pickRange")}
-          </span>
-
+          <Icon icon={Calendar04Icon} size="sm" className="shrink-0 text-tertiary" />
+          <input
+            ref={inputRef}
+            id={id}
+            type="text"
+            autoComplete="off"
+            spellCheck={false}
+            disabled={disabled}
+            aria-label={ariaLabel}
+            aria-invalid={invalid || undefined}
+            aria-haspopup="dialog"
+            value={fieldText}
+            placeholder={placeholder ?? t("datePicker.pickRange")}
+            onChange={(e) => {
+              setDraft(null);
+              setTyped(e.target.value);
+              if (!open) setOpen(true);
+            }}
+            onClick={() => !open && setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                settle();
+                setOpen(false);
+              } else if (e.key === "Escape" && open) {
+                e.preventDefault();
+                e.stopPropagation();
+                setTyped(null);
+                setDraft(null);
+                setOpen(false);
+              } else if (e.key === "ArrowDown" && !open) {
+                e.preventDefault();
+                setOpen(true);
+              } else if (e.key === "Tab") {
+                settle();
+                setOpen(false);
+              }
+            }}
+            className="h-full min-w-0 flex-1 truncate bg-transparent text-primary outline-none placeholder:text-tertiary disabled:cursor-not-allowed"
+          />
           {clearable && value && !disabled && (
-            <span
-              role="button"
+            <button
+              type="button"
               tabIndex={-1}
               aria-label={t("datePicker.clearRange")}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={(event) => {
                 event.stopPropagation();
-                onChange(null);
+                commit(null);
               }}
               className="shrink-0 rounded-control p-0.5 text-tertiary hover:bg-mist hover:text-secondary"
             >
               <Icon icon={Cancel01Icon} size="sm" />
-            </span>
+            </button>
           )}
-        </button>
-      </PopoverTrigger>
+        </div>
+      </PopoverAnchor>
 
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent
+        className="w-auto p-0"
+        align="start"
+        sideOffset={4}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          if (e.target instanceof Node && anchorRef.current?.contains(e.target)) e.preventDefault();
+        }}
+      >
         <Calendar
           mode="range"
           selected={shown}
-          onSelect={handleSelect}
-          defaultMonth={shown?.from ?? undefined}
-          numberOfMonths={2}
-          disabled={tooFar}
+          defaultMonth={shown?.from}
+          onSelect={pick}
+          isDisabled={isDisabled}
+          onToday={() => {
+            // A range has no "today" to pick: Today shows this month, and starts the range on today.
+            pick(new Date());
+          }}
+          onClear={clearable ? () => {
+            commit(null);
+            setOpen(false);
+          } : undefined}
         />
       </PopoverContent>
     </Popover>

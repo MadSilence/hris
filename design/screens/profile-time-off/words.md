@@ -1,0 +1,1701 @@
+# Words — profile-time-off
+
+Every string drawn on the boards of this screen, per frame, in reading order (from the export pages; sidebar left out; bare day numbers and weekday letters left out). Names, dates and numbers are sample data; the spec says which parts are data. Sentence case, US English, no period on toasts and field errors.
+
+## Q01-Month
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q02-Open
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Approved
+- Mon 16 Nov – Fri 20 Nov
+- 5 working days · back Mon 23 Nov
+- Family trip to Madeira
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q03-OpenPending
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Pending
+- Mon 30 Nov – Fri 4 Dec
+- 5 working days · back Mon 7 Dec
+- Decline
+- Approve
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- All requests
+- Assign policy
+
+## Q05-Many
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Personal day
+- Request time off
+- Balances
+- days left
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q05b-MoreThanTwo
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Personal day
+- +3 more
+- Request time off
+- Balances
+- days left
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q05f-WeekStrip
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Personal day
+- +3 more
+- Wed, 11 Nov
+- 4 requests
+- Remote week
+- Business trip
+- Request time off
+- Balances
+- days left
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q06-LongLeave
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Parental leave
+- · back Mon 1 Mar
+- Request time off
+- Balances
+- Annual leave
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q07-Long
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- Annual leave — Lithuania, full-time 2026
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q08-NoPolicy
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- No time off policy yet
+- Assign one so Rūta can request time off and see her balance.
+- Assign policy
+
+## Q09-Loading
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- Request time off
+- Balances
+
+## Q10-Error
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- We couldn’t load time off
+- Rūta’s time off is safe.
+- Try again
+- Request time off
+- Balances
+- Annual leave
+- days left
+- Personal day
+- Sick leave
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q11-OwnView
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+
+## Q12-PickDays
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q13-Request
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- −3 working days
+- days left after
+- Note
+- Optional
+- Anything your manager should know
+- Goes to
+- Cancel
+- Request 3 days
+
+## Q14-RequestShort
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- −3 working days
+- day
+- Note
+- Optional
+- Anything your manager should know
+- Goes to
+- Cancel
+- Request 3 days
+
+## Q15-RequestLong
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- December 2026
+- −21 working days
+- 14 of them come from 2027
+- days left in 2026
+- Note
+- Optional
+- Anything your manager should know
+- Goes to
+- Cancel
+- Request 21 days
+
+## Q16-RequestHalfYear
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Parental leave
+- January 2027
+- −26 weeks
+- No limit
+- Note
+- Optional
+- Anything your manager should know
+- Goes to
+- Cancel
+- Request 26 weeks
+
+## Q17-RequestEmpty
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Pick the days on the calendar
+- Note
+- Optional
+- Anything your manager should know
+- Goes to
+- Cancel
+
+## Q18-Requested
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- · 3 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Tue–Thu, 24–26 Nov
+- Annual leave · 3 days
+- Pending
+- Mon 30 Nov – Fri 4 Dec
+- All requests
+- Assign policy
+- Request sent to Meryem
+
+## Q20-BalanceHistory
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Adjust balance
+- Waiting for approval
+- Time off · Mon 30 Nov – Fri 4 Dec · 5 days
+- Not counted yet
+- Date
+- Change
+- Balance
+- What happened
+- 20 Nov
+- −5 days
+- 18 days
+- Time off · Mon 16 – Fri 20 Nov
+- 2 Jun
+- −1 day
+- 23 days
+- Adjusted by Ulia Tykoon: start date corrected
+- 17 Mar
+- −2 days
+- 24 days
+- Time off · Mon 16 – Tue 17 Mar
+- 1 Jan
+- +1 day
+- 26 days
+- Carried over from 2025
+- +25 days
+- 25 days
+- Yearly allowance
+- Ended with 1 day, carried over
+- 31 Dec
+- −7 days
+- 1 day
+- Time off · Mon 22 – Wed 31 Dec
+- 15 Aug
+- −10 days
+- 8 days
+- Time off · Mon 4 – Fri 15 Aug
+
+## Q21-AdjustBalance
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Days
+- Reason
+- Start date corrected
+- Balance after:
+- 17 days
+- Cancel
+- Save
+- Waiting for approval
+- Time off · Mon 30 Nov – Fri 4 Dec · 5 days
+- Not counted yet
+- Date
+- Change
+- Balance
+- What happened
+- 20 Nov
+- −5 days
+- 18 days
+- Time off · Mon 16 – Fri 20 Nov
+- 2 Jun
+- −1 day
+- 23 days
+- Adjusted by Ulia Tykoon: start date corrected
+- 17 Mar
+- −2 days
+- 24 days
+- Time off · Mon 16 – Tue 17 Mar
+- 1 Jan
+- +1 day
+- 26 days
+- Carried over from 2025
+- +25 days
+- 25 days
+- Yearly allowance
+- Ended with 1 day, carried over
+- 31 Dec
+- −7 days
+- 1 day
+- Time off · Mon 22 – Wed 31 Dec
+- 15 Aug
+- −10 days
+- 8 days
+- Time off · Mon 4 – Fri 15 Aug
+
+## Q22-NoLimit
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- No limit
+- taken when needed
+- Date
+- Days
+- What happened
+- 1 day taken
+- 5 Nov
+- 1 day
+- Time off · Thu 5 Nov
+- 5 days taken
+- 10 Oct
+- 5 days
+- Time off · Mon 6 – Fri 10 Oct
+
+## Q23-NoUpcoming
+
+- Rūta Jonaitė
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Request time off
+- Balances
+- Annual leave
+- days left
+- Personal day
+- day taken
+- All requests
+- Assign policy
+
+## Q24-NoUpcoming15
+
+- Rūta Jonaitė
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Request time off
+- Balances
+- Annual leave
+- days left
+- Personal day
+- day taken
+- Remote week
+- Study leave
+- Volunteering day
+- day left
+- Moving day
+- Wedding leave
+- Blood donation day
+- Exam leave
+- Parental leave
+- days taken
+- Unpaid leave
+- Birthday day off
+- Business trip
+- Annual leave — carried over
+- All requests
+- Assign policy
+
+## Q27-Upcoming15
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Remote week
+- Study leave
+- Volunteering day
+- day left
+- Moving day
+- Wedding leave
+- Blood donation day
+- Exam leave
+- Parental leave
+- days taken
+- Unpaid leave
+- Birthday day off
+- Business trip
+- Annual leave — carried over
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+
+## Q29-AllRequests
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Policy
+- Status
+- Coming up
+- Mon 21 – Wed 23 Dec
+- 3 days
+- 5 days
+- Mon 16 – Fri 20 Nov
+- 31 days taken
+- Thu 5 Nov
+- 1 day
+- Mon 6 – Fri 24 Jul
+- 15 days
+- Mon 4 May
+- Declined
+- Mon 16 – Tue 17 Mar
+- 2 days
+- 24 days taken
+- Mon 22 – Wed 31 Dec
+- 7 days
+- Mon 6 – Fri 10 Oct
+- Mon 4 – Fri 15 Aug
+- 10 days
+- Cancel request
+
+## Q29b-RequestInAll
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Requested Thu 19 Nov
+- Back Mon 7 Dec
+- Waiting for Meryem Alaoui
+- Your manager
+- −5 working days
+- days left after
+- Christmas shopping trip to Vienna
+- Cancel request
+- Close
+
+## Q30-RequestFull
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Requested Thu 19 Nov
+- Back Mon 7 Dec
+- Waiting for Meryem Alaoui
+- Your manager
+- −5 working days
+- days left after
+- Christmas shopping trip to Vienna
+- Cancel request
+- Close
+
+## Q30b-RequestFullApproved
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Requested Thu 19 Nov
+- Back Mon 7 Dec
+- Approved by Meryem Alaoui
+- Thu 19 Nov, 14:40
+- −5 working days
+- Christmas shopping trip to Vienna
+- Close
+
+## Q30c-RequestFullManager
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Requested Thu 19 Nov
+- Back Mon 7 Dec
+- Waiting for you
+- You approve Rūta’s time off
+- −5 working days
+- days left after
+- Christmas shopping trip to Vienna
+- Decline
+- Approve
+
+## Q30d-RequestFullTwoMonths
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Requested Thu 19 Nov
+- Mon 28 Dec 2026 – Tue 5 Jan 2027
+- Back Wed 6 Jan 2027
+- Waiting for Meryem Alaoui
+- Your manager
+- December 2026
+- January 2027
+- −6 working days
+- days left after
+- Christmas shopping trip to Vienna
+- Cancel request
+- Close
+
+## Q30f-RequestFullLongB
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Parental leave
+- Requested Thu 19 Nov
+- Mon 4 Jan – Fri 2 Jul 2027
+- Back Mon 5 Jul 2027
+- Waiting for Meryem Alaoui
+- Your manager
+- Jan
+- Feb
+- Mar
+- Apr
+- May
+- Jun
+- Jul
+- −26 weeks
+- No limit
+- I’ll be reachable by email for anything urgent
+- Cancel request
+- Close
+
+## Q31-CancelConfirm
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Cancel this request?
+- · Mon 30 Nov – Fri 4 Dec · 5 days
+- Meryem won’t need to approve it anymore. The days stay in your balance.
+- Keep it
+- Cancel request
+
+## Q32-NothingTaken
+
+- Rūta Jonaitė
+- Off until Fri, 20 Nov
+- Product designer
+- Manager
+- Meryem Alaoui
+- Team
+- Design
+- With us
+- 3y 5m
+- Active
+- Edit
+- Public profile
+- Personal info
+- Documents
+- Time off
+- Salary
+- Attendance
+- Forms
+- Reviews
+- Tasks
+- Notes
+- November 2026
+- Today
+- All Souls' Day
+- Sick leave
+- Annual leave
+- · 5 days
+- Request time off
+- Balances
+- days left
+- Personal day
+- day taken
+- Upcoming
+- Mon–Fri, 16–20 Nov
+- Annual leave · 5 days
+- Approved
+- Mon 30 Nov – Fri 4 Dec
+- Pending
+- All requests
+- Assign policy
+- Adjust balance
+- Date
+- Change
+- Balance
+- What happened
+- 1 Jan
+- +2 days
+- 2 days
+- Yearly allowance
+- Nothing taken yet
+- Personal days Rūta takes will show up here.

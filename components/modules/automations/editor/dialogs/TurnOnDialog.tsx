@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { FlashIcon, Notification01Icon, PlayIcon, SkipForwardIcon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/desact/button";
 import { Checkbox } from "@/components/desact/checkbox";
+import { FieldError } from "@/components/desact/field-error";
 import { InlineAlert } from "@/components/desact/alert";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/desact/dialog";
@@ -26,7 +27,8 @@ const Line: React.FC<{ icon: IconSvgElement; children: React.ReactNode }> = ({ i
 
 /**
  * Turn on (F4), and with cases already waiting (V6): who it runs for, what it starts with, who hears from it; with
- * waiting cases the choice to take them in, and over the threshold "I understand, send them" before Turn on is enabled.
+ * waiting cases the choice to take them in, and over the threshold "I understand, send them" — Turn on pressed without
+ * it says so under the box (NEVER-DISABLED).
  */
 export const TurnOnDialog: React.FC<{
   open: boolean;
@@ -50,10 +52,12 @@ export const TurnOnDialog: React.FC<{
   const locale = useDisplayLocale();
   const [backfill, setBackfill] = React.useState<BackfillChoice>("NONE");
   const [understood, setUnderstood] = React.useState(false);
+  const [tried, setTried] = React.useState(false);
   React.useEffect(() => {
     if (open) {
       setBackfill("NONE");
       setUnderstood(false);
+      setTried(false);
     }
   }, [open]);
 
@@ -79,19 +83,24 @@ export const TurnOnDialog: React.FC<{
           : t.rich("turnOnDialog.volumeEach", { count: check.messagesPerFiring, b: bold })}
       </p>
       <label className="mt-2 flex cursor-pointer items-center gap-2 text-primary">
-        <Checkbox checked={understood} onCheckedChange={(v) => setUnderstood(v === true)} />
+        <Checkbox
+          checked={understood}
+          onCheckedChange={(v) => setUnderstood(v === true)}
+          aria-invalid={(tried && !understood) || undefined}
+        />
         {t("turnOnDialog.volumeConfirm")}
       </label>
+      {tried && !understood && <FieldError>{t("turnOnDialog.volumeRequired")}</FieldError>}
     </InlineAlert>
   ) : null;
 
-  const option = (value: BackfillChoice, label: string, hint: string) => (
+  const option = (value: BackfillChoice, label: string, hint?: string) => (
     <label className="flex cursor-pointer items-start gap-3">
       <RadioGroupItem value={value} className="mt-0.5" aria-label={label} />
       <span className="flex flex-col gap-0.5">
         <span className="text-body text-primary">{label}</span>
         {/* G14: the radio list's hints are 13/18. */}
-        <span className="text-label font-normal text-tertiary">{hint}</span>
+        {hint && <span className="text-label font-normal text-tertiary">{hint}</span>}
       </span>
     </label>
   );
@@ -104,7 +113,12 @@ export const TurnOnDialog: React.FC<{
           className="flex flex-col gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            if (canTurnOn) onConfirm(backfill, tick && understood);
+            if (turning) return;
+            if (!canTurnOn) {
+              setTried(true);
+              return;
+            }
+            onConfirm(backfill, tick && understood);
           }}
         >
           <DialogHeader>
@@ -115,11 +129,12 @@ export const TurnOnDialog: React.FC<{
             <fieldset className="flex flex-col gap-3">
               <legend className="mb-3 text-label text-primary">{t("turnOnDialog.whoQuestion")}</legend>
               <RadioGroup value={backfill} onValueChange={(v) => setBackfill(v as BackfillChoice)}>
-                {option("NONE", t(`turnOnDialog.waiting.${waitingKind}.onlyNew`), t("turnOnDialog.onlyNewHint"))}
+                {option("NONE", t(`turnOnDialog.waiting.${waitingKind}.onlyNew`))}
                 {option(
                   "ALL",
                   t(`turnOnDialog.waiting.${waitingKind}.also`, { count: check.waitingCases }),
-                  t(`turnOnDialog.waiting.${waitingKind}.hint`),
+                  // DQ-02: only a hire keeps a hint; nothing says "They start right away" any more.
+                  waitingKind === "hires" ? t("turnOnDialog.waiting.hires.hint") : undefined,
                 )}
               </RadioGroup>
               {volumeAlert}
@@ -153,7 +168,7 @@ export const TurnOnDialog: React.FC<{
               <Button type="button" variant="ghost" onClick={onCancel}>
                 {t("turnOnDialog.cancel")}
               </Button>
-              <Button type="submit" disabled={!canTurnOn} aria-busy={turning}>
+              <Button type="submit" loading={turning}>
                 {t("turnOnDialog.confirm")}
               </Button>
             </div>

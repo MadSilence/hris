@@ -156,7 +156,7 @@ const AppSidebar: FC<SidebarProps> = ({
   const companyName = company?.name ?? "";
 
   return (
-    // Peeking, the column keeps its folded width: the open sidebar is fixed and lies over the page.
+    // Peeking, the column keeps its folded width: the open sidebar is absolute in the shell's row and lies over the page.
     <div className={peekOnHover ? "w-(--sidebar-collapsed) shrink-0 overflow-hidden" : "contents"}>
     <SidebarProvider open={!folded} onOpenChange={handleOpenChange}>
       <Sidebar

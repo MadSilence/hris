@@ -5,16 +5,16 @@ import {
   useCompanyCalendarPeople,
 } from "@/components/modules/calendar/hooks/useCompanyCalendar";
 import type { CompanyCalendarGroup, CompanyCalendarUser } from "@/models/calendar";
+import {
+  BoardContext,
+  BoardRegistry,
+  type BoardContextValue,
+} from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
 
 jest.mock("@/components/modules/calendar/hooks/useCompanyCalendar", () => ({
   useCompanyCalendarPeople: jest.fn(),
   useCompanyCalendarMarks: jest.fn(),
   useCompanyCalendarAbsences: () => ({ data: [], isError: false, refetch: jest.fn() }),
-}));
-
-jest.mock("@/components/modules/settings/shared/UserChip/UserChip", () => ({
-  __esModule: true,
-  default: ({ name }: { name: string }) => <span>{name}</span>,
 }));
 
 const person = (id: string, lastName: string): CompanyCalendarUser => ({
@@ -25,14 +25,21 @@ const person = (id: string, lastName: string): CompanyCalendarUser => ({
   avatarUrl: null,
 });
 
-const day = new Date(2026, 8, 21);
-const geometry = {
-  days: [day],
-  dayISOs: ["2026-09-21"],
-  todayISO: "2026-09-21",
-  isNonWorkingDay: () => false,
-  density: "month" as const,
-  gridTemplateColumns: "200px repeat(1, minmax(0, 1fr))",
+const board: BoardContextValue = {
+  geometry: {
+    rangeStart: new Date(2026, 8, 1),
+    dayCount: 30,
+    dayW: 38,
+    scale: "month",
+    isNonWorkingDay: () => false,
+    todayIndex: 20,
+    columnHolidays: new Map(),
+    headerHeight: 76,
+  },
+  registry: new BoardRegistry(),
+  decisions: { canDecide: () => false, approve: jest.fn(), decline: jest.fn(), openFull: () => null },
+  picked: null,
+  setPicked: () => {},
 };
 
 const groups: CompanyCalendarGroup[] = [
@@ -47,18 +54,19 @@ const rowsByGroup: Record<string, CompanyCalendarUser[]> = {
 
 const renderRows = (collapsed: ReadonlySet<string> = new Set(), onToggle = jest.fn()) =>
   render(
-    <CompanyCalendarGroupedRows
-      grouping="TEAM"
-      groups={groups}
-      isLoading={false}
-      collapsed={collapsed}
-      onToggle={onToggle}
-      q=""
-      filters={[]}
-      from="2026-09-01"
-      to="2026-09-30"
-      geometry={geometry}
-    />,
+    <BoardContext.Provider value={board}>
+      <CompanyCalendarGroupedRows
+        grouping="TEAM"
+        groups={groups}
+        isLoading={false}
+        collapsed={collapsed}
+        onToggle={onToggle}
+        q=""
+        filters={[]}
+        from="2026-09-01"
+        to="2026-09-30"
+      />
+    </BoardContext.Provider>,
   );
 
 /** Reports every observed node as on screen at once — the jsdom default never fires at all. */
@@ -100,7 +108,7 @@ describe("CompanyCalendarGroupedRows", () => {
     (useCompanyCalendarMarks as jest.Mock).mockReturnValue({ data: [], isError: false, refetch: jest.fn() });
   });
 
-  it("draws a header per group with its count, the no-value group named after the dimension", () => {
+  it("draws a band per group with its count, the no-value group named after the dimension", () => {
     renderRows();
 
     const platform = screen.getByRole("group", { name: "Platform" });

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { ClearSearchButton } from "@/components/feedback/EmptyState";
 import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import {
@@ -124,7 +123,8 @@ const ActionSelect: React.FC<{
   value: FieldActionLevel;
   server: FieldActionLevel;
   disabled?: boolean;
-  // Minimum level enforced by a broader scope (Whole company). Options below it are disabled.
+  // Minimum level enforced by a broader scope (Whole company). Options below it are not offered (nothing is shown
+  // disabled); the note under the list says why.
   floor?: FieldActionLevel;
   onChange: (level: FieldActionLevel) => void;
 }> = ({ value, server, disabled, floor = "NONE", onChange }) => {
@@ -139,23 +139,11 @@ const ActionSelect: React.FC<{
         </span>
       </SelectTrigger>
       <SelectContent>
-        {FIELD_ACTIONS.map((level) => {
-          const blocked = ACTION_ORDER[level] < floorOrd;
-          return (
-            <SelectItem
-              key={level}
-              value={level}
-              disabled={blocked}
-              title={
-                blocked
-                  ? t("roles.fieldAccess.floorBlocked", { level: t(FIELD_ACTION_LABEL_KEYS[floor]) })
-                  : undefined
-              }
-            >
-              {t(FIELD_ACTION_LABEL_KEYS[level])}
-            </SelectItem>
-          );
-        })}
+        {FIELD_ACTIONS.filter((level) => ACTION_ORDER[level] >= floorOrd || level === value).map((level) => (
+          <SelectItem key={level} value={level}>
+            {t(FIELD_ACTION_LABEL_KEYS[level])}
+          </SelectItem>
+        ))}
         {floorOrd > 0 && (
           <p className="mt-1 border-t border-divider px-2 pt-1.5 text-hint text-tertiary">
             {t("roles.fieldAccess.floorNote", { level: t(FIELD_ACTION_LABEL_KEYS[floor]) })}
@@ -173,7 +161,6 @@ export interface FieldAccessViewProps {
   readOnly: boolean;
   readOnlyReason?: string;
   query: string;
-  onClearSearch?: () => void;
   openGroups: string[];
   onOpenGroupsChange: (value: string[]) => void;
   onChangeAction: (fieldId: string, scope: FieldScope, level: FieldActionLevel) => void;
@@ -186,7 +173,6 @@ export default function FieldAccessView({
   readOnly,
   readOnlyReason,
   query,
-  onClearSearch,
   openGroups,
   onOpenGroupsChange,
   onChangeAction,
@@ -300,8 +286,6 @@ export default function FieldAccessView({
         {visibleGroups.length === 0 && (
           <p className="px-1 py-6 text-body text-tertiary">
             {t("roles.fieldAccess.noMatch", { query: query.trim() })}
-            {onClearSearch && " "}
-            {onClearSearch && <ClearSearchButton variant="link" onClick={onClearSearch} />}
           </p>
         )}
       </Accordion>

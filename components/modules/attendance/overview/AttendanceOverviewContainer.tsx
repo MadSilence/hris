@@ -32,6 +32,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  */
 export const AttendanceOverviewContainer: React.FC = () => {
   const t = useTranslations("attendance");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const { view, setMonth, setRange, setQuery, setFilters } = useAttendanceView();
   const fields = useUserFields();
@@ -85,7 +86,9 @@ export const AttendanceOverviewContainer: React.FC = () => {
           onLoadMore={() => void report.fetchNextPage()}
           onOpen={(row) => router.push(`/attendance/${row.person.id}${view.search ? `?${view.search}` : ""}`)}
           empty={narrowed
-            ? <NoResults hint={t("overview.noResultsHint")} onClearSearch={search.trim() ? () => setSearch("") : undefined}/>
+            ? (search.trim()
+              ? <NoResults title={tCommon("emptyState.nothingCalled", { query: search.trim() })}/>
+              : <NoResults scene="no-match-s" hint={tCommon("emptyState.tryFewerFilters")}/>)
             : (
               <EmptyState
                 scene="attendance"

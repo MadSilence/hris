@@ -13,5 +13,11 @@ type Props = { params: Promise<{ token: string }> };
 export default async function SignedCopyPage({ params }: Props) {
   const { token } = await params;
   const { brand } = await companyAuthBrand();
-  return <SignedCopy token={token} company={brand.kind === "company" ? brand.name : null} />;
+  return (
+    <SignedCopy
+      token={token}
+      company={brand.kind === "company" ? brand.name : null}
+      logoUrl={brand.kind === "company" ? brand.logoUrl : null}
+    />
+  );
 }

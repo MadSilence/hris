@@ -66,7 +66,7 @@ export default function AssignedUsersTable({
           <AssignedUsersTableHeader
             query={query}
             onQueryChange={onQueryChange}
-            assignDisabledReason={isArchived ? t("roles.assigned.archivedCannotAssign") : undefined}
+            cannotAssignReason={isArchived ? t("roles.assigned.archivedCannotAssign") : undefined}
             onAssignClick={() => setAssignOpen(true)}
             onExportClick={() => setExportOpen(true)}
             showHistory={showHistory}

@@ -29,9 +29,11 @@ export const RowActionsMenu: React.FC<{
   label: string;
   align?: "start" | "end";
   className?: string;
-  /** A row whose actions are all unavailable — a system section, a preset attribute. */
+  /**
+   * Busy while one of its actions sends. Not for a row whose actions are all unavailable — that row has no menu,
+   * because nothing is shown disabled (NEVER-DISABLED, `ui/README.md` rule 2).
+   */
   disabled?: boolean;
-  /** Why it is disabled. Shown natively today; see the open question in the guideline. */
   title?: string;
   /** For a kebab inside a clickable row, where the click must not also open the row. */
   stopPropagation?: boolean;
@@ -40,7 +42,11 @@ export const RowActionsMenu: React.FC<{
    * just put it (an inline rename's field; without it the field shows but typing goes nowhere, walk of 2026-11-19).
    */
   onCloseAutoFocus?: (event: Event) => void;
-}> = ({ children, label, align = "end", className, disabled, title, stopPropagation, onCloseAutoFocus }) => (
+  /**
+   * `secondary` is the outlined 36 px trigger of a page header (the profile header, QR3); a row keeps the ghost 32.
+   */
+  trigger?: "ghost" | "secondary";
+}> = ({ children, label, align = "end", className, disabled, title, stopPropagation, onCloseAutoFocus, trigger = "ghost" }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild disabled={disabled}>
       {/*
@@ -49,8 +55,9 @@ export const RowActionsMenu: React.FC<{
         way. A required prop is the only version of this rule that cannot be forgotten.
       */}
       <Button type="button"
-        variant="ghost"
-        size="icon-sm" className="text-secondary hover:bg-subtle hover:text-primary disabled:opacity-40"
+        variant={trigger}
+        size={trigger === "secondary" ? "icon" : "icon-sm"}
+        className={trigger === "secondary" ? "disabled:opacity-40" : "text-secondary hover:bg-subtle hover:text-primary disabled:opacity-40"}
         aria-label={label}
         disabled={disabled}
         title={title}
@@ -127,3 +134,9 @@ export const RowActionDestructive: React.FC<{
     </DropdownMenuItem>
   </>
 );
+
+/**
+ * The hairline between two groups of ordinary items (the profile's ⋯, AQ-08) — when the second group is not the
+ * destructive one, which brings its own.
+ */
+export const RowActionSeparator: React.FC = () => <DropdownMenuSeparator />;

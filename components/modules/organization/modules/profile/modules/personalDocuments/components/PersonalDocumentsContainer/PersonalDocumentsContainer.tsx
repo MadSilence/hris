@@ -10,20 +10,21 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/desact/dialog";
 import { SendForSignatureDialog, stepsFrom } from "@/components/modules/signing/components/SendForSignatureDialog";
-import { SigningPanel } from "@/components/modules/signing/components/SigningPanel";
+import { CancelSigningButton, SigningPanel } from "@/components/modules/signing/components/SigningPanel";
+import { ViewLabel } from "@/components/modules/signing/components/DocumentPieces";
+import { useRouter, useSearchParams } from "next/navigation";
+import { updateFolderLookAction } from "../../actions/documentsFolder/updateFolderLookAction";
 import { latestByDocument, useEnvelopesForPerson, useInvalidateSigning } from "@/components/modules/signing/hooks/useSigning";
 import type { EnvelopeDTO } from "@/api/modules/signing/dto";
 import { RequestDocumentsDialog } from "@/components/modules/signing/components/RequestDocumentsDialog";
 import { EditExpiryDialog } from "@/components/modules/signing/components/ExpiryPieces";
 import { RequestBoxes, isDocumentRequest } from "@/components/modules/signing/components/RequestBox";
 import { useMyTasks } from "@/components/modules/lifecycle/hooks/useLifecycleQueries";
-import { Card } from "@/components/desact/card";
 import type { DocumentDTO, DocumentFolderDTO } from "@/api/modules/documents/dto";
 import { PersonalDocumentsBreadcrumbs } from "../PersonalDocumentsBreadcrumbs/PersonalDocumentsBreadcrumbs";
 import { PersonalDocumentsToolbar } from "../PersonalDocumentsToolbar/PersonalDocumentsToolbar";
 import { PersonalDocumentsFoldersSection } from "../PersonalDocumentsFoldersSection/PersonalDocumentsFoldersSection";
 import { PersonalDocumentsFilesTable } from "../PersonalDocumentsFilesTable/PersonalDocumentsFilesTable";
-import { EmptyFolderState } from "../PersonalDocumentsEmptyState/PersonalDocumentsEmptyState";
 import { PersonalDocumentsSkeleton } from "../PersonalDocumentsSkeleton/PersonalDocumentsSkeleton";
 import { documentService } from "../../services/documentService/documentService";
 import { useCanAccess } from "@/components/auth/useAccess";
@@ -32,9 +33,6 @@ import {
   usePersonalDocuments,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/hooks/document/usePersonalDocuments";
 
-import {
-  CreateDocumentsFolderModal,
-} from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/CreateDocumentsFolderModal";
 import {
   RenameDocumentsFolderModal,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/RenameDoucmentsFolderModal";
@@ -45,7 +43,7 @@ import {
   UploadDocumentModal,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/modals/UploadDocumentModal";
 import { showUndoToast } from "@/lib/feedback/undoToast";
-import { showError } from "@/lib/errors/errorToast";
+import { showError, showSuccess } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
 import { useQueryClient } from "@tanstack/react-query";
 import { restoreDocumentAction } from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/document/trashActions";
@@ -67,14 +65,14 @@ import {
   PersonalDocumentsTrash,
 } from "@/components/modules/organization/modules/profile/modules/personalDocuments/components/PersonalDocumentsTrash";
 import { Button } from "@/components/desact/button";
-import { Delete02Icon, Download01Icon, FolderAddIcon, FolderTransferIcon, StarIcon, Upload04Icon } from "@hugeicons/core-free-icons";
+import { Delete02Icon, Download01Icon, FolderAddIcon, FolderTransferIcon, HourglassIcon, StarIcon, Upload01Icon, Upload04Icon } from "@hugeicons/core-free-icons";
 import { SelectionBar } from "@/components/ui/SelectionBar";
 import { batchDocumentsAction } from "@/components/modules/organization/modules/profile/modules/personalDocuments/actions/document/batchDocumentsAction";
 import { Icon } from "@/components/desact/icon";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ColumnPicker } from "@/components/ui/ColumnPicker";
 import { useHiddenColumns } from "@/components/hooks/useHiddenColumns";
-import { DOCUMENT_COLUMNS } from "../PersonalDocumentsFilesTable/PersonalDocumentsFilesTable";
+import { DOCUMENT_COLUMNS, DOCUMENT_COLUMNS_HIDDEN_BY_DEFAULT } from "../PersonalDocumentsFilesTable/PersonalDocumentsFilesTable";
 import type { DocumentsView } from "../../hooks/document/usePersonalDocuments/usePersonalDocuments";
 import { FolderLookDialog } from "../modals/FolderLookDialog";
 import { uploadFileKey, type UploadFileStatus } from "../modals/UploadDocumentForm";
@@ -122,7 +120,6 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
     moveDocument,
     renameDocument,
 
-    isCreatingFolder,
     isRenamingFolder,
     isDeletingFolder,
     isUploadingFile,
@@ -157,6 +154,17 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   // The drop overlay says whose documents a file lands in.
   const { data: owner } = useUser(userId);
   const isDemo = useIsDemo();
+  const ownerFirstName = owner?.firstName?.trim() || null;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // The Home card's Upload lands here with `?request=` (R7): its upload opens at once.
+  const requestToOpen = searchParams?.get("request") ?? null;
+  const clearRequestParam = React.useCallback(() => {
+    const next = new URLSearchParams(searchParams?.toString() ?? "");
+    next.delete("request");
+    const query = next.toString();
+    router.replace(query ? `?${query}` : "?", { scroll: false });
+  }, [router, searchParams]);
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
   const tSigning = useTranslations("signing");
@@ -178,7 +186,10 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   // Blank is the person having nothing at all — every view empty, not just the one open.
   const isBlank = atRoot && !isFiltered && !isLoading && !error && folders.length === 0 && viewCounts.ALL === 0;
   const viewIsEmpty = atRoot && !isFiltered && documents.length === 0;
-  const { hidden: hiddenColumns, setHidden: setHiddenColumns } = useHiddenColumns("documents");
+  const { hidden: hiddenColumns, setHidden: setHiddenColumns } = useHiddenColumns("documents", DOCUMENT_COLUMNS_HIDDEN_BY_DEFAULT);
+  // The folder open now, for its tile in the trail (DT29).
+  const [openedFolder, setOpenedFolder] = useState<DocumentFolderDTO | null>(null);
+  const categoryOf = (id: string | null | undefined) => (id ? categories?.find((c) => c.id === id) ?? null : null);
   const showVisibility = hasManagePermission || !isOwnSpace;
   const [lookState, setLookState] = useState<DocumentFolderDTO | null>(null);
   const [uploadFolderId, setUploadFolderId] = useState<string | null | undefined>(undefined);
@@ -300,6 +311,12 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
       showError(new Error(result.errorMessage ?? t("documents.table.visibilityFailed")));
       return;
     }
+    // DT12: the change says itself — "Visible to Reza" / "Hidden from Reza".
+    showSuccess(
+      ownerFirstName
+        ? visibility === "HR_ONLY" ? t("documents.table.hiddenFrom", { name: ownerFirstName }) : t("documents.table.visibleTo", { name: ownerFirstName })
+        : visibility === "HR_ONLY" ? t("documents.table.hidden") : t("documents.table.visible"),
+    );
     refreshAll();
   };
   const [moveDocumentState, setMoveDocumentState] = useState<DocumentDTO | null>(null);
@@ -312,11 +329,23 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   const [sendState, setSendState] = useState<{ document: DocumentDTO; again: EnvelopeDTO | null } | null>(null);
   const [signingState, setSigningState] = useState<DocumentDTO | null>(null);
   const ownerName = owner ? `${owner.firstName ?? ""} ${owner.lastName ?? ""}`.trim() : "";
+  // S08a: the signed copy's card at the foot of a completed signing, and opening it.
+  const signedCopyOf = (envelope: EnvelopeDTO) => {
+    const copy = envelope.signedDocumentId ? documents.find((d) => d.id === envelope.signedDocumentId) : undefined;
+    return copy ? { name: copy.name, folderName: copy.folderId ? folderNames.get(copy.folderId) ?? null : null } : null;
+  };
+  const openSigned = (documentId: string, before?: () => void) => {
+    const copy = documents.find((d) => d.id === documentId);
+    if (!copy) return;
+    before?.();
+    setPreviewState(copy);
+  };
   // Requests (documents-requests): asking from here (R05, R01), and on one's own tab, what one is asked for (R07).
   const [requestState, setRequestState] = useState<{ replacing: DocumentDTO | null } | null>(null);
   const [expiryState, setExpiryState] = useState<DocumentDTO | null>(null);
   const myTasks = useMyTasks(false);
-  const myRequests = isOwnSpace ? (myTasks.data ?? []).filter(isDocumentRequest) : [];
+  // R7: the requests I am asked to upload about this person — mine on my own tab, or someone else's I upload for.
+  const myRequests = (myTasks.data ?? []).filter((task) => isDocumentRequest(task) && task.subject.id === userId);
 
   // Dropping anywhere on the tab uploads into the folder currently open, which is what people
   // expect from a file browser. The modal stays for picking a folder or a category explicitly.
@@ -324,8 +353,14 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
   const dragDepth = React.useRef(0);
 
   const folderOptions = useMemo(
-    () => folders.map((folder) => ({ id: folder.id, name: folder.name, icon: folder.icon ?? null, color: folder.color ?? null })),
-    [folders]
+    () => folders.map((folder) => ({
+      id: folder.id,
+      name: folder.name,
+      icon: folder.icon ?? null,
+      color: folder.color ?? null,
+      fileCount: atRoot ? folderFileCounts.get(folder.id) ?? 0 : undefined,
+    })),
+    [folders, atRoot, folderFileCounts]
   );
 
   // Every modal closes on success only. A rejected call (no permission, duplicate name, size limit)
@@ -341,8 +376,9 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
   return (
     <>
-      <Card
-        className="relative flex h-full flex-col border-0 px-8 pt-6 pb-8"
+      {/* DT5: no card around the tab — the toolbar sits under the tab row, flush with the tabs' left edge. */}
+      <div
+        className="relative flex h-full flex-col"
         onDragEnter={(e) => {
           if (!canEdit || !e.dataTransfer.types.includes("Files")) return;
           dragDepth.current += 1;
@@ -367,9 +403,9 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
           if (dropped.length > 0) openUpload(undefined, dropped);
         }}
       >
-        {/* The drop target (SPEC § 2: the accent's subtle tint and its outline). Nothing marks the zone at rest. */}
+        {/* The drop target (SPEC § 2: the accent's subtle tint and its outline). Nothing marks the zone at rest (DT32). */}
         {isDraggingOver && (
-          <div className="pointer-events-none absolute inset-x-8 top-4 bottom-4 z-10 flex flex-col items-center justify-center gap-2 rounded-card border-[1.5px] border-accent bg-accent-subtle text-accent-text">
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-card border-[1.5px] border-accent bg-accent-subtle text-accent-text">
             <Icon icon={Upload04Icon} />
             <p className="text-body font-semibold">{t("documents.container.dropTitle")}</p>
             <p className="text-hint text-secondary">{dropTarget}</p>
@@ -378,36 +414,40 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
         <div className="flex min-h-0 flex-1 flex-col gap-6">
           {myRequests.length > 0 && !showTrash && (
-            <RequestBoxes tasks={myRequests} onUploadedAction={() => void myTasks.refetch()} />
+            <RequestBoxes
+              tasks={myRequests}
+              openTaskId={requestToOpen}
+              onOpenedAction={clearRequestParam}
+              onUploadedAction={() => {
+                void myTasks.refetch();
+                refreshAll();
+              }}
+            />
           )}
-          {/* The toolbar stays while rows are picked; the selection bar sits above the list it acts on (T05b). */}
-          {!showTrash && !isBlank && (
+          {/* T17: a tab that did not load shows no toolbar; T12: nor does a tab with nothing in it. */}
+          {!isBlank && !(error && !showTrash) && (
             <div className="flex flex-none items-center gap-4">
               <PersonalDocumentsToolbar
                 search={search}
                 onSearchChange={setSearch}
                 onUploadFromLocal={() => openUpload(undefined)}
                 onCreateFolder={() => setCreateFolderOpen(true)}
-                canEdit={canEdit}
-                onRequest={hasEditPermission && !isOwnSpace ? () => setRequestState({ replacing: null }) : undefined}
-                onOpenTrash={canManage ? () => { clearSelection(); setShowTrash(true); } : undefined}
+                canEdit={canEdit && !showTrash}
+                onRequest={hasEditPermission && !isOwnSpace && !showTrash ? () => setRequestState({ replacing: null }) : undefined}
+                onOpenTrash={canManage && !showTrash ? () => { clearSelection(); setShowTrash(true); } : undefined}
               />
             </div>
           )}
 
-          {/*
-            The trail says which folder is open — and the trash opens like a folder: Documents › Trash (T10).
-            At the root it said "Documents" above a tab already called Documents.
-          */}
-          {(showTrash || breadcrumbs.length > 1) && (
+          {/* Inside a folder the trail says which (T01, DT29): Documents › its tile and name, and its count. */}
+          {!showTrash && breadcrumbs.length > 1 && (
             <div className="flex-none">
               <PersonalDocumentsBreadcrumbs
-                items={showTrash ? [breadcrumbs[0], { id: null, name: t("documents.container.trash") }] : breadcrumbs}
+                items={breadcrumbs}
+                current={openedFolder && openedFolder.id === currentFolderId ? openedFolder : { icon: null, color: null }}
+                count={isFiltered ? undefined : documents.length}
                 onNavigate={(index) => {
-                  if (showTrash) {
-                    if (index === 0) setShowTrash(false);
-                    return;
-                  }
+                  clearSelection();
                   goToBreadcrumb(index);
                 }}
               />
@@ -416,23 +456,34 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
 
           <div className="min-h-0 flex-1 overflow-y-auto">
             {showTrash ? (
-              <PersonalDocumentsTrash userId={userId}/>
+              <PersonalDocumentsTrash
+                userId={userId}
+                search={search}
+                folderNames={new Map([...folderOptions.map((f) => [f.id, f.name] as const), ...folderNames])}
+                trail={
+                  <PersonalDocumentsBreadcrumbs
+                    items={[breadcrumbs[0], { id: null, name: t("documents.container.trash") }]}
+                    onNavigate={(index) => {
+                      if (index === 0) setShowTrash(false);
+                    }}
+                  />
+                }
+              />
             ) : isLoading ? (
               <PersonalDocumentsSkeleton/>
             ) : error ? (
-              <ErrorState error={error} />
+              <ErrorState error={error} title={t("documents.container.loadFailed")} message={t("documents.container.loadFailedBody")} />
             ) : isBlank ? (
               <EmptyState
                 scene="documents"
-                className="pt-8"
                 title={t("documents.container.blankTitle")}
                 description={canEdit
                   ? t("documents.container.blankDescriptionEditable")
                   : t("documents.container.blankDescription")}
                 action={canEdit ? (
                   <div className="flex gap-2">
-                    <Button type="button" onClick={() => setAddDocumentOpen(true)}>
-                      <Icon icon={Upload04Icon} size="sm" />
+                    <Button type="button" onClick={() => openUpload(undefined)}>
+                      <Icon icon={Upload01Icon} size="sm" />
                       {t("documents.container.uploadFile")}
                     </Button>
                     <Button type="button" variant="secondary" onClick={() => setCreateFolderOpen(true)}>
@@ -446,18 +497,30 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
               <NoResults
                 title={t("documents.container.noResultsTitle", { query: search.trim() })}
                 hint={t("documents.container.noResultsHint")}
-                onClearSearch={() => setSearch("")}
               />
-            ) : isEmpty ? (
-              <EmptyFolderState canAdd={canEdit} />
+            ) : isEmpty && !atRoot ? (
+              // Only inside a folder. At the root an empty list is a view with nothing in it (Starred, Expiring) and
+              // keeps its switch with its own words (V2b) — this branch took it when the person had no folders, and
+              // empty Starred read "This folder is empty" with the switch gone (walk of 2026-11-23).
+              <EmptyState
+                scene="documents"
+                title={t("documents.container.emptyFolderTitle")}
+                description={canEdit ? t("documents.container.emptyFolderDescription") : ""}
+                action={canEdit ? (
+                  <Button type="button" variant="secondary" onClick={() => openUpload(currentFolderId ?? undefined)}>
+                    <Icon icon={Upload01Icon} size="sm" />
+                    {t("documents.folderCard.uploadHere")}
+                  </Button>
+                ) : undefined}
+              />
             ) : (
-              <div className="flex flex-col gap-6">
+              <div className="flex min-h-full flex-col gap-6">
                 {/* Folders hide while searching: the search looks in every folder (T14). */}
                 {!isFiltered && (
                   <PersonalDocumentsFoldersSection
                     folders={folders}
                     fileCounts={atRoot ? folderFileCounts : undefined}
-                    onOpen={(folder) => { clearSelection(); openFolder(folder); }}
+                    onOpen={(folder) => { clearSelection(); setOpenedFolder(folder); openFolder(folder); }}
                     onRename={canEdit ? (folder) => setRenameFolderState(folder) : undefined}
                     onDelete={canManage ? (folder) => setDeleteFolderState(folder) : undefined}
                     onUploadHere={canEdit ? (folder) => openUpload(folder.id) : undefined}
@@ -479,31 +542,49 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                     ) : undefined}
                     actions={[
                       { key: "download", label: tCommon("actions.download"), icon: Download01Icon, href: zipUrl },
-                      ...(canEdit ? [{ key: "move", label: t("documents.table.move"), icon: FolderTransferIcon, onClick: () => setBatchMoveOpen(true) }] : []),
+                      ...(canEdit ? [{ key: "move", label: t("documents.table.moveTo"), icon: FolderTransferIcon, onClick: () => setBatchMoveOpen(true) }] : []),
                       { key: "star", label: t("documents.table.star"), icon: StarIcon, onClick: () => void runBatch("star").then((ok) => ok && clearSelection()) },
                       ...(canManage ? [{ key: "delete", label: t("documents.table.moveToTrash"), icon: Delete02Icon, danger: true, onClick: () => void batchDelete() }] : []),
                     ]}
                   />
                 ) : atRoot && !isFiltered ? (
+                  // DT8, X2, DT31: each count in its pill, Starred and Expiring with their icons; Expiring is always there
+                  // ("Expiring 0"), and the switch stays in every view while the person has any file at all.
                   <div className="flex h-12 items-center">
                     <SegmentedControl
                       aria-label={t("documents.views.label")}
                       fill={false}
+                      size="window"
                       className="self-start"
                       value={view}
                       onChange={(next: DocumentsView) => { clearSelection(); setView(next); }}
-                      options={(["LOOSE", "ALL", "STARRED", "EXPIRING"] as const)
-                        .filter((v) => v !== "EXPIRING" || viewCounts.EXPIRING > 0 || view === "EXPIRING")
-                        .map((v) => ({
+                      options={(["LOOSE", "ALL", "STARRED", "EXPIRING"] as const).map((v) => ({
                         value: v,
-                        label: `${t(`documents.views.${v}`)} ${viewCounts[v]}`,
+                        label: (
+                          <ViewLabel
+                            icon={v === "STARRED" ? StarIcon : v === "EXPIRING" ? HourglassIcon : undefined}
+                            label={t(`documents.views.${v}`)}
+                            count={viewCounts[v]}
+                          />
+                        ),
                       }))}
                     />
                   </div>
                 ) : null}
 
                 {viewIsEmpty ? (
-                  <EmptyFolderState canAdd={canEdit} />
+                  // V2b (DT33): an empty view keeps the switch above it and says what the view is for.
+                  view === "STARRED" ? (
+                    <EmptyState scene="documents" title={t("documents.container.starredEmptyTitle")} description={t("documents.container.starredEmptyBody")} />
+                  ) : view === "EXPIRING" ? (
+                    <EmptyState scene="documents" title={tSigning("section.empty.expiring")} description={tSigning("section.empty.expiringBody")} />
+                  ) : (
+                    <EmptyState
+                      scene="documents"
+                      title={t("documents.container.looseEmptyTitle")}
+                      description={canEdit ? t("documents.container.emptyFolderDescription") : ""}
+                    />
+                  )
                 ) : (
                 <PersonalDocumentsFilesTable
                   documents={documents}
@@ -512,6 +593,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                   onToggleStar={toggleStar}
                   onDelete={canManage ? (document) => void deleteWithUndo(document) : undefined}
                   onChangeVisibility={hasManagePermission ? (document, next) => void changeVisibility(document, next) : undefined}
+                  personFirstName={isOwnSpace ? null : ownerFirstName}
                   onMove={canEdit ? (document) => setMoveDocumentState(document) : undefined}
                   onRename={canEdit ? (document) => setRenameDocumentState(document) : undefined}
                   onPreview={(document) => setPreviewState(document)}
@@ -526,6 +608,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
                   onToggleAllSelected={toggleAllSelected}
                   hiddenColumns={hiddenColumns}
                   showVisibility={showVisibility}
+                  folderNames={atRoot && !isFiltered && view === "STARRED" ? folderNames : undefined}
                   groupByFolder={atRoot && !isFiltered && view === "ALL"
                     ? { names: folderNames, looseLabel: t("documents.views.LOOSE") }
                     : undefined}
@@ -545,23 +628,38 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
             )}
           </div>
         </div>
-      </Card>
+      </div>
 
-      <CreateDocumentsFolderModal
-        isOpen={createFolderOpen}
-        isLoading={isCreatingFolder}
-        errorMessage={messageOf(createFolderError)}
-        onCancelAction={() => {
-          setCreateFolderOpen(false);
-          resetCreateFolder();
-        }}
-        onConfirmAction={({ name }) =>
-          runAndClose(createFolder(name), () => {
+      {/* T03 (DT6): New folder — "In Reza's documents", a live tile, Name, Color, Icon · Cancel · Add folder. */}
+      {createFolderOpen && (
+        <FolderLookDialog
+          mode="create"
+          userId={userId}
+          subtitle={isOwnSpace
+            ? t("documents.createFolder.inOwn")
+            : t("documents.createFolder.inPerson", { name: ownerName || t("documents.root") })}
+          onCreateAction={async (name, look) => {
+            try {
+              const made = (await createFolder(name)) as { data?: { id?: string } } | undefined;
+              const id = made?.data?.id;
+              if (id && (look.icon || look.color)) {
+                const r = await updateFolderLookAction({ userId, folderId: id, icon: look.icon, color: look.color });
+                if (r.status !== ActionStatus.SUCCESS) return r.errorMessage ?? null;
+              }
+              resetCreateFolder();
+              refreshAll();
+              return null;
+            } catch (e) {
+              return messageOf(e) ?? messageOf(createFolderError) ?? "";
+            }
+          }}
+          onCloseAction={() => {
             setCreateFolderOpen(false);
             resetCreateFolder();
-          })
-        }
-      />
+          }}
+          onSavedAction={() => setCreateFolderOpen(false)}
+        />
+      )}
 
       <RenameDocumentsFolderModal
         isOpen={!!renameFolderState}
@@ -611,6 +709,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         statuses={uploadStatuses}
         folders={folderOptions}
         categories={categories?.filter((c) => c.isActive)}
+        personFirstName={isOwnSpace ? null : ownerFirstName}
+        personName={isOwnSpace ? null : ownerName}
         defaultFolderId={(uploadFolderId === undefined ? currentFolderId : uploadFolderId) ?? undefined}
         defaultVisibility={isOwnSpace ? "VISIBLE_TO_EMPLOYEE" : "HR_ONLY"}
         errorMessage={null}
@@ -627,6 +727,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         documentName={t("documents.moveDocument.nDocuments", { count: selectedIds.length })}
         count={selectedIds.length}
         folders={folderOptions}
+        onNewFolderAction={canEdit ? () => setCreateFolderOpen(true) : undefined}
         onCancelAction={() => setBatchMoveOpen(false)}
         onConfirmAction={({ folderId }) => {
           void runBatch("move", { folderId: folderId ?? null }).then((ok) => {
@@ -644,6 +745,7 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         folders={folderOptions}
         currentFolderId={moveDocumentState?.folderId ?? undefined}
         errorMessage={messageOf(moveDocumentError)}
+        onNewFolderAction={canEdit ? () => setCreateFolderOpen(true) : undefined}
         onCancelAction={() => {
           setMoveDocumentState(null);
           resetMoveDocument();
@@ -680,7 +782,8 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
       {expiryState && (
         <EditExpiryDialog
           document={expiryState}
-          personName={ownerName}
+          personName={ownerFirstName ?? ownerName}
+          remindDaysBefore={categoryOf(expiryState.categoryId)?.remindDaysBefore ?? null}
           onCloseAction={() => setExpiryState(null)}
           onSavedAction={() => {
             setExpiryState(null);
@@ -725,6 +828,9 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
             <SigningPanel
               envelope={signingByDocument.get(signingState.id)!}
               canSend={hasEditPermission && !isOwnSpace}
+              managerId={owner?.manager?.id ?? null}
+              signedCopy={signedCopyOf(signingByDocument.get(signingState.id)!)}
+              onOpenSignedAction={(id) => openSigned(id, () => setSigningState(null))}
               onChangedAction={() => void invalidateSigning()}
               onSendAgainAction={() => {
                 const again = signingByDocument.get(signingState.id) ?? null;
@@ -744,6 +850,11 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
         fetchDocument={documentService.fetchPersonalDocument}
         onCloseAction={() => setPreviewState(null)}
         showVisibility={showVisibility}
+        personFirstName={isOwnSpace ? null : ownerFirstName}
+        folderName={previewState?.folderId ? folderNames.get(previewState.folderId) ?? null : null}
+        footerAction={previewState && signingByDocument.get(previewState.id)?.status === "SENT" && hasEditPermission && !isOwnSpace ? (
+          <CancelSigningButton envelope={signingByDocument.get(previewState.id)!} onDoneAction={() => void invalidateSigning()} />
+        ) : undefined}
         onRenameAction={previewState && canEdit && !previewState.signedAt && signingByDocument.get(previewState.id)?.status !== "SENT"
           ? async (name) => {
             try {
@@ -769,6 +880,10 @@ export const PersonalDocumentsContainer: React.FC<PersonalDocumentsContainerProp
           <SigningPanel
             envelope={signingByDocument.get(previewState.id)!}
             canSend={hasEditPermission && !isOwnSpace}
+            cancelInFooter
+            managerId={owner?.manager?.id ?? null}
+            signedCopy={signedCopyOf(signingByDocument.get(previewState.id)!)}
+            onOpenSignedAction={(id) => openSigned(id)}
             onChangedAction={() => void invalidateSigning()}
             onSendAgainAction={() => {
               const again = signingByDocument.get(previewState.id) ?? null;

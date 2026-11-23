@@ -28,6 +28,10 @@ export interface UploadDocumentModalProps {
   errorMessage?: string | null;
   onCancelAction: () => void;
   onConfirmAction: (values: UploadDocumentFormValues) => void;
+  /** Whose documents — "To Reza Karimi's documents"; null on one's own tab ("To your documents"). */
+  personName?: string | null;
+  /** "Hidden from Reza" / "Visible to Reza". */
+  personFirstName?: string | null;
 }
 
 export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
@@ -42,14 +46,13 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
   errorMessage,
   onCancelAction,
   onConfirmAction,
+  personName,
+  personFirstName,
 }) => {
   const t = useTranslations("organization");
 
-  const requestClose = () => {
-    if (isLoading) return;
-
-    onCancelAction();
-  };
+  // DT15: Cancel stays live while files go up — what is in stays in, the rest is not sent.
+  const requestClose = () => onCancelAction();
 
   return (
     <Dialog
@@ -58,11 +61,11 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
         if (!open) requestClose();
       }}
     >
-      <DialogContent hideClose className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>{t("documents.upload.title")}</DialogTitle>
           <DialogDescription>
-            {t("documents.upload.description")}
+            {personName ? t("documents.upload.toPerson", { name: personName }) : t("documents.upload.toOwn")}
           </DialogDescription>
         </DialogHeader>
 
@@ -76,6 +79,7 @@ export const UploadDocumentModal: FC<UploadDocumentModalProps> = ({
           defaultVisibility={defaultVisibility}
           initialFiles={initialFiles}
           statuses={statuses}
+          personFirstName={personFirstName}
           onCancelAction={requestClose}
           onSubmitAction={onConfirmAction}
         />

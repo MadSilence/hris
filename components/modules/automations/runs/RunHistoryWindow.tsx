@@ -94,16 +94,14 @@ export const RunHistoryWindow: React.FC<RunHistoryWindowProps> = ({ automationId
   } else if (rows.length === 0) {
     body = (
       <NoResults
+        variant="panel"
         fill
         scene={q && chip === "ALL" ? "no-results-s" : "no-match-s"}
         title={t("history.noMatchTitle")}
         hint={q ? t("history.noMatch", { chip, query: q }) : t("history.noMatchChip", { chip })}
+        // No "Clear search" (C10): the search field's × empties it.
         action={
-          q ? (
-            <Button type="button" variant="secondary" size="sm" onClick={() => setQuery("")}>
-              {t("history.clearSearch")}
-            </Button>
-          ) : (
+          chip === "ALL" ? undefined : (
             <Button type="button" variant="secondary" size="sm" onClick={() => setChip("ALL")}>
               {t("history.showAll")}
             </Button>

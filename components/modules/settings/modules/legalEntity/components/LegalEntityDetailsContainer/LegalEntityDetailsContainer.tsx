@@ -44,7 +44,7 @@ import { ForbiddenError } from "@/components/clients/exceptions";
 import { useDetachedPeopleImpact } from "@/components/modules/settings/shared/DetachedPeopleNotice";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const SCROLL_OFFSET = "calc(100svh - 390px)";
+const SCROLL_OFFSET = "calc(100cqh - 390px)";
 
 type Props = {
   legalEntityId: string;

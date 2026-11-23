@@ -62,7 +62,6 @@ import {
   ExportDataFormValues,
   triggerExportDownload,
 } from "@/components/modules/settings/shared/ExportDataModal";
-import { ClearSearchButton } from "@/components/feedback/EmptyState";
 import { FormError } from "@/components/feedback/FormError";
 
 type Props = {
@@ -377,7 +376,7 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
     calendar.sourceType !== PublicHolidayCalendarSourceType.Manual && !!calendar.sourceExternalId;
 
   return (
-    <div className="flex h-[calc(100svh-6rem)] flex-col gap-5 overflow-hidden px-8 pt-2">
+    <div className="flex h-[calc(100cqh-6rem)] flex-col gap-5 overflow-hidden px-8 pt-2">
       {/* Header + status + description */}
       <div className="flex flex-none flex-col gap-3">
         <div className="flex items-center justify-between gap-4">
@@ -637,7 +636,6 @@ export const PublicHolidayCalendarDetailsComponent: FC<Props> = ({
                     {t("publicHolidays.details.noMatch")}
                   </p>
                   <p className="mt-1 text-body text-tertiary">{t("publicHolidays.details.noMatchHint")}</p>
-                  <ClearSearchButton className="mt-3" onClick={() => setHolidaySearch("")} />
                 </div>
               ) : !canManage ? (
                 <div className="flex min-h-40 flex-1 flex-col items-center justify-center rounded-card border border-dashed px-6 py-10 text-center">

@@ -151,15 +151,18 @@ export const TemplatePreview: React.FC<{ templateKey: string }> = ({ templateKey
             <Button asChild variant="secondary">
               <Link href={BACK} className="no-underline">{tCommon("actions.cancel")}</Link>
             </Button>
-            <Button
-              type="button"
-              onClick={() => void onApply()}
-              disabled={apply.isPending || preview.isFetching || data.counts.create === 0}
-            >
-              {data.counts.create === 0
-                ? t("templates.preview.nothingToCreate")
-                : t("templates.preview.apply", { count: data.counts.create })}
-            </Button>
+            {/* With nothing to create there is no Apply — it says so in its place, never a grey button (NEVER-DISABLED). */}
+            {data.counts.create === 0 ? (
+              <span className="text-body font-medium text-secondary">{t("templates.preview.nothingToCreate")}</span>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => void onApply()}
+                disabled={apply.isPending || preview.isFetching}
+              >
+                {t("templates.preview.apply", { count: data.counts.create })}
+              </Button>
+            )}
           </div>
         </>
       )}

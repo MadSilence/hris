@@ -45,8 +45,8 @@ const isReadKey = (key: string) => key.startsWith("read-");
  * to an earlier version of (`what` CHANGED, or OVERDUE — which the API sends only for such a page); a page they never
  * agreed to (`what` NEW) is one "to read and agree".
  */
-export const agreementLineKey = (agreement: Pick<AgreementRow, "what" | "agreedVersion">): "wasUpdated" | "toReadAndAgree" =>
-  agreement.what === "NEW" || agreement.agreedVersion == null ? "toReadAndAgree" : "wasUpdated";
+export const agreementLineKey = (agreement: Pick<AgreementRow, "what" | "agreedVersion">): "wasUpdated" | null =>
+  agreement.what === "NEW" || agreement.agreedVersion == null ? null : "wasUpdated";
 
 /** The key a held write is kept under in Home's deferred queue — one per card that can be answered on Home. */
 export const writeKey = {

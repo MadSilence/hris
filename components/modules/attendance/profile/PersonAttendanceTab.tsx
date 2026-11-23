@@ -2,7 +2,7 @@
 
 import { FC, useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { Delete02Icon, InformationCircleIcon, MagicWand01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Delete02Icon, InformationCircleIcon, MagicWand01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
@@ -94,9 +94,10 @@ const HoursBadge: FC<{ minutes: number; onBand?: boolean }> = ({ minutes, onBand
  * The person's Attendance tab (technical_documentation/ATTENDANCE.md § 8): their month on the left, the form on
  * the right, the picked days' entries underneath.
  *
- * **Only the person logs their own time** (the owner, 2026-09-28) — on their own profile, or somebody
- * impersonating them. On anybody else's profile the tab reads and nothing more; the server refuses a
- * write regardless (`canLog` is its answer, not a guess).
+ * **The person logs their own time, and a holder of `PEOPLE.ATTENDANCE_FOR_OTHERS` may log it for them** (U4,
+ * reversing the owner's 2026-09-28 call) — a manager fixing a forgotten day. Without either the tab reads and nothing
+ * more; the server refuses a write regardless (`canLog` is its answer, not a guess). An entry somebody else wrote says
+ * "Logged by {full name}".
  *
  * A span is `From`–`To` on one day, several a day, none overlapping. Dragging across the calendar
  * writes the same span to each picked day, weekends and leave included — the form says when that goes
@@ -119,7 +120,8 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const tCommon = useTranslations("common");
   const todayISO = useMemo(() => dateToISO(new Date()), []);
   const [month, setMonth] = useState(monthOf(todayISO));
-  const [range, setRange] = useState<{ start: string; end: string }>({ start: todayISO, end: todayISO });
+  // Today is picked when the tab opens; × in the panel's head clears the pick (the designers' profile fixes A3).
+  const [range, setRange] = useState<{ start: string; end: string } | null>({ start: todayISO, end: todayISO });
   const [draft, setDraft] = useState<Draft>(EMPTY);
   /** The last span logged — offered on the next picked day as placeholders, confirmed by Quick Fill. */
   const [lastFilled, setLastFilled] = useState<Draft | null>(null);
@@ -143,7 +145,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
     () => new Map((log.data?.days ?? []).map((day) => [day.date, day])),
     [log.data],
   );
-  const pickedDates = useMemo(() => expandSpanToDays(range.start, range.end), [range]);
+  const pickedDates = useMemo(() => (range ? expandSpanToDays(range.start, range.end) : []), [range]);
   const pickedDays = pickedDates.map((iso) => byDate.get(iso)).filter((d): d is AttendanceLogDay => Boolean(d));
   const pickedEntries = pickedDays.flatMap((day) => day.entries);
   const single = pickedDates.length === 1;
@@ -186,9 +188,17 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   const refusal = (caught: unknown) =>
     caught instanceof AttendanceActionError ? caught.result.errorMessage ?? messageForError(caught) : messageForError(caught);
 
+  const clearPick = () => {
+    setRange(null);
+    setEditing(null);
+    setDraft(EMPTY);
+    setFormError(null);
+    setTried(false);
+  };
+
   const submit = async () => {
     setTried(true);
-    if (minutes === null) return;
+    if (minutes === null || pickedDates.length === 0) return;
     setFormError(null);
     try {
       if (editing) {
@@ -223,7 +233,11 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
   };
 
   // The short style (C1): "Wed, 11 Nov", "Wed–Fri, 11–13 Nov" — no year in the current one.
-  const rangeLabel = !inBrowser ? null : shortDates.range(range.start, range.end, { weekday: true });
+  const rangeLabel = !inBrowser || !range ? null : shortDates.range(range.start, range.end, { weekday: true });
+  // A4: the error goes under the field that is empty; a span that ends before it starts is said once, under both.
+  const fromMissing = tried && draft.from === "";
+  const toMissing = tried && draft.to === "";
+  const spanInvalid = tried && minutes === null && !fromMissing && !toMissing;
 
   return (
     <div className="flex flex-col gap-6">
@@ -240,7 +254,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
             toolbar="split"
             renderDay={(day) => {
               const logged = byDate.get(day.iso)?.loggedMinutes ?? 0;
-              const onBand = day.iso >= range.start && day.iso <= range.end;
+              const onBand = range !== null && day.iso >= range.start && day.iso <= range.end;
               return logged > 0 ? <div className="flex justify-center pt-2"><HoursBadge minutes={logged} onBand={onBand}/></div> : null;
             }}
             footer={() => (
@@ -253,20 +267,39 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
         </div>
 
         {canLog && (
-          <Card className="min-h-0 gap-4 border-divider p-6 xl:w-80 xl:shrink-0">
+          <Card className="min-h-0 gap-4 self-stretch border-divider p-5 xl:w-80 xl:shrink-0">
             <div className="space-y-1">
-              <h3 className="text-card-title text-primary">{editing ? t("log.editTitle") : t("log.logTitle")}</h3>
-              <p className="flex min-h-5 items-center gap-2 text-body text-secondary">
-                {rangeLabel}
-                {!single && (
-                  <span className="rounded-pill bg-mist px-2 text-hint font-semibold text-secondary">
-                    {tCommon("time.days", { count: pickedDates.length })}
-                  </span>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="text-card-title text-primary">{editing ? t("log.editTitle") : t("log.logTitle")}</h3>
+                {range && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="-mr-1.5 -mt-1"
+                    aria-label={tCommon("selection.clear")}
+                    title={tCommon("selection.clear")}
+                    onClick={clearPick}
+                  >
+                    <Icon icon={Cancel01Icon} size="sm" />
+                  </Button>
                 )}
-              </p>
-              {!editing && <p className="text-hint text-tertiary">{t("log.pickHint")}</p>}
+              </div>
+              {range && (
+                <p className="flex min-h-5 items-center gap-2 text-body text-secondary">
+                  {rangeLabel}
+                  {!single && (
+                    <span className="rounded-pill bg-mist px-2 text-hint font-semibold text-secondary">
+                      {tCommon("time.days", { count: pickedDates.length })}
+                    </span>
+                  )}
+                </p>
+              )}
+              {/* A2: the hint is the empty state's — once days are picked, they speak for themselves. */}
+              {!range && <p className="text-hint text-tertiary">{t("log.pickHint")}</p>}
             </div>
 
+            {range && (
             <form
               noValidate
               className="flex flex-col gap-4"
@@ -304,6 +337,7 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                     placeholder={suggestion?.from}
                     onChange={(from) => setDraft((d) => ({ ...d, from }))}
                   />
+                  <FieldError>{fromMissing ? t("log.fromRequired") : null}</FieldError>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="attendance-to">{t("person.to")}</Label>
@@ -313,9 +347,10 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                     placeholder={suggestion?.to}
                     onChange={(to) => setDraft((d) => ({ ...d, to }))}
                   />
+                  <FieldError>{toMissing ? t("log.toRequired") : null}</FieldError>
                 </div>
               </div>
-              <FieldError>{tried && minutes === null ? t("log.invalidSpan") : null}</FieldError>
+              <FieldError>{spanInvalid ? t("log.invalidSpan") : null}</FieldError>
 
               {minutes !== null && (
                 <p className="text-hint tabular-nums text-tertiary">
@@ -331,7 +366,8 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 </Label>
                 <Textarea
                   id="attendance-description"
-                  rows={3}
+                  rows={2}
+                  className="min-h-18"
                   value={draft.description}
                   placeholder={suggestion?.description || t("log.notePlaceholder")}
                   onChange={(event) => setDraft((d) => ({ ...d, description: event.target.value }))}
@@ -365,11 +401,12 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 </Button>
               </div>
             </form>
+            )}
           </Card>
         )}
       </div>
 
-      {log.error ? (
+      {!range ? null : log.error ? (
         <ErrorState error={log.error} compact onRetry={() => void log.refetch()}/>
       ) : (
         <Table className="table-fixed">
@@ -403,7 +440,15 @@ export const PersonAttendanceTab: FC<Props> = ({ userId }) => {
                 <TableCell className="tabular-nums">{formatTime.ofDay(entry.startTime)}</TableCell>
                 <TableCell className="tabular-nums">{formatTime.ofDay(entry.endTime)}</TableCell>
                 <TableCell className="tabular-nums">{formatMinutes(entry.minutes)}</TableCell>
-                <TableCell className="truncate" title={entry.description ?? undefined}>{entry.description ?? ""}</TableCell>
+                <TableCell className="truncate" title={entry.description ?? undefined}>
+                  {entry.description ?? ""}
+                  {/* U4: somebody else wrote it. A writer since deleted is still somebody else, unnamed. */}
+                  {entry.loggedBy && entry.loggedBy.id !== entry.userId && (
+                    <span className="block truncate text-label font-normal text-tertiary">
+                      {t("log.loggedBy", { name: entry.loggedBy.fullName ?? t("log.loggedByUnknown") })}
+                    </span>
+                  )}
+                </TableCell>
                 {canLog && (
                   <TableCell>
                     <RowActionsMenu label={t("log.entryActions")}>

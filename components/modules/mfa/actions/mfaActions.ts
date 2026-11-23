@@ -12,6 +12,8 @@ import type {
   StepUpRequest,
 } from "@/api/modules/mfa/dto";
 import { toActionError, type ActionResult } from "@/lib/errors/withActionError";
+import { cookies } from "next/headers";
+import { EMAIL_CODE_COOKIE } from "@/config/security/sessionCookieNames";
 
 export async function startMfaEnrolmentAction(password: string): Promise<ActionResult<EnrolmentStartDTO>> {
   try {
@@ -90,9 +92,21 @@ export async function stepUpAction(body: StepUpRequest): Promise<ActionResult<vo
   }
 }
 
-export async function resetUserMfaAction(userId: string, verifiedOutOfBand: boolean): Promise<ActionResult<void>> {
+/**
+ * Resets somebody's two-step login (AQ-06, U3). `proof` is the admin's own — the password (no factor), a code or a
+ * backup code (a factor), or the code emailed to them (signs in by code; bound to this browser's `__Host-code`) — and
+ * is the step-up. Without it, a fresh step-up is asked for.
+ */
+export async function resetUserMfaAction(
+  userId: string,
+  verifiedOutOfBand: boolean,
+  proof?: { password?: string; code?: string; backupCode?: string; emailCode?: string },
+): Promise<ActionResult<void>> {
   try {
-    await hrisMfaService.resetUser(userId, verifiedOutOfBand);
+    const store = proof?.emailCode ? await cookies() : null;
+    const browserToken = store?.get(EMAIL_CODE_COOKIE)?.value;
+    await hrisMfaService.resetUser(userId, verifiedOutOfBand, proof && { ...proof, ...(browserToken ? { browserToken } : {}) });
+    if (store) store.delete(EMAIL_CODE_COOKIE);
     return { status: ActionStatus.SUCCESS };
   } catch (error) {
     return toActionError(error, "resetUserMfaAction");

@@ -185,3 +185,21 @@ Written out as DQ-21 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-
 ## Q-70 — Two new lines of text (W15, CM01) · home-widgets, company-hub-manage · from code · 2026-11-19
 Written out as DQ-22 in `handoffs/2026-11-19-questions-to-design/QUESTIONS-2026-11-19.md`.
 **Blocks:** nothing
+
+## Q-71 — Answers and questions on the three packages of 19 Nov · documents, profile, manage-account, sign-in-appearance, empty states, calendar · from code · 2026-11-20
+Written out in `handoffs/2026-11-20-answers-to-design/ANSWERS-2026-11-20.md`: what was accepted (with what each acceptance removes, marked ⚠), where our rule stays (dates by country, no print), and AQ-01 – AQ-20.
+**Blocks:** manage-account (AQ-06 – AQ-08), the Decline dialog (AQ-13), the requester's view of Q30 (AQ-04)
+
+## Q-72 — A comma after the weekday, and two calls from the walk · company-calendar, profile-time-off, profile-header · from code · 2026-11-23
+- **The comma.** Our date rule (SPEC § 1, the Home widgets fix A5) writes one date with its weekday as "Mon, 14 Dec";
+  the calendar boards draw "Mon 14 Dec". Which one wins? Nothing changes until you answer.
+- **For your information — the profile ⋯ keeps ours, not AQ-08's.** *Start onboarding* stays for Active and Joining
+  (onboarding is for anybody already in the system, a transfer or a returner too), and *Start offboarding* appears
+  only once a last day is recorded (an offboarding counts from the last day, so without one it has nothing to count
+  from).
+- **For your information — *Edit dates*.** The request window opened from *Edit dates* is titled "Edit dates" and its
+  button reads "Save" (the spec said only "the request window filled in"). Tell us if you meant otherwise.
+- Also settled by the owner and built: a month is always three letters ("Sep", never "Sept"); "Back {first working
+  day}" is the one way to say when somebody returns, the status pill included.
+
+**Blocks:** nothing

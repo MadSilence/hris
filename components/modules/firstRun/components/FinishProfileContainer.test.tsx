@@ -106,7 +106,7 @@ describe("FinishProfileContainer", () => {
     fireEvent.change(await screen.findByRole("textbox"), { target: { value: "Jo" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Couldn’t save. Try again.",
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Couldn’t save. Try again",
       expect.objectContaining({ action: expect.objectContaining({ label: "Retry" }) })));
     expect(screen.getByRole("textbox")).toHaveValue("Jo");
     expect(back).not.toHaveBeenCalled();

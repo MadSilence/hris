@@ -1,10 +1,9 @@
 "use client";
 
 import { FilterChip } from "@/components/ui/FilterChip";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Add01Icon, FilterHorizontalIcon, LayoutThreeColumnIcon, PencilEdit02Icon, Upload01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, LayoutThreeColumnIcon, PencilEdit02Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
 import { Button } from "@/components/desact/button";
@@ -15,7 +14,7 @@ import {
 } from "@/components/desact/popover";
 
 import { PermissionGate } from "@/components/auth/PermissionGate";
-import { AudienceBuilder } from "@/components/audience/AudienceBuilder";
+import { FilterPopover } from "@/components/audience/FilterPopover";
 import { ColumnsManager } from "@/components/modules/organization/components/PeopleTopbar/components/ColumnsManager";
 import type { ColumnItem } from "@/models/userTable";
 import type { FieldDTO, FilterDTO } from "@/models/user/fields";
@@ -73,22 +72,6 @@ export default function PeopleTopbar({
   const tDemo = useTranslations("demo.sample");
   const t = useTranslations("organization");
   const tCommon = useTranslations("common");
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [draft, setDraft] = useState<FilterDTO[]>(filters);
-  const [seed, setSeed] = useState(0);
-
-  useEffect(() => {
-    if (filterOpen) {
-      setDraft(filters);
-      setSeed((s) => s + 1);
-    }
-  }, [filterOpen, filters]);
-
-  const applyFilters = () => {
-    onFiltersChangeAction(draft);
-    setFilterOpen(false);
-  };
-  const resetFilters = () => setDraft([]);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 bg-page py-2">
@@ -109,25 +92,7 @@ export default function PeopleTopbar({
           </PopoverContent>
         </Popover>
 
-        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-          <PopoverTrigger asChild>
-            <Button type="button" variant="secondary" size="sm" className="gap-1.5">
-              <Icon icon={FilterHorizontalIcon} size="sm" />
-              {t("topbar.filter")}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-[660px] max-w-[92vw] p-3">
-            <AudienceBuilder key={seed} fields={fields} value={draft} onChange={setDraft} />
-            <div className="mt-3 flex items-center justify-end gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
-                {tCommon("actions.reset")}
-              </Button>
-              <Button type="button" size="sm" onClick={applyFilters}>
-                {tCommon("actions.apply")}
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <FilterPopover fields={fields} value={filters} onChange={onFiltersChangeAction} size="sm" />
 
         {drafts && (
           <DraftsToggle

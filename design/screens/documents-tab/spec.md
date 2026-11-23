@@ -110,10 +110,53 @@ None blocks this.
   - **The Upload dialog (M3)** is built as drawn (800 wide, two columns, per-file progress, a refused file kept with
     why), and so are dropping onto a folder tile and the tile's drop-target state (`UploadDocumentForm.tsx`,
     `PersonalDocumentsFolderCard.tsx` `onDropFiles`) — documents batch 11, 2026-11-18, not yet seen in a visible window.
-  - **Folder icons** are the folder plus nine from the hub's set; the colours are the package's eight.
+  - **Folder icons** are T03's sixteen (R15, 2026-11-23, below); the colours are the package's eight.
   - **All documents** heads a group with the folder its files sit in — the root's, or a nested one under its own name
     (the root listing names every folder a file sits in, `folderNames`; 2026-11-19, not yet seen on screen). A nested
     folder heads its own group, not its root folder's.
-  - The Expiring view (`documents-expiry`) appears in the switch only while something is expiring.
+  - The Expiring view (`documents-expiry`) is always in the switch, "Expiring 0" included (since 2026-11-20, X2).
 - **An empty folder for a reader who may not upload** (2026-11-19, F5.1): one line, no buttons and no "Drop files here or use Add".
 - **The selection bar takes the view tabs' row** (2026-11-20, the owner): at the root, while rows are selected, the bar stands where Loose · All · Starred were, so the list does not move under the pointer; clearing brings the tabs back. Inside a folder (no tabs row) it still sits above the list.
+
+- **The designers' package of 2026-11-19, built 2026-11-20** (`DESIGN_ROUND_2026_11_19_PLAN.md` batch 2), not yet seen
+  in a browser:
+  - **No card around the tab** (DT5); the files table is fixed-width as X01-List, the name takes the rest and cuts with
+    … with its full name on hover, so it fits a 1440 window (DT30). Size is off by default and stays in the column
+    picker (DT10); the columns are Category · Expires · Who can see · Uploaded (DT27); dates in grey, an empty category
+    "—"; the star only in the row's end (DT23); Starred has a Folder column (DT22).
+  - **One click opens a document** (the owner's A11; DS18, DT29's file half): the double click is gone, Enter still
+    opens, the checkbox, Download, the star and ⋯ keep their own clicks; on row hover the name lifts like a person
+    chip's (white, level-1 shadow). Shared pieces in `components/modules/signing/components/DocumentPieces.tsx`
+    (file-type tile, view label with its count pill, the name, Who can see, the sorted header).
+  - The **file-type tile** 28 in the type's tag colour (DT9); the **view switch** with count pills, radius 6, Starred
+    and Expiring with their icons (DT8); **"Expiring 0" is always there** (X2) and the switch stays in every view
+    while the person has any file (DT31); an empty Starred is V2b, "Nothing starred yet" (DT33).
+  - Row ⋯ in S01-Menu's order, 230 wide, Who can see › "Hidden from Reza" / "Visible to Reza" as two plain items with a
+    tick, and a toast saying the change (DT11, DT12). **Download stays in ⋯ as well as on hover** (AQ-15, blocked).
+  - Empty tab, empty folder, no results and error per T12, T13, T15, T17 — the shared EmptyState centred, no frame,
+    the words from words.md; the error hides the toolbar (DT1–DT4, DT25, DT32). Loading per T16 (DT26).
+  - The Drive-style folder tile with its tab, the icon in the folder colour's bar shade, the count in secondary (DT7).
+  - New folder (T03) and Icon and color are one dialog: a live tile, Name (new folder), eight round colour dots,
+    icon tiles in rows of eight (DT6, DT20). **Sixteen icons, built 2026-11-23** (the owner's R15, `(claude)/DECISIONS.md`
+    § "The walk of 2026-11-23 — the owner's answers"): T03's set in its order — folder, signature, ID card, wallet,
+    education, certificate, calendar, person, star, lock, chart, clock, mail, laptop, checklist, hourglass
+    (`FOLDER_ICONS` in `PersonalDocumentsFolderCard`). The keys stored before (briefcase, shield, heart, file, book,
+    building, people) still draw as they did; they are no longer offered. No data change.
+  - Move to… is T06's list with counts, the current one ticked, New folder in the footer (DT21).
+  - Inside a folder the trail is 18/26 with the folder's tile and "4 files" (DT29). **The chevron that opens the
+    folder's menu from the trail is not built.**
+  - Trash per T10/T11: "Documents › Trash" with the count, the hint, a frameless table Name · Was in · Moved to trash
+    (`DocumentDTO.deletedAt`, new), Restore on hover, Delete forever in ⋯; searched by the toolbar's field (DT18, DT19).
+  - Preview: the file-type tile, a meta line with icons ("In the Identity folder" or the category · "Visible to Reza" ·
+    the upload date), the expiry as its own amber or red strip (X7), the stage radius 16 with no border, Move to trash
+    in red (DT16). Zoom and page count stay as the shared viewer draws them (AQ-11 for the count).
+  - Upload: "Upload documents" / "To Reza Karimi's documents", × to close, Folder · Category (optional) · Valid until
+    · Who can see with the person's first name, the hint under Hidden, a required date said under Valid until (X8);
+    Cancel stays live while files go up (DT15). The drop zone and file rows are still today's (DT14 was counted
+    built; the board's round upload icon and "Drop files here / or choose them" are only in the request's upload).
+  - Request in the toolbar has its icon (DT28).
+- **Not built this round:** the × inside the search field (DT24 — `SearchBox` has none; the shared field is not
+  changed here, so "Clear search" stays as the way out); the selection bar's tint and order (DT13 was already built);
+  the menu's accent hover (DT11 — the kit's menu, product-wide); the toast's place over the content and its accent Undo
+  (DT17 — `lib/feedback/undoToast`, product-wide); the 24 between the tab row and the toolbar (`ProfileShell` keeps
+  its 32, batch 3's T1).

@@ -57,7 +57,7 @@
       "TIME_OFF_REQUESTED": "Requested",
       "TIME_OFF_APPROVED": "Approved",
       "TIME_OFF_REJECTED": "Declined",
-      "TIME_OFF_CANCELLED": "Cancelled"
+      "TIME_OFF_CANCELLED": "Canceled"
     },
     "onlyWhen": "Only when",
     "countFrom": "Count step days from",
@@ -339,7 +339,7 @@
     "untitledDocument": "The document",
     "signedHint": "From step {number}. Signed means everyone has signed.",
     "notSigned": "If it's not signed by then",
-    "declinedHint": "Declined or cancelled counts as not signed: the run doesn't wait for the date."
+    "declinedHint": "Declined or canceled counts as not signed: the run doesn't wait for the date."
   },
   "assign": {
     "action": "Action",
@@ -595,7 +595,7 @@
         "TIME_OFF_REQUESTED": "time off is requested",
         "TIME_OFF_APPROVED": "time off is approved",
         "TIME_OFF_REJECTED": "time off is declined",
-        "TIME_OFF_CANCELLED": "time off is cancelled"
+        "TIME_OFF_CANCELLED": "time off is canceled"
       },
       "process": {
         "ANY_ONBOARDING": "an onboarding is completed",

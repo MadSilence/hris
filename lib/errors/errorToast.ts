@@ -12,16 +12,24 @@ import type { ActionResult } from "@/lib/errors/withActionError";
  * next to the field it is about, and a card will slide away before anyone works out which field
  * that was.
  *
- * An unexpected failure does not auto-dismiss. It carries a reference nobody can retype from memory
- * in the four seconds a normal toast lasts, and the whole point of showing the reference is that it
- * can be copied.
+ * An unexpected failure does not auto-dismiss: the person has to read what failed. Its request id is **not** shown —
+ * an ordinary person has no use for the number (the owner, 2026-11-20; `technical_documentation/ERRORS.md`). It stays
+ * in the backend's log under the same id, and goes to the browser console here for whoever is debugging.
  */
+/**
+ * A toast has no full stop at its end (`technical_documentation/ui/NAMING.md` § 1). The catalogues are written that
+ * way, but an error text is shared with the in-form message, which is a sentence — so the toast drops the last stop
+ * here. An ellipsis and the stops between two sentences stay.
+ */
+export const toastText = (message: string): string => message.replace(/(?<!\.)\.\s*$/, "");
+
 const show = (message: string, reference?: string) => {
   // A server out of reach is as unexpected as it gets, and the person has to read what failed.
   const unexpected = isFallbackErrorMessage(message) || message === messageForCode("E00503");
 
-  toast.error(message, {
-    description: reference,
+  if (reference) console.warn(`[error] ${message} (request ${reference})`);
+
+  toast.error(toastText(message), {
     duration: unexpected ? Infinity : undefined,
     closeButton: true,
   });
@@ -35,7 +43,7 @@ export const showActionError = (result: Pick<ActionResult, "errorMessage" | "req
 export const showError = (error: unknown) => show(messageForError(error), referenceOf(error));
 
 /** Confirmation that something worked, for actions whose result is otherwise invisible. */
-export const showSuccess = (message: string) => toast.success(message);
+export const showSuccess = (message: string) => toast.success(toastText(message));
 
 const referenceOf = (error: unknown): string | undefined =>
   typeof error === "object" && error !== null && "requestId" in error

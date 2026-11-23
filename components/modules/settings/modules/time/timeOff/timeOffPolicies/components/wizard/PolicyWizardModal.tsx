@@ -148,11 +148,22 @@ export const PolicyWizardModal: FC<Props> = ({
   const isLast = stepIndex === STEPS.length - 1;
   const busy = isLoading || isSaving;
 
+  // A step ahead is pressable too (NEVER-DISABLED): the steps before it are checked as Next would, and the first
+  // one that is not ready opens with its reason.
   const goTo = (index: number) => {
-    if (index <= maxReached) {
-      setStepIndex(index);
-      setError(null);
+    if (index > maxReached) {
+      for (let i = stepIndex; i < index; i++) {
+        const validationError = validatePolicyStep(STEPS[i].id, values, t);
+        if (validationError) {
+          setStepIndex(i);
+          setError(validationError);
+          return;
+        }
+      }
+      setMaxReached(index);
     }
+    setStepIndex(index);
+    setError(null);
   };
 
   const handleNext = () => {
@@ -282,17 +293,14 @@ export const PolicyWizardModal: FC<Props> = ({
                 {STEPS.map((s, index) => {
                   const isActive = index === stepIndex;
                   const isDone = index < maxReached;
-                  const clickable = index <= maxReached;
                   return (
                     <button
                       key={s.id}
                       type="button"
-                      disabled={!clickable}
                       onClick={() => goTo(index)}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-control px-2.5 py-2 text-left transition-colors",
                         isActive ? "bg-card shadow-card" : "hover:bg-card/60",
-                        !clickable && "cursor-not-allowed opacity-60",
                       )}
                     >
                       <StepRing state={isActive ? "current" : isDone ? "done" : "ahead"} number={index + 1} />
@@ -343,8 +351,9 @@ export const PolicyWizardModal: FC<Props> = ({
                     type="button"
                     variant="secondary"
                     onClick={handleBack}
-                    disabled={stepIndex === 0 || busy}
-                    className="gap-1"
+                    disabled={busy}
+                    // The first step has no Back: hidden in place, not greyed (NEVER-DISABLED).
+                    className={cn("gap-1", stepIndex === 0 && "invisible")}
                   >
                     <Icon icon={ArrowLeft01Icon} size="sm" />
                     {tCommon("actions.back")}

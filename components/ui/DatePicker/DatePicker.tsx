@@ -1,20 +1,18 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { dateToISO, isoToDate, useDateFormatter } from "@/lib/date";
-
-import { useState, type FC } from "react";
-import type { Matcher } from "react-day-picker";
-import { Calendar03Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { useRef, useState, type FC } from "react";
+import { Calendar04Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 
+import { dateToISO, isoToDate, useDateFormatter, useDateParser } from "@/lib/date";
 import { Calendar } from "@/components/desact/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/desact/popover";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/desact/popover";
 import { cn } from "@/lib/cn";
 
 export { dateToISO, isoToDate } from "@/lib/date";
 
-const isValidISO = (iso: string) =>
+export const isValidISO = (iso: string) =>
   /^\d{4}-\d{2}-\d{2}$/.test(iso) && !Number.isNaN(isoToDate(iso).getTime());
 
 type Props = {
@@ -35,13 +33,27 @@ type Props = {
   className?: string;
 };
 
+/** The bounds as one test, for the calendar and for a typed date. */
+export const outsideBounds = (min?: string, max?: string) => (day: Date) => {
+  const iso = dateToISO(day);
+  return Boolean((min && isValidISO(min) && iso < min) || (max && isValidISO(max) && iso > max));
+};
+
+/** The field's own look — the input and its icons — shared with the range field. */
+export const dateFieldClasses = (invalid: boolean, className?: string) =>
+  cn(
+    "flex h-9 w-full cursor-text items-center gap-2 rounded-control border border-field bg-card px-2.5 text-body outline-none transition-[border-color,box-shadow] duration-(--duration-hover)",
+    "hover:border-field-hover focus-within:border-accent focus-within:shadow-focus",
+    invalid && "border-danger hover:border-danger",
+    className,
+  );
+
 /**
- * The app's single date field: a Desact `Calendar` in a popover, triggered by a button dressed as an
- * input.
- *
- * Replaces `<input type="date">`, whose look, keyboard behaviour and locale ordering are the
- * browser's rather than ours — Chrome, Firefox and Safari each drew a different control. The value
- * stays an ISO string so callers, forms and the API keep the shape they already had.
+ * The app's one date field (rule 4; the designers' X5 and AQ-02, `FORMS_AND_FIELDS.md` § "Date fields"). **The field
+ * takes a typed date** — "14 Mar 2031", "14.03.2031", "Mar 14, 2031" in the company's order (U9) — and the picker opens
+ * from it, 4 under it: {@link Calendar}, 300 wide, month and year menus, Today and Clear. A typed date moves the month to
+ * it at once and is kept on Enter, on Tab or when the field is left; one that is not a date goes back to the last value.
+ * The value stays an ISO string, so callers, forms and the API keep the shape they already had.
  */
 export const DatePicker: FC<Props> = ({
   value,
@@ -58,68 +70,141 @@ export const DatePicker: FC<Props> = ({
 }) => {
   const t = useTranslations("common");
   const formatDisplayDate = useDateFormatter();
+  const parse = useDateParser();
   const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState<string | null>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const selected = value && isValidISO(value) ? isoToDate(value) : undefined;
+  const isDisabled = outsideBounds(min, max);
+  const typedDate = typed !== null ? parse(typed) : null;
+  const shown = selected ? formatDisplayDate(selected, { style: "medium" }) : "";
 
-  const bounds: Matcher[] = [];
-  if (min && isValidISO(min)) bounds.push({ before: isoToDate(min) });
-  if (max && isValidISO(max)) bounds.push({ after: isoToDate(max) });
+  const commit = (next: string) => {
+    setTyped(null);
+    if (next !== value) onChange(next);
+  };
 
-  const handleSelect = (date: Date | undefined) => {
-    onChange(date ? dateToISO(date) : "");
-    setOpen(false);
+  /** What was typed becomes the value when it is a date the field allows; otherwise the last value stays. */
+  const settle = () => {
+    if (typed === null) return;
+    if (typed.trim() === "" && clearable) commit("");
+    else if (typedDate && !isDisabled(typedDate)) commit(dateToISO(typedDate));
+    else setTyped(null);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          id={id}
-          type="button"
-          disabled={disabled}
-          // `data-invalid`, not `aria-invalid`: the trigger is a button, and aria-invalid is only
-          // meaningful on an actual form field. The message next to it is what tells a reader.
+    <Popover
+      open={open && !disabled}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) settle();
+      }}
+    >
+      <PopoverAnchor asChild>
+        <div
+          ref={anchorRef}
           data-invalid={invalid || undefined}
-          aria-label={ariaLabel}
-          className={cn(
-            "flex h-9 w-full items-center gap-2 rounded-control border border-field bg-card px-3 text-body outline-none transition-colors",
-            "hover:border-strong disabled:cursor-not-allowed disabled:opacity-50",
-            "focus-visible:border-accent focus-visible:ring-accent-ring/50 focus-visible:ring-[3px]",
-            "data-[invalid]:border-danger data-[invalid]:ring-status-declined-border/20",
-            className,
-          )}
+          onMouseDown={(e) => {
+            if (disabled || e.target === inputRef.current) return;
+            e.preventDefault();
+            inputRef.current?.focus();
+            setOpen((o) => !o);
+          }}
+          className={cn(dateFieldClasses(invalid, className), disabled && "cursor-not-allowed bg-subtle text-disabled")}
         >
-          <Icon icon={Calendar03Icon} size="sm" className="shrink-0 text-tertiary" />
-
-          <span className={cn("min-w-0 flex-1 truncate text-left", !selected && "text-tertiary")}>
-            {selected ? formatDisplayDate(selected, { style: "medium" }) : placeholder ?? t("datePicker.pickDate")}
-          </span>
-
+          <Icon icon={Calendar04Icon} size="sm" className="shrink-0 text-tertiary" />
+          <input
+            ref={inputRef}
+            id={id}
+            type="text"
+            autoComplete="off"
+            spellCheck={false}
+            disabled={disabled}
+            aria-label={ariaLabel}
+            aria-invalid={invalid || undefined}
+            aria-haspopup="dialog"
+            value={typed ?? shown}
+            placeholder={placeholder ?? t("datePicker.pickDate")}
+            onChange={(e) => {
+              setTyped(e.target.value);
+              if (!open) setOpen(true);
+            }}
+            onClick={() => !open && setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                settle();
+                setOpen(false);
+              } else if (e.key === "Escape" && open) {
+                e.preventDefault();
+                e.stopPropagation();
+                setTyped(null);
+                setOpen(false);
+              } else if (e.key === "ArrowDown" && !open) {
+                e.preventDefault();
+                setOpen(true);
+              } else if (e.key === "Tab") {
+                settle();
+                setOpen(false);
+              }
+            }}
+            onBlur={(e) => {
+              const next = e.relatedTarget as Node | null;
+              if (next && document.querySelector("[data-slot='calendar']")?.contains(next)) return;
+              settle();
+            }}
+            className="h-full min-w-0 flex-1 truncate bg-transparent text-primary outline-none placeholder:text-tertiary disabled:cursor-not-allowed"
+          />
           {clearable && selected && !disabled && (
-            <span
-              role="button"
+            <button
+              type="button"
               tabIndex={-1}
               aria-label={t("datePicker.clearDate")}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               onClick={(event) => {
                 event.stopPropagation();
-                onChange("");
+                commit("");
               }}
               className="shrink-0 rounded-control p-0.5 text-tertiary hover:bg-mist hover:text-secondary"
             >
               <Icon icon={Cancel01Icon} size="sm" />
-            </span>
+            </button>
           )}
-        </button>
-      </PopoverTrigger>
+        </div>
+      </PopoverAnchor>
 
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent
+        className="w-auto p-0"
+        align="start"
+        sideOffset={4}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          if (e.target instanceof Node && anchorRef.current?.contains(e.target)) e.preventDefault();
+        }}
+      >
         <Calendar
           mode="single"
-          selected={selected}
-          onSelect={handleSelect}
-          defaultMonth={selected ?? undefined}
-          disabled={bounds.length > 0 ? bounds : undefined}
+          selected={typedDate ?? selected}
+          defaultMonth={typedDate ?? selected}
+          onSelect={(day) => {
+            commit(dateToISO(day));
+            setOpen(false);
+          }}
+          isDisabled={min || max ? isDisabled : undefined}
+          onToday={isDisabled(new Date()) ? undefined : () => {
+            commit(dateToISO(new Date()));
+            setOpen(false);
+          }}
+          onClear={clearable ? () => {
+            commit("");
+            setOpen(false);
+          } : undefined}
         />
       </PopoverContent>
     </Popover>

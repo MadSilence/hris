@@ -30,6 +30,9 @@ export const FormError: React.FC<{
   );
 };
 
-/** The reference is only worth the space when the sentence above it says nothing specific. */
-export const referenceFor = (message?: string | null, requestId?: string, code?: string) =>
-  isFallbackErrorMessage(message) ? requestId ?? code : requestId;
+/**
+ * The reference is only worth the space when the sentence above it says nothing specific, and then it is the code: the
+ * request id stays in the log, never on the screen (ERRORS.md, the owner's call of 2026-11-20).
+ */
+export const referenceFor = (message?: string | null, _requestId?: string, code?: string) =>
+  isFallbackErrorMessage(message) ? code : undefined;

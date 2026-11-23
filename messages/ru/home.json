@@ -40,7 +40,7 @@
       "inbox": "Входящие",
       "editHome": "Настроить главную"
     },
-    "notYet": "Ассистент noddo скоро появится. Ничего не отправлено."
+    "notYet": "Ассистент noddo скоро появится. Ничего не отправлено"
   },
   "widgets": {
     "waitingOnYou": {
@@ -195,12 +195,10 @@
     "workingDays": "{count, plural, one {{amount} рабочий день} few {{amount} рабочих дня} many {{amount} рабочих дней} other {{amount} рабочего дня}}",
     "automation": "Автоматизация",
     "didntRun": "не сработала",
-    "selfReview": "ваша самооценка",
     "reviewDue": "{hasDate, select, yes {{count, plural, =0 {Срок сегодня} one {Срок через # день} few {Срок через # дня} many {Срок через # дней} other {Срок через # дня}}} other {Без срока}}",
     "managerSeesAfter": "Руководитель увидит после отправки",
     "assignedBy": "Назначил(а) {name}",
     "wasUpdated": "обновлена",
-    "toReadAndAgree": "прочитать и согласиться",
     "whatChanged": "Что изменилось: {points}",
     "readAndAgree": "Прочитать и согласиться",
     "toSignFrom": "{hasSender, select, yes {от {sender} · на подпись} other {на подпись}}"

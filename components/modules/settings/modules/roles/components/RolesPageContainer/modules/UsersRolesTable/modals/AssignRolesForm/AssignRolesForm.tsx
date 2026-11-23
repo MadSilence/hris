@@ -328,7 +328,7 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
 
         <Button
           type="submit"
-          disabled={isLoading || !user}
+          disabled={isLoading}
  >
           {tCommon("actions.apply")}
         </Button>

@@ -13,10 +13,12 @@ import { useCanAccess } from "@/components/auth";
 import { cn } from "@/lib/cn";
 import { showActionError } from "@/lib/errors/errorToast";
 import { ActionStatus } from "@/components/models/ActionStatus";
-import type { FeedScope, HubHome } from "@/models/hub";
+import type { FeedScope, HubHome, PageTree } from "@/models/hub";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAppDataContext } from "@/components/providers/AppDataProvider";
 import { createHubPageAction } from "../actions";
-import { useHubHome } from "../hooks";
-import { HubAskBox, HubHeading, HubLoadError, HubPage, HubSegmented, HubState, HubTitle, LoadingBlock, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
+import { hubQueryKeys, useHubHome, useInvalidateHub } from "../hooks";
+import { HubAskBox, HubHeading, HubLoadError, HubPage, HubSegmented, HubState, HubTitle, LoadingBlock, NewSectionDialog, NewsRow, PinnedPost, SkeletonRows, useHubDates } from "../shared";
 import { CelebrationStrip } from "./CelebrationStrip";
 import { AgreeCallout, HandbookSectionCard, orderSectionCards, SavedPopover, SectionLinkArrow, useFeedScope } from "./HomeParts";
 
@@ -98,12 +100,14 @@ const HandbookColumn: React.FC<{ home: HubHome; manager: boolean; onAddPage: () 
         </SectionLinkArrow>
       </div>
       {cards.length === 0 ? (
-        // FIXES S1–S5: documents at 160, centred in the column's free area (the grid row stretches the column to the
-        // bottom of the news); Add a page only for someone who can manage the hub.
+        // FIXES S1–S5: documents at 160; Add a page only for someone who can manage the hub. Centred in a fixed area
+        // 320 high, 16 under the heading row (the section's gap), whatever the News column does: switching For me /
+        // Everyone never moves it (FIXES-2026-11-20 RC10).
         <HubState
           scene="documents"
           size="m160"
           titleSize="section"
+          className="h-80 flex-none"
           title={t("handbook.empty")}
           line={t("handbook.emptyLine")}
           action={
@@ -151,23 +155,57 @@ const HandbookColumn: React.FC<{ home: HubHome; manager: boolean; onAddPage: () 
   );
 };
 
-/** Creates a draft page and opens it in the editor (CM03 "New page", from anywhere). */
+/**
+ * Creates a draft page and opens it in the editor (CM03 "New page", from anywhere). In a hub with no section yet it
+ * first asks for one in the New section dialog and then opens the page in it (FIXES-round2 RC7, the owner's B8): render
+ * `dialog` beside the button. The backend still makes a section of its own for a page sent without one.
+ */
 export const useNewPage = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { internalApiClient } = useAppDataContext();
+  const invalidate = useInvalidateHub();
   const [busy, setBusy] = React.useState(false);
-  return {
-    busy,
-    create: async (sectionId: string | null = null) => {
+  const [asking, setAsking] = React.useState(false);
+
+  const open = async (sectionId: string | null) => {
+    setBusy(true);
+    const result = await createHubPageAction(sectionId);
+    setBusy(false);
+    if (result.status === ActionStatus.ERROR || !result.data) {
+      showActionError(result);
+      return;
+    }
+    router.push(`/hub/manage/pages/${result.data.id}/edit`);
+  };
+
+  const create = async (sectionId: string | null = null) => {
+    if (sectionId === null) {
       setBusy(true);
-      const result = await createHubPageAction(sectionId);
+      const tree = await queryClient
+        .fetchQuery<PageTree>({ queryKey: hubQueryKeys.tree, queryFn: () => internalApiClient.get<PageTree>("/hub/manage/pages") })
+        .catch(() => null);
       setBusy(false);
-      if (result.status === ActionStatus.ERROR || !result.data) {
-        showActionError(result);
+      if (tree && tree.sections.length === 0) {
+        setAsking(true);
         return;
       }
-      router.push(`/hub/manage/pages/${result.data.id}/edit`);
-    },
+    }
+    await open(sectionId);
   };
+
+  const dialog = asking ? (
+    <NewSectionDialog
+      onClose={() => setAsking(false)}
+      onCreated={(id) => {
+        setAsking(false);
+        void invalidate();
+        void open(id);
+      }}
+    />
+  ) : null;
+
+  return { busy, create, dialog };
 };
 
 /**
@@ -252,6 +290,7 @@ export const HubHomeContainer: React.FC = () => {
           <HandbookColumn home={data} manager={manager} adding={newPage.busy} onAddPage={() => void newPage.create()} />
         </div>
       )}
+      {newPage.dialog}
     </HubPage>
   );
 };

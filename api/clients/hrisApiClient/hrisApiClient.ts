@@ -357,6 +357,7 @@ export class HrisApiClient {
       code: body?.code ?? undefined,
       fieldErrors: body?.fieldErrors ?? undefined,
       params: Array.isArray(body?.params) ? body.params : undefined,
+      offerPasswordReset: body?.offerPasswordReset === true ? true : undefined,
       requestId: response.headers.get("X-Request-Id") ?? undefined,
     };
     const message = body?.message ?? `HTTP ${response.status}`;
