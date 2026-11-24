@@ -4,6 +4,8 @@ import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { Alert02Icon, Briefcase01Icon, CalendarLock01Icon, CancelCircleIcon, CheckListIcon, CheckmarkCircle02Icon, FileTextIcon, FlashIcon, Notification01Icon, ShieldCheckIcon, SquareLock02Icon, TaskDone01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import type { Notification } from "@/models/notifications";
 import { requestOnHome } from "@/components/modules/timeOff/lib/requestLink";
+import { hasMessageForCode, messageForCode } from "@/lib/errors/errorMessages";
+import { isLanguage } from "@/i18n/locales";
 import type { IconSvgElement } from "@/components/desact/icon";
 
 /** The `notifications` translator, handed to the pure helpers that build a notification's sentence. */
@@ -100,6 +102,35 @@ const pauseReason = (reason: unknown): string =>
 
 /** A formatted due date, with its select. */
 const dueOn = (value: unknown, language?: string) => ({ hasDue: has(value), due: sentenceDate(value, language) });
+
+/** The kinds a held answer can be (`HeldActionKind`); anything else reads as "your answer". */
+const HELD_KINDS = new Set([
+  "TIME_OFF_APPROVE",
+  "TIME_OFF_CANCELLATION_CONFIRM",
+  "AUTOMATION_APPROVAL_APPROVE",
+  "TASK_COMPLETE",
+  "HUB_PAGE_UNPUBLISH",
+  "HUB_REMIND",
+]);
+
+/** Where a held answer that failed is mended: the request, the tasks, the page's place in the handbook. */
+const heldTargetHref = (kind: string, targetId: string): string | null => {
+  if (!targetId) return null;
+  switch (kind) {
+    case "TIME_OFF_APPROVE":
+    case "TIME_OFF_CANCELLATION_CONFIRM":
+      return requestOnHome(targetId);
+    case "AUTOMATION_APPROVAL_APPROVE":
+    case "TASK_COMPLETE":
+      return "/tasks";
+    case "HUB_PAGE_UNPUBLISH":
+      return "/hub/manage/pages";
+    case "HUB_REMIND":
+      return `/hub/manage/pages/${targetId}/agreed`;
+    default:
+      return null;
+  }
+};
 
 /**
  * Turns a stored notification (type + params) into display text + a deep-link, rendered at read time
@@ -1018,6 +1049,21 @@ export const presentNotification = (n: Notification, t: NotificationsTranslator,
         icon: FileTextIcon,
         // A saved view opens in People; reports have no screen yet (they wait for the designers).
         href: report ? null : "/organization/people",
+      };
+    }
+    case "HELD_ACTION_FAILED": {
+      // An answer held with Undo that the server could not apply when its moment came (U-5): told to whoever answered,
+      // with the refusal's own words — the request was withdrawn, someone else answered first, the right was lost.
+      const kind = str(p.kind);
+      const target = str(p.targetName);
+      const code = str(p.failureCode);
+      return {
+        title: t("presenter.heldActionFailed.title", { kind: HELD_KINDS.has(kind) && target ? kind : "other", target }),
+        message: hasMessageForCode(code)
+          ? messageForCode(code, undefined, undefined, isLanguage(language) ? language : undefined)
+          : t("presenter.heldActionFailed.noReason"),
+        icon: Alert02Icon,
+        href: heldTargetHref(kind, str(n.targetId) || str(p.targetId)),
       };
     }
     default:

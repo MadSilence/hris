@@ -14,7 +14,7 @@ import type { CalendarView } from "@/models/calendarView";
 import type { CompanyCalendarAbsence, CompanyCalendarGrouping } from "@/models/calendar";
 import type { LeaveDecisions } from "@/components/modules/calendar/components/CompanyCalendarBoard/boardContext";
 import type { ViewPill } from "@/components/modules/calendar/components/CompanyCalendarToolbar/CompanyCalendarViewsRow";
-import { showUndoToast } from "@/lib/feedback/undoToast";
+import { holdWithUndo } from "@/lib/feedback/holdWithUndo";
 
 let search = new URLSearchParams();
 const mockPush = jest.fn();
@@ -48,12 +48,7 @@ jest.mock("@/components/modules/calendar/hooks/useCalendarViews", () => ({
   useCalendarViews: jest.fn(),
   useCalendarViewMutations: jest.fn(),
 }));
-const mockApprove = jest.fn();
-jest.mock(
-  "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest",
-  () => ({ useApproveTimeOffRequest: () => ({ mutateAsync: mockApprove }) }),
-);
-jest.mock("@/lib/feedback/undoToast", () => ({ showUndoToast: jest.fn() }));
+jest.mock("@/lib/feedback/holdWithUndo", () => ({ holdWithUndo: jest.fn() }));
 jest.mock("@/components/modules/timeOff", () => ({
   DeclineLeaveDialog: ({ target }: { target: { requestId: string; firstName?: string | null } | null }) =>
     target ? <div data-test="decline-dialog">{`${target.requestId} ${target.firstName ?? ""}`}</div> : null,
@@ -173,8 +168,7 @@ describe("CompanyCalendarBoardContainer", () => {
       remove: { mutate: jest.fn(), isPending: false },
       reorder: { mutate: reorderViews, isPending: false },
     });
-    jest.mocked(showUndoToast).mockReset();
-    mockApprove.mockReset().mockResolvedValue(undefined);
+    jest.mocked(holdWithUndo).mockReset().mockResolvedValue(true);
   });
 
   describe("grouping", () => {
@@ -305,25 +299,19 @@ describe("CompanyCalendarBoardContainer", () => {
       expect(canDecide(pending({ requestId: undefined }))).toBe(false);
     });
 
-    it("holds an approval behind Undo and sends it only when the toast ends", () => {
-      render(<CompanyCalendarBoardContainer />);
-      act(() => board!.decisions.approve(pending()));
-
-      const toast = jest.mocked(showUndoToast).mock.calls[0][0];
-      expect(toast.message).toBe("Time off approved");
-      expect(mockApprove).not.toHaveBeenCalled();
-
-      act(() => toast.onExpire?.());
-      expect(mockApprove).toHaveBeenCalledWith({ requestId: "r1" });
-    });
-
-    it("never sends an approval that was undone", () => {
+    it("holds an approval on the server with Undo, and keeps nothing back on the page", () => {
       const { unmount } = render(<CompanyCalendarBoardContainer />);
       act(() => board!.decisions.approve(pending()));
-      const toast = jest.mocked(showUndoToast).mock.calls[0][0];
-      act(() => void toast.onUndo());
+
+      expect(holdWithUndo).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(holdWithUndo).mock.calls[0][0]).toMatchObject({
+        kind: "TIME_OFF_APPROVE",
+        targetId: "r1",
+        message: "Time off approved",
+      });
+      // Leaving the page sends nothing more: the answer is already on the server.
       unmount();
-      expect(mockApprove).not.toHaveBeenCalled();
+      expect(holdWithUndo).toHaveBeenCalledTimes(1);
     });
 
     it("declines in its own small window, with the person's name (AQ-13)", () => {

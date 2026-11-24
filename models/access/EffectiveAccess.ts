@@ -17,6 +17,9 @@ export type FieldAccessGrant = "VIEW" | "EDIT";
 // of the UI while the API lets them everywhere, so isSystemOwner must be checked first.
 export type EffectiveAccess = {
   systemOwner: boolean;
+  // Holds the company's mandatory Admin role. Grants nothing by itself — a screen pairs it with a
+  // permission, as the backend does (`MfaPolicy`): see `mayChangeSecuritySettings`.
+  admin: boolean;
   permissions: Partial<Record<ResourceCode, ResourceAccess>>;
   fields: Record<string, FieldAccessGrant>;
   moduleSummary: Partial<Record<ResourceCode, AccessAction>>;
@@ -31,4 +34,8 @@ export const SYSTEM_OWNER_ACCESS_HASH = "system-owner";
 export function isSystemOwner(access: EffectiveAccess | null | undefined): boolean {
   if (!access) return false;
   return access.systemOwner === true || access.accessHash === SYSTEM_OWNER_ACCESS_HASH;
+}
+
+export function isAdmin(access: EffectiveAccess | null | undefined): boolean {
+  return access?.admin === true;
 }

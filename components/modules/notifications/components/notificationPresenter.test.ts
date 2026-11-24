@@ -2,6 +2,7 @@ import { SquareLock02Icon } from "@hugeicons/core-free-icons";
 import { translatorFor } from "@/test/nextIntl";
 import { presentNotification as present, type NotificationsTranslator } from "./notificationPresenter";
 import type { Notification } from "@/models/notifications";
+import { requestOnHome } from "@/components/modules/timeOff/lib/requestLink";
 
 const t = translatorFor("notifications") as unknown as NotificationsTranslator;
 const presentNotification = (n: Notification) => present(n, t);
@@ -91,6 +92,7 @@ const REGISTERED_TYPES = [
   "HUB_AGREEMENT_REMINDED",
   "HUB_AGREEMENT_MISSED",
   "HUB_POST_PUBLISHED",
+  "HELD_ACTION_FAILED",
 ];
 
 describe("presentNotification", () => {
@@ -154,15 +156,15 @@ describe("presentNotification", () => {
   describe("ROLE_HOLDERS_CHANGED", () => {
     it("names the one person, or counts a batch", () => {
       const one = presentNotification(
-        notification({ type: "ROLE_HOLDERS_CHANGED", params: { roleId: "r1", roleName: "HR Admin", added: true, count: 1, personName: "Bo", actorName: "Ada" } }),
+        notification({ type: "ROLE_HOLDERS_CHANGED", params: { roleId: "r1", roleName: "Admin", added: true, count: 1, personName: "Bo", actorName: "Ada" } }),
       );
       const many = presentNotification(
-        notification({ type: "ROLE_HOLDERS_CHANGED", params: { roleName: "HR Admin", added: false, count: 12, actorName: "Ada" } }),
+        notification({ type: "ROLE_HOLDERS_CHANGED", params: { roleName: "Admin", added: false, count: 12, actorName: "Ada" } }),
       );
 
-      expect(one.message).toBe("Ada gave HR Admin to Bo.");
+      expect(one.message).toBe("Ada gave Admin to Bo.");
       expect(one.href).toBe("/settings/people/roles/r1");
-      expect(many.message).toBe("Ada took HR Admin from 12 people.");
+      expect(many.message).toBe("Ada took Admin from 12 people.");
     });
   });
 
@@ -397,6 +399,45 @@ describe("approvals for somebody else", () => {
       expect(view.title).toBe("An approval is waiting for you");
       expect(view.message).toBe("Approve 12 days off for Tom still waits for your answer.");
       expect(view.href).toBe("/tasks");
+    });
+  });
+
+  describe("an answer held with Undo that could not be applied (U-5)", () => {
+    it("names what was not applied, gives the refusal's own words, and opens the request", () => {
+      const view = presentNotification(
+        notification({
+          type: "HELD_ACTION_FAILED",
+          targetType: "TIME_OFF_REQUEST",
+          targetId: "r1",
+          params: { kind: "TIME_OFF_APPROVE", targetName: "Anna Berg", failureCode: "E00409" },
+        }),
+      );
+
+      expect(view.title).toBe("Your approval of Anna Berg's leave wasn't applied");
+      expect(view.message).toBe("Somebody else changed this while you were working on it. Reload and try again.");
+      expect(view.href).toBe(requestOnHome("r1"));
+    });
+
+    it.each([
+      ["TASK_COMPLETE", "Send the laptop wasn't marked done", "/tasks"],
+      ["AUTOMATION_APPROVAL_APPROVE", "Your approval of Send the laptop wasn't applied", "/tasks"],
+      ["HUB_PAGE_UNPUBLISH", "Send the laptop wasn't unpublished", "/hub/manage/pages"],
+      ["HUB_REMIND", "The reminder about Send the laptop wasn't sent", "/hub/manage/pages/x1/agreed"],
+    ])("%s", (kind, title, href) => {
+      const view = presentNotification(
+        notification({ type: "HELD_ACTION_FAILED", params: { kind, targetId: "x1", targetName: "Send the laptop", failureCode: "nope" } }),
+      );
+
+      expect(view.title).toBe(title);
+      // A code the catalogue does not know: no developer's sentence, no generic "try again".
+      expect(view.message).toBe("It could not be applied.");
+      expect(view.href).toBe(href);
+    });
+
+    it("reads as the reader's answer when it does not know what or whom", () => {
+      const view = presentNotification(notification({ type: "HELD_ACTION_FAILED", params: { kind: "SOMETHING_NEW" } }));
+      expect(view.title).toBe("Your answer wasn't applied");
+      expect(view.href).toBeNull();
     });
   });
 

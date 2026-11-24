@@ -4,6 +4,8 @@ export type RoleDTO = {
   description?: string;
   systemOwner: boolean;
   isDefault: boolean;
+  /** The mandatory Admin role (A-2): found by this flag, never by its name. */
+  isAdmin: boolean;
   archived: boolean;
   archivedAt?: string | null;
   userCount?: number;

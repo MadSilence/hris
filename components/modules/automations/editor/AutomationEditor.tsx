@@ -166,7 +166,7 @@ export const AutomationEditor: React.FC<{
   const t = useTranslations("automationsEditor");
   const tShared = useTranslations("automations");
   /** F4's "who will hear from it": the backend names them by code ("MANAGER", "ROLE:<id>") — said in words here, as the
-   *  sentence says them ("Their manager and HR Admin"). Shown as the codes, the dialog read "MANAGER will get…". */
+   *  sentence says them ("Their manager and Admin"). Shown as the codes, the dialog read "MANAGER will get…". */
   const audienceWords = (codes: string[]): string[] => {
     const specs = codes.map((code): RecipientSpec => {
       const [kind, id] = code.split(":");

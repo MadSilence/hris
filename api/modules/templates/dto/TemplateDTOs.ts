@@ -9,7 +9,7 @@ export type TemplateSummaryDTO = {
   summary: string;
   changelog: string | null;
   itemCount: number;
-  /** HR Admin and Manager, or a template for the industry the setup stored — shown first. */
+  /** Manager, or a template for the industry the setup stored — shown first. */
   suggested: boolean;
   /** The version this company applied last — "applied", not "still there". */
   appliedVersion: number | null;

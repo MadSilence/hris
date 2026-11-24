@@ -14,7 +14,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 const access: EffectiveAccess = {
-  systemOwner: false,
+  systemOwner: false, admin: false,
   permissions: { "ROLES.ROLE": { VIEW: ["COMPANY"] } },
   fields: {},
   moduleSummary: {},

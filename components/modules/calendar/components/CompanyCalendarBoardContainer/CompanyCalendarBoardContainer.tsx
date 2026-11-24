@@ -39,12 +39,12 @@ import {
 import { DeclineLeaveDialog, type DeclineTarget } from "@/components/modules/timeOff";
 import { REQUEST_PARAM } from "@/components/modules/timeOff/lib/requestLink";
 import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
-import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
+import { useInvalidateLeaveAnswer } from "@/components/modules/timeOff/lib/useInvalidateLeaveAnswer";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useCompanyData } from "@/components/providers/CompanyDataProvider/CompanyDataProvider";
 import { showError } from "@/lib/errors/errorToast";
-import { showUndoToast } from "@/lib/feedback/undoToast";
+import { holdWithUndo } from "@/lib/feedback/holdWithUndo";
 import { isoToDate, useWeekStartsOn } from "@/lib/date";
 import type { CalendarView } from "@/models/calendarView";
 import type { CompanyCalendarAbsence, CompanyCalendarGrouping, CompanyCalendarUser } from "@/models/calendar";
@@ -199,47 +199,26 @@ export const CompanyCalendarBoardContainer: FC = () => {
   );
 
   // ── Deciding from the card (N05; the owner reversed C7 on 2026-11-20) ──
-  const approve = useApproveTimeOffRequest();
   const [declining, setDeclining] = useState<DeclineTarget | null>(null);
   const router = useRouter();
   const leaveHref = useLeaveRequestHref();
-  const held = useRef(new Map<string, () => void>());
+  // Approve is held on the server with Undo (DECISIONS.md § "Undo and the Admin role"); while held, the board reads the
+  // card as answered for its reader (`awaitingYou` false), so re-reading it is all the page does.
+  const invalidateLeave = useInvalidateLeaveAnswer();
   const refreshLeave = useCallback(
     () => void queryClient.invalidateQueries({ queryKey: [COMPANY_CALENDAR_ABSENCES_QUERY_KEY] }),
     [queryClient],
   );
-  const send = useCallback(
-    (requestId: string) => {
-      if (!held.current.delete(requestId)) return;
-      approve
-        .mutateAsync({ requestId })
-        .then(refreshLeave)
-        .catch((error: unknown) => showError(error));
-    },
-    [approve, refreshLeave],
-  );
-  // Approve is held back with Undo (the owner's D1): sent when the toast ends, or when the reader leaves the page.
-  useEffect(() => {
-    const flush = () => held.current.forEach((commit) => commit());
-    window.addEventListener("pagehide", flush);
-    return () => {
-      window.removeEventListener("pagehide", flush);
-      flush();
-    };
-  }, []);
   const decisions = useMemo<LeaveDecisions>(
     () => ({
       canDecide: (a: CompanyCalendarAbsence) => Boolean(a.awaitingYou && a.status === "PENDING" && a.requestId),
       approve: (a: CompanyCalendarAbsence) => {
-        const id = a.requestId;
-        if (!id) return;
-        held.current.set(id, () => send(id));
-        showUndoToast({
+        if (!a.requestId) return;
+        void holdWithUndo({
+          kind: "TIME_OFF_APPROVE",
+          targetId: a.requestId,
           message: t("card.approvedToast"),
-          onUndo: () => {
-            held.current.delete(id);
-          },
-          onExpire: () => held.current.get(id)?.(),
+          invalidate: invalidateLeave,
         });
       },
       // Decline is its own small window with an optional comment (AQ-13).
@@ -268,7 +247,7 @@ export const CompanyCalendarBoardContainer: FC = () => {
           </Button>
         ) : null,
     }),
-    [send, t, router, leaveHref],
+    [invalidateLeave, t, router, leaveHref],
   );
 
   // ── Views: "Everyone" and "My team" are built in; the reader's own are stored, in their order ──

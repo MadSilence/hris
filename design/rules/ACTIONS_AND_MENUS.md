@@ -201,7 +201,9 @@ From the designers' home round (`hris/design/handoffs/2026-11-11-home/PRODUCT-RU
     journalled or notified for an undone one.
 - **Nothing is held in the browser** — no `setTimeout` before a write, no flush on `pagehide`. The toast lasts until
   the server's moment, does not pause on hover, and closing it applies the action at once.
-- *Until `development_plan/UNDO_PLAN.md` is built, seven sites still hold in the browser; the plan lists them.*
+- **One card for both, as the designers drew it** (T09, LW01c; SPEC § 13.7; DECISIONS.md B1): the round Pine check,
+  what happened in the past tense with no period, *Undo* in the accent with no icon — no close button and no bar. Five
+  seconds. `UndoCard` in `hris/lib/feedback/undoToast.tsx`.
 
 ## What this does not settle
 

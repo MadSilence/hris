@@ -42,6 +42,10 @@ export class HrisNotificationsService {
     return hrisApiNotificationsClient.remove(id);
   }
 
+  public async restore(id: string): Promise<void> {
+    return hrisApiNotificationsClient.restore(id);
+  }
+
   public async waitingOnMe(): Promise<WaitingOnMe> {
     return hrisApiNotificationsClient.waitingOnMe();
   }

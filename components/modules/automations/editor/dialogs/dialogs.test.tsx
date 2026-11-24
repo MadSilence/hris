@@ -12,7 +12,7 @@ const check = (over: Partial<AutomationCheck> = {}): AutomationCheck => ({
   waitingCases: 0,
   messagesPerFiring: 1,
   volumeThreshold: 200,
-  audiences: ["Managers", "HR Admin"],
+  audiences: ["Managers", "Admin"],
   runsGoing: 0,
   examples: [],
   problems: [],
@@ -44,7 +44,7 @@ describe("TurnOnDialog", () => {
     const dialog = screen.getByRole("dialog", { name: "Turn on Long time off approval?" });
     expect(within(dialog).getByText((_, el) => el?.tagName === "SPAN" && /^It runs for 48.people in Poland and Lithuania\.$/.test(el.textContent ?? ""))).toBeInTheDocument();
     expect(within(dialog).getByText("It starts with new requests. Requests sent before today aren't affected.")).toBeInTheDocument();
-    expect(within(dialog).getByText("Managers and HR Admin will get requests and notifications from it.")).toBeInTheDocument();
+    expect(within(dialog).getByText("Managers and Admin will get requests and notifications from it.")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Turn on" }));
     expect(props.onConfirm).toHaveBeenCalledWith("NONE", false);
     fireEvent.click(within(dialog).getByRole("button", { name: "Test run first" }));

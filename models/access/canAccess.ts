@@ -1,6 +1,6 @@
 import { AccessAction } from "./AccessAction";
 import { AccessScope } from "./AccessScope";
-import { EffectiveAccess, isSystemOwner } from "./EffectiveAccess";
+import { EffectiveAccess, isAdmin, isSystemOwner } from "./EffectiveAccess";
 import { ResourceCode } from "./ResourceCode";
 
 export type AccessCheck = {
@@ -33,4 +33,14 @@ export function canAccess(params: {
 
   // COMPANY is the widest scope and satisfies any requested scope.
   return scopes.includes(scope) || scopes.includes("COMPANY");
+}
+
+/**
+ * Settings → Login & SSO → Sign-in Security: a System Owner, or an Admin holding SETTINGS.GENERAL MANAGE —
+ * the backend's `MfaPolicy.mayChangeSecuritySettings`, which still decides on save. The Admin flag alone never grants.
+ */
+export function mayChangeSecuritySettings(access: EffectiveAccess | null | undefined): boolean {
+  if (!access) return false;
+  if (isSystemOwner(access)) return true;
+  return isAdmin(access) && canAccess({ access, resource: "SETTINGS.GENERAL", action: "MANAGE" });
 }

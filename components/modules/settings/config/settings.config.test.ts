@@ -5,7 +5,7 @@ import { buildSearchPages } from "@/components/modules/search/utils/searchPages"
 type Grants = Partial<Record<ResourceCode, ResourceAccess>>;
 
 const reader = (permissions: Grants): EffectiveAccess => ({
-  systemOwner: false,
+  systemOwner: false, admin: false,
   permissions,
   fields: {},
   moduleSummary: {},

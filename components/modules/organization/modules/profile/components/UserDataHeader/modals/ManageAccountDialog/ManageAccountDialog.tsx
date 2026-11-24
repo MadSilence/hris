@@ -311,8 +311,8 @@ export function ManageAccountDialog({ open, onCloseAction, user, fullName, onCha
                         label={t("profile.manageAccount.login.twoStep")}
                         value={t("profile.manageAccount.login.twoStepOn")}
                         action={
-                          // A protected account is reset only by a System Owner (MFA_DESIGN.md § 3.8): no Reset the
-                          // server would refuse.
+                          // A protected account is reset only by a System Owner, or by an Admin when it is not an
+                          // owner's (MFA_DESIGN.md § 3.8, A-5): the server says which — no Reset it would refuse.
                           overview.mayReset && (
                             <RowLink onClick={() => setConfirm("RESET_MFA")}>
                               {t("profile.manageAccount.login.reset")}

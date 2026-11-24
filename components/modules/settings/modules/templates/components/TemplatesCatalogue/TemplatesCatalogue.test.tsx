@@ -8,10 +8,10 @@ jest.mock("@/components/modules/settings/modules/templates/hooks", () => ({
 }));
 
 const entry = (over: Partial<TemplateSummaryDTO>): TemplateSummaryDTO => ({
-  key: "role.hr-admin",
+  key: "role.manager",
   version: 1,
   kind: "ROLE",
-  title: "HR Admin",
+  title: "Manager",
   summary: "Runs HR.",
   changelog: null,
   itemCount: 1,
@@ -54,7 +54,7 @@ describe("TemplatesCatalogue", () => {
   it("shows one kind when asked, for Add from library", () => {
     render(<TemplatesCatalogue kind="FIELD_SET"/>);
     expect(screen.getByText("Work Authorisation")).toBeInTheDocument();
-    expect(screen.queryByText("HR Admin")).not.toBeInTheDocument();
+    expect(screen.queryByText("Manager")).not.toBeInTheDocument();
   });
 
   it("says there is nothing to apply rather than drawing an empty list", () => {

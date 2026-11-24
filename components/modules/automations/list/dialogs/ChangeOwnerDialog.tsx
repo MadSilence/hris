@@ -21,7 +21,7 @@ import { useOwnerCandidates, type OwnerCandidate } from "./useOwnerCandidates";
  * Change owner (O1 → O2): the owner now, then a single-person picker of people who may manage automations.
  * "Change owner" pressed with nobody picked says so under the picker (NEVER-DISABLED); once picked, a note says what happens to runs going.
  *
- * G11: 560 wide, one column 16 apart; the owner now on mist with their role ("Owner now · HR Admin"); the picker's rows
+ * G11: 560 wide, one column 16 apart; the owner now on mist with their role ("Owner now · Admin"); the picker's rows
  * 56 high with "{job title} · {office}" under the name.
  */
 export const ChangeOwnerDialog: React.FC<{

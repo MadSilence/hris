@@ -156,7 +156,12 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
   const [removing, setRemoving] = React.useState(false);
   const providerChanges = c.configured && !shared && c.linkedCount > 0
     && (draft.provider !== c.provider || draft.protocol !== c.protocol || (draft.protocol === "OIDC" && draft.issuer !== (c.issuer ?? "")));
+  // The provider, its address and the two trusts are the System Owner's alone (A-4); an Admin changes the rest.
+  // Nothing is greyed (NEVER-DISABLED): a locked field reads as it is and, pressed, says whose it is.
   const locked = !c.mayChangeProvider;
+  const ownerOnly = () => explain(t("identity.sso.ownerOnly"));
+  const lockedSelect = locked ? { open: false, onOpenChange: (o: boolean) => { if (o) ownerOnly(); } } : {};
+  const lockedText = locked ? { readOnly: true, onClick: ownerOnly } : {};
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const set = <K extends keyof typeof draft>(k: K, v: (typeof draft)[K]) => setDraft((d) => ({ ...d, [k]: v }));
@@ -242,7 +247,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="idp-provider">{t("identity.sso.provider")}</Label>
-          <Select disabled={locked} value={draft.provider} onValueChange={(v) => set("provider", v as typeof draft.provider)}>
+          <Select {...lockedSelect} value={draft.provider} onValueChange={(v) => set("provider", v as typeof draft.provider)}>
             <SelectTrigger id="idp-provider"><SelectValue /></SelectTrigger>
             <SelectContent>
               {/* i18n-exempt: brand name */}
@@ -255,7 +260,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="idp-protocol">{t("identity.sso.protocol")}</Label>
-          <Select disabled={locked} value={draft.protocol} onValueChange={(v) => set("protocol", v as typeof draft.protocol)}>
+          <Select {...lockedSelect} value={draft.protocol} onValueChange={(v) => set("protocol", v as typeof draft.protocol)}>
             <SelectTrigger id="idp-protocol"><SelectValue /></SelectTrigger>
             <SelectContent>
               {/* i18n-exempt: protocol name */}
@@ -271,7 +276,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           <CopyField label={t("identity.sso.redirectUri")} value={c.redirectUri} />
           <div className="space-y-2">
             <Label htmlFor="idp-issuer">{t("identity.sso.issuer")}</Label>
-            <Input id="idp-issuer" disabled={locked} value={draft.issuer} onChange={(e) => set("issuer", e.currentTarget.value)} />
+            <Input id="idp-issuer" {...lockedText} value={draft.issuer} onChange={(e) => set("issuer", e.currentTarget.value)} />
             <p className="text-hint text-tertiary">
               {draft.provider === "ENTRA" ? t("identity.sso.issuerHintEntra") : t("identity.sso.issuerHintOkta")}
             </p>
@@ -305,7 +310,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
           <CopyField label={t("identity.sso.acsUrl")} value={c.samlAcsUrl} />
           <div className="space-y-2">
             <Label htmlFor="idp-metadata">{t("identity.sso.metadataUrl")}</Label>
-            <Input id="idp-metadata" disabled={locked} value={draft.samlMetadataUrl} onChange={(e) => set("samlMetadataUrl", e.currentTarget.value)} />
+            <Input id="idp-metadata" {...lockedText} value={draft.samlMetadataUrl} onChange={(e) => set("samlMetadataUrl", e.currentTarget.value)} />
             <p className="text-hint text-tertiary">{t("identity.sso.metadataHint")}</p>
           </div>
           {!draft.samlMetadataUrl && (
@@ -313,16 +318,16 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="idp-entity">{t("identity.sso.idpEntityId")}</Label>
-                  <Input id="idp-entity" disabled={locked} value={draft.samlIdpEntityId} onChange={(e) => set("samlIdpEntityId", e.currentTarget.value)} />
+                  <Input id="idp-entity" {...lockedText} value={draft.samlIdpEntityId} onChange={(e) => set("samlIdpEntityId", e.currentTarget.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="idp-sso">{t("identity.sso.idpSsoUrl")}</Label>
-                  <Input id="idp-sso" disabled={locked} value={draft.samlIdpSsoUrl} onChange={(e) => set("samlIdpSsoUrl", e.currentTarget.value)} />
+                  <Input id="idp-sso" {...lockedText} value={draft.samlIdpSsoUrl} onChange={(e) => set("samlIdpSsoUrl", e.currentTarget.value)} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="idp-certs">{t("identity.sso.certificates")}</Label>
-                <Textarea id="idp-certs" disabled={locked} rows={4} value={draft.samlIdpCertificates} onChange={(e) => set("samlIdpCertificates", e.currentTarget.value)} />
+                <Textarea id="idp-certs" {...lockedText} rows={4} value={draft.samlIdpCertificates} onChange={(e) => set("samlIdpCertificates", e.currentTarget.value)} />
                 <p className="text-hint text-tertiary">
                   {c.samlCertificatesSet ? t("identity.sso.certificatesSet") : t("identity.sso.certificatesHint")}
                 </p>
@@ -338,7 +343,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
 
       {!shared && (
         <div className="flex items-start gap-2">
-          <Checkbox id="idp-trust-email" disabled={locked} checked={draft.trustEmail} onCheckedChange={(v) => set("trustEmail", Boolean(v))} />
+          <Checkbox id="idp-trust-email" checked={draft.trustEmail} onCheckedChange={(v) => (locked ? ownerOnly() : set("trustEmail", Boolean(v)))} />
           <div className="space-y-0.5">
             <Label htmlFor="idp-trust-email" className="font-normal">{t("identity.sso.trustEmail")}</Label>
             <p className="text-hint text-tertiary">{t("identity.sso.trustEmailHint")}</p>
@@ -347,7 +352,7 @@ const ConnectionPanel: React.FC<{ c: IdentityConnectionDTO }> = ({ c }) => {
       )}
 
       <div className="flex items-start gap-2">
-        <Checkbox id="idp-trust-mfa" disabled={locked} checked={draft.trustIdpMfa} onCheckedChange={(v) => set("trustIdpMfa", Boolean(v))} />
+        <Checkbox id="idp-trust-mfa" checked={draft.trustIdpMfa} onCheckedChange={(v) => (locked ? ownerOnly() : set("trustIdpMfa", Boolean(v)))} />
         <div className="space-y-0.5">
           <Label htmlFor="idp-trust-mfa" className="font-normal">{t("identity.sso.trustIdpMfa")}</Label>
           <p className="text-hint text-tertiary">{t("identity.sso.trustIdpMfaHint")}</p>
@@ -563,7 +568,7 @@ const GroupsPanel: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
 
-  const mappable = (roles.data ?? []).filter((r) => !r.systemOwner && !r.isDefault && !r.archived);
+  const mappable = (roles.data ?? []).filter((r) => !r.systemOwner && !r.isDefault && !r.isAdmin && !r.archived);
 
   const open = (g: IdpGroupDTO) => {
     setEditing(g);

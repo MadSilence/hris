@@ -25,7 +25,7 @@ export const automationCatalogFixture = (): AutomationCatalog => ({
   recipientKinds: ["PERSON", "MANAGER", "MANAGERS_MANAGER", "DEPARTMENT_HEAD", "ONBOARDING_MANAGER", "ROLE", "USER"],
   roles: [
     { id: "r-mkt", name: "Marketing lead" },
-    { id: "r-hr", name: "HR Admin" },
+    { id: "r-hr", name: "Admin" },
   ],
   relations: ["OFFICE_CALENDAR", "COUNTRY_CALENDAR", "LEGAL_ENTITY_CALENDAR"],
   defaultLateWindowDays: 30,

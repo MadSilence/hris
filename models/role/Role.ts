@@ -5,6 +5,8 @@ export type Role = {
   systemOwner: boolean;
   // Auto-assigned base role: always present on a user, cannot be removed, permissions editable.
   isDefault: boolean;
+  // The mandatory Admin role: cannot be renamed, archived or deleted; its rights stay editable.
+  isAdmin: boolean;
   // Soft-disabled: keeps its assignments but grants nothing until restored.
   archived: boolean;
   archivedAt?: string | null;

@@ -289,7 +289,7 @@ occasions; each occasion is its own row. Where nobody is told, § 5.11 says so.
 | What happened | Notification | Who gets it | App: turn off? | Email | Acts / Opens |
 |---|---|---|---|---|---|
 | A role is given to a person — by hand or by a rule | **Role assigned** | The person | Yes | Daily · can turn off | — / their profile |
-| | **Role holders changed** (*System*; one line per change, counting a batch) | Every System Owner but the actor and the person. Not for the company's default role | Owner | Now · fixed | — / the role |
+| | **Role holders changed** (*System*; one line per change, counting a batch) | Every Admin (the owners when nobody holds Admin; the owners too when the role is System Owner) but the actor and the person. Not for the company's default role | Owner | Now · fixed | — / the role |
 | A role is taken from a person | **Role removed** | The person | Yes | Daily · can turn off | — / their profile |
 | | **Role holders changed** (*System*) | As above | Owner | Now · fixed | — / the role |
 | A person's manager is set, changed or removed | **Manager changed** | The person | Yes | Daily · can turn off | — / their profile |
@@ -304,9 +304,9 @@ occasions; each occasion is its own row. Where nobody is told, § 5.11 says so.
 
 | What happened | Notification | Who gets it | App: turn off? | Email | Acts / Opens |
 |---|---|---|---|---|---|
-| A role's permissions or field access are changed | **Role access changed** | Every System Owner but the actor | Owner | Now · fixed | — / the role |
+| A role's permissions or field access are changed | **Role access changed** | Every Admin (the owners when nobody holds Admin) but the actor | Owner | Now · fixed | — / the role |
 | A person's account is locked after failed sign-ins | **Account locked** | The person's manager, and everyone who may block this person. *The person themselves gets an email, not an inbox line* | No | Now · fixed | — / the person |
-| MFA is reset for somebody; the company's MFA rule changes; the SSO connection is changed; a SCIM token is issued; the identity provider's group-to-role mapping changes; SCIM was refused blocking somebody | **Login security changed** | Every System Owner | No | Now · fixed | — / the person or Settings → Login and SSO |
+| MFA is reset for somebody; the company's MFA rule changes; the SSO connection is changed; a SCIM token is issued; the identity provider's group-to-role mapping changes; SCIM was refused blocking somebody | **Login security changed** | Every Admin and every System Owner | No | Now · fixed | — / the person or Settings → Login and SSO |
 | A scheduled invitation could not be sent | **Invitation not sent** | Whoever scheduled it | No | Now · fixed | — / the person |
 
 ### 5.6 Documents and signing (category *Documents*)

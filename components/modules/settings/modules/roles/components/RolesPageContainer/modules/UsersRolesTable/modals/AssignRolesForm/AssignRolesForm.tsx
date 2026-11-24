@@ -238,7 +238,9 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
           ) : (
             visibleRoles.map((role) => {
               const checked = formik.values.roleIds.includes(role.id);
-              // Default is always on; System Owner can only be granted/revoked by an owner. An
+              // Default is always on; System Owner can only be granted/revoked by an owner — an Admin
+              // assigns every other role, Admin included, but never this one (A-3, A-4). Admin is
+              // pre-ticked for nobody: it is held by whoever holds it, like any role. An
               // archived role can be taken away but never put back — unticking it is the only
               // move left, so the box locks again once it is clear.
               const locked =
@@ -277,6 +279,10 @@ export const AssignRolesForm: FC<AssignRolesFormProps> = ({
 
                     {role.isDefault && (
                       <Badge variant="neutral" className="shrink-0">{t("roles.table.default")}</Badge>
+                    )}
+
+                    {role.isAdmin && (
+                      <Badge variant="neutral" className="shrink-0">{t("roles.table.mandatory")}</Badge>
                     )}
 
                     {role.archived && (

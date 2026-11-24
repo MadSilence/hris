@@ -84,7 +84,7 @@ export const automationWords = (d: WordsDeps) => {
 
   // ── small pieces ─────────────────────────────────────────────────────────────────────────────
 
-  /** One recipient inside a sentence: "their manager", "HR Admin", "a person". */
+  /** One recipient inside a sentence: "their manager", "Admin", "a person". */
   const recipient = (r: RecipientSpec): string => {
     if (r.kind === "ROLE") return names.role(r.roleId) ?? t("words.aRole");
     if (r.kind === "USER") return t("words.aPerson");
@@ -392,7 +392,7 @@ export const automationWords = (d: WordsDeps) => {
   };
 
   /**
-   * The card's title: "Their manager approves", "Book the probation review", "Tell HR Admin". The definition is needed
+   * The card's title: "Their manager approves", "Book the probation review", "Tell Admin". The definition is needed
    * only by a wait, to say whether it waits for a task or a signing.
    */
   const stepTitle = (
@@ -512,7 +512,7 @@ export const automationWords = (d: WordsDeps) => {
     return upperFirst(parts.join(" · "));
   };
 
-  /** The step inside the sentence: "tells HR Admin", "asks their manager to approve". */
+  /** The step inside the sentence: "tells Admin", "asks their manager to approve". */
   const stepPhrase = (
     step: StepSpec,
     definition?: Pick<AutomationDefinition, "steps"> | null,

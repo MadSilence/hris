@@ -272,6 +272,7 @@
       "columnUpdated": "Last updated",
       "system": "System",
       "default": "Default",
+      "mandatory": "Mandatory",
       "emptyTitle": "No roles yet",
       "emptyDescription": "Most teams start with an admin and a manager role.",
       "archivedDescription": "Archived roles will appear here.",
@@ -860,7 +861,8 @@
       "saved": "Single sign-on saved",
       "title": "Single sign-on",
       "provider": "Identity provider",
-      "ownerOnlyHint": "Only a System Owner can change the provider, its address and whether its two-step login is trusted.",
+      "ownerOnlyHint": "Only a System Owner can change the provider, its address, and whether its two-step login and its email are trusted.",
+      "ownerOnly": "Only a System Owner can change this.",
       "trustIdpMfa": "Trust the provider's two-step login",
       "trustIdpMfaHint": "People who pass the provider's second step skip ours. System Owners always answer ours.",
       "providerOther": "Other",
@@ -886,8 +888,8 @@
       "sessionLasts": "A single sign-on session lasts",
       "test": "Test connection",
       "secretExpires": "Secret expires on",
-      "expiresHint": "We remind the System Owners 30 and 7 days before.",
-      "certificateExpires": "The certificate expires on {date}. We remind the System Owners 30 and 7 days before.",
+      "expiresHint": "We remind the System Owners and Admins 30 and 7 days before.",
+      "certificateExpires": "The certificate expires on {date}. We remind the System Owners and Admins 30 and 7 days before.",
       "trustEmail": "Trust the email this provider sends",
       "trustEmailHint": "For a provider that doesn't mark addresses as verified. The first login links people by this address, so turn it on only if your provider controls it.",
       "remove": "Remove",
@@ -937,7 +939,7 @@
       "roles": "Roles",
       "dialogTitle": "Roles for {name}",
       "dialogDescription": "Every member is updated at once, and logged out on their next request if their access changes — you too, if you are in this group.",
-      "neverGiven": "The System Owner and default roles are never given by a group."
+      "neverGiven": "The System Owner, Admin and default roles are never given by a group."
     },
     "domain": {
       "hint": "On Google Workspace or Microsoft 365? Connect it and your people log in with their work account — nothing to set up there. Log in with an account of your organisation.",

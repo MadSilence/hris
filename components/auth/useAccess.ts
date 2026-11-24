@@ -15,7 +15,8 @@ type StorageSchema = {
   payload: EffectiveAccess;
 };
 
-const STORAGE_VERSION = 2;
+// 3: the payload carries `admin` (the Admin role).
+const STORAGE_VERSION = 3;
 
 function loadFromStorage(): { etag: string | null; payload: EffectiveAccess | null } {
   if (typeof window === "undefined") return { etag: null, payload: null };

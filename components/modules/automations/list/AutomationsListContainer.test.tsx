@@ -61,7 +61,7 @@ jest.mock("./dialogs/useOwnerCandidates", () => ({
   useOwnerCandidates: () => ({
     isLoading: false,
     data: [
-      { id: "u1", name: "Ulia Tykoon", avatarUrl: null, detail: "HR Admin" },
+      { id: "u1", name: "Ulia Tykoon", avatarUrl: null, detail: "Admin" },
       { id: "u2", name: "Jonas Petrauskas", avatarUrl: null, detail: "HR Partner · Vilnius" },
     ],
   }),

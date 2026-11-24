@@ -2,7 +2,7 @@ import type { TimeOffRequest } from "@/models/timeOff";
 import type { Task } from "@/models/lifecycle";
 import type { AgreementRow } from "@/models/hub";
 import { partialMock } from "@/test/types";
-import { agreementLineKey, buildDeck, cardKey, markRead, readKey, skipCard, writeKey } from "./waitingOnYouDeck";
+import { agreementLineKey, buildDeck, cardKey, markRead, readKey, skipCard } from "./waitingOnYouDeck";
 
 const request = (id: string, createdAt: string, status = "PENDING") =>
   partialMock<TimeOffRequest>({ id, createdAt, status: status as TimeOffRequest["status"], userId: "u" });
@@ -21,8 +21,6 @@ const deckOf = (overrides: Partial<Parameters<typeof buildDeck>[0]> = {}) =>
     ],
     failedRuns: [{ id: "run1", ruleId: "r", ruleName: "Time off approval", person: null, reason: null }],
     skipped: [],
-    held: new Set(),
-    heldTask: () => false,
     ...overrides,
   });
 
@@ -43,12 +41,6 @@ describe("Waiting on you, the deck", () => {
   it("puts what was skipped at the back, in the order it was skipped", () => {
     const deck = deckOf({ skipped: [cardKey.timeOff("late"), cardKey.timeOff("early")] });
     expect(deck.slice(-2).map((c) => c.key)).toEqual(["time-off:late", "time-off:early"]);
-  });
-
-  it("leaves out a card whose answer is held for Undo", () => {
-    const deck = deckOf({ held: new Set([writeKey.timeOff("early")]), heldTask: (id) => id === "t-soon" });
-    expect(deck.map((c) => c.key)).not.toContain("time-off:early");
-    expect(deck.map((c) => c.key)).not.toContain("task:t-soon");
   });
 
   it("puts a page waiting for the reader's yes among the things to do, by its agree-by date", () => {

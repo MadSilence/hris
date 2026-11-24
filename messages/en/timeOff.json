@@ -635,7 +635,7 @@
       "selectApprover": "Select approver",
       "chosenRole": "The chosen role",
       "fallback": "Fallback approver",
-      "fallbackDefault": "HR Admin, or System Owner without it (the default)",
+      "fallbackDefault": "Admin (the default)",
       "noFallback": "No fallback",
       "fallbackHint": "A role whose holders decide any step nobody can: an approver who has left, a manager step for somebody with no manager, an approver away with nobody standing in.",
       "noFallbackWarning": "Without a fallback, a request whose approver has left or is away with nobody standing in waits for an administrator to approve it anyway.",

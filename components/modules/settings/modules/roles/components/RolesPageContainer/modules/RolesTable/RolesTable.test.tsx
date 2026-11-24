@@ -52,3 +52,17 @@ describe("RolesTable archive", () => {
     expect(await screen.findByText("Archive refused")).toBeInTheDocument();
   });
 });
+
+/* The mandatory Admin role (A-7): marked, and its ⋯ offers neither Rename, Archive nor Delete — hidden, not greyed. */
+describe("RolesTable mandatory Admin", () => {
+  it("marks Admin and hides what cannot work on it", () => {
+    const admin = partialMock<Role>({ id: "r-admin", name: "Admin", userCount: 1, archived: false, isAdmin: true });
+    render(<RolesTable roleRows={[admin]} rolesLoading={false}/>);
+
+    expect(screen.getByText("Mandatory")).toBeInTheDocument();
+    expect(screen.getByText("Duplicate")).toBeInTheDocument();
+    expect(screen.queryByText("Rename")).not.toBeInTheDocument();
+    expect(screen.queryByText("Archive")).not.toBeInTheDocument();
+    expect(screen.queryByText("Delete")).not.toBeInTheDocument();
+  });
+});

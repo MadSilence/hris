@@ -184,6 +184,12 @@ export default function RolesTable({
                       {t("roles.table.default")}
                     </Badge>
                   )}
+
+                  {r.isAdmin && (
+                    <Badge variant="neutral" className="ml-2">
+                      {t("roles.table.mandatory")}
+                    </Badge>
+                  )}
                 </TableCell>
 
                 <TableCell className="text-tertiary">
@@ -207,7 +213,7 @@ export default function RolesTable({
                         setArchiveTarget({ id: r.id, name: r.name, userCount: r.userCount ?? 0 });
                       }}
                       onRestore={() => void onArchiveRole?.(r.id, false)}
-                      locked={r.systemOwner || r.isDefault}
+                      locked={r.systemOwner || r.isDefault || r.isAdmin}
                       archived={r.archived}
                     />
                   </div>

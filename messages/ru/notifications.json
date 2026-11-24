@@ -352,6 +352,10 @@
       "title": "Согласование ждёт вас",
       "message": "{task}{hasPerson, select, yes { — для: {person}} other {}} всё ещё ждёт вашего ответа."
     },
+    "heldActionFailed": {
+      "title": "{kind, select, TIME_OFF_APPROVE {Одобрение отпуска не применено: {target}} TIME_OFF_CANCELLATION_CONFIRM {Подтверждение отмены отпуска не применено: {target}} AUTOMATION_APPROVAL_APPROVE {Одобрение не применено: {target}} TASK_COMPLETE {Задача не отмечена выполненной: {target}} HUB_PAGE_UNPUBLISH {Страница не снята с публикации: {target}} HUB_REMIND {Напоминание не отправлено: {target}} other {Ваш ответ не применён}}",
+      "noReason": "Его не удалось применить."
+    },
     "invitationFailed": {
       "title": "Приглашение не отправлено",
       "message": "Запланированное приглашение для: {target} — не удалось отправить. Откройте профиль, чтобы пригласить снова."

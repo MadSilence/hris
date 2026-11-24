@@ -15,6 +15,7 @@ import { useCanAccess } from "@/components/auth";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { showUndoToast } from "@/lib/feedback/undoToast";
 import { showError } from "@/lib/errors/errorToast";
+import { holdWithUndo } from "@/lib/feedback/holdWithUndo";
 import type { ActionResult } from "@/lib/errors/withActionError";
 import type { HubAudience, TreePage, TreeSection } from "@/models/hub";
 import {
@@ -25,7 +26,6 @@ import {
   moveHubPageAction,
   reorderHubPagesAction,
   reorderHubSectionsAction,
-  unpublishHubPageAction,
   updateHubSectionAction,
 } from "../../actions";
 import { unwrapHub, useInvalidateHub, usePageTree, useSectionDeleteImpact } from "../../hooks";
@@ -256,11 +256,13 @@ export const PagesContainer: React.FC = () => {
     onMovePageTo: sections.length > 1 ? (page) => setPending({ kind: "moveTo", page }) : undefined,
     onDuplicatePage: (page) => setPending({ kind: "duplicate", page }),
     onUnpublishPage: (page) =>
-      // Held back, not taken back: there is no "publish again" that would not also publish the draft.
-      showUndoToast({
+      // Held on the server, not taken back: there is no "publish again" that would not also publish the draft. The tree
+      // reads it as published until the server applies it, and is read again then.
+      void holdWithUndo({
+        kind: "HUB_PAGE_UNPUBLISH",
+        targetId: page.id,
         message: t("manage.toasts.unpublished"),
-        onUndo: () => undefined,
-        onExpire: () => void act(() => unpublishHubPageAction(page.id)),
+        invalidate,
       }),
     onDeletePage: (page) => setPending({ kind: "deletePage", page }),
   };

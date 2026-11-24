@@ -17,7 +17,7 @@ const REFS: Record<string, { id: string; label: string }[]> = {
   ],
   departments: [{ id: "d-eng", label: "Engineering" }],
   teams: [{ id: "t-dev", label: "Developers" }],
-  roles: [{ id: "r-hr", label: "HR Admin" }],
+  roles: [{ id: "r-hr", label: "Admin" }],
   calendars: [{ id: "c-lt", label: "Lithuania" }],
   policies: [{ id: "p-vac", label: "Vacation" }],
 };

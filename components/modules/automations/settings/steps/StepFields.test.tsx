@@ -65,7 +65,7 @@ describe("StepFields", () => {
     const list = screen.getByRole("listbox");
     const options = within(list).getAllByRole("option").map((o) => o.textContent);
     expect(options[0]).toContain("The person");
-    expect(options.findIndex((o) => o?.includes("HR Admin"))).toBeLessThan(options.findIndex((o) => o?.includes("Aistė")));
+    expect(options.findIndex((o) => o?.includes("Admin"))).toBeLessThan(options.findIndex((o) => o?.includes("Aistė")));
     fireEvent.click(within(list).getByText("Their manager"));
     expect(seen.step.recipients).toEqual([{ kind: "MANAGER" }]);
     fireEvent.click(within(screen.getByRole("listbox")).getByText("Marta Nowak"));

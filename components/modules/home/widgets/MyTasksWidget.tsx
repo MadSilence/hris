@@ -1,21 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
-import { ActionStatus } from "@/components/models/ActionStatus";
 import { cn } from "@/lib/cn";
 import { useShortDates } from "@/lib/date";
-import { showActionError } from "@/lib/errors/errorToast";
+import { holdWithUndo } from "@/lib/feedback/holdWithUndo";
 import type { Task } from "@/models/lifecycle";
 import { lifecycleQueryKeys, useMyTasks } from "@/components/modules/lifecycle/hooks";
-import { completeMyTaskAction } from "@/components/modules/lifecycle/actions/lifecycleActions";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
-import { scheduleWrite, showUndoToast, usePendingWrites } from "@/components/modules/home/deferred";
 import { isoDateInZone } from "@/components/modules/home/utils/zonedTime";
 import {
   BigNumber,
@@ -33,9 +30,6 @@ import { NOTIFICATIONS_QUERY_KEY } from "@/components/modules/notifications/util
 
 /** A task Home can close in one tick: nothing to fill, attach or answer. Everything else opens on /tasks. */
 export const TICKABLE_KINDS = new Set<Task["kind"]>(["TODO", "ACKNOWLEDGE"]);
-
-/** The key a held "done" is kept under in the deferred queue. */
-export const taskDoneKey = (taskId: string) => `task-done:${taskId}`;
 
 const addDays = (iso: string, days: number) => {
   const d = new Date(`${iso}T12:00:00Z`);
@@ -59,22 +53,27 @@ const byDue = (a: Task, b: Task) => {
   return a.title.localeCompare(b.title);
 };
 
-/** Ticks a task done on Home: held for the undo window, then sent (DECISIONS.md § "The home redesign"). */
+/**
+ * Ticks a task done on Home, held on the server with Undo (DECISIONS.md § "Undo and the Admin role"). While held, the
+ * server already reads the task as done for its author (U-4), so re-reading the lists is all the page does.
+ */
 export const useTickTask = () => {
   const t = useTranslations("home");
   const queryClient = useQueryClient();
-  return (task: Task) => {
-    const undo = scheduleWrite(taskDoneKey(task.id), async () => {
-      const result = await completeMyTaskAction({ id: task.id });
-      if (result.status !== ActionStatus.SUCCESS) showActionError(result);
-      await queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.myTasksRoot });
-      // Sent through a server action, not a mutation: the one list (A1) and the inbox are refreshed by hand.
-      await queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_QUERY_KEY] });
+  return (task: Task): Promise<boolean> =>
+    holdWithUndo({
+      kind: "TASK_COMPLETE",
+      targetId: task.id,
+      // `POST /tasks/{id}/complete`'s own body; a task ticked on Home has nothing attached.
+      payload: { documentId: null },
+      message: t("myTasks.done"),
+      invalidate: () =>
+        Promise.all([
+          queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.myTasksRoot }),
+          // The one list (A1) and the inbox.
+          queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_QUERY_KEY] }),
+        ]),
     });
-    showUndoToast(t("myTasks.done"), t("card.undo"), () => {
-      undo();
-    });
-  };
 };
 
 /**
@@ -101,7 +100,7 @@ const TaskCheck: React.FC<{ done: boolean; label: string; onTick: () => void; ta
 
 /**
  * Tasks assigned to the reader, by processes and by people (`home-widgets` § 8): overdue first, then by due date.
- * **Ticking one closes it on Home** — held five seconds with Undo — and it stays crossed out until the day ends, then
+ * **Ticking one closes it on Home** — held on the server with Undo — and it stays crossed out until the day ends, then
  * leaves (PRODUCT-RULES 15). Only a task with nothing to fill can be ticked here; the rest open on /tasks.
  */
 export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
@@ -110,8 +109,19 @@ export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   const router = useRouter();
   const settings = useUserSettings();
   const query = useMyTasks(true);
-  const pending = usePendingWrites();
-  const tick = useTickTask();
+  const tickTask = useTickTask();
+  // Ticked and on its way to the server — not held here: it is done once the hold answers and the list is read again.
+  const [ticking, setTicking] = useState<ReadonlySet<string>>(new Set());
+  const tick = (task: Task) => {
+    setTicking((now) => new Set(now).add(task.id));
+    void tickTask(task).finally(() =>
+      setTicking((now) => {
+        const next = new Set(now);
+        next.delete(task.id);
+        return next;
+      }),
+    );
+  };
   const today = isoDateInZone(new Date(), settings.data?.companyTimeZone);
   const { userId } = useCurrentUser();
   const weekAgo = addDays(today, -6);
@@ -134,9 +144,9 @@ export const MyTasksWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {
   }
 
   const all = query.data ?? [];
-  const isDone = (task: Task) => task.status === "DONE" || pending.has(taskDoneKey(task.id));
-  const doneToday = (task: Task) => isDone(task) && (pending.has(taskDoneKey(task.id)) || (task.completedAt ?? "").slice(0, 10) === today);
-  const open = all.filter((task) => (task.status === "OPEN" || task.status === "WAITING") && !pending.has(taskDoneKey(task.id))).sort(byDue);
+  const isDone = (task: Task) => task.status === "DONE" || ticking.has(task.id);
+  const doneToday = (task: Task) => isDone(task) && (ticking.has(task.id) || (task.completedAt ?? today).slice(0, 10) === today);
+  const open = all.filter((task) => (task.status === "OPEN" || task.status === "WAITING") && !ticking.has(task.id)).sort(byDue);
   const shown = [...open, ...all.filter(doneToday)];
   // K1: today's tasks only — an overdue one is not "due today".
   const dueToday = open.filter((task) => task.dueDate === today).length;

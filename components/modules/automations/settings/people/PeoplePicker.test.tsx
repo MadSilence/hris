@@ -58,12 +58,12 @@ describe("PeoplePicker", () => {
   it("lists Roles, then People A–Z with their office; the picks are chips", () => {
     const onChange = jest.fn();
     render(<Harness initial={[{ kind: "ROLE", roleId: "r-hr" }]} onChange={onChange} />);
-    expect(screen.getByText("HR Admin")).toBeInTheDocument();
+    expect(screen.getByText("Admin")).toBeInTheDocument();
     fireEvent.focus(screen.getByRole("combobox", { name: "Who gets it" }));
     const list = screen.getByRole("listbox");
     expect(within(list).getByRole("group", { name: "Roles" })).toBeInTheDocument();
     expect(within(list).getByRole("group", { name: "People A–Z" })).toBeInTheDocument();
-    expect(within(list).queryByText("HR Admin")).not.toBeInTheDocument();
+    expect(within(list).queryByText("Admin")).not.toBeInTheDocument();
     expect(within(list).getByText("Vilnius")).toBeInTheDocument();
   });
 

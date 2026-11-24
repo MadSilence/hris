@@ -5,6 +5,7 @@ import {
   markAllNotificationsReadAction,
   markAllNotificationsSeenAction,
   markNotificationReadAction,
+  restoreNotificationAction,
   setNotificationStarredAction,
 } from "@/components/modules/notifications/actions/notificationActions";
 import { useInvalidateNotifications } from "@/components/modules/notifications/hooks/useNotifications";
@@ -53,6 +54,14 @@ export const useDeleteNotification = () => {
   const invalidate = useInvalidateNotifications();
   return useMutation({
     mutationFn: async (id: string) => throwOnError(await deleteNotificationAction(id)),
+    onSuccess: invalidate,
+  });
+};
+
+export const useRestoreNotification = () => {
+  const invalidate = useInvalidateNotifications();
+  return useMutation({
+    mutationFn: async (id: string) => throwOnError(await restoreNotificationAction(id)),
     onSuccess: invalidate,
   });
 };

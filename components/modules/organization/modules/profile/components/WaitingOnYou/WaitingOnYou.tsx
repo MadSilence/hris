@@ -1,20 +1,19 @@
 "use client";
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { FC, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowDown01Icon, ArrowUp01Icon, CalendarLock01Icon, TaskDone01Icon } from "@hugeicons/core-free-icons";
 import { Icon, type IconSvgElement } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
-import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
 import { useTimeOffPolicies } from "@/components/modules/settings/modules/time/timeOff/timeOffPolicies/hooks/useTimeOffPolicies";
 import { useMyReviews } from "@/components/modules/reviews/hooks";
 import { TimeOffRequestStatus } from "@/api/modules/timeOff/timeOffRequests/dto";
 import { formatDayAmount } from "@/models/timeOff/formatDayAmount";
 import { useShortDates } from "@/lib/date";
-import { showError } from "@/lib/errors/errorToast";
-import { showUndoToast } from "@/lib/feedback/undoToast";
+import { holdWithUndo } from "@/lib/feedback/holdWithUndo";
+import { useInvalidateLeaveAnswer } from "@/components/modules/timeOff/lib/useInvalidateLeaveAnswer";
 
 /** How many strips show before "Show N more". */
 const VISIBLE = 2;
@@ -44,10 +43,9 @@ const readNotNow = (): string[] => {
  * After a decision the strip goes, the next rises and the counter drops. The request stays Pending — this is not a
  * status.
  *
- * "Not now" hides a strip for the session; the task stays in the inbox. **Approve is held back** (the owner, D1): the
- * strip goes and a toast offers Undo; the approval is sent only when the toast ends — or when the reader leaves the page
- * or the profile — so Undo simply never sends it. A tab closed inside those seconds may lose the approval: the request
- * then stays Pending and comes back here, which is the safe way to fail.
+ * "Not now" hides a strip for the session; the task stays in the inbox. **Approve is held on the server** with Undo
+ * (DECISIONS.md § "Undo and the Admin role"): it is sent at once, the server leaves the request out of the reader's list
+ * while it is held, and the strip goes when the list is read again. Undo cancels it there and the strip comes back.
  */
 export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId, firstName }) => {
   const t = useTranslations("organization");
@@ -57,12 +55,12 @@ export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId
   const awaiting = waiting?.requests;
   const { data: policies } = useTimeOffPolicies();
   const { data: myReviews } = useMyReviews();
-  const approve = useApproveTimeOffRequest();
+  const invalidateLeave = useInvalidateLeaveAnswer();
 
   const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
   const [hidden, setHidden] = useState<string[]>(() => (typeof window === "undefined" ? [] : readNotNow()));
-  /** Approved but not sent yet — the strip is gone while its toast offers Undo. */
-  const [held, setHeld] = useState<string[]>([]);
+  /** Approved and on its way — gone at once; it stays gone once the list is read again, or comes back if refused. */
+  const [sending, setSending] = useState<string[]>([]);
   const [expanded, setExpanded] = useState(false);
 
   const strips = useMemo<Strip[]>(() => {
@@ -107,30 +105,8 @@ export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId
     return [...decisions, ...inputs].sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   }, [awaiting, policies, myReviews, userId, firstName, shortDates, t]);
 
-  // ── Held approvals: sent when the toast ends, on leaving the profile, or on leaving the page ──
-  const pending = useRef(new Map<string, () => void>());
-  const send = useCallback(
-    (stripId: string, requestId: string) => {
-      if (!pending.current.delete(stripId)) return;
-      approve.mutateAsync({ requestId }).catch((error: unknown) => {
-        // Refused (decided by someone else meanwhile, the policy changed): the strip comes back with the reason.
-        setHeld((h) => h.filter((id) => id !== stripId));
-        showError(error);
-      });
-    },
-    [approve],
-  );
-  useEffect(() => {
-    const flush = () => pending.current.forEach((commit) => commit());
-    window.addEventListener("pagehide", flush);
-    return () => {
-      window.removeEventListener("pagehide", flush);
-      flush();
-    };
-  }, []);
-
   if (!inBrowser) return null;
-  const open = strips.filter((s) => !hidden.includes(s.id) && !held.includes(s.id));
+  const open = strips.filter((s) => !hidden.includes(s.id) && !sending.includes(s.id));
   if (open.length === 0) return null;
   const shown = expanded ? open : open.slice(0, VISIBLE);
 
@@ -145,16 +121,13 @@ export const WaitingOnYou: FC<{ userId: string; firstName: string }> = ({ userId
   };
 
   const holdApproval = (strip: Extract<Strip, { kind: "decision" }>) => {
-    setHeld((h) => [...h, strip.id]);
-    pending.current.set(strip.id, () => send(strip.id, strip.requestId));
-    showUndoToast({
+    setSending((now) => [...now, strip.id]);
+    void holdWithUndo({
+      kind: "TIME_OFF_APPROVE",
+      targetId: strip.requestId,
       message: strip.approvedText,
-      onUndo: () => {
-        pending.current.delete(strip.id);
-        setHeld((h) => h.filter((id) => id !== strip.id));
-      },
-      onExpire: () => pending.current.get(strip.id)?.(),
-    });
+      invalidate: invalidateLeave,
+    }).finally(() => setSending((now) => now.filter((id) => id !== strip.id)));
   };
 
   return (

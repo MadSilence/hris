@@ -1,11 +1,11 @@
-import { canAccess } from "./canAccess";
+import { canAccess, mayChangeSecuritySettings } from "./canAccess";
 import { EffectiveAccess } from "./EffectiveAccess";
 
 function makeAccess(
   permissions: EffectiveAccess["permissions"],
   accessHash = "hash-abc",
 ): EffectiveAccess {
-  return { systemOwner: false, permissions, fields: {}, moduleSummary: {}, accessHash };
+  return { systemOwner: false, admin: false, permissions, fields: {}, moduleSummary: {}, accessHash };
 }
 
 describe("canAccess", () => {
@@ -17,6 +17,7 @@ describe("canAccess", () => {
   it("grants everything for a system owner flagged by systemOwner, despite empty maps", () => {
     const owner: EffectiveAccess = {
       systemOwner: true,
+      admin: false,
       permissions: {},
       fields: {},
       moduleSummary: {},
@@ -86,5 +87,20 @@ describe("canAccess", () => {
   it("SELF grant does not satisfy a COMPANY request", () => {
     const access = makeAccess({ "PEOPLE.PROFILE": { VIEW: ["SELF"] } });
     expect(canAccess({ access, resource: "PEOPLE.PROFILE", action: "VIEW", scope: "COMPANY" })).toBe(false);
+  });
+});
+
+describe("mayChangeSecuritySettings", () => {
+  const manage = { "SETTINGS.GENERAL": { MANAGE: ["COMPANY" as const] } };
+
+  it("lets an owner, and an Admin holding SETTINGS.GENERAL MANAGE", () => {
+    expect(mayChangeSecuritySettings({ ...makeAccess({}), systemOwner: true })).toBe(true);
+    expect(mayChangeSecuritySettings({ ...makeAccess(manage), admin: true })).toBe(true);
+  });
+
+  it("refuses the flag alone, the right alone, and nobody", () => {
+    expect(mayChangeSecuritySettings({ ...makeAccess({}), admin: true })).toBe(false);
+    expect(mayChangeSecuritySettings(makeAccess(manage))).toBe(false);
+    expect(mayChangeSecuritySettings(null)).toBe(false);
   });
 });

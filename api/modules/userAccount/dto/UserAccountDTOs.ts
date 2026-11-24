@@ -26,7 +26,8 @@ export type AccountOverviewDTO = {
   companySso: boolean;
   /**
    * The viewer may reset their two-step login: false for one's own account, and for a protected one (a System Owner,
-   * a holder of a SETTINGS MANAGE right) unless the viewer is a System Owner.
+   * a holder of a SETTINGS MANAGE right) unless the viewer is a System Owner, or an Admin holding the right and the
+   * account is not an owner's (A-5).
    */
   mayReset: boolean;
 };

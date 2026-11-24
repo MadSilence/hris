@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { DashboardSquare01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
@@ -11,7 +11,6 @@ import { cn } from "@/lib/cn";
 import type { HomeHeaderStyle } from "@/models/home";
 import { availableWidgets, homeRoleOf } from "@/components/modules/home/widgets";
 import { arrangeHome } from "@/components/modules/home/layout";
-import { flushWrites } from "@/components/modules/home/deferred";
 import { EditHome } from "@/components/modules/home/edit";
 import { WidgetCell, WidgetGrid } from "./WidgetGrid";
 import { Greeting, HomeBand, ProfileMenu } from "./HomeHeader";
@@ -33,9 +32,6 @@ export const HomeContainer: React.FC = () => {
   const settings = useUserSettings();
   const [editing, setEditing] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
-
-  // A held Approve or task done leaves when Home is left (DECISIONS.md § "The home redesign").
-  useEffect(() => () => flushWrites(), []);
 
   const available = useMemo(() => availableWidgets(access), [access]);
   const role = homeRoleOf(access);

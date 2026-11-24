@@ -41,7 +41,7 @@ jest.mock("@/components/modules/home/widgets/ToSignWidget", () => ({ ToSignWidge
 jest.mock("@/components/modules/notifications/hooks/useWaitingOnMe", () => ({ useWaitingOnMe: () => ({ data: undefined }) }));
 
 const accessWith = (permissions: Partial<Record<ResourceCode, ResourceAccess>>): EffectiveAccess => ({
-  systemOwner: false, permissions, fields: {}, moduleSummary: {}, accessHash: "h",
+  systemOwner: false, admin: false, permissions, fields: {}, moduleSummary: {}, accessHash: "h",
 });
 
 const EMPLOYEE = accessWith({

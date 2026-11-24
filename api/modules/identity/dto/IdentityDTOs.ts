@@ -16,7 +16,7 @@ export type IdentityConnectionDTO = {
   scimEnabled: boolean;
   /** The provider's own second factor stands in for ours. */
   trustIdpMfa: boolean;
-  /** Only a System Owner may change which provider is trusted. */
+  /** Only a System Owner may change the provider, its address and the two trusts (A-4) — an Admin too changes the rest. */
   mayChangeProvider: boolean;
   redirectUri: string;
   samlAcsUrl: string;

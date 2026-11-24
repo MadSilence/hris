@@ -13,7 +13,7 @@ export interface RolesTableRowActionsProps {
   onDelete: () => void;
   onArchive: () => void;
   onRestore: () => void;
-  // System owner / default roles can't be renamed, archived or deleted.
+  // The three mandatory roles (System Owner, Admin, Default User) can't be renamed, archived or deleted.
   locked?: boolean;
   archived?: boolean;
 }

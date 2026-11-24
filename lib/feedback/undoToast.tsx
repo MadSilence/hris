@@ -3,12 +3,12 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { Undo02Icon } from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/desact/icon";
 import { showError } from "@/lib/errors/errorToast";
 
 /**
- * "Done — undo?", for three seconds, with a bar that drains.
+ * "Done — undo?", for five seconds (SPEC § 13.7).
  *
  * Decided 2026-09-02. **A trash and an undo answer different needs**: a trash is asked for after
  * regret, days later, and an undo after a slip — a click on the wrong row, the menu item above the
@@ -20,43 +20,27 @@ import { showError } from "@/lib/errors/errorToast";
  * reversible — archiving, deactivating, unassigning — where a dialog asking "are you sure" for the
  * fifteenth time buys nothing. An irreversible act still gets its dialog, with its impact counts.
  *
- * The bar is the honest part. A toast that offers an undo without showing how long it has left asks
- * the reader to gamble on the timing, and the answer they choose is "read it faster", which is the
- * opposite of what the pause is for.
- *
- * **Held back, not taken back** — `onExpire`: for an act that cannot be reversed once sent (an approval tells the
- * requester at once), the caller does not do it yet; it does it in `onExpire`, when the toast ends without an Undo —
- * timed out or swiped away. Undo then simply never sends it (the owner, 2026-11-05, D1). Exactly one of the two runs.
+ * **This is the reversal** (DECISIONS.md § "Undo and the Admin role", U-1): the act is already sent, and Undo calls its
+ * inverse. An answer that journals, notifies or triggers is not taken back this way — it is held on the server, through
+ * `holdWithUndo` beside this file. Nothing is ever held in the browser (U-2).
  */
 export const showUndoToast = ({
   message,
   onUndo,
-  onExpire,
-  durationMs = UNDO_WINDOW_MS,
 }: {
   /** What just happened, in the past tense: "Annual Leave archived". */
   message: string;
   /** Puts it back. Its failure is surfaced as an ordinary error card. */
   onUndo: () => void | Promise<unknown>;
-  /** The toast ended without an Undo: do what was held back. */
-  onExpire?: () => void;
-  durationMs?: number;
 }) => {
   let settled = false;
-  const expire = () => {
-    if (settled) return;
-    settled = true;
-    onExpire?.();
-  };
-  const id = toast.custom(
+  return toast.custom(
     (toastId) => (
       <UndoCard
         message={message}
-        durationMs={durationMs}
         onUndo={async () => {
           // Dismiss first: the undo is what the reader asked for, and leaving the card up while it
-          // runs invites a second press against a window that is already closing. Settled first, so the
-          // dismissal is not read as the toast running out.
+          // runs invites a second press against a window that is already closing.
           if (settled) return;
           settled = true;
           toast.dismiss(toastId);
@@ -68,51 +52,37 @@ export const showUndoToast = ({
         }}
       />
     ),
-    { duration: durationMs, onAutoClose: expire, onDismiss: expire },
+    { duration: UNDO_WINDOW_MS },
   );
-
-  return id;
 };
 
-/** Three seconds was the decision. Named so a caller widening it has to say so. */
-export const UNDO_WINDOW_MS = 3000;
+/** Five seconds, as every toast (SPEC § 13.7; three until 2026-11-23). Named so a caller widening it has to say so. */
+export const UNDO_WINDOW_MS = 5000;
 
-const UndoCard: React.FC<{
+/**
+ * The card both kinds of Undo show, as the designers drew it (T09 in `design/screens/documents-tab`, LW01c in
+ * `home-widgets`; SPEC § 13.7): the round Pine check, what happened, and Undo as the one text action in the accent — no
+ * icon on it, no close button, no bar. It goes on its own when its window ends.
+ */
+export const UndoCard: React.FC<{
   message: string;
-  durationMs: number;
   onUndo: () => void;
-}> = ({ message, durationMs, onUndo }) => {
+}> = ({ message, onUndo }) => {
   const t = useTranslations("common");
   return (
-  <div
-    role="status"
-    className="relative w-[356px] overflow-hidden rounded-control border border-divider bg-card shadow-popover"
-  >
-    <div className="flex items-center justify-between gap-3 px-4 py-3">
-      <p className="text-body text-primary">{message}</p>
-
+    <div
+      role="status"
+      className="flex w-[356px] items-center gap-3 rounded-popover border border-divider bg-overlay px-4 py-3 text-body text-primary shadow-popover"
+    >
+      <Icon icon={CheckmarkCircle02Icon} className="flex-none text-status-approved-icon" />
+      <p className="min-w-0 flex-1 truncate">{message}</p>
       <button
         type="button"
         onClick={onUndo}
-        className="flex flex-none items-center gap-1.5 rounded-control px-2 py-1 text-body font-medium text-secondary transition hover:bg-subtle"
+        className="ml-auto shrink-0 rounded-control px-2 py-1 text-body font-medium text-accent-text hover:bg-accent-subtle"
       >
-        <Icon icon={Undo02Icon} size="sm" />
         {t("actions.undo")}
       </button>
     </div>
-
-    {/*
-      Driven by CSS rather than a timer: a re-render every frame to move a bar is work the browser
-      already does for free, and an animation cannot drift out of step with the dismissal the way a
-      `setInterval` can when the tab is backgrounded.
-    */}
-    <span
-      aria-hidden
-      className="absolute bottom-0 left-0 h-0.5 bg-strong"
-      style={{ animation: `undo-drain ${durationMs}ms linear forwards` }}
-    />
-
-    <style>{`@keyframes undo-drain { from { width: 100%; } to { width: 0%; } }`}</style>
-  </div>
   );
 };

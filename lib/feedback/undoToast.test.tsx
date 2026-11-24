@@ -63,43 +63,15 @@ describe("showUndoToast", () => {
     await waitFor(() => expect(showError).toHaveBeenCalledWith(boom));
   });
 
-  it("drains a bar over the window it actually has", async () => {
-    const { container } = renderToaster();
+  it("is the designers' card: one text action, no close button, no bar", async () => {
+    renderToaster();
     showUndoToast({ message: "Annual Leave archived", onUndo: jest.fn() });
 
     await screen.findByText("Annual Leave archived");
 
-    // The bar is the only reason the pause is honest: an undo offered without showing how long it
-    // has left asks the reader to guess, and they guess by hurrying.
-    const bar = container.querySelector<HTMLElement>('[aria-hidden="true"][style*="undo-drain"]')
-      ?? document.body.querySelector<HTMLElement>('[style*="undo-drain"]');
-
-    expect(bar).toBeTruthy();
-    expect(bar!.style.animation).toContain(`${UNDO_WINDOW_MS}ms`);
-  });
-
-  describe("an act held back until the toast ends (D1)", () => {
-    it("does it when the toast runs out", async () => {
-      const onExpire = jest.fn();
-      renderToaster();
-      showUndoToast({ message: "Approved", onUndo: jest.fn(), onExpire, durationMs: 50 });
-
-      await screen.findByText("Approved");
-      await waitFor(() => expect(onExpire).toHaveBeenCalledTimes(1));
-    });
-
-    it("never does it after an Undo", async () => {
-      const user = userEvent.setup();
-      const onExpire = jest.fn();
-      const onUndo = jest.fn();
-      renderToaster();
-      showUndoToast({ message: "Approved", onUndo, onExpire, durationMs: 400 });
-
-      await user.click(await screen.findByRole("button", { name: /undo/i }));
-      await new Promise((r) => setTimeout(r, 600));
-
-      expect(onUndo).toHaveBeenCalledTimes(1);
-      expect(onExpire).not.toHaveBeenCalled();
-    });
+    expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual(["Undo"]);
+    expect(document.body.querySelector('[style*="undo-drain"]')).toBeNull();
+    // Five seconds, as every toast (SPEC § 13.7).
+    expect(UNDO_WINDOW_MS).toBe(5000);
   });
 });

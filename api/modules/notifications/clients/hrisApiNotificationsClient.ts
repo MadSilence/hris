@@ -60,6 +60,11 @@ export class HrisApiNotificationsClient {
     await hrisApiClient.delete<void>(`${this.PATH}/${id}`);
   }
 
+  /** Undo of a delete — the author's own line, back as it was. */
+  public async restore(id: string): Promise<void> {
+    await hrisApiClient.post<void>(`${this.PATH}/${id}/restore`);
+  }
+
   public async listPreferences(): Promise<NotificationPreference[]> {
     const dtos = await hrisApiClient.get<NotificationPreferenceDTO[]>(`${this.PATH}/preferences`);
     return notificationMapper.mapPreferenceDTOs(dtos);

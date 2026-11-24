@@ -48,12 +48,6 @@ const isReadKey = (key: string) => key.startsWith("read-");
 export const agreementLineKey = (agreement: Pick<AgreementRow, "what" | "agreedVersion">): "wasUpdated" | null =>
   agreement.what === "NEW" || agreement.agreedVersion == null ? null : "wasUpdated";
 
-/** The key a held write is kept under in Home's deferred queue — one per card that can be answered on Home. */
-export const writeKey = {
-  timeOff: (id: string) => `approve-time-off:${id}`,
-  automation: (taskId: string) => `approve-automation:${taskId}`,
-};
-
 const byDueDate = (a: Task, b: Task) => {
   if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
   if (a.dueDate) return -1;
@@ -86,7 +80,8 @@ const mergeByDue = (tasks: DeckCard[], agreements: DeckCard[]): DeckCard[] => {
 
 /**
  * The deck in its order: Decide (oldest first), then Do (by due date), then Read (newest first) — and behind them, in
- * the order they were skipped, the cards this person skipped. A card whose answer is being held for Undo is not in it.
+ * the order they were skipped, the cards this person skipped. A card whose answer is held for Undo is not in it: the
+ * server leaves it out of the reader's lists while it is held (DECISIONS.md § "Undo and the Admin role", U-4).
  */
 export const buildDeck = (input: {
   requests: TimeOffRequest[];
@@ -97,13 +92,9 @@ export const buildDeck = (input: {
   /** Documents to sign that no task stands for (`/me/actions`, its `envelopes`). */
   envelopes?: EnvelopeDTO[];
   skipped: readonly string[];
-  held: ReadonlySet<string>;
-  /** The held keys of tasks ticked done (My tasks shares them). */
-  heldTask: (taskId: string) => boolean;
 }): DeckCard[] => {
   const decide: DeckCard[] = [
     ...[...input.requests]
-      .filter((r) => !input.held.has(writeKey.timeOff(r.id)))
       .sort((a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? ""))
       .map((request): DeckCard =>
         request.status === "CANCELLATION_PENDING"
@@ -111,12 +102,12 @@ export const buildDeck = (input: {
           : { key: cardKey.timeOff(request.id), group: "DECIDE", kind: "TIME_OFF", request },
       ),
     ...input.tasks
-      .filter((task) => task.kind === "APPROVE_AUTOMATION" && task.status === "OPEN" && !input.held.has(writeKey.automation(task.id)))
+      .filter((task) => task.kind === "APPROVE_AUTOMATION" && task.status === "OPEN")
       .sort(byDueDate)
       .map((task): DeckCard => ({ key: cardKey.task(task.id), group: "DECIDE", kind: "AUTOMATION", task })),
   ];
   const taskCards: DeckCard[] = input.tasks
-    .filter((task) => task.kind !== "APPROVE_AUTOMATION" && task.status === "OPEN" && !input.heldTask(task.id))
+    .filter((task) => task.kind !== "APPROVE_AUTOMATION" && task.status === "OPEN")
     .sort(byDueDate)
     .map((task): DeckCard =>
       REVIEW_KINDS.has(task.kind)

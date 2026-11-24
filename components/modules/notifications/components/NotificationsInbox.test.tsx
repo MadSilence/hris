@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import { NotificationsInbox } from "./NotificationsInbox";
 import { useInboxSummary, useNotificationPages } from "@/components/modules/notifications/hooks/useNotifications";
@@ -19,11 +19,14 @@ jest.mock("@/components/modules/notifications/hooks/useNotifications", () => ({
   useInboxSummary: jest.fn(() => ({ data: undefined })),
 }));
 jest.mock("@/lib/feedback/undoToast", () => ({ showUndoToast: jest.fn() }));
+jest.mock("@/lib/errors/errorToast", () => ({ showError: jest.fn() }));
 const mockRemove = jest.fn();
+const mockRestore = jest.fn();
 jest.mock("@/components/modules/notifications/hooks/useNotificationMutations", () => {
   const mutation = () => ({ mutate: jest.fn(), isPending: false });
   return {
     useDeleteNotification: () => ({ mutate: mockRemove, isPending: false }),
+    useRestoreNotification: () => ({ mutateAsync: mockRestore, isPending: false }),
     useMarkAllNotificationsRead: mutation,
     useMarkAllNotificationsSeen: mutation,
     useMarkNotificationRead: mutation,
@@ -131,7 +134,8 @@ describe("NotificationsInbox — Needs action (sitting 2, H5)", () => {
 describe("NotificationsInbox — paging and delete (B5, B2)", () => {
   beforeEach(() => {
     mockQuery = "";
-    mockRemove.mockClear();
+    mockRemove.mockReset();
+    mockRestore.mockReset().mockResolvedValue(undefined);
     jest.mocked(showUndoToast).mockClear();
   });
 
@@ -148,15 +152,36 @@ describe("NotificationsInbox — paging and delete (B5, B2)", () => {
     expect(screen.getByRole("button", { name: /Needs action/ })).toHaveTextContent("3");
   });
 
-  it("hides a deleted line at once and deletes it only when the Undo window ends", () => {
+  it("deletes at once, and Undo restores the line (a reversal)", async () => {
     answer({ isLoading: false, data: [notification({ id: "gone", params: { requesterName: "Deleted Dora" } })] });
     render(<NotificationsInbox />);
 
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     expect(screen.queryByText(/Deleted Dora/)).not.toBeInTheDocument();
-    expect(mockRemove).not.toHaveBeenCalled();
+    expect(mockRemove).toHaveBeenCalledWith("gone", expect.anything());
 
-    jest.mocked(showUndoToast).mock.calls[0][0].onExpire?.();
-    expect(mockRemove).toHaveBeenCalledWith("gone");
+    // The toast follows the server's yes.
+    expect(showUndoToast).not.toHaveBeenCalled();
+    act(() => mockRemove.mock.calls[0][1].onSuccess());
+    const toast = jest.mocked(showUndoToast).mock.calls[0][0];
+    expect(toast.message).toBe("Notification deleted");
+
+    await act(async () => {
+      await toast.onUndo();
+    });
+    expect(mockRestore).toHaveBeenCalledWith("gone");
+    expect(screen.getByText(/Deleted Dora/)).toBeInTheDocument();
+  });
+
+  it("brings a line back when its delete is refused", () => {
+    answer({ isLoading: false, data: [notification({ id: "kept", params: { requesterName: "Kept Kim" } })] });
+    render(<NotificationsInbox />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.queryByText(/Kept Kim/)).not.toBeInTheDocument();
+    act(() => mockRemove.mock.calls[0][1].onError(new Error("nope")));
+
+    expect(screen.getByText(/Kept Kim/)).toBeInTheDocument();
+    expect(showUndoToast).not.toHaveBeenCalled();
   });
 });

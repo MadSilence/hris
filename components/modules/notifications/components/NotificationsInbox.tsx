@@ -13,11 +13,13 @@ import { cn } from "@/lib/cn";
 import type { Notification } from "@/models/notifications";
 import { useInboxSummary, useNotificationPages } from "@/components/modules/notifications/hooks/useNotifications";
 import { showUndoToast } from "@/lib/feedback/undoToast";
+import { showError } from "@/lib/errors/errorToast";
 import {
   useDeleteNotification,
   useMarkAllNotificationsRead,
   useMarkAllNotificationsSeen,
   useMarkNotificationRead,
+  useRestoreNotification,
   useSetNotificationStarred,
 } from "@/components/modules/notifications/hooks/useNotificationMutations";
 import {
@@ -126,6 +128,7 @@ export const NotificationsInbox: FC = () => {
   const markAllSeen = useMarkAllNotificationsSeen();
   const setStarred = useSetNotificationStarred();
   const remove = useDeleteNotification();
+  const restore = useRestoreNotification();
 
   /* The status filter lives in the URL (`?filter=needs-action`), so a link can open the inbox on it — home's
      *Waiting on You* and the board's "Review" do (sitting 2, H5). */
@@ -145,7 +148,7 @@ export const NotificationsInbox: FC = () => {
   const { data: summary } = useInboxSummary();
   const pages = useNotificationPages(status, category === ALL_CATEGORIES ? null : category);
   const isLoading = pages.isLoading;
-  /** Deleted, waiting out its Undo (B2): hidden here, sent when the toast ends. */
+  /** Deleted (B2): hidden at once while the delete is on its way; back if it is refused or undone. */
   const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
   const all = useMemo(
     () => (pages.data?.pages ?? []).flatMap((page) => page.items).filter((n) => !hiddenIds.has(n.id)),
@@ -194,17 +197,32 @@ export const NotificationsInbox: FC = () => {
     return () => observer.disconnect();
   }, [pages.hasNextPage, pages.isFetchingNextPage, pages]);
 
+  const unhide = (id: string) =>
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+
+  /**
+   * A reversal (DECISIONS.md § "Undo and the Admin role", U-1): a delete tells nobody, so it is sent at once and Undo
+   * restores the line. Nothing waits in the page.
+   */
   const deleteWithUndo = (n: Notification) => {
     setHiddenIds((prev) => new Set(prev).add(n.id));
-    showUndoToast({
-      message: t("inbox.deleted"),
-      onUndo: () =>
-        setHiddenIds((prev) => {
-          const next = new Set(prev);
-          next.delete(n.id);
-          return next;
+    remove.mutate(n.id, {
+      onSuccess: () =>
+        showUndoToast({
+          message: t("inbox.deleted"),
+          onUndo: async () => {
+            await restore.mutateAsync(n.id);
+            unhide(n.id);
+          },
         }),
-      onExpire: () => remove.mutate(n.id),
+      onError: (error) => {
+        unhide(n.id);
+        showError(error);
+      },
     });
   };
 

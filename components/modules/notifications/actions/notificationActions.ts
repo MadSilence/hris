@@ -45,6 +45,11 @@ export async function deleteNotificationAction(id: string): Promise<ActionResult
   return run(() => hrisNotificationsService.remove(id), "deleteNotificationAction");
 }
 
+/** Undo of a delete (a reversal: the delete tells nobody, so it is sent at once and this puts it back). */
+export async function restoreNotificationAction(id: string): Promise<ActionResult> {
+  return run(() => hrisNotificationsService.restore(id), "restoreNotificationAction");
+}
+
 export async function setNotificationPreferenceAction(
   category: string,
   enabled: boolean,

@@ -221,7 +221,15 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       {/* A time off request opened over whatever page carries `?leaveRequest=` (AQ-12 b). */}
       <LeaveRequestHost/>
 
-      <Toaster/>
+      {/* Toasts sit at the content's bottom-left, 32 in from its edge — never over the sidebar (T09, DT17). The
+          sidebar's width follows its fold; on a phone (sonner's own breakpoint) the sidebar is gone. */}
+      <Toaster
+        offset={{
+          left: `calc(var(${(canvas ? !canvasUnfolded : collapsed) ? "--sidebar-collapsed" : "--sidebar-width"}) + 32px)`,
+          bottom: 32,
+        }}
+        mobileOffset={{ left: 16, bottom: 16 }}
+      />
     </div>
   );
 };

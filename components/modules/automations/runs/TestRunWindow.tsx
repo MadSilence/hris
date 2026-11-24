@@ -499,7 +499,7 @@ const ResultLine: React.FC<{
   </li>
 );
 
-/** Line 1 of a result (F6): what happens, said of the people it happens to — "HR Admin gets a notification". */
+/** Line 1 of a result (F6): what happens, said of the people it happens to — "Admin gets a notification". */
 const useWhatHappens = () => {
   const t = useTranslations("automationsRuns");
   const locale = useDisplayLocale();

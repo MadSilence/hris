@@ -49,10 +49,10 @@ const grant = (over: Partial<TemplateGrantDTO>): TemplateGrantDTO => ({
 });
 
 const role = (over: Partial<TemplateItemDTO> = {}): TemplateItemDTO => ({
-  ref: "hr-admin",
+  ref: "manager",
   type: "ROLE",
-  name: "HR Admin",
-  finalName: "HR Admin",
+  name: "Manager",
+  finalName: "Manager",
   outcome: "NEW",
   include: true,
   clash: "SKIP",
@@ -83,15 +83,15 @@ const role = (over: Partial<TemplateItemDTO> = {}): TemplateItemDTO => ({
 });
 
 const preview = (item: TemplateItemDTO): TemplatePreviewDTO => ({
-  key: "role.hr-admin",
+  key: "role.manager",
   version: 1,
   kind: "ROLE",
-  title: "HR Admin",
+  title: "Manager",
   summary: "Runs HR.",
   fingerprint: "fp-1",
   parts: [{
-    key: "role.hr-admin",
-    title: "HR Admin",
+    key: "role.manager",
+    title: "Manager",
     kind: "ROLE",
     version: 1,
     root: true,
@@ -121,7 +121,7 @@ describe("TemplatePreview", () => {
   /** Review item 7: an existing sensitive field is named as such, and its grant is not ticked for anybody. */
   it("marks a grant on an existing sensitive field and leaves it unticked", () => {
     setUp(role());
-    render(<TemplatePreview templateKey="role.hr-admin"/>);
+    render(<TemplatePreview templateKey="role.manager"/>);
 
     fireEvent.click(screen.getByRole("button", { name: /1 of 2 grants/i }));
 
@@ -133,7 +133,7 @@ describe("TemplatePreview", () => {
   it("applies with the preview's fingerprint", async () => {
     setUp(role());
     mutateAsync.mockResolvedValue({ status: ActionStatus.SUCCESS, data: { id: "app-1" } });
-    render(<TemplatePreview templateKey="role.hr-admin"/>);
+    render(<TemplatePreview templateKey="role.manager"/>);
 
     fireEvent.click(screen.getByRole("button", { name: /apply · 1 to create/i }));
 
@@ -145,7 +145,7 @@ describe("TemplatePreview", () => {
   it("previews again when the company changed since the preview", async () => {
     setUp(role());
     mutateAsync.mockResolvedValue({ status: ActionStatus.ERROR, code: "TPL00002", errorMessage: "x" });
-    render(<TemplatePreview templateKey="role.hr-admin"/>);
+    render(<TemplatePreview templateKey="role.manager"/>);
 
     fireEvent.click(screen.getByRole("button", { name: /apply · 1 to create/i }));
 
@@ -154,11 +154,11 @@ describe("TemplatePreview", () => {
   });
 
   it("offers skip or a renamed copy on a clash, and applies nothing by default", () => {
-    setUp(role({ outcome: "CLASH", reason: "The company already has a role called “HR Admin”.", existingName: "HR Admin" }));
-    render(<TemplatePreview templateKey="role.hr-admin"/>);
+    setUp(role({ outcome: "CLASH", reason: "The company already has a role called “Manager”.", existingName: "Manager" }));
+    render(<TemplatePreview templateKey="role.manager"/>);
 
     expect(screen.getByText("Name taken")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: /what to do with hr admin/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /what to do with manager/i })).toBeInTheDocument();
     // No grey button (NEVER-DISABLED): the place of Apply says there is nothing to create.
     expect(screen.getByText(/nothing to create/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /nothing to create|apply/i })).not.toBeInTheDocument();

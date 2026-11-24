@@ -3,7 +3,7 @@ import path from "path";
 
 /**
  * The product never says "HR" (DECISIONS.md § "The leftovers of the design rounds", WALK_QUESTIONS § 43) — the
- * automations' words included. A role a company names "HR Admin" is its data, not a word of ours.
+ * automations' words included. A role a company names "HR lead" is its data, not a word of ours.
  */
 describe("the automations' catalogues", () => {
   const dir = path.resolve(__dirname, "../../../../messages");

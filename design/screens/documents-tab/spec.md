@@ -157,6 +157,6 @@ None blocks this.
   - Request in the toolbar has its icon (DT28).
 - **Not built this round:** the × inside the search field (DT24 — `SearchBox` has none; the shared field is not
   changed here, so "Clear search" stays as the way out); the selection bar's tint and order (DT13 was already built);
-  the menu's accent hover (DT11 — the kit's menu, product-wide); the toast's place over the content and its accent Undo
-  (DT17 — `lib/feedback/undoToast`, product-wide); the 24 between the tab row and the toolbar (`ProfileShell` keeps
+  the menu's accent hover (DT11 — the kit's menu, product-wide); (the toast's place over the content and its accent Undo, DT17, was built product-wide on 2026-11-23 —
+  `lib/feedback/undoToast`, `AppShell`'s Toaster); the 24 between the tab row and the toolbar (`ProfileShell` keeps
   its 32, batch 3's T1).

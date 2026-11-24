@@ -11,7 +11,7 @@ jest.mock("./ProcessesWidget", () => ({ ProcessesWidget: () => null }));
 jest.mock("./AutomationsWidget", () => ({ AutomationsWidget: () => null }));
 
 const accessWith = (permissions: Partial<Record<ResourceCode, ResourceAccess>>): EffectiveAccess => ({
-  systemOwner: false,
+  systemOwner: false, admin: false,
   permissions,
   fields: {},
   moduleSummary: {},

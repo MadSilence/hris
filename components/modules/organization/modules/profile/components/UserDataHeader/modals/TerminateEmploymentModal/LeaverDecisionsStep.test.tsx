@@ -27,7 +27,7 @@ const decisions: LeaverDecisionsDTO = {
       startDate: "2026-11-02",
       endDate: "2026-11-04",
       status: "PENDING",
-      fallbackRoleName: "HR Admin",
+      fallbackRoleName: "Admin",
     },
   ],
   tasks: [{ taskId: "t1", title: "Sign the welcome pack", subject: { id: "jo", name: "Jo Joiner" }, defaultAssignee: null }],
@@ -56,7 +56,7 @@ describe("LeaverDecisionsStep", () => {
     expect(screen.getByText("Decisions Waiting on Dave Departing")).toBeInTheDocument();
     const requests = screen.getByTestId("leaver-group-requestsTo");
     expect(within(requests).getByText(/Bob Builder/)).toBeInTheDocument();
-    expect(within(requests).getByText("Unchosen, they go to the HR Admin role, the policy's fallback.")).toBeInTheDocument();
+    expect(within(requests).getByText("Unchosen, they go to the Admin role, the policy's fallback.")).toBeInTheDocument();
     const tasks = screen.getByTestId("leaver-group-tasksTo");
     expect(within(tasks).getByText("Sign the welcome pack · for Jo Joiner")).toBeInTheDocument();
     expect(within(tasks).getByText("Unchosen, each goes to its onboarding manager.")).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe("LeaverDecisionsStep", () => {
     });
     expect(screen.getByTestId("picker-reassign-requestsTo")).toHaveTextContent("picked erin");
     // The default is no longer what happens to that group, so it is not said any more.
-    expect(screen.queryByText("Unchosen, they go to the HR Admin role, the policy's fallback.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unchosen, they go to the Admin role, the policy's fallback.")).not.toBeInTheDocument();
   });
 
   it("says when a policy has no fallback, and shows nothing when nothing waits", () => {

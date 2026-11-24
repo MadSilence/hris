@@ -20,30 +20,25 @@ import type { IconSvgElement } from "@hugeicons/react";
 import { Icon } from "@/components/desact/icon";
 import { Button } from "@/components/desact/button";
 import { Skeleton } from "@/components/desact/skeleton";
-import { ActionStatus } from "@/components/models/ActionStatus";
 import { useCanAccess } from "@/components/auth/useAccess";
 import { useUserSettings } from "@/components/modules/firstRun/hooks";
 import { useCurrentUser } from "@/components/providers/CurrentUserProvider/CurrentUserProvider";
 import { hubIcon } from "@/components/modules/hub/shared";
 import { cn } from "@/lib/cn";
 import { useDisplayLocale, useShortDates } from "@/lib/date";
-import { showActionError, showError } from "@/lib/errors/errorToast";
+import { holdWithUndo } from "@/lib/feedback/holdWithUndo";
 import { dayAmountArgs, type TimeOffRequest } from "@/models/timeOff";
-import { getTimeOffRequestsAwaitingMeQueryKey } from "@/components/modules/settings/modules/time/timeOff/utils";
-import { useApproveTimeOffRequest } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useApproveTimeOffRequest";
-import { useDecideCancellation } from "@/components/modules/settings/modules/time/timeOff/timeOffRequests/hooks/useDecideCancellation";
 import { DeclineLeaveDialog } from "@/components/modules/timeOff/DeclineLeaveDialog";
 import { useLeaveRequestContext } from "@/components/modules/timeOff/lib/requestQuery";
 import { useLeaveRequestHref } from "@/components/modules/timeOff/lib/useLeaveRequestHref";
+import { useInvalidateLeaveAnswer } from "@/components/modules/timeOff/lib/useInvalidateLeaveAnswer";
 import { NEEDS_ACTION_INBOX_HREF } from "@/components/modules/notifications/utils/inboxFilters";
 import { getWaitingOnMeQueryKey } from "@/components/modules/notifications/utils/notificationsQueryKeys";
 import { useWaitingOnMe } from "@/components/modules/notifications/hooks/useWaitingOnMe";
 import { lifecycleQueryKeys } from "@/components/modules/lifecycle/hooks";
-import { decideAutomationApprovalAction } from "@/components/modules/automations/actions/automationActions";
 import { automationsHref } from "@/components/modules/automations/list";
 import { useRunWords } from "@/components/modules/automations/runs";
 import { useAutomationsWeek, useSaveHomeSettings } from "@/components/modules/home/hooks";
-import { scheduleWrite, showUndoToast, usePendingWrites } from "@/components/modules/home/deferred";
 import { isoDateInZone } from "@/components/modules/home/utils/zonedTime";
 import {
   FactChip,
@@ -56,8 +51,8 @@ import {
   WidgetLink,
   WidgetSkeleton,
 } from "@/components/modules/home/components/WidgetCard";
-import { TICKABLE_KINDS, taskDoneKey, useTickTask } from "./MyTasksWidget";
-import { agreementLineKey, buildDeck, markRead, skipCard, writeKey, type DeckCard } from "./waitingOnYouDeck";
+import { TICKABLE_KINDS, useTickTask } from "./MyTasksWidget";
+import { agreementLineKey, buildDeck, markRead, skipCard, type DeckCard } from "./waitingOnYouDeck";
 import type { HomeWidgetProps } from "./catalogue";
 
 /** The most dashes under the title; past it, the counter alone. */
@@ -89,7 +84,6 @@ const useDeck = () => {
   const canSeeAutomations = useCanAccess("SETTINGS.AUTOMATIONS", "VIEW");
   const waiting = useWaitingOnMe();
   const week = useAutomationsWeek(canSeeAutomations);
-  const held = usePendingWrites();
   const save = useSaveHomeSettings();
   const [skipped, setSkipped] = useState<string[]>([]);
   const stored = settings.data?.homeSkipped;
@@ -106,10 +100,8 @@ const useDeck = () => {
         agreements: waiting.data?.agreements ?? [],
         envelopes: waiting.data?.envelopes ?? [],
         skipped,
-        held,
-        heldTask: (id) => held.has(taskDoneKey(id)),
       }),
-    [waiting.data, week.data, skipped, held],
+    [waiting.data, week.data, skipped],
   );
 
   const keep = (next: string[]) => {
@@ -133,52 +125,52 @@ const useDeck = () => {
   };
 };
 
-/** The decisions Home can take, each held for the undo window (DECISIONS.md § "The home redesign"). */
+/**
+ * The decisions Home can take, each held on the server with Undo (DECISIONS.md § "Undo and the Admin role"). Each
+ * resolves once the answer is held and the deck read again — the server leaves an answered card out of its author's
+ * lists — or refused, when the card stays.
+ */
 const useAnswers = () => {
   const t = useTranslations("home");
   const queryClient = useQueryClient();
-  const approveLeave = useApproveTimeOffRequest();
-  const decideCancellation = useDecideCancellation();
+  const invalidateLeave = useInvalidateLeaveAnswer();
   const tickTask = useTickTask();
-
-  const held = (key: string, message: string, send: () => Promise<void>) => {
-    const undo = scheduleWrite(key, async () => {
-      try {
-        await send();
-      } catch (error) {
-        showError(error);
-      }
-      await queryClient.invalidateQueries({ queryKey: getTimeOffRequestsAwaitingMeQueryKey() });
-      // The deck reads the one list (A1); an automation's approval goes through a server action, not a mutation, so the
-      // app-wide refresh after a mutation does not see it.
-      await queryClient.invalidateQueries({ queryKey: getWaitingOnMeQueryKey() });
-    });
-    showUndoToast(message, t("card.undo"), () => {
-      undo();
-    });
-  };
+  // An automation's approval is a task: the one list (A1) and the reader's tasks.
+  const invalidateApproval = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getWaitingOnMeQueryKey() }),
+      queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.myTasksRoot }),
+    ]);
 
   return {
-    approve: (card: DeckCard) => {
-      if (card.kind === "TIME_OFF") {
-        held(writeKey.timeOff(card.request.id), t("waitingOnYou.toasts.approved"), async () => {
-          await approveLeave.mutateAsync({ requestId: card.request.id });
-        });
-      } else if (card.kind === "CANCELLATION") {
-        held(writeKey.timeOff(card.request.id), t("waitingOnYou.toasts.cancellationApproved"), async () => {
-          await decideCancellation.mutateAsync({ requestId: card.request.id, userId: card.request.userId, decision: "CONFIRM" });
-        });
-      } else if (card.kind === "AUTOMATION") {
-        held(writeKey.automation(card.task.id), t("waitingOnYou.toasts.automationApproved"), async () => {
-          const result = await decideAutomationApprovalAction({ taskId: card.task.id, approve: true });
-          if (result.status === ActionStatus.ERROR) showActionError(result);
-          await queryClient.invalidateQueries({ queryKey: lifecycleQueryKeys.myTasksRoot });
-        });
+    approve: (card: DeckCard): Promise<unknown> => {
+      switch (card.kind) {
+        case "TIME_OFF":
+          return holdWithUndo({
+            kind: "TIME_OFF_APPROVE",
+            targetId: card.request.id,
+            message: t("waitingOnYou.toasts.approved"),
+            invalidate: invalidateLeave,
+          });
+        case "CANCELLATION":
+          return holdWithUndo({
+            kind: "TIME_OFF_CANCELLATION_CONFIRM",
+            targetId: card.request.id,
+            message: t("waitingOnYou.toasts.cancellationApproved"),
+            invalidate: invalidateLeave,
+          });
+        case "AUTOMATION":
+          return holdWithUndo({
+            kind: "AUTOMATION_APPROVAL_APPROVE",
+            targetId: card.task.id,
+            message: t("waitingOnYou.toasts.automationApproved"),
+            invalidate: invalidateApproval,
+          });
+        default:
+          return Promise.resolve();
       }
     },
-    markDone: (card: DeckCard) => {
-      if (card.kind === "TASK") tickTask(card.task);
-    },
+    markDone: (card: DeckCard): Promise<unknown> => (card.kind === "TASK" ? tickTask(card.task) : Promise.resolve()),
   };
 };
 
@@ -550,13 +542,17 @@ const DecisionDeck: React.FC<{
   const front = deck[0];
   const behind = Math.min(2, deck.length - 1);
 
-  const leave = (how: "approve" | "skip", then: () => void) => {
+  /**
+   * The card animates away while its answer goes out. It stays the front card until the deck is read again — the
+   * server leaves an answered card out — so a refused answer simply brings it back.
+   */
+  const leave = (how: "approve" | "skip", then: () => unknown) => {
     if (!front || leaving) return;
     setLeaving({ key: front.key, how });
-    setTimeout(() => {
-      then();
-      setLeaving(null);
-    }, LEAVE_MS[how]);
+    const animated = new Promise((resolve) => setTimeout(resolve, LEAVE_MS[how]));
+    void Promise.all([animated, Promise.resolve().then(then)])
+      .catch(() => undefined)
+      .finally(() => setLeaving(null));
   };
 
   return (
@@ -605,7 +601,7 @@ const DecisionDeck: React.FC<{
 /**
  * What waits for the reader's answer (`home-widgets` § 1): leave to approve, an automation's approval, tasks and review
  * steps, and — for HR — a failed automation run. Always shown, with "All caught up" when nothing waits. The Large one
- * is a deck: Approve answers on Home (held five seconds with Undo), Decline opens the request with its reason field,
+ * is a deck: Approve answers on Home (held on the server, with Undo), Decline opens the request with its reason field,
  * Skip puts the card at the back for this person.
  */
 export const WaitingOnYouWidget: React.FC<HomeWidgetProps> = ({ size, preview }) => {

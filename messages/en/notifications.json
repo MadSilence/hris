@@ -352,6 +352,10 @@
       "title": "An approval is waiting for you",
       "message": "{task}{hasPerson, select, yes { for {person}} other {}} still waits for your answer."
     },
+    "heldActionFailed": {
+      "title": "{kind, select, TIME_OFF_APPROVE {Your approval of {target}'s leave wasn't applied} TIME_OFF_CANCELLATION_CONFIRM {Your approval of {target}'s cancellation wasn't applied} AUTOMATION_APPROVAL_APPROVE {Your approval of {target} wasn't applied} TASK_COMPLETE {{target} wasn't marked done} HUB_PAGE_UNPUBLISH {{target} wasn't unpublished} HUB_REMIND {The reminder about {target} wasn't sent} other {Your answer wasn't applied}}",
+      "noReason": "It could not be applied."
+    },
     "invitationFailed": {
       "title": "Invitation not sent",
       "message": "The invitation scheduled for {target} could not be sent. Open their profile to invite them again."
